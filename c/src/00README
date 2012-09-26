@@ -1,0 +1,12 @@
+To compile:
+
+Open a csh or tcsh shell, then:
+
+> setenv C_HOME <location of lunus/c directory, e.g., ~/lunus/c>
+
+> csh makemake Makefile
+
+> make all
+
+This has been tested and works under Mac OS X PPC64.
+ 

@@ -1,0 +1,11 @@
+LUNUS software for diffuse scattering from protein crystals
+Compiled under Mac OS X PPC 7 Feb 2008
+
+WARNING: Untested since 1997, when run under IRIX
+
+analysis/ - scripts for data analysis
+c/ - source and binaries for diffuse scattering routines
+docs/ - documentation for diffuse scattering analysis
+generation/ - map generation files
+visualization/ - map visualization files
+xplor/ - simulation files
