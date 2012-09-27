@@ -348,6 +348,7 @@ typedef struct
   char *header;		        /* Image header (typically TIFF) */
   size_t header_length;	        /* Length of image header (4096) */
   IMAGE_DATA_TYPE *image;	/* Pointer to image */
+  char big_endian;              /* byte order, 1 = big_endian, 0 = other */
   size_t image_length;	        /* Total number of pixels in image */
   short vpixels;		/* Number of vertical pixels */
   short hpixels;		/* Number of horizontal pixels */

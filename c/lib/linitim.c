@@ -28,6 +28,7 @@ DIFFIMAGE *linitim(void)
   }
   
   
+  imdiff->big_endian = DOS_BYTE_ORDER;
   imdiff->vpixels = DEFAULT_VSIZE;
   imdiff->hpixels = DEFAULT_HSIZE;
   imdiff->image_length = DEFAULT_IMAGELENGTH;
