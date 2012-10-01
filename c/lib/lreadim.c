@@ -56,8 +56,11 @@ int lreadim(DIFFIMAGE *imdiff)
       imdiff->image_length = imdiff->hpixels*imdiff->vpixels;
       imdiff->image = (IMAGE_DATA_TYPE *)realloc(imdiff->image,imdiff->image_length*sizeof(IMAGE_DATA_TYPE));
       imdiff->pixel_size_mm = atof(getTag(imdiff->header,"PIXEL_SIZE"));
-      imdiff->beam_mm.x = atof(getTag(imdiff->header,"DENZO_X_BEAM"));
-      imdiff->beam_mm.y = atof(getTag(imdiff->header,"DENZO_Y_BEAM"));
+      imdiff->beam_mm.x = atof(getTag(imdiff->header,"BEAM_CENTER_X"));
+      imdiff->beam_mm.y = atof(getTag(imdiff->header,"BEAM_CENTER_Y"));
+      imdiff->origin.c = imdiff->beam_mm.x/imdiff->pixel_size_mm+.5;
+      imdiff->origin.r = imdiff->beam_mm.y/imdiff->pixel_size_mm+.5;
+      imdiff->distance_mm = atof(getTag(imdiff->header,"DISTANCE"));
       if (!strcmp(getTag(imdiff->header,"BYTE_ORDER"),"big_endian"))
 	imdiff->big_endian=1;
       else if (!strcmp(getTag(imdiff->header,"BYTE_ORDER"),"little_endian"))

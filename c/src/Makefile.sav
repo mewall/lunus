@@ -320,6 +320,7 @@ lcutim.o:lcutim.c mwmask.h
 ldf2im.o:ldf2im.c mwmask.h
 ldfrflt.o:ldfrflt.c mwmask.h
 ldfsqrlt.o:ldfsqrlt.c mwmask.h
+ldiffim.o:ldiffim.c mwmask.h
 ldivlt.o:ldivlt.c mwmask.h
 ldivrf.o:ldivrf.c mwmask.h
 lexplt.o:lexplt.c mwmask.h
@@ -414,6 +415,7 @@ libmw.a: \
 	ldf2im.o \
 	ldfrflt.o \
 	ldfsqrlt.o \
+	ldiffim.o \
 	ldivlt.o \
 	ldivrf.o \
 	lexplt.o \

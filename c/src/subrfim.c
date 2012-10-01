@@ -4,7 +4,7 @@
    Date: 4/4/94
    Version: 1.
    
-   "subrfim <input file> <image in> <image out> <x origin> <y origin>"
+   "subrfim <input file> <image in> <image out>"
 
    Input is rfile and image.  Output is 16-bit 
    image with rfile subtracted.
@@ -37,17 +37,11 @@ int main(int argc, char *argv[])
 	
 	imagein = stdin;
 	imageout = stdout;
-	origin.r = DEFAULT_IMAGE_ORIGIN;
-	origin.c = DEFAULT_IMAGE_ORIGIN;
 
 /*
  * Read information from input line:
  */
 	switch(argc) {
-		case 6:
-			origin.r = (RCCOORDS_DATA)atoi(argv[5]);
-		case 5:
-			origin.c = (RCCOORDS_DATA)atoi(argv[4]);
 		case 4:
 			if (strcmp(argv[3], "-") == 0) {
 				imageout = stdout;
@@ -89,12 +83,6 @@ int main(int argc, char *argv[])
     perror("\nCouldn't initialize diffraction image.\n\n");
     exit(0);
   }
-
-/*
- * Set defaults:
- */
-
-  imdiff->origin = origin;
 
  /*
   * Read diffraction image:

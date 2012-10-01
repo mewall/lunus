@@ -38,17 +38,11 @@ int main(int argc, char *argv[])
 	
 	imagein = stdin;
 	outfile = stdout;
-	origin.r = DEFAULT_IMAGE_ORIGIN;
-	origin.c = DEFAULT_IMAGE_ORIGIN;
 
 /*
  * Read information from input line:
  */
 	switch(argc) {
-		case 5: 
-			origin.r = (RCCOORDS_DATA)atoi(argv[4]);
-		case 4:
-			origin.c = (RCCOORDS_DATA)atoi(argv[3]);
 		case 3:
 			if ( (outfile = fopen(argv[2],"wb")) == NULL ) {
 				printf("Can't open %s.",argv[2]);
@@ -80,12 +74,6 @@ int main(int argc, char *argv[])
     perror("\nCouldn't initialize diffraction image.\n\n");
     exit(0);
   }
-
-/*
- * Set defaults:
- */
-
-  imdiff->origin = origin;
 
 /*
  * Read diffraction image:

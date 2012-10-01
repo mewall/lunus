@@ -16,16 +16,16 @@ int lsubrfim(DIFFIMAGE *imdiff)
 		radius,
 		index = 0;
 
-	struct rccoords rvec;
+	struct xycoords rvec;
 
 	int
 		return_value;
 
 	for(r = 0; r < imdiff->vpixels; r++) {
+	  rvec.y = r*imdiff->pixel_size_mm - imdiff->beam_mm.y;
 	  for(c = 0; c < imdiff->hpixels; c++) {
-	      rvec.r = r - imdiff->origin.r;
-	      rvec.c = c - imdiff->origin.c;
-	      radius = (size_t)sqrtf((float)(rvec.r*rvec.r + rvec.c*rvec.c));
+	      rvec.x = c*imdiff->pixel_size_mm - imdiff->beam_mm.x;
+	      radius = (size_t)(sqrtf(rvec.x*rvec.x + rvec.y*rvec.y)/imdiff->pixel_size_mm+.5);
 	      if (radius < imdiff->rfile_length) {
 		index = r*imdiff->hpixels+c;
 	        if ((imdiff->image[index] != imdiff->overload_tag) &&

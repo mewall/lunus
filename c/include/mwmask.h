@@ -29,7 +29,7 @@
 
 /*#define SNCPS                           /* sncps data set */
 /*#define SNAB                            /* snab data set */
-#define SNC                             /* snc data set */
+/*#define SNC                             /* snc data set */
 /*#define LYS                             /* lys data set */
 
 /*
@@ -248,6 +248,20 @@
 #define DEFAULT_CELL_BETA 90.0          /* C-A angle for lys */
 #define DEFAULT_CELL_GAMMA 90.0         /* A-B angle for lys */
 /* NOTE NO CASSETTE ANGLES */
+#else // SNaseWT
+#define DEFAULT_WAVELENGTH 1.11         /* Wavelength */
+#define DEFAULT_DISTANCE_MM 200.05	/* Sample-detector distance in mm*/
+#define DEFAULT_X_BEAM 156.44		/* Beam position in x (.img) */
+#define DEFAULT_Y_BEAM 158.21		/* Beam position in y (.img) */
+#define DEFAULT_CASSETTE_ROTX 0.05      /* Cassette rotx */
+#define DEFAULT_CASSETTE_ROTY 0.12      /* Cassette roty */
+#define DEFAULT_CASSETTE_ROTZ -1.70     /* Cassette rotz */
+#define DEFAULT_CELL_A 47.773           /* A for sncps */
+#define DEFAULT_CELL_B 47.773           /* B for sncps */
+#define DEFAULT_CELL_C 63.378           /* C for sncps */
+#define DEFAULT_CELL_ALPHA 90.0         /* B-C angle */
+#define DEFAULT_CELL_BETA 90.0          /* C-A angle */
+#define DEFAULT_CELL_GAMMA 90.0         /* A-B angle */
 #endif
 #endif
 #endif

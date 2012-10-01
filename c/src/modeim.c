@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
 	  }
 	  else {
 	    if ( (imageout = fopen(argv[2],"wb")) == NULL ) {
-	      printf("Can't open %s.",argv[2]);
+	      printf("\nCan't open %s.\n\n",argv[2]);
 	      exit(0);
 	    }
 	  }
@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
 	  }
 	  else {
 	    if ( (imagein = fopen(argv[1],"rb")) == NULL ) {
-	      printf("Can't open %s.",argv[1]);
+	      printf("\nCan't open %s.\n\n",argv[1]);
 	      exit(0);
 	    }
 	  }

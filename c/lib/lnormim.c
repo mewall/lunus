@@ -31,18 +31,17 @@ int lnormim(DIFFIMAGE *imdiff)
     distance,
     distance_squared;
   
-  distance = imdiff->distance_mm / imdiff->pixel_size_mm;
-  distance_squared = distance*distance;
+  distance_squared = imdiff->distance_mm*imdiff->distance_mm;
   for(r=0; r < imdiff->vpixels; r++) {
-    rvec.y = (float)(r - imdiff->origin.r);
+    rvec.y = (float)(r*imdiff->pixel_size_mm-imdiff->beam_mm.y);
     for(c=0; c < imdiff->hpixels; c++) {
       if ((imdiff->image[index] != imdiff->overload_tag) &&
 	  (imdiff->image[index] != imdiff->ignore_tag)) {
-	rvec.x = (float)(c - imdiff->origin.c);
+	rvec.x = (float)(c*imdiff->pixel_size_mm-imdiff->beam_mm.x);
 	radius_squared = ((rvec.x*rvec.x) + (rvec.y*rvec.y));
 	correction_factor = 1. + radius_squared/distance_squared - 
 	  2*PI/180.*(rvec.x*imdiff->cassette.y -
-	     rvec.y*imdiff->cassette.x)/distance;
+	     rvec.y*imdiff->cassette.x)/imdiff->distance_mm;
 	imdiff->image[index] *= correction_factor * sqrtf(correction_factor);
       }
       index++;

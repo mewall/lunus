@@ -89,7 +89,6 @@ int main(int argc, char *argv[])
    * Set input line defaults:
    */
   
-  origin.i = origin.j = origin.k = DEFAULT_LATTICE_ORIGIN;
   scale=1;
   outfile = stdout;
   inner_radius= DEFAULT_INNER_RADIUS_LT;
@@ -155,6 +154,35 @@ int main(int argc, char *argv[])
     exit(0);
   }
 
+  /*
+   * Loop through input lines until '.' is encountered.
+   */
+
+
+  while ((*gets(input_line) != '.') && (input_line != NULL)) {
+    printf("%s\n",input_line);
+    info_string = input_line;
+    space_ptr = strchr(info_string,' ');
+    *space_ptr = 0;
+    if ( (infile = fopen(info_string,"r")) == NULL ) {
+      printf("\nCan't open index file %s.\n\n",info_string);
+      exit(0);
+    }
+    info_string = space_ptr+1;
+    space_ptr = strchr(info_string,' ');
+    *space_ptr = 0;
+    if ( (imagein = fopen(info_string,"rb")) == NULL ) {
+      printf("\nCan't open image %s.\n\n",info_string);
+      exit(0);
+    }
+    info_string = space_ptr+1;
+    if (info_string != "") {
+      scale = atof(info_string);
+    } else {
+      scale = 1.;
+    }
+
+
 /*
  * Initialize diffraction image:
  */
@@ -163,6 +191,18 @@ int main(int argc, char *argv[])
     perror("Couldn't initialize diffraction image.\n\n");
     exit(0);
   }
+
+    /*
+     * Read diffraction image:
+     */
+    
+    imdiff->infile = imagein;
+    if (lreadim(imdiff) != 0) {
+      perror(imdiff->error_msg);
+      goto CloseShop;
+    }
+
+    printf("Read the diffraction image\n");
 
   
   /*
@@ -205,9 +245,9 @@ int main(int argc, char *argv[])
   lat->cell.alpha = cell_alpha;
   lat->cell.beta = cell_beta;
   lat->cell.gamma = cell_gamma;
-  imdiff->beam_mm.x = x_beam;
-  imdiff->beam_mm.y = y_beam;
-  imdiff->distance_mm = distance;
+  //  imdiff->beam_mm.x = x_beam;
+  //  imdiff->beam_mm.y = y_beam;
+  //  imdiff->distance_mm = distance;
 
   /*
    * Allocate ct:
@@ -219,53 +259,23 @@ int main(int argc, char *argv[])
     exit(0);
   }
 
-  /*
-   * Loop through input lines until '.' is encountered.
-   */
-
-  while ((*gets(input_line) != '.') && (input_line != NULL)) {
-    printf("%s\n",input_line);
-    info_string = input_line;
-    space_ptr = strchr(info_string,' ');
-    *space_ptr = 0;
-    if ( (infile = fopen(info_string,"r")) == NULL ) {
-      printf("\nCan't open index file %s.\n\n",info_string);
-      exit(0);
-    }
-    info_string = space_ptr+1;
-    space_ptr = strchr(info_string,' ');
-    *space_ptr = 0;
-    if ( (imagein = fopen(info_string,"rb")) == NULL ) {
-      printf("\nCan't open image %s.\n\n",info_string);
-      exit(0);
-    }
-    info_string = space_ptr+1;
-    if (info_string != "") {
-      scale = atof(info_string);
-    } else {
-      scale = 1.;
-    }
-
     /*
      * Read input file which contains the orientation matrix:
      */
+
+    printf("Reading the input file...");
     
     imdiff->infile = infile;
     lgetmat(imdiff);
 
-    /*
-     * Read diffraction image:
-     */
+    printf("done\n");
     
-    imdiff->infile = imagein;
-    if (lreadim(imdiff) != 0) {
-      perror(imdiff->error_msg);
-      goto CloseShop;
-    }
 
     /*
      * Step through the image and generate the map:
      */
+
+    printf("Stepping through the image...");
     
     map_index = 0;
     for (i=0; i<imdiff->vpixels; i++) {
@@ -278,6 +288,8 @@ int main(int argc, char *argv[])
       }
     }
     
+    printf("done\n");
+
     /*
      * Scale the values to the input line scale:
      */

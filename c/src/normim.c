@@ -5,8 +5,7 @@
    Date: 2/24/95
    Version: 1.
    
-   "normim <image in> <image out> <x origin> <y origin>
-      <distance[mm]> <cassette rotx> <cassette roty>" 
+   "normim <image in> <image out> <cassette rotx> <cassette roty>" 
 
    Input is diffraction image.  Output is normalized corrected image.
 
@@ -39,9 +38,6 @@ int main(int argc, char *argv[])
  * Set input line defaults:
  */
 
-  origin.r = DEFAULT_IMAGE_ORIGIN;
-  origin.c = DEFAULT_IMAGE_ORIGIN;
-  distance_mm = DEFAULT_DISTANCE_MM;
   cassette.x = DEFAULT_CASSETTE_ROTX;
   cassette.y = DEFAULT_CASSETTE_ROTY;
   imagein = stdin;
@@ -51,16 +47,10 @@ int main(int argc, char *argv[])
  * Read information from input line:
  */
 	switch(argc) {
-	  case 8:
-	  cassette.y = (XYZCOORDS_DATA)atof(argv[7]);
-	  case 7:
-	  cassette.x = (XYZCOORDS_DATA)atof(argv[6]);
-	  case 6:
-	  distance_mm = atof(argv[5]);
 	  case 5:
-	  origin.r = (RCCOORDS_DATA)atol(argv[4]);
+	  cassette.y = (XYZCOORDS_DATA)atof(argv[7]);
 	  case 4:
-	  origin.c = (RCCOORDS_DATA)atol(argv[3]);
+	  cassette.x = (XYZCOORDS_DATA)atof(argv[6]);
 	  case 3:
 	  if (strcmp(argv[2], "-") == 0) {
 	    imageout = stdout;
@@ -84,7 +74,7 @@ int main(int argc, char *argv[])
 	  break;
 	  default:
 	  printf("\n Usage: normim <image in> <image out> "
-		 "<x origin> <y origin> <distance [mm]>\n\n");
+		 "(<cassette rotx> <cassette roty>)\n\n");
 	  exit(0);
 	}
   
@@ -97,17 +87,6 @@ int main(int argc, char *argv[])
     exit(0);
   }
   
-  /*
-   * Set the origin for the image:
-   */
-  
-  imdiff->origin = origin;
-
-  /*
-   * Set sample-to-detector distance for the image
-   */
-
-  imdiff->distance_mm = distance_mm;
   
   /*
    * Read diffraction image:
