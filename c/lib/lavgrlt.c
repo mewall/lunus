@@ -58,6 +58,7 @@ int lavgrlt(LAT3D *lat)
 		       rfloat.z*rfloat.z) / rscale)+.5);
 	if (r > lat->rfile_length) lat->rfile_length = r;
 	if (lat->lattice[index] != lat->mask_tag) {
+	  if (lat->lattice[index]<0) printf("%d,%f\n",(int)index,lat->lattice[index]);
 	  if (ct[r] == 0) {
 	    lat->rfile[r] = lat->lattice[index];
 	    ct[r] = 1;

@@ -30,12 +30,12 @@ int lreadlt(LAT3D *lat)
 
 
   
-  lat->xscale = (double)((lat->xbound.max - lat->xbound.min)/ 
-		         (double)(lat->xvoxels - 1));               
-  lat->yscale = (double)((lat->ybound.max - lat->ybound.min)/ 
-		         (double)(lat->yvoxels - 1));               
-  lat->zscale = (double)((lat->zbound.max - lat->zbound.min)/ 
-		         (double)(lat->zvoxels - 1));               
+  lat->xscale = (float)((lat->xbound.max - lat->xbound.min)/ 
+		         (float)(lat->xvoxels - 1));               
+  lat->yscale = (float)((lat->ybound.max - lat->ybound.min)/ 
+		         (float)(lat->yvoxels - 1));               
+  lat->zscale = (float)((lat->zbound.max - lat->zbound.min)/ 
+		         (float)(lat->zvoxels - 1));               
 
   lat->origin.i =  (long)(-lat->xbound.min / lat->xscale + .5);
   lat->origin.j =  (long)(-lat->ybound.min / lat->yscale + .5);
@@ -62,6 +62,12 @@ int lreadlt(LAT3D *lat)
   
   num_read = fread(lat->lattice, sizeof(LATTICE_DATA_TYPE), 
 		   lat->lattice_length,lat->infile);
+  int i;
+  for (i=0;i<lat->lattice_length;i++) {
+    if (lat->lattice[i] != lat->mask_tag && lat->lattice[i] < 0) {
+      printf("%d,%f\n",i,lat->lattice[i]);
+    }
+  }
   if (num_read != lat->lattice_length) {
     printf("/nCouldn't read all of the lattice from input file.\n\n");
     return_value = 2;

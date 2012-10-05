@@ -1,5 +1,5 @@
 /* GENLAT.C - Create a 3D lattice based upon an input list of
-              diffraction images and index files.
+   diffraction images and index files.
    
    Author: Mike Wall
    Date: 2/22/95
@@ -10,14 +10,14 @@
    "genlat <output file > <inner radius cutoff> <outer radius cutoff>
    <x-origin> <y-origin> <z-origin> <minrange>"
 
-      A list in the form of:
+   A list in the form of:
 
-      <index file> <image file> <scale factor>
+   <index file> <image file> <scale factor>
 
-      must be supplied at standard input, terminated by '.' in the
-      first character of the last line.
+   must be supplied at standard input, terminated by '.' in the
+   first character of the last line.
 
-   */
+*/
 
 #include<mwmask.h>
 
@@ -100,39 +100,39 @@ int main(int argc, char *argv[])
   y_beam = DEFAULT_Y_BEAM;
   distance = DEFAULT_DISTANCE_MM;
   switch(argc) {    
-    case 17:
+  case 17:
     cell_gamma = atof(argv[16]);
-    case 16:
+  case 16:
     cell_beta = atof(argv[15]);
-    case 15:
+  case 15:
     cell_alpha = atof(argv[14]);
-    case 14:
+  case 14:
     cell_c = atof(argv[13]);
-    case 13:
+  case 13:
     cell_b = atof(argv[12]);
-    case 12:
+  case 12:
     cell_a = atof(argv[11]);
-    case 11:
+  case 11:
     distance = atof(argv[10]);
-    case 10:
+  case 10:
     y_beam = atof(argv[9]);
-    case 9:
+  case 9:
     x_beam = atof(argv[8]);
-    case 8:
+  case 8:
     minrange = atof(argv[7]);
-    case 7:
+  case 7:
     origin.k = atol(argv[6]);
-    case 6:
+  case 6:
     origin.j = atol(argv[5]);
-    case 5:
+  case 5:
     origin.i = atol(argv[4]);
-    case 4:
+  case 4:
     outer_radius = atof(argv[3]);
     outer_radius_sq = outer_radius*outer_radius;
-    case 3:
+  case 3:
     inner_radius = atof(argv[2]);
     inner_radius_sq = inner_radius*inner_radius;
-    case 2:
+  case 2:
     if (strcmp(argv[1],"-") == 0) {
       outfile = stdout;
     }
@@ -143,7 +143,7 @@ int main(int argc, char *argv[])
       }
     }
     break;
-    default:
+  default:
     printf("\n Usage: genlat <output file> <inner radius> "
 	   "<outer radius> <x-origin> <y-origin> <z-origin>"
 	   " <minrange> <x beam> <y beam> <distance>\n\n"
@@ -154,10 +154,30 @@ int main(int argc, char *argv[])
     exit(0);
   }
 
+    /*
+     * Initialize diffraction image:
+     */
+
+    if ((imdiff = linitim()) == NULL) {
+      perror("Couldn't initialize diffraction image.\n\n");
+      exit(0);
+    }
+
+
+    /*
+     * Initialize lattice:
+     */
+
+    if ((lat = linitlt()) == NULL) {
+      perror("Couldn't initialize lattice.n\n");
+      exit(0);
+    }
+
   /*
    * Loop through input lines until '.' is encountered.
    */
 
+    int imnum = 1;
 
   while ((*gets(input_line) != '.') && (input_line != NULL)) {
     printf("%s\n",input_line);
@@ -183,15 +203,6 @@ int main(int argc, char *argv[])
     }
 
 
-/*
- * Initialize diffraction image:
- */
-
-  if ((imdiff = linitim()) == NULL) {
-    perror("Couldn't initialize diffraction image.\n\n");
-    exit(0);
-  }
-
     /*
      * Read diffraction image:
      */
@@ -205,59 +216,51 @@ int main(int argc, char *argv[])
     printf("Read the diffraction image\n");
 
   
-  /*
-   * Allocate memory:
-   */
+    /*
+     * Allocate memory:
+     */
   
-  map3D = (struct voxel *)malloc(sizeof(struct voxel)*imdiff->image_length);
-  if (!map3D) {
-    printf("\n***Unable to allocate map3D.\n");
-    goto CloseShop;
-  }
+    map3D = (struct voxel *)malloc(sizeof(struct voxel)*imdiff->image_length);
+    if (!map3D) {
+      printf("\n***Unable to allocate map3D.\n");
+      goto CloseShop;
+    }
 
-  /*
-   * Initialize lattice:
-   */
-
-  if ((lat = linitlt()) == NULL) {
-    perror("Couldn't initialize lattice.n\n");
-    exit(0);
-  }
 
   
   
-  /*
-   * Set main defaults:
-   */
+    /*
+     * Set main defaults:
+     */
   
-  lat->map3D = map3D;
-  lat->minrange.x = lat->minrange.y = lat->minrange.z = minrange;
-  lat->origin = origin;
-  lat->xbound.min = - lat->origin.i*lat->xscale;               
-  lat->xbound.max = (lat->xvoxels - lat->origin.i - 1)*lat->xscale;
-  lat->ybound.min = - lat->origin.j*lat->yscale; 
-  lat->ybound.max = (lat->yvoxels - lat->origin.j - 1)*lat->yscale;
-  lat->zbound.min = - lat->origin.k*lat->zscale; 
-  lat->zbound.max = (lat->zvoxels - lat->origin.k - 1)*lat->zscale;
-  lat->cell.a = cell_a;
-  lat->cell.b = cell_b;
-  lat->cell.c = cell_c;
-  lat->cell.alpha = cell_alpha;
-  lat->cell.beta = cell_beta;
-  lat->cell.gamma = cell_gamma;
-  //  imdiff->beam_mm.x = x_beam;
-  //  imdiff->beam_mm.y = y_beam;
-  //  imdiff->distance_mm = distance;
+    lat->map3D = map3D;
+    lat->minrange.x = lat->minrange.y = lat->minrange.z = minrange;
+    lat->origin = origin;
+    lat->xbound.min = - lat->origin.i*lat->xscale;               
+    lat->xbound.max = (lat->xvoxels - lat->origin.i - 1)*lat->xscale;
+    lat->ybound.min = - lat->origin.j*lat->yscale; 
+    lat->ybound.max = (lat->yvoxels - lat->origin.j - 1)*lat->yscale;
+    lat->zbound.min = - lat->origin.k*lat->zscale; 
+    lat->zbound.max = (lat->zvoxels - lat->origin.k - 1)*lat->zscale;
+    lat->cell.a = cell_a;
+    lat->cell.b = cell_b;
+    lat->cell.c = cell_c;
+    lat->cell.alpha = cell_alpha;
+    lat->cell.beta = cell_beta;
+    lat->cell.gamma = cell_gamma;
+    //  imdiff->beam_mm.x = x_beam;
+    //  imdiff->beam_mm.y = y_beam;
+    //  imdiff->distance_mm = distance;
 
-  /*
-   * Allocate ct:
-   */
+    /*
+     * Allocate ct:
+     */
   
-  ct = (size_t *)calloc(lat->lattice_length,sizeof(size_t));
-  if (!ct) {
-    printf("\nNot enough room to allocate counting table ct.\n\n");
-    exit(0);
-  }
+    ct = (size_t *)calloc(lat->lattice_length,sizeof(size_t));
+    if (!ct) {
+      printf("\nNot enough room to allocate counting table ct.\n\n");
+      exit(0);
+    }
 
     /*
      * Read input file which contains the orientation matrix:
@@ -270,6 +273,11 @@ int main(int argc, char *argv[])
 
     printf("done\n");
     
+    printf("U matrix\n\n");
+    printf("%f %f %f\n",imdiff->u.xx,imdiff->u.xy,imdiff->u.xz);
+    printf("%f %f %f\n",imdiff->u.yx,imdiff->u.yy,imdiff->u.yz);
+    printf("%f %f %f\n",imdiff->u.zx,imdiff->u.zy,imdiff->u.zz);
+
 
     /*
      * Step through the image and generate the map:
@@ -295,7 +303,8 @@ int main(int argc, char *argv[])
      */
     
     for(map_index=0; map_index<imdiff->image_length; map_index++) {
-      map3D[map_index].value *= scale;
+      if (map3D[map_index].value != (float)imdiff->lattice_ignore_tag)
+	map3D[map_index].value *= scale;
     }
     
     /*
@@ -304,7 +313,7 @@ int main(int argc, char *argv[])
 
     for(map_index=0; map_index<imdiff->image_length; map_index++) {
       voxel_data = &map3D[map_index];
-/*printf("%d : %f, %f, %f, %f\n",map_index,voxel_data->pos.x,voxel_data->pos.y,voxel_data->pos.z,voxel_data->value);/***/
+      if (map_index == 1000000)	printf("%ld : %f, %f, %f, %f\n",map_index,voxel_data->pos.x,voxel_data->pos.y,voxel_data->pos.z,voxel_data->value);/***/
       q_squared = (voxel_data->pos.x*voxel_data->pos.x +
 		   voxel_data->pos.y*voxel_data->pos.y +
 		   voxel_data->pos.z*voxel_data->pos.z);
@@ -341,18 +350,23 @@ int main(int argc, char *argv[])
 	    printf("\nTried to index lattice outside of range.\n");
 	    goto CloseShop;
 	  }
+	  if (voxel_data->value < 0) {
+	    printf("%d,%f\n",(int)map_index,(float)voxel_data->value);
+	  }		  
 	  if (ct[index] == 0) {
+	    //	    lat->lattice[index] = (LATTICE_DATA_TYPE)imnum;
 	    lat->lattice[index] = (LATTICE_DATA_TYPE)voxel_data->value;
 	    ct[index]++;
 	  } else {
-	    lat->lattice[index] =
-	      (LATTICE_DATA_TYPE)(((float)ct[index]*lat->lattice[index] + 
-				   voxel_data->value)
-				  /(float)(ct[index]+1.));
+	    //	    lat->lattice[index] = (LATTICE_DATA_TYPE)imnum;
+	    lat->lattice[index] = 
+	      	      (LATTICE_DATA_TYPE)(((float)ct[index]*lat->lattice[index] + 
+	      				   voxel_data->value)
+	      				  /(float)(ct[index]+1.));
 	    ct[index]++;
 	  }
 	}
-      }
+       }
     }
 
     /* 
@@ -361,6 +375,7 @@ int main(int argc, char *argv[])
     
     fclose(infile);
     fclose(imagein);
+    imnum++;
   }
 
   /*
@@ -373,7 +388,7 @@ int main(int argc, char *argv[])
     exit(0);
   }
   
-  CloseShop:
+ CloseShop:
   
   /*
    * Free allocated memory:

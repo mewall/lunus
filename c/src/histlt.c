@@ -30,7 +30,8 @@ int main(int argc, char *argv[])
     binsize = 1;
 
   size_t
-    index,
+    val,
+    index = 0,
     i,
     j,
     k,
@@ -122,6 +123,8 @@ int main(int argc, char *argv[])
  * Generate the histogram:
  */
 
+  printf("Generating the histogram\n");
+
   lat->inner_radius = inner_radius;
   lat->outer_radius = outer_radius;
 
@@ -142,8 +145,10 @@ int main(int argc, char *argv[])
 	    (r <= lat->outer_radius) &&
 	    ((int)lat->lattice[index] >= -32768) &&
 	    ((int)lat->lattice[index] <= 32767)) {
-	  histogram[((int)lat->lattice[index] -
-		     (int)lat->lattice[index] % binsize) + 32768]++;
+	  //	  histogram[((int)lat->lattice[index] -
+	  //		     (int)lat->lattice[index] % binsize) + 32768]++;
+	  val = (int)lat->lattice[index]+32768;
+	  if (val>=0&&val<=65536) histogram[(int)lat->lattice[index]+32768]++;
 	}
 	index++;
       }
@@ -155,7 +160,7 @@ int main(int argc, char *argv[])
 
   for(i=0;i<=65535;i++) {
     if (histogram[i] != (size_t)0) {
-      fprintf(histout,"%d %d\n",(int)i-32768,histogram[i]);
+      fprintf(histout,"%d %ld\n",(int)i-32768,histogram[i]);
     }
   }
 

@@ -60,8 +60,9 @@ int lgensv(DIFFIMAGE *imdiff)
   if ((imdiff->image[index] != imdiff->ignore_tag) &&
       (imdiff->image[index] != imdiff->mask_tag)){
     imdiff->map3D->value = (float) imdiff->image[index];
+    if (imdiff->image[index] < 0||imdiff->map3D->value < 0) printf("%d,%f,%f\n",(int)index,(float)imdiff->image[index],imdiff->map3D->value);
   } else {
-    imdiff->map3D->value = imdiff->lattice_ignore_tag;
+    imdiff->map3D->value = (float)imdiff->lattice_ignore_tag;
   }
   
   /*

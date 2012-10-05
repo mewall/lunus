@@ -31,7 +31,7 @@
 /*#define SNAB                            /* snab data set */
 /*#define SNC                             /* snc data set */
 /*#define LYS                             /* lys data set */
-
+#define SNaseWT
 /*
  * I/O specifications:
  */
@@ -249,6 +249,7 @@
 #define DEFAULT_CELL_GAMMA 90.0         /* A-B angle for lys */
 /* NOTE NO CASSETTE ANGLES */
 #else // SNaseWT
+#ifdef SNaseWT
 #define DEFAULT_WAVELENGTH 1.11         /* Wavelength */
 #define DEFAULT_DISTANCE_MM 200.05	/* Sample-detector distance in mm*/
 #define DEFAULT_X_BEAM 156.44		/* Beam position in x (.img) */
@@ -262,6 +263,7 @@
 #define DEFAULT_CELL_ALPHA 90.0         /* B-C angle */
 #define DEFAULT_CELL_BETA 90.0          /* C-A angle */
 #define DEFAULT_CELL_GAMMA 90.0         /* A-B angle */
+#endif
 #endif
 #endif
 #endif
@@ -427,16 +429,16 @@ typedef struct {
   char *filename;
   FILE *infile;
   FILE *outfile;
-  char error_msg[LINESIZE];     /*Error message string */
+  char error_msg[LINESIZE];      /*Error message string */
   struct voxel *map3D;	        /* Pointer to list of voxels */
   LATTICE_DATA_TYPE *lattice;   /* Pointer to lattice */
   size_t xvoxels;		/* Number of x-voxels */
   size_t yvoxels;		/* Number of y-voxels */
   size_t zvoxels;		/* Number of z-voxels */
   size_t xyvoxels;              /* Number of voxels in an xy section */
-  double xscale;                /* Scale factor for x */
-  double yscale;                /* Scale factor for y */
-  double zscale;                /* Scale factor for z */
+  float xscale;                 /* Scale factor for x */
+  float yscale;                 /* Scale factor for y */
+  float zscale;                 /* Scale factor for z */
   size_t lattice_length;	/* Number of voxels */
   struct bounds xbound;	        /* Max and min of x-coord */
   struct bounds ybound;	        /* Max and min of y-coord */
@@ -455,7 +457,7 @@ typedef struct {
 				/* calcs */
   float peak;                   /* Gaussian peak value */
   float width;                  /* Gaussian width */
-  SHIM_DATA_TYPE *shim;        /* Shell image */
+  SHIM_DATA_TYPE *shim;         /* Shell image */
   size_t shim_length;           /* Total number of pixels in shell image */
   size_t shim_hsize;            /* Number of horizontal pixels in */
 				/* shell image */
@@ -507,6 +509,7 @@ int lgetpks(DIFFIMAGE *imdiff);
 DIFFIMAGE *linitim(void);
 LAT3D *linitlt(void);
 int lintdfim(DIFFIMAGE *imdiff);
+struct xyzmatrix lmatmul(struct xyzmatrix a, struct xyzmatrix b);
 int lmedim(DIFFIMAGE *imdiff);
 size_t lmin(size_t arg1, size_t arg2);
 int lminr(LAT3D *lat);
@@ -531,6 +534,7 @@ int lreadlt(LAT3D *lat);
 int lreadrf(DIFFIMAGE *imdiff);
 int lrf2lt(LAT3D *lat);
 int lrmpkim(DIFFIMAGE *imdiff);
+struct xyzmatrix lrotmat(float rotx, float roty, float rotz);
 int lscaleim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lscalelt(LAT3D *lat1, LAT3D *lat2);
 int lshim4lt(LAT3D *lat);
@@ -558,6 +562,7 @@ int lwriteim(DIFFIMAGE *imdiff);
 int lwritelt(LAT3D *lat);
 int lwriterf(DIFFIMAGE *imdiff);
 int lwritesh(LAT3D *lat);
+int lwritevtk(LAT3D *lat);
 int lxavgr(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lxavgrim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lxf1lt(LAT3D *lat);

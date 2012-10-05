@@ -28,6 +28,13 @@ int lwritelt(LAT3D *lat)
   num_wrote = fwrite(&lat->ybound, sizeof(struct bounds), 1, lat->outfile);
   num_wrote = fwrite(&lat->zbound, sizeof(struct bounds), 1, lat->outfile);
 
+  int i;
+  for (i=0;i<lat->lattice_length;i++) {
+    if (lat->lattice[i] != lat->mask_tag && lat->lattice[i] < 0) {
+      printf("%d,%f\n",i,lat->lattice[i]);
+    }
+  }
+
   num_wrote = fwrite(lat->lattice, sizeof(LATTICE_DATA_TYPE), 
 			lat->lattice_length, lat->outfile);
 

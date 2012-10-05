@@ -22,6 +22,7 @@ all: \
 	avsqrlt \
 	binasc \
 	buttim \
+	calcu \
 	constim \
 	constlt \
 	constrf \
@@ -49,6 +50,7 @@ all: \
 	histlt \
 	intdfim \
 	intimdf \
+	lat2vtk \
 	map2lat \
 	mapbound \
 	maskimg \
@@ -66,6 +68,7 @@ all: \
 	normim \
 	normim_tv6 \
 	ovldim \
+	pattim \
 	peakim \
 	polarim \
 	punchim \
@@ -137,6 +140,8 @@ binasc:binasc.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 buttim:buttim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+calcu:calcu.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 constim:constim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 constlt:constlt.c ${DEPENDS}
@@ -191,6 +196,8 @@ intdfim:intdfim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 intimdf:intimdf.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+lat2vtk:lat2vtk.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 map2lat:map2lat.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 mapbound:mapbound.c ${DEPENDS}
@@ -224,6 +231,8 @@ normim:normim.c ${DEPENDS}
 normim_tv6:normim_tv6.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 ovldim:ovldim.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+pattim:pattim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 peakim:peakim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -348,6 +357,7 @@ lgetpks.o:lgetpks.c mwmask.h
 linitim.o:linitim.c mwmask.h
 linitlt.o:linitlt.c mwmask.h
 lintdfim.o:lintdfim.c mwmask.h
+lmattools.o:lmattools.c mwmask.h
 lmedim.o:lmedim.c mwmask.h
 lmin.o:lmin.c mwmask.h
 lminr.o:lminr.c mwmask.h
@@ -399,6 +409,7 @@ lwriteim.o:lwriteim.c mwmask.h
 lwritelt.o:lwritelt.c mwmask.h
 lwriterf.o:lwriterf.c mwmask.h
 lwritesh.o:lwritesh.c mwmask.h
+lwritevtk.o:lwritevtk.c mwmask.h
 lxavgr.o:lxavgr.c mwmask.h
 lxavgrim.o:lxavgrim.c mwmask.h
 lxflt.o:lxflt.c mwmask.h
@@ -443,6 +454,7 @@ libmw.a: \
 	linitim.o \
 	linitlt.o \
 	lintdfim.o \
+	lmattools.o \
 	lmedim.o \
 	lmin.o \
 	lminr.o \
@@ -494,6 +506,7 @@ libmw.a: \
 	lwritelt.o \
 	lwriterf.o \
 	lwritesh.o \
+	lwritevtk.o \
 	lxavgr.o \
 	lxavgrim.o \
 	lxflt.o \
