@@ -1,7 +1,8 @@
 LUNUS software for diffuse scattering from protein crystals
-Compiled under Mac OS X PPC 7 Feb 2008
+Version 0.1a
 
-WARNING: Untested since 1997, when run under IRIX
+Revised October 2012 to compile under Mac OS X 10.6.8 using gcc
+Support added for ADSC .img files
 
 analysis/ - scripts for data analysis
 c/ - source and binaries for diffuse scattering routines
