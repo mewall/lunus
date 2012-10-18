@@ -311,14 +311,27 @@ int main(int argc, char *argv[])
      * Step through the map and fill the lattice:
      */
 
+
+    struct rccoords *checkpoints;
+    float *dsqrs;
+
+    checkpoints = (struct rccoords *)calloc(lat->lattice_length,sizeof(struct rccoords));
+    dsqrs = (float *)calloc(lat->lattice_length,sizeof(float));
+
     for(map_index=0; map_index<imdiff->image_length; map_index++) {
       voxel_data = &map3D[map_index];
-      if (map_index == 1000000)	printf("%ld : %f, %f, %f, %f\n",map_index,voxel_data->pos.x,voxel_data->pos.y,voxel_data->pos.z,voxel_data->value);/***/
       q_squared = (voxel_data->pos.x*voxel_data->pos.x +
 		   voxel_data->pos.y*voxel_data->pos.y +
 		   voxel_data->pos.z*voxel_data->pos.z);
+	voxel_data->pos.x *= imdiff->cell.a;
+	voxel_data->pos.y *= imdiff->cell.b;
+	voxel_data->pos.z *= imdiff->cell.c;
+
+	// Following condition is suspicious as it's performed after renormalizing x,y,z
+
       if ((inner_radius_sq < q_squared) && (outer_radius_sq >
 					    q_squared)) {
+
 	if (voxel_data->pos.x < 0) {
 	  hh = (int)(voxel_data->pos.x - .5);
 	} else {
@@ -337,19 +350,27 @@ int main(int argc, char *argv[])
 	i = (size_t) (voxel_data->pos.x + lat->origin.i + .5); 
 	j = (size_t) (voxel_data->pos.y + lat->origin.j + .5); 
 	k = (size_t) (voxel_data->pos.z + lat->origin.k + .5); 
+	index = k*lat->xyvoxels + j*lat->xvoxels + i;
+	if (index >= lat->lattice_length) {
+	  printf("\nTried to index lattice outside of range.\n");
+	  goto CloseShop;
+	}
 	dist.x = (float)fabsf(voxel_data->pos.x - (float)hh);
 	dist.y = (float)fabsf(voxel_data->pos.y - (float)kk);
 	dist.z = (float)fabsf(voxel_data->pos.z - (float)ll);
+	float dsqr = dist.x*dist.x+dist.y*dist.y+dist.z*dist.z;
+	if (dsqr < .0001)	{
+	  if (dsqrs[index]==0||dsqr < dsqrs[index]) {
+	    checkpoints[index].r = map_index/imdiff->hpixels;
+	    checkpoints[index].c = map_index%imdiff->hpixels;
+	    dsqrs[index] = dsqr;
+	  }
+	}
 	if ((voxel_data->value != lat->mask_tag) && 
 	    (voxel_data->value != 0) &&
 	    (dist.x > lat->minrange.x) &&
 	    (dist.y > lat->minrange.y) &&
 	    (dist.z > lat->minrange.z)) {
-	  index = k*lat->xyvoxels + j*lat->xvoxels + i;
-	  if (index >= lat->lattice_length) {
-	    printf("\nTried to index lattice outside of range.\n");
-	    goto CloseShop;
-	  }
 	  if (voxel_data->value < 0) {
 	    printf("%d,%f\n",(int)map_index,(float)voxel_data->value);
 	  }		  
@@ -366,12 +387,31 @@ int main(int argc, char *argv[])
 	    ct[index]++;
 	  }
 	}
-       }
+      }
+    }
+
+    // Output check points
+
+    index = 0;
+    for (k=0;k<lat->zvoxels;k++) {
+      for (j=0;j<lat->yvoxels;j++) {
+	for (i=0;i<lat->xvoxels;i++) {
+	  if (dsqrs[index] != 0) {
+	    printf("(%d,%d,%d) is %f from (%d,%d)\n",(int)(i-origin.i),(int)(j-origin.j),(int)(k-origin.k),sqrtf(dsqrs[index]),checkpoints[index].r,checkpoints[index].c);
+	  }
+	  index++;
+	}
+      }
     }
 
     /* 
      * Close input files:
      */
+
+    free(map3D);
+    free(ct);
+    free(checkpoints);
+    free(dsqrs);
     
     fclose(infile);
     fclose(imagein);

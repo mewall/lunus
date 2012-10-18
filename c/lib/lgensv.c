@@ -71,9 +71,11 @@ int lgensv(DIFFIMAGE *imdiff)
   
   c = sqrt(q.x*q.x + q.y*q.y + q.z*q.z);
   
-  q.x = q.x / c;
-  q.y = q.y / c;
-  q.z = q.z / c - 1;
+  q.x = q.x / c/imdiff->wavelength;
+  q.y = q.y / c/imdiff->wavelength;
+  q.z = q.z / (c - 1)/imdiff->wavelength;
+
+  imdiff->q = q;
   
   /*printf("Unit cell: %g, %g, %g\n",imdiff->cell.a,imdiff->cell.b,imdiff->cell.c);/***/
   
@@ -94,20 +96,21 @@ int lgensv(DIFFIMAGE *imdiff)
    */
 
   imdiff->map3D->pos.x = (imdiff->u.xx*q.x + imdiff->u.xy*q.y +
-			  imdiff->u.xz*q.z)/imdiff->wavelength;
+			  imdiff->u.xz*q.z);
   imdiff->map3D->pos.y = (imdiff->u.yx*q.x + imdiff->u.yy*q.y +
-			  imdiff->u.yz*q.z)/imdiff->wavelength;
+			  imdiff->u.yz*q.z);
   imdiff->map3D->pos.z = (imdiff->u.zx*q.x + imdiff->u.zy*q.y +
-			  imdiff->u.zz*q.z)/imdiff->wavelength;
+			  imdiff->u.zz*q.z);
 
   /*
    * Generate (h,k,l) for output:
    */
 
+  /*
   imdiff->map3D->pos.x *= imdiff->cell.a;
   imdiff->map3D->pos.y *= imdiff->cell.b;
   imdiff->map3D->pos.z *= imdiff->cell.c;
-  
+  */  
 
 /*  printf("(%d,%d) -> (%g, %g, %g)\n",imdiff->pos.r,imdiff->pos.c,imdiff->map3D->pos.x,imdiff->map3D->pos.y,imdiff->map3D->pos.z);/***/
 }

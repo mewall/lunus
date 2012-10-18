@@ -16,12 +16,19 @@ int main(int argc, char *argv[])
 {
 
   struct xyzmatrix Rx, Ry, Rz, F, S, U;
+  struct xyzcoords u,v;
 
   float rotx=0,roty=0,rotz=0, film=0, osc_start = 0;
 /*
  * Read information from input line:
  */
   switch(argc) {
+  case 9:
+    u.z = atof(argv[8]);
+  case 8:
+    u.y = atof(argv[7]);
+  case 7:
+    u.x = atof(argv[6]);
   case 6:
     osc_start= atof(argv[5])*PI/180.;
   case 5:
@@ -61,22 +68,26 @@ int main(int argc, char *argv[])
   U = lmatmul(Rx,F);
   U = lmatmul(Ry,U);
   U = lmatmul(Rz,U);
+
+  
+
   */
 
   U = lrotmat(rotx,roty,rotz);
   F = lrotmat(0,0,film);
-  S = lrotmat(0,osc_start,0);
-  U = lmatmul(U,F);
+  S = lrotmat(osc_start,0,0);
   U = lmatmul(U,S);
+  U = lmatmul(U,F);
 
-  /*
+  v = lmatvecmul(U,u);
+
   printf("%f %f %f\n",U.xx,U.xy,U.xz);
   printf("%f %f %f\n",U.yx,U.yy,U.yz);
   printf("%f %f %f\n",U.zx,U.zy,U.zz);
-  */
- 
+  printf("\n%f,%f,%f\n",u.x,u.y,u.z);
+  /* 
   printf("%f %f %f\n",-U.yz,-U.zz,-U.xz);
   printf("%f %f %f\n",-U.yx,-U.zx,-U.xx);
   printf("%f %f %f\n",U.yy,U.zy,U.xy);
-
+  */
 }

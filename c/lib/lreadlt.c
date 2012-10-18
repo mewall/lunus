@@ -21,9 +21,9 @@ int lreadlt(LAT3D *lat)
    * Read in 3D lattice descriptor:
    */
 
-  num_read = fread(&lat->xvoxels, sizeof(long), 1, lat->infile);
-  num_read = fread(&lat->yvoxels, sizeof(long), 1, lat->infile);
-  num_read = fread(&lat->zvoxels, sizeof(long), 1, lat->infile);
+  num_read = fread(&lat->xvoxels, sizeof(uint32_t), 1, lat->infile);
+  num_read = fread(&lat->yvoxels, sizeof(uint32_t), 1, lat->infile);
+  num_read = fread(&lat->zvoxels, sizeof(uint32_t), 1, lat->infile);
   num_read = fread(&lat->xbound, sizeof(struct bounds), 1, lat->infile);
   num_read = fread(&lat->ybound, sizeof(struct bounds), 1, lat->infile);
   num_read = fread(&lat->zbound, sizeof(struct bounds), 1, lat->infile);

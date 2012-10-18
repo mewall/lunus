@@ -15,6 +15,7 @@
 
 #include<stdio.h>
 #include<stdlib.h>
+#include<stdint.h>
 #include<math.h>
 #include<string.h>
 #include<errno.h>
@@ -419,6 +420,7 @@ typedef struct
   struct xyzcoords cassette;    /* Cassette rotation angles */
   float amplitude;              /* Amplitude of noise or fluctuation */
   float pitch;                  /* Pitch of fluctuation */
+  struct xyzcoords q;
 } DIFFIMAGE;
 
 /*
@@ -432,10 +434,10 @@ typedef struct {
   char error_msg[LINESIZE];      /*Error message string */
   struct voxel *map3D;	        /* Pointer to list of voxels */
   LATTICE_DATA_TYPE *lattice;   /* Pointer to lattice */
-  size_t xvoxels;		/* Number of x-voxels */
-  size_t yvoxels;		/* Number of y-voxels */
-  size_t zvoxels;		/* Number of z-voxels */
-  size_t xyvoxels;              /* Number of voxels in an xy section */
+  uint32_t xvoxels;		/* Number of x-voxels */
+  uint32_t yvoxels;		/* Number of y-voxels */
+  uint32_t zvoxels;		/* Number of z-voxels */
+  uint32_t xyvoxels;            /* Number of voxels in an xy section */
   float xscale;                 /* Scale factor for x */
   float yscale;                 /* Scale factor for y */
   float zscale;                 /* Scale factor for z */
@@ -567,3 +569,4 @@ int lxavgr(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lxavgrim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lxf1lt(LAT3D *lat);
 int lxfmask(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
+struct xyzcoords lmatvecmul(struct xyzmatrix b,struct xyzcoords a);

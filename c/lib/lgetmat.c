@@ -64,7 +64,8 @@ int lgetmat(DIFFIMAGE *imdiff)
 
   printf("Reading the orientation info line\n");
 
-  fscanf(imdiff->infile,"%f %f %f %f %f %f %f",&osc_start,&osc_end,&d1,&d2,&rotz,&roty,&rotx);
+  fgets(inl, LINESIZE, imdiff->infile);
+  sscanf(inl,"%f %f %f %f %f %f %f",&osc_start,&osc_end,&d1,&d2,&rotz,&roty,&rotx);
 
   printf("%f %f %f %f\n",osc_start,rotx,roty,rotz);
   
@@ -78,7 +79,7 @@ int lgetmat(DIFFIMAGE *imdiff)
 
   struct xyzmatrix F,S,U;
 
-  U = lrotmat(rotx+osc_start,roty,rotz);
+  U = lrotmat(+rotx+osc_start,roty,rotz);
   F = lrotmat(0,0,PI/2);
   //  S = lrotmat(osc_start,0,0);
   //  U = lmatmul(U,S);
@@ -94,8 +95,20 @@ int lgetmat(DIFFIMAGE *imdiff)
   imdiff->u.zx = U.zz;
   imdiff->u.zy = U.yz;
   imdiff->u.zz = U.xz;
-  */
+  /****/
 
+
+  imdiff->u.xx = U.xx;
+  imdiff->u.xy = U.yx;
+  imdiff->u.xz = U.zx;
+  imdiff->u.yx = U.xy;
+  imdiff->u.yy = U.yy;
+  imdiff->u.yz = U.zy;
+  imdiff->u.zx = U.xz;
+  imdiff->u.zy = U.yz;
+  imdiff->u.zz = U.zz;
+  /****/
+  /*
   imdiff->u.xx = U.xx;
   imdiff->u.xy = U.xy;
   imdiff->u.xz = U.xz;
@@ -105,8 +118,35 @@ int lgetmat(DIFFIMAGE *imdiff)
   imdiff->u.zx = U.zx;
   imdiff->u.zy = U.zy;
   imdiff->u.zz = U.zz;
-
+  /****/
 /*for(i=0;i<=8;i++){printf ("%f\n",u[i]);}/***/
+
+
+
+  int h,k,l,t;
+  float r,c;
+  struct voxel v;
+
+  imdiff->map3D = &v;
+
+  int npar;
+
+  fgets(inl, LINESIZE, imdiff->infile);
+  printf("%s\n",inl);
+  npar = sscanf(inl,"%d %d %d %d %f %f %f %f %f %f %f %f %f",&h,&k,&l,&t,&d1,&d1,&d1,&d1,&d1,&r,&c,&d1,&d1);
+
+  printf("npar,t = %d,%d\n",npar,t);
+
+  while (13 == npar) {
+    if (t==1) {
+      imdiff->pos.r = (RCCOORDS_DATA)r;
+      imdiff->pos.c = (RCCOORDS_DATA)c;    
+      lgensv(imdiff);
+      printf("(%f,%f),(%f,%f,%f): (%f,%f,%f) vs. (%f,%f,%f)\n",r,c,imdiff->q.x,imdiff->q.y,imdiff->q.z,(float)h/imdiff->cell.a,(float)k/imdiff->cell.b,(float)l/imdiff->cell.c,v.pos.x,v.pos.y,v.pos.z);
+    }
+    fgets(inl, LINESIZE, imdiff->infile);
+    npar = sscanf(inl,"%d %d %d %d %f %f %f %f %f %f %f %f %f",&h,&k,&l,&t,&d1,&d1,&d1,&d1,&d1,&r,&c,&d1,&d1);
+  }
 
   /*
    * Free memory:

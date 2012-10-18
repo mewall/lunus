@@ -74,6 +74,7 @@ all: \
 	punchim \
 	rad2s \
 	ratioim \
+	revbytelt \
 	rf2char \
 	rf2lt \
 	rmpkim \
@@ -243,6 +244,8 @@ punchim:punchim.c ${DEPENDS}
 rad2s:rad2s.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 ratioim:ratioim.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+revbytelt:revbytelt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 rf2char:rf2char.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}

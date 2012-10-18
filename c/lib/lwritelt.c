@@ -21,9 +21,9 @@ int lwritelt(LAT3D *lat)
  * Write lattice to output file:
  */
 
-  num_wrote = fwrite(&lat->xvoxels, sizeof(long), 1, lat->outfile);
-  num_wrote = fwrite(&lat->yvoxels, sizeof(long), 1, lat->outfile);
-  num_wrote = fwrite(&lat->zvoxels, sizeof(long), 1, lat->outfile);
+  num_wrote = fwrite(&lat->xvoxels, sizeof(uint32_t), 1, lat->outfile);
+  num_wrote = fwrite(&lat->yvoxels, sizeof(uint32_t), 1, lat->outfile);
+  num_wrote = fwrite(&lat->zvoxels, sizeof(uint32_t), 1, lat->outfile);
   num_wrote = fwrite(&lat->xbound, sizeof(struct bounds), 1, lat->outfile);
   num_wrote = fwrite(&lat->ybound, sizeof(struct bounds), 1, lat->outfile);
   num_wrote = fwrite(&lat->zbound, sizeof(struct bounds), 1, lat->outfile);

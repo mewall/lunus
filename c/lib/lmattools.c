@@ -43,3 +43,14 @@ struct xyzmatrix lmatmul(struct xyzmatrix a, struct xyzmatrix b)
 
   return c;
 }
+
+struct xyzcoords lmatvecmul(struct xyzmatrix b,struct xyzcoords a)
+{
+  struct xyzcoords c;
+
+  c.x = b.xx*a.x + b.xy*a.y + b.xz*a.z;
+  c.y = b.yx*a.x + b.yy*a.y + b.yz*a.z;
+  c.z = b.zx*a.x + b.zy*a.y + b.zz*a.z;
+
+  return c;
+}
