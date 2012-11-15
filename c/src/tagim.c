@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
 			 }
 			}
                 case 3:
-			image_value = atof(argv[2]);
+		  image_value = (IMAGE_DATA_TYPE)atoi(argv[2]);
 		case 2:
 			if (strcmp(argv[1], "-") == 0) {
 				imagein = stdin;

@@ -89,6 +89,7 @@ int main(int argc, char *argv[])
    * Generate rfile:
    */
   
+	printf("Radial averaging image of size %d,%d\n",imdiff->hpixels,imdiff->vpixels); 
 	lavgrim(imdiff);  
 
 /*

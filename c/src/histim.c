@@ -150,8 +150,10 @@ int main(int argc, char *argv[])
  * Write the output file:
  */
 
-  for(i=32768;i<=65535;i=i+binsize) {
+  for(i=0;i<=65535;i=i+binsize) {
+    if (histogram[i]>0) {
       fprintf(histout,"%d %d\n",(int)i-32768,histogram[i]);
+    }
   }
 
 CloseShop:

@@ -2,7 +2,7 @@
               detector-face rotation in a diffraction image.
    
    Author: Mike Wall
-   Date: 2/24/95
+   Date: 2/24/95, 11/14/2012
    Version: 1.
    
    "normim <image in> <image out> <cassette rotx> <cassette roty>" 
@@ -22,6 +22,9 @@ int main(int argc, char *argv[])
   size_t
     i;
 
+  IMAGE_DATA_TYPE
+    value_offset;
+
   DIFFIMAGE 
 	*imdiff;
 
@@ -38,6 +41,7 @@ int main(int argc, char *argv[])
  * Set input line defaults:
  */
 
+  value_offset = DEFAULT_VALUE_OFFSET;
   cassette.x = DEFAULT_CASSETTE_ROTX;
   cassette.y = DEFAULT_CASSETTE_ROTY;
   imagein = stdin;
@@ -47,10 +51,12 @@ int main(int argc, char *argv[])
  * Read information from input line:
  */
 	switch(argc) {
+	  case 6:
+	  cassette.y = (XYZCOORDS_DATA)atof(argv[5]);
 	  case 5:
-	  cassette.y = (XYZCOORDS_DATA)atof(argv[7]);
+	  cassette.x = (XYZCOORDS_DATA)atof(argv[4]);
 	  case 4:
-	  cassette.x = (XYZCOORDS_DATA)atof(argv[6]);
+	  value_offset = (IMAGE_DATA_TYPE)atoi(argv[3]);
 	  case 3:
 	  if (strcmp(argv[2], "-") == 0) {
 	    imageout = stdout;
@@ -74,7 +80,7 @@ int main(int argc, char *argv[])
 	  break;
 	  default:
 	  printf("\n Usage: normim <image in> <image out> "
-		 "(<cassette rotx> <cassette roty>)\n\n");
+		 "(<value_offset> <cassette rotx> <cassette roty>)\n\n");
 	  exit(0);
 	}
   
@@ -87,7 +93,7 @@ int main(int argc, char *argv[])
     exit(0);
   }
   
-  
+
   /*
    * Read diffraction image:
    */
@@ -102,6 +108,7 @@ int main(int argc, char *argv[])
    * Normalize the diffraction image:
    */
   
+  imdiff->value_offset = value_offset;
   imdiff->cassette.x = cassette.x;
   imdiff->cassette.y = cassette.y;
   lnormim(imdiff);

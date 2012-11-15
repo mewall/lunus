@@ -18,8 +18,8 @@ int lwriterf(DIFFIMAGE *imdiff)
 
 
   num_wrote = fwrite(imdiff->rfile, sizeof(RFILE_DATA_TYPE),
-                     DEFAULT_RFILE_LENGTH, imdiff->outfile);
-  if (num_wrote != DEFAULT_RFILE_LENGTH) { 
+                     imdiff->rfile_length, imdiff->outfile);
+  if (num_wrote != imdiff->rfile_length) { 
     sprintf(imdiff->error_msg,"\nLWRITERF:  Only wrote %ld words to "
 		"rfile.\n\n", num_wrote);
     return_value = 1;

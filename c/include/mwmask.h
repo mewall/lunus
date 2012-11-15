@@ -56,6 +56,7 @@
 #define DEFAULT_IGNORE_TAG 0x7fff	/* 32767 */
 /* #define DEFAULT_OVERLOAD_TAG 0xffff     /* 65535 */
 /* #define DEFAULT_IGNORE_TAG 0xffff       /* 65535 */
+#define DEFAULT_VALUE_OFFSET 40         /* Default offset. 0 for TV6, 40 for LBL .img */
 #define MAX_OVERLOADS 10000		/* Max # of overloads in an image */
 #define MAX_PEAKS 20000			/* Max # of peaks in an image */
 #define MAX_IMAGE_DATA_VALUE 32767	/* Maximum value of pixel in image */
@@ -372,6 +373,7 @@ typedef struct
   IMAGE_DATA_TYPE ignore_tag;   /* Ignore this pixel value */
   struct rccoords *overload;    /* Pointer to overload coords */
   IMAGE_DATA_TYPE overload_tag; /* Pixel value indicating ovld */
+  IMAGE_DATA_TYPE value_offset; /* Constant offset applied to all pixels */
   LATTICE_DATA_TYPE lattice_ignore_tag; /* Lattice ign. tag */
   long overload_count;	        /* Number of overload pixels in img */
   struct xycoords *peak;	/* X-Y coords of Bragg peak posns */
