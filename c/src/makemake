@@ -45,9 +45,10 @@ echo '$(CC) -c -o ${L}/$*.o $(CFLAGS) ${L}/$*.c' | awk '{print "\t"$0}' >> ${C_H
 echo "#" >> ${C_HOME}/src/$1
 echo "# Libraries:" >> ${C_HOME}/src/$1
 echo "#" >> ${C_HOME}/src/$1
-echo "libmw.a: \" >> ${C_HOME}/src/$1
-ls -1 *.c | awk '{print "\t"substr($0,0,length()-2)".o \\"}' >> ${C_HOME}/src/$1
-echo ';cd ${L}; $(AR) $(ARFLAGS) $@ $?' | awk '{print "\t"$0}' >> ${C_HOME}/src/$1
+/bin/echo -n "libmw.a: " >> ${C_HOME}/src/$1
+ls -1 *.c | awk '{printf "\\\n\t"substr($0,0,length()-2)".o "}' >> ${C_HOME}/src/$1
+echo "" >> ${C_HOME}/src/$1
+echo 'cd ${L}; rm libmw.a; $(AR) $(ARFLAGS) libmw.a *.o' | awk '{print "\t"$0}' >> ${C_HOME}/src/$1
 
 
 

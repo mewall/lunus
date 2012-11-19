@@ -1,8 +1,8 @@
 VPATH=${C_HOME}/src:${C_HOME}/lib:${C_HOME}/bin:${C_HOME}/include
 CC=cc
-CFLAGS= -g3 -L${C_HOME}/lib -O2 -I${C_HOME}/include
+CFLAGS= -g -L${C_HOME}/lib -I${C_HOME}/include
 AR=ar
-ARFLAGS=cr
+ARFLAGS=-r
 SHELL=/bin/csh
 LIBS=-lmw -lm
 DEPENDS=mwmask.h libmw.a
@@ -107,6 +107,7 @@ all: \
 	thrshim \
 	totiff8 \
 	tst3d \
+	vtk2lat \
 	waveim \
 	windim \
 	writehdr \
@@ -311,6 +312,8 @@ totiff8:totiff8.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 tst3d:tst3d.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+vtk2lat:vtk2lat.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 waveim:waveim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 windim:windim.c ${DEPENDS}
@@ -383,6 +386,7 @@ lreaddf.o:lreaddf.c mwmask.h
 lreadim.o:lreadim.c mwmask.h
 lreadlt.o:lreadlt.c mwmask.h
 lreadrf.o:lreadrf.c mwmask.h
+lreadvtk.o:lreadvtk.c mwmask.h
 lrf2lt.o:lrf2lt.c mwmask.h
 lrmpkim.o:lrmpkim.c mwmask.h
 lscaleim.o:lscaleim.c mwmask.h
@@ -480,6 +484,7 @@ libmw.a: \
 	lreadim.o \
 	lreadlt.o \
 	lreadrf.o \
+	lreadvtk.o \
 	lrf2lt.o \
 	lrmpkim.o \
 	lscaleim.o \
@@ -513,5 +518,5 @@ libmw.a: \
 	lxavgr.o \
 	lxavgrim.o \
 	lxflt.o \
-	lxfmask.o \
-	;cd ${L}; $(AR) $(ARFLAGS) $@ $?
+	lxfmask.o 
+	cd ${L}; rm libmw.a; $(AR) $(ARFLAGS) libmw.a *.o
