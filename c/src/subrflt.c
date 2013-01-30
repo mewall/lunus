@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
 			}
 			break;
 		default:
-			printf("\n Usage: subrflt <input file> <input lattice>"
+			printf("\n Usage: subrflt <input rfile> <input lattice> "
 				"<output lattice>\n\n");
 			exit(0);
 	}
@@ -102,11 +102,13 @@ int main(int argc, char *argv[])
  * Read in rfile:
  */
 
- while ((num_read = fread(&lat->rfile[i], sizeof(RFILE_DATA_TYPE), 1, 
-				infile)) == 1) {
-	i++;
- }
+  i=0;
 
+  while ((num_read = fread(&lat->rfile[i], sizeof(RFILE_DATA_TYPE), 1, 
+			   infile)) == 1) {
+    i++;
+  }
+  
  lat->rfile_length = i;
 
 /*

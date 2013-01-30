@@ -450,6 +450,7 @@ typedef struct {
   struct bounds valuebound;     /* Max and min of voxel value */
   struct unit_cell cell;        /* Unit cell descriptor */
   LATTICE_DATA_TYPE mask_tag;   /* Masked voxel value tag */
+  LATTICE_DATA_TYPE threshold;  /* Threshold for use in correlation calculation, and perhaps elsewhere */
   struct ijkcoords origin;      /* Origin voxel position */
   RFILE_DATA_TYPE *rfile;       /* Radial distribution function */
   size_t rfile_length;	        /* Number of rfile values */
@@ -488,10 +489,12 @@ int lavgsqim(DIFFIMAGE *imdiff);
 int lavsqrim(DIFFIMAGE *imdiff);
 int lavsqrlt(LAT3D *lat);
 int lbuttim(DIFFIMAGE *imdiff);
+int lccrlt(LAT3D *lat1, LAT3D *lat2);
 int lchbyte(void *ptr, size_t packet_size, size_t list_length);
 int lconstim(DIFFIMAGE *imdiff);
 int lconstlt(LAT3D *lat);
 int lconstrf(DIFFIMAGE *imdiff);
+float lcorrlt(LAT3D *lat1, LAT3D *lat2);
 int lculllt(LAT3D *lat);
 int lcutim(DIFFIMAGE *imdiff);
 int ldf2im(DIFFIMAGE *imdiff);
@@ -533,10 +536,13 @@ int lpunch(DIFFIMAGE *imdiff);
 int lpunchim(DIFFIMAGE *imdiff);
 int lratioim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lreaddf(DIFFIMAGE *imdiff);
+int lreadhkl(LAT3D *lat,LAT3D *tmpl);
 int lreadim(DIFFIMAGE *imdiff);
 int lreadlt(LAT3D *lat);
 int lreadrf(DIFFIMAGE *imdiff);
+int lreadvtk(LAT3D *lat);
 int lrf2lt(LAT3D *lat);
+float lrfaclt(LAT3D *lat1, LAT3D *lat2);
 int lrmpkim(DIFFIMAGE *imdiff);
 struct xyzmatrix lrotmat(float rotx, float roty, float rotz);
 int lscaleim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);

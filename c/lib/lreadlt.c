@@ -62,12 +62,14 @@ int lreadlt(LAT3D *lat)
   
   num_read = fread(lat->lattice, sizeof(LATTICE_DATA_TYPE), 
 		   lat->lattice_length,lat->infile);
+  /*
   int i;
   for (i=0;i<lat->lattice_length;i++) {
     if (lat->lattice[i] != lat->mask_tag && lat->lattice[i] < 0) {
       printf("%d,%f\n",i,lat->lattice[i]);
     }
   }
+		   */
   if (num_read != lat->lattice_length) {
     printf("/nCouldn't read all of the lattice from input file.\n\n");
     return_value = 2;

@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
     break;
     default:
     printf("\n Usage: avgrlt <input lattice> "
-	   "<output lattice> <x-origin> "
+	   "<output rfile> <x-origin> "
 	   "<y-origin> <z-origin>\n\n");
     exit(0);
   }

@@ -23,11 +23,14 @@ all: \
 	binasc \
 	buttim \
 	calcu \
+	ccrlt \
 	constim \
 	constlt \
 	constrf \
+	corrlt \
 	culllt \
 	cutim \
+	dat2vtk \
 	df2im \
 	dfrflt \
 	dfsqrlt \
@@ -48,6 +51,7 @@ all: \
 	headc \
 	histim \
 	histlt \
+	hkl2vtk \
 	intdfim \
 	intimdf \
 	lat2vtk \
@@ -77,6 +81,7 @@ all: \
 	revbytelt \
 	rf2char \
 	rf2lt \
+	rfaclt \
 	rmpkim \
 	scaleim \
 	scalelt \
@@ -144,15 +149,21 @@ buttim:buttim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 calcu:calcu.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+ccrlt:ccrlt.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 constim:constim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 constlt:constlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 constrf:constrf.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+corrlt:corrlt.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 culllt:culllt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 cutim:cutim.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+dat2vtk:dat2vtk.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 df2im:df2im.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -193,6 +204,8 @@ headc:headc.c ${DEPENDS}
 histim:histim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 histlt:histlt.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+hkl2vtk:hkl2vtk.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 intdfim:intdfim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -251,6 +264,8 @@ revbytelt:revbytelt.c ${DEPENDS}
 rf2char:rf2char.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 rf2lt:rf2lt.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+rfaclt:rfaclt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 rmpkim:rmpkim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -338,10 +353,12 @@ lavgsqim.o:lavgsqim.c mwmask.h
 lavsqrim.o:lavsqrim.c mwmask.h
 lavsqrlt.o:lavsqrlt.c mwmask.h
 lbuttim.o:lbuttim.c mwmask.h
+lccrlt.o:lccrlt.c mwmask.h
 lchbyte.o:lchbyte.c mwmask.h
 lconstim.o:lconstim.c mwmask.h
 lconstlt.o:lconstlt.c mwmask.h
 lconstrf.o:lconstrf.c mwmask.h
+lcorrlt.o:lcorrlt.c mwmask.h
 lculllt.o:lculllt.c mwmask.h
 lcutim.o:lcutim.c mwmask.h
 ldf2im.o:ldf2im.c mwmask.h
@@ -383,11 +400,13 @@ lpunch.o:lpunch.c mwmask.h
 lpunchim.o:lpunchim.c mwmask.h
 lratioim.o:lratioim.c mwmask.h
 lreaddf.o:lreaddf.c mwmask.h
+lreadhkl.o:lreadhkl.c mwmask.h
 lreadim.o:lreadim.c mwmask.h
 lreadlt.o:lreadlt.c mwmask.h
 lreadrf.o:lreadrf.c mwmask.h
 lreadvtk.o:lreadvtk.c mwmask.h
 lrf2lt.o:lrf2lt.c mwmask.h
+lrfaclt.o:lrfaclt.c mwmask.h
 lrmpkim.o:lrmpkim.c mwmask.h
 lscaleim.o:lscaleim.c mwmask.h
 lscalelt.o:lscalelt.c mwmask.h
@@ -436,10 +455,12 @@ libmw.a: \
 	lavsqrim.o \
 	lavsqrlt.o \
 	lbuttim.o \
+	lccrlt.o \
 	lchbyte.o \
 	lconstim.o \
 	lconstlt.o \
 	lconstrf.o \
+	lcorrlt.o \
 	lculllt.o \
 	lcutim.o \
 	ldf2im.o \
@@ -481,11 +502,13 @@ libmw.a: \
 	lpunchim.o \
 	lratioim.o \
 	lreaddf.o \
+	lreadhkl.o \
 	lreadim.o \
 	lreadlt.o \
 	lreadrf.o \
 	lreadvtk.o \
 	lrf2lt.o \
+	lrfaclt.o \
 	lrmpkim.o \
 	lscaleim.o \
 	lscalelt.o \

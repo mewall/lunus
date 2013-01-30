@@ -22,12 +22,13 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
+#include<inttypes.h>
 
 union data_union {
-	short two_byte;
+	uint16_t two_byte;
 	struct {
-		char low_byte;
-		char high_byte;
+		uint8_t low_byte;
+		uint8_t high_byte;
 	} one_byte;
 };
 
@@ -44,7 +45,7 @@ int main(int argc, char *argv[])
 	*outstream,
 	    *header;
 
-	short
+	uint16_t
 	upper_threshold = DEFAULT_UPPER_THRESHOLD,
 	    lower_threshold = DEFAULT_LOWER_THRESHOLD,
 		pix_value;
@@ -61,7 +62,7 @@ int main(int argc, char *argv[])
 	float
 		scale;
 
-	short
+	uint16_t
 	*instream;
 
 	union data_union
@@ -85,9 +86,9 @@ int main(int argc, char *argv[])
 			exit(0);
 		}
 		case 4:
-		upper_threshold = atoi(argv[3]);
+		  upper_threshold = (uint16_t)atoi(argv[3]);
 		case 3:
-		lower_threshold = atoi(argv[2]);
+		  lower_threshold = (uint16_t)atoi(argv[2]);
 		case 2:
 		/*
  * Open input and output files:
@@ -129,7 +130,7 @@ int main(int argc, char *argv[])
 	imagesize = filesize-header_length;
 	imagelength = imagesize/2;
 	outstream = (char *)malloc(sizeof(char)*(imagelength+1));
-	instream = (short *)malloc(sizeof(short)*(imagelength+1));
+	instream = (uint16_t *)malloc(sizeof(uint16_t)*(imagelength+1));
 	if (!(outstream && instream)) {
 		printf("Can't allocate image arrays.  Exiting.\n");
 		exit(0);
@@ -143,7 +144,7 @@ int main(int argc, char *argv[])
 	header[0xDE] = 0x10;		/* Strip size change */
 	header[0x178] = 0x08;		/* TV6 Significant bpp */
 
-	num_read = fread(instream,sizeof(short),imagelength,f_in);
+	num_read = fread(instream,sizeof(uint16_t),imagelength,f_in);
 	if (ferror(f_in)) {
 		printf("Error reading file %s.",filename);
 	}
@@ -157,8 +158,11 @@ int main(int argc, char *argv[])
 	i = 0;
 	while (i < imagelength) {
 		pix.two_byte = instream[i];
-		pix_value = (short)pix.one_byte.high_byte * 256 + 
-			(short)pix.one_byte.low_byte;
+		pix_value = (uint16_t)(pix.one_byte.high_byte * 256 + 
+				       pix.one_byte.low_byte);
+		//				pix_value = (short)pix.one_byte.low_byte * 256 + 
+		//					(short)pix.one_byte.high_byte;
+		//		printf("%d,%d,%d\n",pix.one_byte.high_byte,pix.one_byte.low_byte,pix_value);
 		if ((pix_value < lower_threshold) || (pix_value >= 32766)) {
 			outstream[i] = 0;
 		}
@@ -190,7 +194,7 @@ int main(int argc, char *argv[])
  */
 
 	free((char *)filename);
-	free((short *)instream);
+	free((uint16_t *)instream);
 	free((char *)outstream);
 	free((char *)header);
 }

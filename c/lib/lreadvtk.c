@@ -15,10 +15,13 @@ int lreadvtk(LAT3D *lat)
     return_value = 0;
   
   int 
-    len_inl = 10000;
+    len_inl = 100000;
 
   char
     *token, *inl;
+
+  char
+    *fgets_status;
 
 /*
  * Read the header:
@@ -44,9 +47,10 @@ int lreadvtk(LAT3D *lat)
   printf("Reading the vtk file header...\n");
 
   int found_token = 1;
-  while (found_token == 1) {
+  int stop_header = 0;
+  while (found_token == 1&& stop_header==0) {
     found_token = 0;
-    if (fgets(inl,len_inl-1,lat->infile) != NULL) {      
+    if ((fgets_status=fgets(inl,len_inl-1,lat->infile)) != NULL) {      
       if ((token = strtok(inl," \n")) == NULL) {
 	printf("Null...\n");
 	token = inl;
@@ -79,6 +83,7 @@ int lreadvtk(LAT3D *lat)
 	}
 	if (strstr(token,"LOOKUP_TABLE")!=NULL) {
 	  found_token = 1;
+	  stop_header = 1;
 	}
 	if (strstr(token,"ASCII")!=NULL) {
 	  found_token = 1;
@@ -97,22 +102,45 @@ int lreadvtk(LAT3D *lat)
     exit(1);
   }
 
+  lat->xyvoxels = lat->xvoxels*lat->yvoxels;
+
   lat->xbound.max = lat->xbound.min + lat->xvoxels*lat->xscale;
   lat->ybound.max = lat->ybound.min + lat->yvoxels*lat->yscale;
   lat->zbound.max = lat->zbound.min + lat->zvoxels*lat->zscale;
 
-  lat->origin.i = (IJKCOORDS_DATA)(-lat->xbound.min*lat->xscale+.49);
-  lat->origin.j = (IJKCOORDS_DATA)(-lat->ybound.min*lat->yscale+.49);
-  lat->origin.k = (IJKCOORDS_DATA)(-lat->zbound.min*lat->zscale+.49);
+  lat->origin.i = (IJKCOORDS_DATA)(-lat->xbound.min/lat->xscale+.49);
+  lat->origin.j = (IJKCOORDS_DATA)(-lat->ybound.min/lat->yscale+.49);
+  lat->origin.k = (IJKCOORDS_DATA)(-lat->zbound.min/lat->zscale+.49);
 
   int index = 0,ct=0;
   int i,j,k;
 
-  printf("%d %d %d\n",lat->xvoxels,lat->yvoxels,lat->zvoxels);
+  printf("size: %d %d %d\n",lat->xvoxels,lat->yvoxels,lat->zvoxels);
+  printf("origin: %d %d %d\n",lat->origin.i,lat->origin.j,lat->origin.k);
+  printf("(min,max) bounds: (%g,%g), (%g,%g), (%g,%g)\n",lat->xbound.min,lat->xbound.max,lat->ybound.min,lat->ybound.max,lat->zbound.min,lat->zbound.max);
 
   printf("Reading the vtk file data...\n");
 
-  for (k=0;k<lat->zvoxels;k++) {
+  int linenum=0;
+
+  printf("%s\n",inl);
+
+  while (fgets(inl,len_inl-1,lat->infile) != NULL) {
+    ++linenum;
+    int ind_tmp = 0;
+    token = strtok(inl," \n");
+    while (token != NULL) {
+      lat->lattice[index] = atof(token);
+      index++;
+      token = strtok(NULL," \n");
+      ++ind_tmp;
+    }
+  }
+
+  printf("linenum = %d\n",linenum);
+
+  /*  
+for (k=0;k<lat->zvoxels;k++) {
     for (j=0;j<lat->yvoxels;j++) {
       for (i=0;i<lat->xvoxels;i++) {
 	found_token = 0;
@@ -120,7 +148,8 @@ int lreadvtk(LAT3D *lat)
 	  while (found_token == 0) {
 	    if (fgets(inl,len_inl-1,lat->infile) == NULL) {
 	      perror("Failed to complete reading of .vtk file\n");
-	      exit(1);
+	      printf("%d %d %d\n",i,j,k);
+	      //	      exit(1);
 	    }
 	    if ((token = strtok(inl," \n")) != NULL) {
 	      found_token = 1;
@@ -134,11 +163,11 @@ int lreadvtk(LAT3D *lat)
       }
     }
   }
-  
+  */  
   printf("...done\n");
 
   if (index != lat->lattice_length) {
-    printf("/nCouldn't write all of the lattice to output file.\n\n");
+    printf("\nCouldn't read all of the lattice from the input file, index = %d.\n\n",index);
     return_value = 1;
     goto CloseShop;
   }
