@@ -33,8 +33,8 @@ int lavsqrim(DIFFIMAGE *imdiff)
 	        if (radius > imdiff->rfile_length) 
 			imdiff->rfile_length = radius;
 		imdiff->rfile[radius] = (RFILE_DATA_TYPE)(
-			(float)imdiff->image[index]*
-			(float)imdiff->image[index]+ 
+			(float)(imdiff->image[index]-imdiff->value_offset)*
+			(float)(imdiff->image[index]-imdiff->value_offset)+ 
 			(float)n[radius]*(float)imdiff->rfile[radius]) /
 				(RFILE_DATA_TYPE)(n[radius] + 1);
 		n[radius]++;

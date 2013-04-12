@@ -44,6 +44,7 @@ int lnormim(DIFFIMAGE *imdiff)
 	     rvec.y*imdiff->cassette.x)/imdiff->distance_mm;
 	imdiff->image[index] -= imdiff->value_offset;
 	imdiff->image[index] *= correction_factor * sqrtf(correction_factor);
+	imdiff->image[index] += imdiff->value_offset;
       }
       index++;
     }

@@ -53,15 +53,24 @@ int lreadim(DIFFIMAGE *imdiff)
       }
       imdiff->hpixels = (size_t)atoi(getTag(imdiff->header,"SIZE1"));
       imdiff->vpixels = (size_t)atoi(getTag(imdiff->header,"SIZE2"));
+      imdiff->window_lower.r = imdiff->window_lower.c = 0;
+      imdiff->window_upper.r = imdiff->vpixels;
+      imdiff->window_upper.c = imdiff->hpixels;
+      if (getTag(imdiff->header,"IMAGE_PEDESTAL")!=NULL) {
+	imdiff->value_offset = (IMAGE_DATA_TYPE)atoi(getTag(imdiff->header,"IMAGE_PEDESTAL"));
+      } else {
+	imdiff->value_offset = DEFAULT_VALUE_OFFSET;
+      }
       imdiff->rfile_length = (size_t)(imdiff->hpixels < imdiff->vpixels ? imdiff->hpixels : imdiff->vpixels);
       imdiff->image_length = imdiff->hpixels*imdiff->vpixels;
       imdiff->image = (IMAGE_DATA_TYPE *)realloc(imdiff->image,imdiff->image_length*sizeof(IMAGE_DATA_TYPE));
       imdiff->pixel_size_mm = atof(getTag(imdiff->header,"PIXEL_SIZE"));
-      imdiff->beam_mm.x = atof(getTag(imdiff->header,"DENZO_X_BEAM"));
-      imdiff->beam_mm.y = atof(getTag(imdiff->header,"DENZO_Y_BEAM"));
+      imdiff->beam_mm.y = atof(getTag(imdiff->header,"BEAM_CENTER_X"));
+      imdiff->beam_mm.x = atof(getTag(imdiff->header,"BEAM_CENTER_Y"));
       imdiff->origin.c = imdiff->beam_mm.x/imdiff->pixel_size_mm+.5;
       imdiff->origin.r = imdiff->beam_mm.y/imdiff->pixel_size_mm+.5;
       imdiff->distance_mm = atof(getTag(imdiff->header,"DISTANCE"));
+      imdiff->wavelength = atof(getTag(imdiff->header,"WAVELENGTH"));
       if (!strcmp(getTag(imdiff->header,"BYTE_ORDER"),"big_endian"))
 	imdiff->big_endian=1;
       else if (!strcmp(getTag(imdiff->header,"BYTE_ORDER"),"little_endian"))
@@ -107,10 +116,11 @@ int lreadim(DIFFIMAGE *imdiff)
 const char * getTag(const char *target,const char *tag)
 {
   char *pos_begin,*pos_end;
+  char *val;
   
   if ((pos_begin = strstr(target,tag)) == NULL) {
-    printf("\nCouldn't find tag %s in image header\n\n",tag);
-    exit(5);;
+    //printf("\nWarning: Couldn't find tag %s in image header\n\n",tag);
+    return(NULL);
   }
   if ((pos_begin = strchr(pos_begin,'='))==NULL) {
     perror("\nImage header tag syntax not recognized\n\n");
@@ -121,7 +131,6 @@ const char * getTag(const char *target,const char *tag)
     exit(6);
   }
   int len = pos_end-pos_begin-1;
-  char *val;
   val = (char *)calloc(sizeof(char),len+1);
   memcpy(val,pos_begin+1,len);
   return(val);

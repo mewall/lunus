@@ -47,16 +47,12 @@ int main(int argc, char *argv[])
  * Read information from input line:
  */
 	switch(argc) {
-	  case 8:
-	  polarization_offset = atof(argv[7]);
-	  case 7:
-	  polarization = atof(argv[6]);
 	  case 6:
-	  distance_mm = atof(argv[5]);
+	  polarization_offset = atof(argv[5]);
 	  case 5:
-	  origin.r = (RCCOORDS_DATA)atol(argv[4]);
+	  polarization = atof(argv[4]);
 	  case 4:
-	  origin.c = (RCCOORDS_DATA)atol(argv[3]);
+	  distance_mm = atof(argv[3]);
 	  case 3:
 	  if (strcmp(argv[2], "-") == 0) {
 	    imageout = stdout;
@@ -98,7 +94,7 @@ int main(int argc, char *argv[])
    * Set the origin for the image:
    */
   
-  imdiff->origin = origin;
+  //  imdiff->origin = origin;
 
   /*
    * Set sample-to-detector distance for the image

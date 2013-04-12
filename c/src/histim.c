@@ -35,6 +35,8 @@ int main(int argc, char *argv[])
 	upper_bound,
 	lower_bound;
 
+  int use_default_bounds = 1;
+
   size_t
     *histogram;
 
@@ -75,6 +77,7 @@ int main(int argc, char *argv[])
 			upper_bound.c = (RCCOORDS_DATA)atol(argv[3]);
 		case 3:
 			lower_bound.c = (RCCOORDS_DATA)atol(argv[2]);
+			use_default_bounds = 0;
 		case 2:
 			if (strcmp(argv[1], "-") == 0) {
 				imagein = stdin;
@@ -127,8 +130,10 @@ int main(int argc, char *argv[])
  * Set window parameters:
  */
 
-  imdiff->window_upper = upper_bound;
-  imdiff->window_lower = lower_bound;
+  if (use_default_bounds == 0) {
+    imdiff->window_upper = upper_bound;
+    imdiff->window_lower = lower_bound;
+  }
 
 /*
  * Select pixels in the patch and histogram them:

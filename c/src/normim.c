@@ -51,12 +51,10 @@ int main(int argc, char *argv[])
  * Read information from input line:
  */
 	switch(argc) {
-	  case 6:
-	  cassette.y = (XYZCOORDS_DATA)atof(argv[5]);
 	  case 5:
-	  cassette.x = (XYZCOORDS_DATA)atof(argv[4]);
+	  cassette.y = (XYZCOORDS_DATA)atof(argv[4]);
 	  case 4:
-	  value_offset = (IMAGE_DATA_TYPE)atoi(argv[3]);
+	  cassette.x = (XYZCOORDS_DATA)atof(argv[3]);
 	  case 3:
 	  if (strcmp(argv[2], "-") == 0) {
 	    imageout = stdout;
@@ -80,7 +78,7 @@ int main(int argc, char *argv[])
 	  break;
 	  default:
 	  printf("\n Usage: normim <image in> <image out> "
-		 "(<value_offset> <cassette rotx> <cassette roty>)\n\n");
+		 "(<cassette rotx> <cassette roty>)\n\n");
 	  exit(0);
 	}
   
@@ -108,7 +106,7 @@ int main(int argc, char *argv[])
    * Normalize the diffraction image:
    */
   
-  imdiff->value_offset = value_offset;
+  //imdiff->value_offset = value_offset;
   imdiff->cassette.x = cassette.x;
   imdiff->cassette.y = cassette.y;
   lnormim(imdiff);
