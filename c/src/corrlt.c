@@ -5,9 +5,10 @@
    Version: 1.
    
    Usage:
-   		"rfaclt <input lattice 1> <input lattice 2>"
+   		"corrlt <input lattice 1> <input lattice 2> <threshold>"
 
-		Input is two 3D lattices.  Output is the correlation coefficient written to stdout.  
+		Input is two 3D lattices and threshold below which voxels in lattice 1 are ignored. 
+		Output is the correlation coefficient written to stdout.  
    */
 
 #include<mwmask.h>
@@ -75,8 +76,8 @@ int main(int argc, char *argv[])
     }
     break;
     default:
-    printf("\n Usage: sublt <input lattice 1> <input lattice 2> "
-	   "<output lattice>\n\n");
+    printf("\n Usage: corrlt <input lattice 1> <input lattice 2> "
+	   "<threshold>\n\n");
     exit(0);
   }
   
@@ -108,7 +109,7 @@ int main(int argc, char *argv[])
   }
 
 /*
- * Calculate the R-factor:
+ * Calculate the Pearson Correlation:
  */
 
   float corr;
