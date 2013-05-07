@@ -13,6 +13,10 @@
    */
 
 #include<mwmask.h>
+#ifdef USE_OPENMP
+#include<omp.h>
+#endif
+
 int lmodeim(DIFFIMAGE *imdiff) 
 {
   
@@ -25,11 +29,7 @@ int lmodeim(DIFFIMAGE *imdiff)
     c; 
 
   size_t
-    i,
-    j,
-    mode_value,
-    mode_ct,
-    k,
+     k,
     l,
     max_count=0,
     avg_max_count_count = 0,
@@ -53,10 +53,6 @@ int lmodeim(DIFFIMAGE *imdiff)
   
   image = (IMAGE_DATA_TYPE *)calloc(imdiff->image_length, 
 				      sizeof(IMAGE_DATA_TYPE)); 
-  count = (size_t *)calloc(65537,sizeof(size_t));
-  count_pointer = (size_t *)calloc((imdiff->mode_height+1) *
-				(imdiff->mode_width+1), 
-				sizeof(size_t));
   if (!image || !count || !count_pointer) {
     sprintf(imdiff->error_msg,"\nLMODEIM:  Couldn't allocate arrays.\n\n");
     return_value = 1;
@@ -67,18 +63,33 @@ int lmodeim(DIFFIMAGE *imdiff)
   half_height = imdiff->mode_height / 2;
   half_width = imdiff->mode_width / 2;
   index = 0;
+
+#ifdef USE_OPENMP
+#pragma omp for
+#endif
+  size_t j;
   for (j=0; j<imdiff->vpixels; j++) {
+    size_t i;
     for (i=0; i<imdiff->hpixels; i++) {
       if (imdiff->image[index] != imdiff->ignore_tag) {
-	mode_value=0;
-	max_count=0;
-	l=0;
+	size_t mode_value=0;
+	size_t max_count=0;
+	size_t l=0;
+	RCCOORDS_DATA n,m,r,c;
+	size_t *count;
+	count = (size_t *)calloc(65537,sizeof(size_t));
+	size_t *count_pointer;
+	count_pointer = (size_t *)calloc((imdiff->mode_height+1) *
+				(imdiff->mode_width+1), 
+				sizeof(size_t));
+	size_t k;
 	for(n=-half_height; n<=half_height; n++) {
 	  r = j + n;
 	  for(m=-half_width; m<=half_width; m++) {
 	    c = i + m;
 	    if (!((r < 0) || (r > imdiff->vpixels) || (c < 0) ||       
 		  (c > imdiff->hpixels))) {
+	      size_t imd_index;
 	      imd_index = index + n*imdiff->hpixels + m;
 	      if ((imdiff->image[imd_index] != imdiff->overload_tag) &&
 		  (imdiff->image[imd_index] != imdiff->ignore_tag)) {

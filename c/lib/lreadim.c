@@ -9,8 +9,6 @@
 #include<mwmask.h>
 #include <string.h>
 
-const char * getTag(const char *target,const char *tag);
-
 int lreadim(DIFFIMAGE *imdiff)
 {
 	size_t
@@ -42,7 +40,7 @@ int lreadim(DIFFIMAGE *imdiff)
 	strstr(buf,"PIXEL_SIZE=")!=NULL) {
       // assume ADSC .img format
       //      printf("ADSC .img image\n");
-      imdiff->header_length = (size_t)atoi(getTag(buf, "HEADER_BYTES"));
+      imdiff->header_length = (size_t)atoi(lgettag(buf, "HEADER_BYTES"));
       imdiff->header = (char *)realloc(imdiff->header,sizeof(char)*imdiff->header_length);
       fseek(imdiff->infile,0,SEEK_SET);
       num_read = fread(imdiff->header, sizeof(char), imdiff->header_length,
@@ -51,32 +49,40 @@ int lreadim(DIFFIMAGE *imdiff)
 	sprintf(imdiff->error_msg,"\nCouldn't read all of header.\n\n");
 	return(1);
       }
-      imdiff->hpixels = (size_t)atoi(getTag(imdiff->header,"SIZE1"));
-      imdiff->vpixels = (size_t)atoi(getTag(imdiff->header,"SIZE2"));
+      imdiff->hpixels = (size_t)atoi(lgettag(imdiff->header,"SIZE1"));
+      imdiff->vpixels = (size_t)atoi(lgettag(imdiff->header,"SIZE2"));
       imdiff->window_lower.r = imdiff->window_lower.c = 0;
       imdiff->window_upper.r = imdiff->vpixels;
       imdiff->window_upper.c = imdiff->hpixels;
-      if (getTag(imdiff->header,"IMAGE_PEDESTAL")!=NULL) {
-	imdiff->value_offset = (IMAGE_DATA_TYPE)atoi(getTag(imdiff->header,"IMAGE_PEDESTAL"));
+      if (lgettag(imdiff->header,"IMAGE_PEDESTAL")!=NULL) {
+	imdiff->value_offset = (IMAGE_DATA_TYPE)atoi(lgettag(imdiff->header,"IMAGE_PEDESTAL"));
       } else {
 	imdiff->value_offset = DEFAULT_VALUE_OFFSET;
       }
       imdiff->rfile_length = (size_t)(imdiff->hpixels < imdiff->vpixels ? imdiff->hpixels : imdiff->vpixels);
       imdiff->image_length = imdiff->hpixels*imdiff->vpixels;
       imdiff->image = (IMAGE_DATA_TYPE *)realloc(imdiff->image,imdiff->image_length*sizeof(IMAGE_DATA_TYPE));
-      imdiff->pixel_size_mm = atof(getTag(imdiff->header,"PIXEL_SIZE"));
-      imdiff->beam_mm.y = atof(getTag(imdiff->header,"BEAM_CENTER_X"));
-      imdiff->beam_mm.x = atof(getTag(imdiff->header,"BEAM_CENTER_Y"));
+      imdiff->pixel_size_mm = atof(lgettag(imdiff->header,"PIXEL_SIZE"));
+      if (lgettag(imdiff->header,"BEAM_CENTER_X")!=NULL) {
+	imdiff->beam_mm.y = atof(lgettag(imdiff->header,"BEAM_CENTER_X"));
+      } else {
+	imdiff->beam_mm.x = imdiff->pixel_size_mm*(float)imdiff->hpixels/2.0;
+      }
+      if (lgettag(imdiff->header,"BEAM_CENTER_Y")!=NULL) {
+	imdiff->beam_mm.x = atof(lgettag(imdiff->header,"BEAM_CENTER_Y"));
+      } else {
+	imdiff->beam_mm.y = imdiff->pixel_size_mm*(float)imdiff->vpixels/2.0;
+      }
       imdiff->origin.c = imdiff->beam_mm.x/imdiff->pixel_size_mm+.5;
       imdiff->origin.r = imdiff->beam_mm.y/imdiff->pixel_size_mm+.5;
-      imdiff->distance_mm = atof(getTag(imdiff->header,"DISTANCE"));
-      imdiff->wavelength = atof(getTag(imdiff->header,"WAVELENGTH"));
-      if (!strcmp(getTag(imdiff->header,"BYTE_ORDER"),"big_endian"))
+      imdiff->distance_mm = atof(lgettag(imdiff->header,"DISTANCE"));
+      imdiff->wavelength = atof(lgettag(imdiff->header,"WAVELENGTH"));
+      if (!strcmp(lgettag(imdiff->header,"BYTE_ORDER"),"big_endian"))
 	imdiff->big_endian=1;
-      else if (!strcmp(getTag(imdiff->header,"BYTE_ORDER"),"little_endian"))
+      else if (!strcmp(lgettag(imdiff->header,"BYTE_ORDER"),"little_endian"))
 	imdiff->big_endian=0;
       else {
-	sprintf(imdiff->error_msg,"\nByte order %s not recognized.\n\n",getTag(imdiff->header,"BYTE_ORDER"));
+	sprintf(imdiff->error_msg,"\nByte order %s not recognized.\n\n",lgettag(imdiff->header,"BYTE_ORDER"));
 	return(7);
       }
     }
