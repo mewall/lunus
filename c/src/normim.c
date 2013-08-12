@@ -35,7 +35,8 @@ int main(int argc, char *argv[])
     distance_mm;
 
   struct xyzcoords
-    cassette;
+    cassette,
+    beam;
 
 /*
  * Set input line defaults:
@@ -44,6 +45,8 @@ int main(int argc, char *argv[])
   value_offset = DEFAULT_VALUE_OFFSET;
   cassette.x = DEFAULT_CASSETTE_ROTX;
   cassette.y = DEFAULT_CASSETTE_ROTY;
+  beam.x = 0;
+  beam.y = 0;
   imagein = stdin;
   imageout = stdout;
 
@@ -51,6 +54,10 @@ int main(int argc, char *argv[])
  * Read information from input line:
  */
 	switch(argc) {
+	case 7:
+	  beam.y = (XYZCOORDS_DATA)atof(argv[6]);
+	case 6:
+	  beam.x = (XYZCOORDS_DATA)atof(argv[5]);
 	  case 5:
 	  cassette.y = (XYZCOORDS_DATA)atof(argv[4]);
 	  case 4:
@@ -109,6 +116,8 @@ int main(int argc, char *argv[])
   //imdiff->value_offset = value_offset;
   imdiff->cassette.x = cassette.x;
   imdiff->cassette.y = cassette.y;
+  if (beam.x != 0) {imdiff->beam_mm.y = beam.x;};
+  if (beam.y != 0) {imdiff->beam_mm.x = beam.y;};
   lnormim(imdiff);
   
   /*
