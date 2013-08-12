@@ -56,7 +56,7 @@
 #define DEFAULT_IGNORE_TAG 0x7fff	/* 32767 */
 /* #define DEFAULT_OVERLOAD_TAG 0xffff     /* 65535 */
 /* #define DEFAULT_IGNORE_TAG 0xffff       /* 65535 */
-#define DEFAULT_VALUE_OFFSET 40         /* Default offset. 0 for TV6, 40 for LBL .img */
+#define DEFAULT_VALUE_OFFSET 0          /* Default offset. 0 for TV6, PILATUS, 40 for ADXV .img */
 #define MAX_OVERLOADS 10000		/* Max # of overloads in an image */
 #define MAX_PEAKS 20000			/* Max # of peaks in an image */
 #define MAX_IMAGE_DATA_VALUE 32767	/* Maximum value of pixel in image */
@@ -513,6 +513,7 @@ int lgetanls(DIFFIMAGE *imdiff);
 int lgetmat(DIFFIMAGE *imdiff);
 int lgetovld(DIFFIMAGE *imdiff);
 int lgetpks(DIFFIMAGE *imdiff);
+const char * lgettag(const char *target,const char *tag);
 DIFFIMAGE *linitim(void);
 LAT3D *linitlt(void);
 int lintdfim(DIFFIMAGE *imdiff);

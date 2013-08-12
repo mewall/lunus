@@ -1,6 +1,6 @@
 VPATH=${C_HOME}/src:${C_HOME}/lib:${C_HOME}/bin:${C_HOME}/include
-CC=cc
-CFLAGS= -g -L${C_HOME}/lib -I${C_HOME}/include
+CC=gcc
+CFLAGS= -g -fopenmp -DUSE_OPENMP -L${C_HOME}/lib -I${C_HOME}/include
 AR=ar
 ARFLAGS=-r
 SHELL=/bin/csh

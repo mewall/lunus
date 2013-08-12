@@ -2,6 +2,7 @@
    
    Author: Mike Wall
    Date: 2/28/95
+         revised 5/10/2013 (add P222 group for PSII)
    Version: 1.
    
    */
@@ -88,6 +89,27 @@ struct ijkcoords lijkmij(struct ijkcoords vec)
  * Symmetry operations:
  */
 
+int lP1(LAT3D *lat)
+{
+  int return_value = 0;
+
+  /*
+   * Generate rotations:
+   */
+
+  /*
+   * Generate reflections:
+   */
+
+  /*
+   * Generate Friedel mates:
+   */
+
+  lat->symvec[1] = lijkinv(lat->symvec[0]);
+
+  lat->symop_count = 2;
+}
+
 int lP41(LAT3D *lat)
 {
   int return_value = 0;
@@ -123,6 +145,42 @@ int lP41(LAT3D *lat)
   lat->symvec[15] = lijkinv(lat->symvec[7]);
 
   lat->symop_count = 16;
+}
+
+int lP222(LAT3D *lat)
+{
+  int return_value = 0;
+
+  /*
+   * Generate group:
+   */
+
+  lat->symvec[1].i = +lat->symvec[0].i;
+  lat->symvec[1].j = -lat->symvec[0].j;
+  lat->symvec[1].k = -lat->symvec[0].k;
+
+  lat->symvec[2].i = -lat->symvec[0].i;
+  lat->symvec[2].j = +lat->symvec[0].j;
+  lat->symvec[2].k = -lat->symvec[0].k;
+
+  lat->symvec[3].i = -lat->symvec[0].i;
+  lat->symvec[3].j = -lat->symvec[0].j;
+  lat->symvec[3].k = +lat->symvec[0].k;
+
+  /*
+   * Generate reflections:
+   */
+
+  /*
+   * Generate Friedel mates:
+   */
+
+  lat->symvec[4] = lijkinv(lat->symvec[0]);
+  lat->symvec[5] = lijkinv(lat->symvec[1]);
+  lat->symvec[6] = lijkinv(lat->symvec[2]);
+  lat->symvec[7] = lijkinv(lat->symvec[3]);
+
+  lat->symop_count = 8;
 }
 
 int lsymlt(LAT3D *lat)
@@ -171,8 +229,14 @@ int lsymlt(LAT3D *lat)
       for (index[0].i = 0; index[0].i < lat->xvoxels; index[0].i++) {
 	rvec[0] = lijksub(index[0],lat->origin);
 	switch(lat->symop_index) {
-	  case 1:
+	case 0:
+	  lP1(lat);
+	  break;
+	case 1:
 	  lP41(lat);
+	  break;
+	case 2:
+	  lP222(lat);
 	  break;
 	}
 	op_count = lat->symop_count;

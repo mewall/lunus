@@ -29,13 +29,7 @@ int lmodeim(DIFFIMAGE *imdiff)
     c; 
 
   size_t
-     k,
-    l,
-    max_count=0,
-    avg_max_count_count = 0,
-    *count,
-    *count_pointer,
-    imd_index = 0,
+     avg_max_count_count = 0,
     index = 0; 
   
   float
@@ -53,7 +47,7 @@ int lmodeim(DIFFIMAGE *imdiff)
   
   image = (IMAGE_DATA_TYPE *)calloc(imdiff->image_length, 
 				      sizeof(IMAGE_DATA_TYPE)); 
-  if (!image || !count || !count_pointer) {
+  if (!image) {
     sprintf(imdiff->error_msg,"\nLMODEIM:  Couldn't allocate arrays.\n\n");
     return_value = 1;
     goto CloseShop;
@@ -64,25 +58,32 @@ int lmodeim(DIFFIMAGE *imdiff)
   half_width = imdiff->mode_width / 2;
   index = 0;
 
-#ifdef USE_OPENMP
-#pragma omp for
-#endif
   size_t j;
+
+#ifdef USE_OPENMP
+  //  printf("Using OpenMP\n");
+#pragma omp parallel shared(imdiff,image,half_height,half_width,avg_max_count,avg_max_count_count) private(j)
+  {
+    #pragma omp for schedule(dynamic,1)
+#endif
   for (j=0; j<imdiff->vpixels; j++) {
     size_t i;
+    size_t *count;
+    count = (size_t *)calloc(65537,sizeof(size_t));
+    size_t *count_pointer;
+    count_pointer = (size_t *)calloc((imdiff->mode_height+1) *
+				     (imdiff->mode_width+1), 
+				       sizeof(size_t));
     for (i=0; i<imdiff->hpixels; i++) {
+      size_t mode_value=0;
+      size_t max_count=0;
+      size_t mode_ct=1;
+      size_t l=0;
+      RCCOORDS_DATA n,m,r,c;
+      size_t k;
+      size_t index;
+      index = j*imdiff->hpixels+i;
       if (imdiff->image[index] != imdiff->ignore_tag) {
-	size_t mode_value=0;
-	size_t max_count=0;
-	size_t l=0;
-	RCCOORDS_DATA n,m,r,c;
-	size_t *count;
-	count = (size_t *)calloc(65537,sizeof(size_t));
-	size_t *count_pointer;
-	count_pointer = (size_t *)calloc((imdiff->mode_height+1) *
-				(imdiff->mode_width+1), 
-				sizeof(size_t));
-	size_t k;
 	for(n=-half_height; n<=half_height; n++) {
 	  r = j + n;
 	  for(m=-half_width; m<=half_width; m++) {
@@ -129,16 +130,19 @@ int lmodeim(DIFFIMAGE *imdiff)
       else {
 	image[index] = imdiff->image[index];
       }
-      index++;
-      /*if (index % 1000 == 0) printf("%d\n",index);/***/
+      //      index++;
+      //      if (index % 1000 == 0) printf("%d\n",index);
     }
+    free(count);
+    free(count_pointer);
   }
+#ifdef USE_OPENMP
+  }
+#endif
   for(index=0;index<imdiff->image_length; index++) {
     imdiff->image[index] = image[index];
   }
   printf("avg_max_count = %f\n\n",avg_max_count);/***/
-  free((size_t *)count);/***/
-  free((size_t *)count_pointer);/***/
   free((IMAGE_DATA_TYPE *)image);/***/
   CloseShop:
   return(return_value);

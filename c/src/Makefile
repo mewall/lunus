@@ -1,6 +1,6 @@
 VPATH=${C_HOME}/src:${C_HOME}/lib:${C_HOME}/bin:${C_HOME}/include
-CC=cc
-CFLAGS= -g -L${C_HOME}/lib -I${C_HOME}/include
+CC=gcc
+CFLAGS= -g -fopenmp -DUSE_OPENMP -L${C_HOME}/lib -I${C_HOME}/include
 AR=ar
 ARFLAGS=-r
 SHELL=/bin/csh
@@ -10,6 +10,9 @@ S=${C_HOME}/src
 B=${C_HOME}/bin
 L=${C_HOME}/lib
 all: \
+	addbeam \
+	addosc \
+	addtag \
 	avgim \
 	avgr \
 	avgrf \
@@ -123,6 +126,12 @@ all: \
 #
 # Executables:
 #
+addbeam:addbeam.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+addosc:addosc.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+addtag:addtag.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 avgim:avgim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 avgr:avgr.c ${DEPENDS}
@@ -377,6 +386,7 @@ lgetanls.o:lgetanls.c mwmask.h
 lgetmat.o:lgetmat.c mwmask.h
 lgetovld.o:lgetovld.c mwmask.h
 lgetpks.o:lgetpks.c mwmask.h
+lgettag.o:lgettag.c mwmask.h
 linitim.o:linitim.c mwmask.h
 linitlt.o:linitlt.c mwmask.h
 lintdfim.o:lintdfim.c mwmask.h
@@ -479,6 +489,7 @@ libmw.a: \
 	lgetmat.o \
 	lgetovld.o \
 	lgetpks.o \
+	lgettag.o \
 	linitim.o \
 	linitlt.o \
 	lintdfim.o \

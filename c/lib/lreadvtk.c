@@ -102,6 +102,10 @@ int lreadvtk(LAT3D *lat)
     exit(1);
   }
 
+  if (lat->lattice) free((LATTICE_DATA_TYPE *)lat->lattice);
+  lat->lattice = (LATTICE_DATA_TYPE *)calloc(lat->lattice_length,
+					     sizeof(LATTICE_DATA_TYPE)); 
+
   lat->xyvoxels = lat->xvoxels*lat->yvoxels;
 
   lat->xbound.max = lat->xbound.min + lat->xvoxels*lat->xscale;
