@@ -1,12 +1,12 @@
-/* ADDTAG.C - Add general tag info to .img header.
+/* SETTAG.C - Add set a tag to a given value in .img header.
    
    Author: Mike Wall
    Date: 4/12/2013
    Version: 1.
    
-   "addtag <image in> <image out> <tag name> <tag value>" 
+   "settag <image in> <image out> <tag name> <tag value>" 
 
-   Input is input image, output image, tag name, and tag value.  Output is input image with tag added to header
+   Input is input image, output image, tag name, and tag value.  Output is input image with tag modified in header
 
    */
 
@@ -27,15 +27,13 @@ int main(int argc, char *argv[])
   IMAGE_DATA_TYPE
 	image_value;
 
-  float
-    tagval;
-
   char
     *buf;
 
-  char *tag;
+  char *tag,*tagval;
   
   tag = (char *)malloc(1000);
+  tagval = (char *)malloc(1000);
 
 
 /*
@@ -49,8 +47,8 @@ int main(int argc, char *argv[])
  * Read information from input line:
  */
 	switch(argc) {
-                case 5:
-		  tagval = atof(argv[4]);
+	case 5:
+		  strcpy(tagval,argv[4]);
 	case 4:
 	  strcpy(tag,argv[3]);
 		case 3:
@@ -104,19 +102,7 @@ int main(int argc, char *argv[])
  * Change the header:
  */
 
-   buf = imdiff->header;
-   if (strstr(buf,tag)==NULL) {
-     char *tagstr;
-     tagstr = (char *)malloc(1000);
-     sprintf(tagstr,"%s=%f;%c}  ",tag,tagval,0x0a);
-     tagstr[strlen(tagstr)-2]=0x0c;
-     tagstr[strlen(tagstr)-1]=0x0a;
-     if (strchr(buf,0x7d)==NULL) {
-       perror("Couldn't find terminator sequence in header\n");
-       exit(0);
-     }
-     strcpy(strchr(buf,0x7d),tagstr);
-   }
+   lsettag(imdiff->header,tag,tagval);
 
 /*
  * Write the output image:

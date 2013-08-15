@@ -89,6 +89,7 @@ all: \
 	see \
 	seecat \
 	seesh \
+	settag \
 	shim4lt \
 	shimlt \
 	smthim \
@@ -280,6 +281,8 @@ seecat:seecat.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 seesh:seesh.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+settag:settag.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 shim4lt:shim4lt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 shimlt:shimlt.c ${DEPENDS}
@@ -408,6 +411,7 @@ lrfaclt.o:lrfaclt.c mwmask.h
 lrmpkim.o:lrmpkim.c mwmask.h
 lscaleim.o:lscaleim.c mwmask.h
 lscalelt.o:lscalelt.c mwmask.h
+lsettag.o:lsettag.c mwmask.h
 lshim4lt.o:lshim4lt.c mwmask.h
 lshimlt.o:lshimlt.c mwmask.h
 lsmthim.o:lsmthim.c mwmask.h
@@ -511,6 +515,7 @@ libmw.a: \
 	lrmpkim.o \
 	lscaleim.o \
 	lscalelt.o \
+	lsettag.o \
 	lshim4lt.o \
 	lshimlt.o \
 	lsmthim.o \
