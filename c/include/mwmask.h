@@ -32,7 +32,7 @@
 /*#define SNAB                            /* snab data set */
 /*#define SNC                             /* snc data set */
 /*#define LYS                             /* lys data set */
-#define SNaseWT
+#define SNaseWT				  /* using this for current set */
 /*
  * I/O specifications:
  */
@@ -252,10 +252,10 @@
 /* NOTE NO CASSETTE ANGLES */
 #else // SNaseWT
 #ifdef SNaseWT
-#define DEFAULT_WAVELENGTH 1.11         /* Wavelength */
-#define DEFAULT_DISTANCE_MM 200.05	/* Sample-detector distance in mm*/
-#define DEFAULT_X_BEAM 156.44		/* Beam position in x (.img) */
-#define DEFAULT_Y_BEAM 158.21		/* Beam position in y (.img) */
+#define DEFAULT_WAVELENGTH 0.918         /* Wavelength */
+#define DEFAULT_DISTANCE_MM 200.00	/* Sample-detector distance in mm*/
+#define DEFAULT_X_BEAM 145.46		/* Beam position in x (.img) */
+#define DEFAULT_Y_BEAM 127.08		/* Beam position in y (.img) */
 #define DEFAULT_CASSETTE_ROTX 0.05      /* Cassette rotx */
 #define DEFAULT_CASSETTE_ROTY 0.12      /* Cassette roty */
 #define DEFAULT_CASSETTE_ROTZ -1.70     /* Cassette rotz */
