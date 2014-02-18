@@ -18,8 +18,10 @@ int lthrshim(DIFFIMAGE *imdiff)
 		return_value = 0;
 
   for(index=0; index < imdiff->image_length; index++) {
-    if ((imdiff->image[index] < imdiff->lower_threshold) || 
-	(imdiff->image[index] > imdiff->upper_threshold)) {
+    if (imdiff->image[index] < imdiff->lower_threshold) {
+      imdiff->image[index] = imdiff->ignore_tag;
+    }
+    if (imdiff->image[index] > imdiff->upper_threshold) {
       imdiff->image[index] = imdiff->overload_tag;
     }
   }

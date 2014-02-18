@@ -52,7 +52,8 @@
 #define DEFAULT_HSIZE 1024		/* # Horizontal pixels */
 #define DEFAULT_HEADER_LENGTH 4096	/* TV6 TIFF image header length */
 #define DEFAULT_IMAGELENGTH 1048576	/* TV6 TIFF image #pixels */
-#define DEFAULT_OVERLOAD_TAG 0x7ffe	/* 32766 */
+#define DEFAULT_OVERLOAD_TAG 0x7fff	/* 32766 */
+/*#define DEFAULT_OVERLOAD_TAG 0x7ffe	/* 32766 */
 #define DEFAULT_IGNORE_TAG 0x7fff	/* 32767 */
 /* #define DEFAULT_OVERLOAD_TAG 0xffff     /* 65535 */
 /* #define DEFAULT_IGNORE_TAG 0xffff       /* 65535 */
@@ -485,9 +486,11 @@ int lavgr(LAT3D *lat);
 int lavgrf(DIFFIMAGE *imdiff1);
 int lavgrim(DIFFIMAGE *imdiff);
 int lavgrlt(LAT3D *lat);
+int lavgpolim(DIFFIMAGE *imdiff);
 int lavgsqim(DIFFIMAGE *imdiff);
 int lavsqrim(DIFFIMAGE *imdiff);
 int lavsqrlt(LAT3D *lat);
+int lbeamim(DIFFIMAGE *imdiff);
 int lbuttim(DIFFIMAGE *imdiff);
 int lccrlt(LAT3D *lat1, LAT3D *lat2);
 int lchbyte(void *ptr, size_t packet_size, size_t list_length);

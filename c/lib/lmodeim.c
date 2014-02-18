@@ -126,11 +126,11 @@ int lmodeim(DIFFIMAGE *imdiff)
 			   max_count) / (float)(avg_max_count_count + 1);
 	  avg_max_count_count++;
 	}
-      }
-      else {
-	image[index] = imdiff->image[index];
-      }
-      //      index++;
+    }
+    else {
+      image[index] = imdiff->image[index];
+    }
+    //      index++;
       //      if (index % 1000 == 0) printf("%d\n",index);
     }
     free(count);

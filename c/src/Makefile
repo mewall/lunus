@@ -1,6 +1,7 @@
 VPATH=${C_HOME}/src:${C_HOME}/lib:${C_HOME}/bin:${C_HOME}/include
 CC=gcc
-CFLAGS= -g -fopenmp -DUSE_OPENMP -L${C_HOME}/lib -I${C_HOME}/include
+#CFLAGS= -g -fopenmp -DUSE_OPENMP -L${C_HOME}/lib -I${C_HOME}/include
+CFLAGS= -g -w -L${C_HOME}/lib -I${C_HOME}/include
 AR=ar
 ARFLAGS=-r
 SHELL=/bin/csh
@@ -14,6 +15,7 @@ all: \
 	addosc \
 	addtag \
 	avgim \
+	avgpolim \
 	avgr \
 	avgrf \
 	avgrim \
@@ -21,6 +23,7 @@ all: \
 	avgsqim \
 	avsqrim \
 	avsqrlt \
+	beamim \
 	binasc \
 	buttim \
 	calcu \
@@ -131,6 +134,8 @@ addtag:addtag.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 avgim:avgim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+avgpolim:avgpolim.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 avgr:avgr.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 avgrf:avgrf.c ${DEPENDS}
@@ -144,6 +149,8 @@ avgsqim:avgsqim.c ${DEPENDS}
 avsqrim:avsqrim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 avsqrlt:avsqrlt.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+beamim:beamim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 binasc:binasc.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -345,6 +352,7 @@ xpl2mw:xpl2mw.c ${DEPENDS}
 # Library functions:
 #
 lavgim.o:lavgim.c mwmask.h
+lavgpolim.o:lavgpolim.c mwmask.h
 lavgr.o:lavgr.c mwmask.h
 lavgrf.o:lavgrf.c mwmask.h
 lavgrim.o:lavgrim.c mwmask.h
@@ -352,6 +360,7 @@ lavgrlt.o:lavgrlt.c mwmask.h
 lavgsqim.o:lavgsqim.c mwmask.h
 lavsqrim.o:lavsqrim.c mwmask.h
 lavsqrlt.o:lavsqrlt.c mwmask.h
+lbeamim.o:lbeamim.c mwmask.h
 lbuttim.o:lbuttim.c mwmask.h
 lccrlt.o:lccrlt.c mwmask.h
 lchbyte.o:lchbyte.c mwmask.h
@@ -449,6 +458,7 @@ lxfmask.o:lxfmask.c mwmask.h
 #
 libmw.a: \
 	lavgim.o \
+	lavgpolim.o \
 	lavgr.o \
 	lavgrf.o \
 	lavgrim.o \
@@ -456,6 +466,7 @@ libmw.a: \
 	lavgsqim.o \
 	lavsqrim.o \
 	lavsqrlt.o \
+	lbeamim.o \
 	lbuttim.o \
 	lccrlt.o \
 	lchbyte.o \
