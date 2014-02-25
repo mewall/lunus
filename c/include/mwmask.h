@@ -582,3 +582,9 @@ int lxavgrim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lxf1lt(LAT3D *lat);
 int lxfmask(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 struct xyzcoords lmatvecmul(struct xyzmatrix b,struct xyzcoords a);
+XYZCOORDS_DATA ldotvec(struct xyzcoords b,struct xyzcoords a);
+struct xyzcoords linvvec(struct xyzcoords a);
+struct xyzcoords laddvec(struct xyzcoords b,struct xyzcoords a);
+struct xyzcoords lmulscvec(XYZCOORDS_DATA b,struct xyzcoords a);
+struct xyzcoords lsubvec(struct xyzcoords b,struct xyzcoords a);
+
