@@ -14,11 +14,13 @@
 
 int lgetovld(DIFFIMAGE *imdiff)
 {
+  printf("do we even make it in\n");
 	long 
 		i=0,
 		j=0;
-
 	while (i < imdiff->image_length) {
+	  printf("%d\n", i);
+	  fflush(stdout);
 		if ((imdiff->image[i] == imdiff->overload_tag) ||
 		    (imdiff->image[i] == imdiff->ignore_tag)) {
 			imdiff->overload[j].r = (short)(i/imdiff->hpixels);
@@ -28,5 +30,6 @@ int lgetovld(DIFFIMAGE *imdiff)
 		i++;
 	}
 	imdiff->overload_count = j;
+	printf("and then are we going to make it out alive\n");
 	return(0);
 }

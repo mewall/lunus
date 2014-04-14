@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
 
 	char 
 		output_value,
-		inl[LINESIZE];
+		inl[sizeof(RFILE_DATA_TYPE)];
 
 	switch(argc) {
 		case 3:
@@ -46,8 +46,11 @@ int main(int argc, char *argv[])
 			exit(0);
 	}
 	scale = 255./(float)(upper_threshold - lower_threshold);
-	while (fgets(inl,LINESIZE,stdin) != NULL) {
-		sscanf(inl,"%d %g", &index, &value);
+	while (fgets(inl,sizeof(RFILE_DATA_TYPE),stdin) != NULL) {
+		//sscanf(inl,"%d %g", &index, &value);
+		sscanf(inl,"%g", &value);
+		printf(" value = %g\n", value);
+		fflush(stdout);
 		if (value < (float)lower_threshold) {
 			output_value = 0;
 		}
@@ -58,6 +61,6 @@ int main(int argc, char *argv[])
 			output_value = (char)((scale * (value - 
 				(float)lower_threshold)));
 		}
-		fwrite(&output_value, sizeof(char), 1, stdout);
+		fwrite(&output_value, sizeof(RFILE_DATA_TYPE), 1, stdout);
 	}
 }

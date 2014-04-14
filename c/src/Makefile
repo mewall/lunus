@@ -78,6 +78,8 @@ all: \
 	punchim \
 	rad2s \
 	ratioim \
+	rbavrim \
+	rbminrim \
 	revbytelt \
 	rf2char \
 	rf2lt \
@@ -104,10 +106,10 @@ all: \
 	sumrf \
 	swapmw \
 	symlt \
-	tag_overloads \
 	tagim \
 	taglt \
 	tagneg \
+	tag_overloads \
 	tailc \
 	thrshim \
 	totiff8 \
@@ -259,6 +261,10 @@ rad2s:rad2s.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 ratioim:ratioim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+rbavrim:rbavrim.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+rbminrim:rbminrim.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 revbytelt:revbytelt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 rf2char:rf2char.c ${DEPENDS}
@@ -311,13 +317,13 @@ swapmw:swapmw.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 symlt:symlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-tag_overloads:tag_overloads.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 tagim:tagim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 taglt:taglt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 tagneg:tagneg.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+tag_overloads:tag_overloads.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 tailc:tailc.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -400,9 +406,13 @@ lpolarim.o:lpolarim.c mwmask.h
 lpunch.o:lpunch.c mwmask.h
 lpunchim.o:lpunchim.c mwmask.h
 lratioim.o:lratioim.c mwmask.h
+lrbavrim.o:lrbavrim.c mwmask.h
+lrbminrim.o:lrbminrim.c mwmask.h
+lreadcbf.o:lreadcbf.c mwmask.h
 lreaddf.o:lreaddf.c mwmask.h
 lreadhkl.o:lreadhkl.c mwmask.h
 lreadim.o:lreadim.c mwmask.h
+lreadim_orig.o:lreadim_orig.c mwmask.h
 lreadlt.o:lreadlt.c mwmask.h
 lreadrf.o:lreadrf.c mwmask.h
 lreadvtk.o:lreadvtk.c mwmask.h
@@ -414,6 +424,7 @@ lscalelt.o:lscalelt.c mwmask.h
 lsettag.o:lsettag.c mwmask.h
 lshim4lt.o:lshim4lt.c mwmask.h
 lshimlt.o:lshimlt.c mwmask.h
+lsmoothrf.o:lsmoothrf.c mwmask.h
 lsmthim.o:lsmthim.c mwmask.h
 lsolidlt.o:lsolidlt.c mwmask.h
 lsubim.o:lsubim.c mwmask.h
@@ -504,9 +515,13 @@ libmw.a: \
 	lpunch.o \
 	lpunchim.o \
 	lratioim.o \
+	lrbavrim.o \
+	lrbminrim.o \
+	lreadcbf.o \
 	lreaddf.o \
 	lreadhkl.o \
 	lreadim.o \
+	lreadim_orig.o \
 	lreadlt.o \
 	lreadrf.o \
 	lreadvtk.o \
@@ -518,6 +533,7 @@ libmw.a: \
 	lsettag.o \
 	lshim4lt.o \
 	lshimlt.o \
+	lsmoothrf.o \
 	lsmthim.o \
 	lsolidlt.o \
 	lsubim.o \

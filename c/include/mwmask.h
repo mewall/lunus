@@ -32,7 +32,7 @@
 /*#define SNAB                            /* snab data set */
 /*#define SNC                             /* snc data set */
 /*#define LYS                             /* lys data set */
-#define SNaseWT				  /* using this for current set */
+#define EIGER				  /* for all Feb 2014 CHESS F1 data */
 /*
  * I/O specifications:
  */
@@ -53,7 +53,7 @@
 #define DEFAULT_HEADER_LENGTH 4096	/* TV6 TIFF image header length */
 #define DEFAULT_IMAGELENGTH 1048576	/* TV6 TIFF image #pixels */
 #define DEFAULT_OVERLOAD_TAG 0x7ffe	/* 32766 */
-#define DEFAULT_IGNORE_TAG 0x7fff	/* 32767 */
+#define DEFAULT_IGNORE_TAG 0x7ffe	/* 32766 */
 /* #define DEFAULT_OVERLOAD_TAG 0xffff     /* 65535 */
 /* #define DEFAULT_IGNORE_TAG 0xffff       /* 65535 */
 #define DEFAULT_VALUE_OFFSET 0          /* Default offset. 0 for TV6, PILATUS, 40 for ADXV .img */
@@ -177,7 +177,21 @@
 /* 
  * Data-set dependent defines
  */
-
+#ifdef EIGER
+#define DEFAULT_WAVELENGTH 0.9179       /* Wavelength for sncps */
+#define DEFAULT_DISTANCE_MM 71.7	/* Sample-detector distance in mm*/
+#define DEFAULT_X_BEAM 48.6		/* Beam position in x (denzo) */
+#define DEFAULT_Y_BEAM 41.7		/* Beam position in y (denzo) */
+#define DEFAULT_CELL_A 78.9           /* A */
+#define DEFAULT_CELL_B 78.9           /* B */
+#define DEFAULT_CELL_C 37.66           /* C */
+#define DEFAULT_CELL_ALPHA 90.0         /* B-C angle */
+#define DEFAULT_CELL_BETA 90.0          /* C-A angle */
+#define DEFAULT_CELL_GAMMA 90.0         /* A-B angle */
+#define DEFAULT_CASSETTE_ROTX 0         /* temp */
+#define DEFAULT_CASSETTE_ROTY 0         /* temp */
+#define DEFAULT_CASSETTE_ROTZ 0         /* temp */
+#else
 #ifdef SNCPS
 #define DEFAULT_WAVELENGTH 0.92       /* Wavelength for sncps */
 #define DEFAULT_DISTANCE_MM 58.0	/* Sample-detector distance in */
@@ -265,6 +279,7 @@
 #define DEFAULT_CELL_ALPHA 90.0         /* B-C angle */
 #define DEFAULT_CELL_BETA 90.0          /* C-A angle */
 #define DEFAULT_CELL_GAMMA 90.0         /* A-B angle */
+#endif
 #endif
 #endif
 #endif

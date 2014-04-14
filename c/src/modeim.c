@@ -103,6 +103,7 @@ int main(int argc, char *argv[])
 
   lmodeim(imdiff);
 
+
 /*
  * Write the output image:
  */

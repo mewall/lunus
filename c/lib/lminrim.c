@@ -29,15 +29,14 @@ int lminrim(DIFFIMAGE *imdiff)
 	      radius = (size_t)sqrtf(rvec.y*rvec.y + rvec.x*rvec.x);
 	      if (radius > imdiff->rfile_length) imdiff->rfile_length = radius;
 	      if (imdiff->image[index] != imdiff->overload_tag) {
-		if ((imdiff->image[index] != 
-			(IMAGE_DATA_TYPE)imdiff->rfile_mask_tag) && 
+		if ((imdiff->image[index] != (IMAGE_DATA_TYPE)imdiff->rfile_mask_tag) && 
 			((imdiff->rfile[radius] == imdiff->rfile_mask_tag) ||
-		    	(imdiff->rfile[radius] > 
-				(RFILE_DATA_TYPE)imdiff->image[index]))) {
+		    	(imdiff->rfile[radius] > (RFILE_DATA_TYPE)imdiff->image[index]))) {
 		  imdiff->rfile[radius] = (RFILE_DATA_TYPE)imdiff->image[index];
 	        }
 	      }
 	  index++;
 	  }
 	}
+
 }
