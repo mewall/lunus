@@ -9,6 +9,9 @@
 
 		Input is an ascii rfile.  
 		Output is an 8-bit list of densitometry values.
+
+
+   Somewhat butchered by Veronica Pillar 4/14/14; I recommend not using this.
 */
 
 #define DEFAULT_LOWER_THRESHOLD 0
