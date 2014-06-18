@@ -9,7 +9,7 @@
 
 #include<mwmask.h>
 
-int lavgrim(DIFFIMAGE *imdiff)
+int lavgpolim(DIFFIMAGE *imdiff)
 {
 	size_t
 		r,

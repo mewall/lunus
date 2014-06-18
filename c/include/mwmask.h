@@ -169,6 +169,8 @@
  */
 
 #define PI 3.14159			/* PI */
+#define BOHR 0.52917721092              /* Bohr radius in Angstroms */
+#define DEFAULT_MACHST 16708            /* Default CCP4 machine stamp */
 #define VALUE_ALLOCATED 1		/* Flag for imdiff->value allocated */
 #define RDATA_MALLOC_FACTOR 7		/* Bigger than 2*PI */
 #define POLARIZATION_CORRECTION_THRESHOLD .01 /* Threshold for */
@@ -281,6 +283,7 @@ typedef float XYZCOORDS_DATA;
 typedef short RCCOORDS_DATA;
 typedef float RFILE_DATA_TYPE;
 typedef float LATTICE_DATA_TYPE;
+typedef float MAP_DATA_TYPE;
 typedef short SHIM_DATA_TYPE;
 typedef short IMAGE_DATA_TYPE;
 typedef float WEIGHTS_DATA_TYPE;
@@ -427,6 +430,123 @@ typedef struct
 } DIFFIMAGE;
 
 /*
+ * CCP4 Map data type:
+ */
+
+/* 
+ * Format description from http://www.ccp4.ac.uk/html/maplib.html
+
+ 1      NC              # of Columns    (fastest changing in map)
+ 2      NR              # of Rows
+ 3      NS              # of Sections   (slowest changing in map)
+ 4      MODE            Data type
+                          0 = envelope stored as signed bytes (from
+                              -128 lowest to 127 highest)
+                          1 = Image     stored as Integer*2
+                          2 = Image     stored as Reals
+                          3 = Transform stored as Complex Integer*2
+                          4 = Transform stored as Complex Reals
+                          5 == 0	
+ 
+                          Note: Mode 2 is the normal mode used in
+                                the CCP4 programs. Other modes than 2 and 0
+                                may NOT WORK
+ 
+ 5      NCSTART         Number of first COLUMN  in map
+ 6      NRSTART         Number of first ROW     in map
+ 7      NSSTART         Number of first SECTION in map
+ 8      NX              Number of intervals along X
+ 9      NY              Number of intervals along Y
+10      NZ              Number of intervals along Z
+11      X length        Cell Dimensions (Angstroms)
+12      Y length                     "
+13      Z length                     "
+14      Alpha           Cell Angles     (Degrees)
+15      Beta                         "
+16      Gamma                        "
+17      MAPC            Which axis corresponds to Cols.  (1,2,3 for X,Y,Z)
+18      MAPR            Which axis corresponds to Rows   (1,2,3 for X,Y,Z)
+19      MAPS            Which axis corresponds to Sects. (1,2,3 for X,Y,Z)
+20      AMIN            Minimum density value
+21      AMAX            Maximum density value
+22      AMEAN           Mean    density value    (Average)
+23      ISPG            Space group number
+24      NSYMBT          Number of bytes used for storing symmetry operators
+25      LSKFLG          Flag for skew transformation, =0 none, =1 if foll
+26-34   SKWMAT          Skew matrix S (in order S11, S12, S13, S21 etc) if
+                        LSKFLG .ne. 0.
+35-37   SKWTRN          Skew translation t if LSKFLG .ne. 0.
+                        Skew transformation is from standard orthogonal
+                        coordinate frame (as used for atoms) to orthogonal
+                        map frame, as
+ 
+                                Xo(map) = S * (Xo(atoms) - t)
+ 
+38      future use       (some of these are used by the MSUBSX routines
+ .          "              in MAPBRICK, MAPCONT and FRODO)
+ .          "   (all set to zero by default)
+ .          "
+52          "
+
+53	MAP	        Character string 'MAP ' to identify file type
+54	MACHST		Machine stamp indicating the machine type
+			which wrote file
+55      ARMS            Rms deviation of map from mean density
+56      NLABL           Number of labels being used
+57-256  LABEL(20,10)    10  80 character text labels (ie. A4 format)
+
+Symmetry records follow - if any - stored as text as in International Tables, operators separated by * and grouped into 'lines' of 80 characters (i.e. symmetry operators do not cross the ends of the 80-character 'lines' and the 'lines' do not terminate in a *).
+Map data array follows.
+
+*/
+
+
+
+typedef struct {
+  char *filename;
+  FILE *infile;
+  FILE *outfile;
+  void *header; // 256 word (4-byte) header.
+  long nc; // 0, fastest changing
+  long nr; // 1
+  long ns; // 2, slowest changing
+  long mode; // 3
+  long ncstart; // 4
+  long nrstart; // 5
+  long nsstart; // 6
+  long nx; // 7
+  long ny; // 8
+  long nz; // 9
+  float xlen; // 10
+  float ylen; // 11
+  float zlen; // 12
+  float alpha; // 13
+  float beta; // 14
+  float gamma; // 15
+  long mapc; // 16
+  long mapr; // 17
+  long maps; // 18
+  float amin; // 19
+  float amax; // 20
+  float amean; // 21
+  long ispg; // 22
+  long nsymbt; // 23
+  long lskflg; // 24
+  char map[4]; // 52
+  long machst; // 53
+  float arms; // 54
+  long nlabl; // 55
+  char *label; // 56-255
+  size_t section_length;
+  size_t map_length;
+  void *symrec_buf;
+  char *symrec;
+  void *data_buf;
+  MAP_DATA_TYPE *data;
+  MAP_DATA_TYPE scale_factor;
+} CCP4MAP;
+
+/*
  * Lattice data type:
  */
 
@@ -498,6 +618,7 @@ int lconstim(DIFFIMAGE *imdiff);
 int lconstlt(LAT3D *lat);
 int lconstrf(DIFFIMAGE *imdiff);
 float lcorrlt(LAT3D *lat1, LAT3D *lat2);
+int lcpmaplt(CCP4MAP *map, LAT3D *lat);
 int lculllt(LAT3D *lat);
 int lcutim(DIFFIMAGE *imdiff);
 int ldf2im(DIFFIMAGE *imdiff);
@@ -508,6 +629,7 @@ int ldivlt(LAT3D *lat1, LAT3D *lat2);
 int ldivrf(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lexplt(LAT3D *lat);
 void lfft(float *data,int *nn,int ndim,int isign);
+int lfilltaglt(LAT3D *lat);
 int lfreeim(DIFFIMAGE *imdiff);
 int lfreelt(LAT3D *lat);
 int lgausslt(LAT3D *lat);
@@ -519,6 +641,7 @@ int lgetpks(DIFFIMAGE *imdiff);
 const char * lgettag(const char *target,const char *tag);
 DIFFIMAGE *linitim(void);
 LAT3D *linitlt(void);
+CCP4MAP *linitmap(void);
 int lintdfim(DIFFIMAGE *imdiff);
 struct xyzmatrix lmatmul(struct xyzmatrix a, struct xyzmatrix b);
 int lmedim(DIFFIMAGE *imdiff);
@@ -531,18 +654,22 @@ int lmullt(LAT3D *lat1, LAT3D *lat2);
 int lmulrf(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lmulrfim(DIFFIMAGE *imdiff);
 int lmulsclt(LAT3D *lat);
+int lmulscmap(CCP4MAP *map);
 int lnign(DIFFIMAGE *imdiff);
 int lnoiseim(DIFFIMAGE *imdiff);
 int lnormim(DIFFIMAGE *imdiff);
+int lpadlt(LAT3D *lat);
 int lpeakim(DIFFIMAGE *imdiff);
 int lpolarim(DIFFIMAGE *imdiff);
 int lpunch(DIFFIMAGE *imdiff);
 int lpunchim(DIFFIMAGE *imdiff);
 int lratioim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
+int lreadcube(CCP4MAP *map);
 int lreaddf(DIFFIMAGE *imdiff);
 int lreadhkl(LAT3D *lat,LAT3D *tmpl);
 int lreadim(DIFFIMAGE *imdiff);
 int lreadlt(LAT3D *lat);
+int lreadmap(CCP4MAP *map);
 int lreadrf(DIFFIMAGE *imdiff);
 int lreadvtk(LAT3D *lat);
 int lrf2lt(LAT3D *lat);
@@ -562,18 +689,22 @@ int lsubrfim(DIFFIMAGE *imdiff);
 int lsubrflt(LAT3D *lat);
 int lsumim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lsumlt(LAT3D *lat1, LAT3D *lat2);
+int lsummap(CCP4MAP *map1, CCP4MAP *map2);
 int lsumrf(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lsymlt(LAT3D *lat);
 int ltagim(DIFFIMAGE *imdiff);
 int ltaglt(LAT3D *lat);
 int lthrshim(DIFFIMAGE *imdiff);
 int ltordata(DIFFIMAGE *imdiff);
+int ltranslt(LAT3D *lat1, LAT3D *lat2);
 int lupdbd(LAT3D *lat);
 int lwaveim(DIFFIMAGE *imdiff);
 int lwindim(DIFFIMAGE *imdiff);
 int lwritedf(DIFFIMAGE *imdiff);
 int lwriteim(DIFFIMAGE *imdiff);
+int lwritehkl(LAT3D *lat);
 int lwritelt(LAT3D *lat);
+int lwritemap(CCP4MAP *map);
 int lwriterf(DIFFIMAGE *imdiff);
 int lwritesh(LAT3D *lat);
 int lwritevtk(LAT3D *lat);

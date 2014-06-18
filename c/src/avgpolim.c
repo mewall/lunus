@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
 			break;
 		default:
 			printf("\n Usage: avgrim <input image> "
-				"<output rfile> <x origin> <y origin>\n\n");
+				"<output rfile> <inner radius> <outer radius>\n\n");
 			exit(0);
 	}
   
@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
 	//	printf("Radial averaging image of size %d,%d\n",imdiff->hpixels,imdiff->vpixels); 
 	imdiff->mask_inner_radius = inner_radius;
 	imdiff->mask_outer_radius = outer_radius;
-	lavgrim(imdiff);  
+	lavgpolim(imdiff);  
 
 /*
  * Write the output rfile:

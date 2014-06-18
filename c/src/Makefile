@@ -1,7 +1,7 @@
 VPATH=${C_HOME}/src:${C_HOME}/lib:${C_HOME}/bin:${C_HOME}/include
 CC=gcc
-CFLAGS= -g -fopenmp -DUSE_OPENMP -L${C_HOME}/lib -I${C_HOME}/include
-#CFLAGS= -g -w -L${C_HOME}/lib -I${C_HOME}/include
+#CFLAGS= -g -fopenmp -DUSE_OPENMP -L${C_HOME}/lib -I${C_HOME}/include
+CFLAGS= -g -w -L${C_HOME}/lib -I${C_HOME}/include
 AR=ar
 ARFLAGS=-r
 SHELL=/bin/csh
@@ -401,6 +401,7 @@ lgetpks.o:lgetpks.c mwmask.h
 lgettag.o:lgettag.c mwmask.h
 linitim.o:linitim.c mwmask.h
 linitlt.o:linitlt.c mwmask.h
+linitmap.o:linitmap.c mwmask.h
 lintdfim.o:lintdfim.c mwmask.h
 lmattools.o:lmattools.c mwmask.h
 lmedim.o:lmedim.c mwmask.h
@@ -421,10 +422,12 @@ lpolarim.o:lpolarim.c mwmask.h
 lpunch.o:lpunch.c mwmask.h
 lpunchim.o:lpunchim.c mwmask.h
 lratioim.o:lratioim.c mwmask.h
+lreadcube.o:lreadcube.c mwmask.h
 lreaddf.o:lreaddf.c mwmask.h
 lreadhkl.o:lreadhkl.c mwmask.h
 lreadim.o:lreadim.c mwmask.h
 lreadlt.o:lreadlt.c mwmask.h
+lreadmap.o:lreadmap.c mwmask.h
 lreadrf.o:lreadrf.c mwmask.h
 lreadvtk.o:lreadvtk.c mwmask.h
 lrf2lt.o:lrf2lt.c mwmask.h
@@ -456,6 +459,7 @@ lwindim.o:lwindim.c mwmask.h
 lwritedf.o:lwritedf.c mwmask.h
 lwriteim.o:lwriteim.c mwmask.h
 lwritelt.o:lwritelt.c mwmask.h
+lwritemap.o:lwritemap.c mwmask.h
 lwriterf.o:lwriterf.c mwmask.h
 lwritesh.o:lwritesh.c mwmask.h
 lwritevtk.o:lwritevtk.c mwmask.h
@@ -507,6 +511,7 @@ libmw.a: \
 	lgettag.o \
 	linitim.o \
 	linitlt.o \
+	linitmap.o \
 	lintdfim.o \
 	lmattools.o \
 	lmedim.o \
@@ -527,10 +532,12 @@ libmw.a: \
 	lpunch.o \
 	lpunchim.o \
 	lratioim.o \
+	lreadcube.o \
 	lreaddf.o \
 	lreadhkl.o \
 	lreadim.o \
 	lreadlt.o \
+	lreadmap.o \
 	lreadrf.o \
 	lreadvtk.o \
 	lrf2lt.o \
@@ -562,6 +569,7 @@ libmw.a: \
 	lwritedf.o \
 	lwriteim.o \
 	lwritelt.o \
+	lwritemap.o \
 	lwriterf.o \
 	lwritesh.o \
 	lwritevtk.o \
