@@ -1,14 +1,13 @@
-/* SYMLT.C - Symmetrize a lattice according to input line instructions.
+/* TRANSLT.C - Translate the intensity in a lattice by specified coordinate shift.
    
    Author: Mike Wall
-   Date: 2/28/95
+   Date: 7/17/2014
    Version: 1.
    
    Usage:
-   		"symlt <input lattice> <output lattice> <symmetry_operation>"
+   		"translt <input lattice> <output lattice> <x shift> <y shift> <z shift>"
 
-		Input are lattice and symmetry operation
-		specification.  Output is symmetrized lattice.
+		Input are lattice and shift coords.  Output is lattice with density translated by the shift.
    */
 
 #include<mwmask.h>
@@ -22,8 +21,8 @@ int main(int argc, char *argv[])
   char
     error_msg[LINESIZE];
 
-  size_t
-    symop;
+  int
+    axis;
 
   LAT3D 
 	*lat;
@@ -31,7 +30,7 @@ int main(int argc, char *argv[])
   RFILE_DATA_TYPE *rfile;
 
   struct ijkcoords
-    origin;
+    t;
 
 /*
  * Set input line defaults:
@@ -44,14 +43,12 @@ int main(int argc, char *argv[])
  * Read information from input line:
  */
 	switch(argc) {
-    case 7: 
-    origin.k = atol(argv[6]);
-    case 6:
-    origin.j = atol(argv[5]);
+    case 6: 
+    t.k = atol(argv[5]);
     case 5:
-    origin.i = atol(argv[4]);
-	  case 4:
-	  symop = atol(argv[3]);
+    t.j = atol(argv[4]);
+    case 4:
+    t.i = atol(argv[3]);
 	  case 3:
 	  if (strcmp(argv[2],"-") == 0) {
 	    latticeout = stdout;
@@ -74,12 +71,8 @@ int main(int argc, char *argv[])
 	  }
 	  break;
 	  default:
-	  printf("\n Usage: symlt <input lattice> "
-		 "<output lattice> <symmetry_operation>\n\n"
-		 "  Symmetry Operations:\n"
-		 "    0 = P1\n"
-		 "    1 = P41\n"
-		 "    2 = P222\n\n");
+	  printf("\n Usage: translt <input lattice> "
+		 "<output lattice> <shift>\n\n");
 	  exit(0);
 	}
   
@@ -106,11 +99,7 @@ int main(int argc, char *argv[])
    * Perform symmetry operation:
    */
 
-  lat->symop_index = symop;
-  if (argc==7) {
-    lat->origin.i=origin.i; lat->origin.j=origin.j; lat->origin.k=origin.k;
-  }
-  lsymlt(lat);
+  ltranslt(lat,t);
   
   /*
    * Write lattice to output file:

@@ -675,6 +675,7 @@ int lreadvtk(LAT3D *lat);
 int lrf2lt(LAT3D *lat);
 float lrfaclt(LAT3D *lat1, LAT3D *lat2);
 int lrmpkim(DIFFIMAGE *imdiff);
+int lrotlt(LAT3D *lat,int axis);
 struct xyzmatrix lrotmat(float rotx, float roty, float rotz);
 int lscaleim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lscalelt(LAT3D *lat1, LAT3D *lat2);
@@ -719,3 +720,14 @@ struct xyzcoords laddvec(struct xyzcoords b,struct xyzcoords a);
 struct xyzcoords lmulscvec(XYZCOORDS_DATA b,struct xyzcoords a);
 struct xyzcoords lsubvec(struct xyzcoords b,struct xyzcoords a);
 
+// Symmetry library functions:
+
+struct ijkcoords lijksub(struct ijkcoords vec1, struct ijkcoords vec2);
+  struct ijkcoords lijksum(struct ijkcoords vec1, struct ijkcoords vec2);
+struct ijkcoords lijkrotk(struct ijkcoords vec, float cos_theta, 
+			  float sin_theta);
+struct ijkcoords lijkinv(struct ijkcoords vec);
+struct ijkcoords lijkmij(struct ijkcoords vec);
+int lP1(LAT3D *lat);
+int lP41(LAT3D *lat);
+int lP222(LAT3D *lat);

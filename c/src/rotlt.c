@@ -1,14 +1,14 @@
-/* SYMLT.C - Symmetrize a lattice according to input line instructions.
+/* ROTLT.C - Symmetrize a lattice according to input line instructions.
    
    Author: Mike Wall
-   Date: 2/28/95
+   Date: 7/17/2014
    Version: 1.
    
    Usage:
-   		"symlt <input lattice> <output lattice> <symmetry_operation>"
+   		"rotlt <input lattice> <output lattice> <axis code>"
 
-		Input are lattice and symmetry operation
-		specification.  Output is symmetrized lattice.
+		Input are lattice and axis code specification (1 = x; 2 = y; 3 = z)
+		specification.  Output is lattice rotated by 90 degrees about the specified axis.
    */
 
 #include<mwmask.h>
@@ -22,8 +22,8 @@ int main(int argc, char *argv[])
   char
     error_msg[LINESIZE];
 
-  size_t
-    symop;
+  int
+    axis;
 
   LAT3D 
 	*lat;
@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
     case 5:
     origin.i = atol(argv[4]);
 	  case 4:
-	  symop = atol(argv[3]);
+	  axis = atol(argv[3]);
 	  case 3:
 	  if (strcmp(argv[2],"-") == 0) {
 	    latticeout = stdout;
@@ -74,12 +74,12 @@ int main(int argc, char *argv[])
 	  }
 	  break;
 	  default:
-	  printf("\n Usage: symlt <input lattice> "
-		 "<output lattice> <symmetry_operation>\n\n"
-		 "  Symmetry Operations:\n"
-		 "    0 = P1\n"
-		 "    1 = P41\n"
-		 "    2 = P222\n\n");
+	  printf("\n Usage: rotlt <input lattice> "
+		 "<output lattice> <axis code>\n\n"
+		 "  Axis Codes:\n"
+		 "    1 = x\n"
+		 "    2 = y\n"
+		 "    3 = z\n\n");
 	  exit(0);
 	}
   
@@ -106,11 +106,10 @@ int main(int argc, char *argv[])
    * Perform symmetry operation:
    */
 
-  lat->symop_index = symop;
   if (argc==7) {
     lat->origin.i=origin.i; lat->origin.j=origin.j; lat->origin.k=origin.k;
   }
-  lsymlt(lat);
+  lrotlt(lat,axis);
   
   /*
    * Write lattice to output file:

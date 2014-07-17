@@ -1,6 +1,5 @@
 VPATH=${C_HOME}/src:${C_HOME}/lib:${C_HOME}/bin:${C_HOME}/include
 CC=gcc
-#CFLAGS= -gstabs -fopenmp -DUSE_OPENMP -L${C_HOME}/lib -I${C_HOME}/include
 #CFLAGS= -g -fopenmp -DUSE_OPENMP -L${C_HOME}/lib -I${C_HOME}/include
 CFLAGS= -g -w -L${C_HOME}/lib -I${C_HOME}/include
 AR=ar
@@ -30,13 +29,11 @@ all: \
 	binasc \
 	buttim \
 	calcu \
-	ccp4map2lat \
 	ccrlt \
 	constim \
 	constlt \
 	constrf \
 	corrlt \
-	cube2map \
 	culllt \
 	cutim \
 	dat2vtk \
@@ -49,7 +46,6 @@ all: \
 	explt \
 	fftim \
 	fftlt \
-	filltaglt \
 	filter \
 	ftfltim \
 	gausslt \
@@ -64,7 +60,6 @@ all: \
 	hkl2vtk \
 	intdfim \
 	intimdf \
-	lat2hkl \
 	lat2vtk \
 	map2lat \
 	mapbound \
@@ -78,13 +73,11 @@ all: \
 	mulrf \
 	mulrfim \
 	mulsclt \
-	mulscmap \
 	nign \
 	noiseim \
 	normim \
 	normim_tv6 \
 	ovldim \
-	padlt \
 	pattim \
 	peakim \
 	polarim \
@@ -96,6 +89,7 @@ all: \
 	rf2lt \
 	rfaclt \
 	rmpkim \
+	rotlt \
 	scaleim \
 	scalelt \
 	scalerf \
@@ -115,7 +109,6 @@ all: \
 	subrflt \
 	sumim \
 	sumlt \
-	summap \
 	sumrf \
 	swapmw \
 	symlt \
@@ -126,7 +119,6 @@ all: \
 	tailc \
 	thrshim \
 	totiff8 \
-	translt \
 	tst3d \
 	vtk2lat \
 	waveim \
@@ -175,8 +167,6 @@ buttim:buttim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 calcu:calcu.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-ccp4map2lat:ccp4map2lat.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 ccrlt:ccrlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 constim:constim.c ${DEPENDS}
@@ -186,8 +176,6 @@ constlt:constlt.c ${DEPENDS}
 constrf:constrf.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 corrlt:corrlt.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-cube2map:cube2map.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 culllt:culllt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -212,8 +200,6 @@ explt:explt.c ${DEPENDS}
 fftim:fftim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 fftlt:fftlt.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-filltaglt:filltaglt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 filter:filter.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -243,8 +229,6 @@ intdfim:intdfim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 intimdf:intimdf.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-lat2hkl:lat2hkl.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 lat2vtk:lat2vtk.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 map2lat:map2lat.c ${DEPENDS}
@@ -271,8 +255,6 @@ mulrfim:mulrfim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 mulsclt:mulsclt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-mulscmap:mulscmap.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 nign:nign.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 noiseim:noiseim.c ${DEPENDS}
@@ -282,8 +264,6 @@ normim:normim.c ${DEPENDS}
 normim_tv6:normim_tv6.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 ovldim:ovldim.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-padlt:padlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 pattim:pattim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -306,6 +286,8 @@ rf2lt:rf2lt.c ${DEPENDS}
 rfaclt:rfaclt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 rmpkim:rmpkim.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+rotlt:rotlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 scaleim:scaleim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -345,8 +327,6 @@ sumim:sumim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 sumlt:sumlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-summap:summap.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 sumrf:sumrf.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 swapmw:swapmw.c ${DEPENDS}
@@ -366,8 +346,6 @@ tailc:tailc.c ${DEPENDS}
 thrshim:thrshim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 totiff8:totiff8.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-translt:translt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 tst3d:tst3d.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -439,11 +417,9 @@ lmullt.o:lmullt.c mwmask.h
 lmulrf.o:lmulrf.c mwmask.h
 lmulrfim.o:lmulrfim.c mwmask.h
 lmulsclt.o:lmulsclt.c mwmask.h
-lmulscmap.o:lmulscmap.c mwmask.h
 lnign.o:lnign.c mwmask.h
 lnoiseim.o:lnoiseim.c mwmask.h
 lnormim.o:lnormim.c mwmask.h
-lpadlt.o:lpadlt.c mwmask.h
 lpeakim.o:lpeakim.c mwmask.h
 lpolarim.o:lpolarim.c mwmask.h
 lpunch.o:lpunch.c mwmask.h
@@ -460,6 +436,7 @@ lreadvtk.o:lreadvtk.c mwmask.h
 lrf2lt.o:lrf2lt.c mwmask.h
 lrfaclt.o:lrfaclt.c mwmask.h
 lrmpkim.o:lrmpkim.c mwmask.h
+lrotlt.o:lrotlt.c mwmask.h
 lscaleim.o:lscaleim.c mwmask.h
 lscalelt.o:lscalelt.c mwmask.h
 lsettag.o:lsettag.c mwmask.h
@@ -474,19 +451,17 @@ lsubrfim.o:lsubrfim.c mwmask.h
 lsubrflt.o:lsubrflt.c mwmask.h
 lsumim.o:lsumim.c mwmask.h
 lsumlt.o:lsumlt.c mwmask.h
-lsummap.o:lsummap.c mwmask.h
 lsumrf.o:lsumrf.c mwmask.h
+lsymlib.o:lsymlib.c mwmask.h
 lsymlt.o:lsymlt.c mwmask.h
 ltagim.o:ltagim.c mwmask.h
 ltaglt.o:ltaglt.c mwmask.h
 lthrshim.o:lthrshim.c mwmask.h
 ltordata.o:ltordata.c mwmask.h
-ltranslt.o:ltranslt.c mwmask.h
 lupdbd.o:lupdbd.c mwmask.h
 lwaveim.o:lwaveim.c mwmask.h
 lwindim.o:lwindim.c mwmask.h
 lwritedf.o:lwritedf.c mwmask.h
-lwritehkl.o:lwritehkl.c mwmask.h
 lwriteim.o:lwriteim.c mwmask.h
 lwritelt.o:lwritelt.c mwmask.h
 lwritemap.o:lwritemap.c mwmask.h
@@ -554,11 +529,9 @@ libmw.a: \
 	lmulrf.o \
 	lmulrfim.o \
 	lmulsclt.o \
-	lmulscmap.o \
 	lnign.o \
 	lnoiseim.o \
 	lnormim.o \
-	lpadlt.o \
 	lpeakim.o \
 	lpolarim.o \
 	lpunch.o \
@@ -575,6 +548,7 @@ libmw.a: \
 	lrf2lt.o \
 	lrfaclt.o \
 	lrmpkim.o \
+	lrotlt.o \
 	lscaleim.o \
 	lscalelt.o \
 	lsettag.o \
@@ -589,19 +563,17 @@ libmw.a: \
 	lsubrflt.o \
 	lsumim.o \
 	lsumlt.o \
-	lsummap.o \
 	lsumrf.o \
+	lsymlib.o \
 	lsymlt.o \
 	ltagim.o \
 	ltaglt.o \
 	lthrshim.o \
 	ltordata.o \
-	ltranslt.o \
 	lupdbd.o \
 	lwaveim.o \
 	lwindim.o \
 	lwritedf.o \
-	lwritehkl.o \
 	lwriteim.o \
 	lwritelt.o \
 	lwritemap.o \

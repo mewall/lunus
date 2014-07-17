@@ -89,6 +89,7 @@ all: \
 	rf2lt \
 	rfaclt \
 	rmpkim \
+	rotlt \
 	scaleim \
 	scalelt \
 	scalerf \
@@ -118,6 +119,7 @@ all: \
 	tailc \
 	thrshim \
 	totiff8 \
+	translt \
 	tst3d \
 	vtk2lat \
 	waveim \
@@ -286,6 +288,8 @@ rfaclt:rfaclt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 rmpkim:rmpkim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+rotlt:rotlt.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 scaleim:scaleim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 scalelt:scalelt.c ${DEPENDS}
@@ -343,6 +347,8 @@ tailc:tailc.c ${DEPENDS}
 thrshim:thrshim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 totiff8:totiff8.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+translt:translt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 tst3d:tst3d.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -433,6 +439,7 @@ lreadvtk.o:lreadvtk.c mwmask.h
 lrf2lt.o:lrf2lt.c mwmask.h
 lrfaclt.o:lrfaclt.c mwmask.h
 lrmpkim.o:lrmpkim.c mwmask.h
+lrotlt.o:lrotlt.c mwmask.h
 lscaleim.o:lscaleim.c mwmask.h
 lscalelt.o:lscalelt.c mwmask.h
 lsettag.o:lsettag.c mwmask.h
@@ -448,11 +455,13 @@ lsubrflt.o:lsubrflt.c mwmask.h
 lsumim.o:lsumim.c mwmask.h
 lsumlt.o:lsumlt.c mwmask.h
 lsumrf.o:lsumrf.c mwmask.h
+lsymlib.o:lsymlib.c mwmask.h
 lsymlt.o:lsymlt.c mwmask.h
 ltagim.o:ltagim.c mwmask.h
 ltaglt.o:ltaglt.c mwmask.h
 lthrshim.o:lthrshim.c mwmask.h
 ltordata.o:ltordata.c mwmask.h
+ltranslt.o:ltranslt.c mwmask.h
 lupdbd.o:lupdbd.c mwmask.h
 lwaveim.o:lwaveim.c mwmask.h
 lwindim.o:lwindim.c mwmask.h
@@ -543,6 +552,7 @@ libmw.a: \
 	lrf2lt.o \
 	lrfaclt.o \
 	lrmpkim.o \
+	lrotlt.o \
 	lscaleim.o \
 	lscalelt.o \
 	lsettag.o \
@@ -558,11 +568,13 @@ libmw.a: \
 	lsumim.o \
 	lsumlt.o \
 	lsumrf.o \
+	lsymlib.o \
 	lsymlt.o \
 	ltagim.o \
 	ltaglt.o \
 	lthrshim.o \
 	ltordata.o \
+	ltranslt.o \
 	lupdbd.o \
 	lwaveim.o \
 	lwindim.o \
