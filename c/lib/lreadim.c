@@ -77,10 +77,10 @@ int lreadim(DIFFIMAGE *imdiff)
       imdiff->origin.r = imdiff->beam_mm.y/imdiff->pixel_size_mm+.5;
       imdiff->distance_mm = atof(lgettag(imdiff->header,"DISTANCE"));
       imdiff->wavelength = atof(lgettag(imdiff->header,"WAVELENGTH"));
-      if (!strcmp(lgettag(imdiff->header,"BYTE_ORDER"),"big_endian"))
-	imdiff->big_endian=1;
-      else if (!strcmp(lgettag(imdiff->header,"BYTE_ORDER"),"little_endian"))
+      if (!strcmp(lgettag(imdiff->header,"BYTE_ORDER"),"little_endian"))
 	imdiff->big_endian=0;
+      else if (!strcmp(lgettag(imdiff->header,"BYTE_ORDER"),"big_endian"))
+	imdiff->big_endian=1;
       else {
 	sprintf(imdiff->error_msg,"\nByte order %s not recognized.\n\n",lgettag(imdiff->header,"BYTE_ORDER"));
 	return(7);

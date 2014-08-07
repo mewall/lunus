@@ -1,14 +1,13 @@
-/* ROTLT.C - Rotate a lattice according to input line instructions.
+/* LIQUIDFACLT.C - Generate a liquid-like motions prefactor lattice.
    
    Author: Mike Wall
-   Date: 7/17/2014
+   Date: 2/28/95
    Version: 1.
    
    Usage:
-   		"rotlt <input lattice> <output lattice> <axis code> <angle>"
+   		"gausslt <input lattice> <output lattice> <width>"
 
-		Input are lattice, axis code specification (1 = x; 2 = y; 3 = z)
-		and angle.  Output is lattice rotated by angle about the specified axis.
+		Input is lattice and width.  Output is liquid-like motions prefactor lattice.
    */
 
 #include<mwmask.h>
@@ -16,25 +15,18 @@
 int main(int argc, char *argv[])
 {
   FILE
-	*latticein,
-	*latticeout;
-
+    *latticein,
+    *latticeout;
+  
   char
     error_msg[LINESIZE];
 
-  int
-    axis;
+  LAT3D 
+    *lat;
 
   float
-    angle;
-
-  LAT3D 
-	*lat;
-
-  RFILE_DATA_TYPE *rfile;
-
-  struct ijkcoords
-    origin;
+    peak,
+    width;
 
 /*
  * Set input line defaults:
@@ -42,22 +34,13 @@ int main(int argc, char *argv[])
 	
 	latticein = stdin;
 	latticeout = stdout;
-	angle = 90.0;
 
 /*
  * Read information from input line:
  */
 	switch(argc) {
-    case 8: 
-    origin.k = atol(argv[7]);
-    case 7:
-    origin.j = atol(argv[6]);
-    case 6:
-    origin.i = atol(argv[5]);
-	case 5:
-	  angle = atof(argv[4]);
 	  case 4:
-	  axis = atol(argv[3]);
+	  width = atof(argv[3]);
 	  case 3:
 	  if (strcmp(argv[2],"-") == 0) {
 	    latticeout = stdout;
@@ -80,12 +63,8 @@ int main(int argc, char *argv[])
 	  }
 	  break;
 	  default:
-	  printf("\n Usage: rotlt <input lattice> "
-		 "<output lattice> <axis code> <angle>\n\n"
-		 "  Axis Codes:\n"
-		 "    1 = x\n"
-		 "    2 = y\n"
-		 "    3 = z\n\n");
+	  printf("\n Usage: gausslt <input lattice> "
+		 "<output lattice> <peak> <width>\n\n");
 	  exit(0);
 	}
   
@@ -109,15 +88,11 @@ int main(int argc, char *argv[])
   }
 
   /*
-   * Perform symmetry operation:
+   * Calculate liquid-like motions prefactor:
    */
-
-  if (argc==8) {
-    lat->origin.i=origin.i; lat->origin.j=origin.j; lat->origin.k=origin.k;
-  }
-  lat->axis = axis;
-  lat->angle = angle;
-  lrotlt(lat);
+  
+  lat->width = width;
+  lliquidfaclt(lat);
   
   /*
    * Write lattice to output file:

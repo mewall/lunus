@@ -67,6 +67,7 @@ all: \
 	medim \
 	minr \
 	minrim \
+	mirrorlt \
 	modeim \
 	mulim \
 	mullt \
@@ -97,6 +98,7 @@ all: \
 	seecat \
 	seesh \
 	settag \
+	shiftlt \
 	shim4lt \
 	shimlt \
 	smthim \
@@ -243,6 +245,8 @@ minr:minr.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 minrim:minrim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+mirrorlt:mirrorlt.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 modeim:modeim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 mulim:mulim.c ${DEPENDS}
@@ -302,6 +306,8 @@ seecat:seecat.c ${DEPENDS}
 seesh:seesh.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 settag:settag.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+shiftlt:shiftlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 shim4lt:shim4lt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -411,6 +417,7 @@ lmedim.o:lmedim.c mwmask.h
 lmin.o:lmin.c mwmask.h
 lminr.o:lminr.c mwmask.h
 lminrim.o:lminrim.c mwmask.h
+lmirrorlt.o:lmirrorlt.c mwmask.h
 lmodeim.o:lmodeim.c mwmask.h
 lmulim.o:lmulim.c mwmask.h
 lmullt.o:lmullt.c mwmask.h
@@ -440,6 +447,7 @@ lrotlt.o:lrotlt.c mwmask.h
 lscaleim.o:lscaleim.c mwmask.h
 lscalelt.o:lscalelt.c mwmask.h
 lsettag.o:lsettag.c mwmask.h
+lshiftlt.o:lshiftlt.c mwmask.h
 lshim4lt.o:lshim4lt.c mwmask.h
 lshimlt.o:lshimlt.c mwmask.h
 lsmthim.o:lsmthim.c mwmask.h
@@ -523,6 +531,7 @@ libmw.a: \
 	lmin.o \
 	lminr.o \
 	lminrim.o \
+	lmirrorlt.o \
 	lmodeim.o \
 	lmulim.o \
 	lmullt.o \
@@ -552,6 +561,7 @@ libmw.a: \
 	lscaleim.o \
 	lscalelt.o \
 	lsettag.o \
+	lshiftlt.o \
 	lshim4lt.o \
 	lshimlt.o \
 	lsmthim.o \

@@ -61,12 +61,14 @@ all: \
 	intdfim \
 	intimdf \
 	lat2vtk \
+	liquidfaclt \
 	map2lat \
 	mapbound \
 	maskimg \
 	medim \
 	minr \
 	minrim \
+	mirrorlt \
 	modeim \
 	mulim \
 	mullt \
@@ -97,6 +99,7 @@ all: \
 	seecat \
 	seesh \
 	settag \
+	shiftlt \
 	shim4lt \
 	shimlt \
 	smthim \
@@ -119,7 +122,6 @@ all: \
 	tailc \
 	thrshim \
 	totiff8 \
-	translt \
 	tst3d \
 	vtk2lat \
 	waveim \
@@ -232,6 +234,8 @@ intimdf:intimdf.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 lat2vtk:lat2vtk.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+liquidfaclt:liquidfaclt.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 map2lat:map2lat.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 mapbound:mapbound.c ${DEPENDS}
@@ -243,6 +247,8 @@ medim:medim.c ${DEPENDS}
 minr:minr.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 minrim:minrim.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+mirrorlt:mirrorlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 modeim:modeim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -304,6 +310,8 @@ seesh:seesh.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 settag:settag.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+shiftlt:shiftlt.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 shim4lt:shim4lt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 shimlt:shimlt.c ${DEPENDS}
@@ -347,8 +355,6 @@ tailc:tailc.c ${DEPENDS}
 thrshim:thrshim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 totiff8:totiff8.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-translt:translt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 tst3d:tst3d.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -409,11 +415,13 @@ linitim.o:linitim.c mwmask.h
 linitlt.o:linitlt.c mwmask.h
 linitmap.o:linitmap.c mwmask.h
 lintdfim.o:lintdfim.c mwmask.h
+lliquidfaclt.o:lliquidfaclt.c mwmask.h
 lmattools.o:lmattools.c mwmask.h
 lmedim.o:lmedim.c mwmask.h
 lmin.o:lmin.c mwmask.h
 lminr.o:lminr.c mwmask.h
 lminrim.o:lminrim.c mwmask.h
+lmirrorlt.o:lmirrorlt.c mwmask.h
 lmodeim.o:lmodeim.c mwmask.h
 lmulim.o:lmulim.c mwmask.h
 lmullt.o:lmullt.c mwmask.h
@@ -443,6 +451,7 @@ lrotlt.o:lrotlt.c mwmask.h
 lscaleim.o:lscaleim.c mwmask.h
 lscalelt.o:lscalelt.c mwmask.h
 lsettag.o:lsettag.c mwmask.h
+lshiftlt.o:lshiftlt.c mwmask.h
 lshim4lt.o:lshim4lt.c mwmask.h
 lshimlt.o:lshimlt.c mwmask.h
 lsmthim.o:lsmthim.c mwmask.h
@@ -461,7 +470,6 @@ ltagim.o:ltagim.c mwmask.h
 ltaglt.o:ltaglt.c mwmask.h
 lthrshim.o:lthrshim.c mwmask.h
 ltordata.o:ltordata.c mwmask.h
-ltranslt.o:ltranslt.c mwmask.h
 lupdbd.o:lupdbd.c mwmask.h
 lwaveim.o:lwaveim.c mwmask.h
 lwindim.o:lwindim.c mwmask.h
@@ -522,11 +530,13 @@ libmw.a: \
 	linitlt.o \
 	linitmap.o \
 	lintdfim.o \
+	lliquidfaclt.o \
 	lmattools.o \
 	lmedim.o \
 	lmin.o \
 	lminr.o \
 	lminrim.o \
+	lmirrorlt.o \
 	lmodeim.o \
 	lmulim.o \
 	lmullt.o \
@@ -556,6 +566,7 @@ libmw.a: \
 	lscaleim.o \
 	lscalelt.o \
 	lsettag.o \
+	lshiftlt.o \
 	lshim4lt.o \
 	lshimlt.o \
 	lsmthim.o \
@@ -574,7 +585,6 @@ libmw.a: \
 	ltaglt.o \
 	lthrshim.o \
 	ltordata.o \
-	ltranslt.o \
 	lupdbd.o \
 	lwaveim.o \
 	lwindim.o \

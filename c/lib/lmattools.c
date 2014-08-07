@@ -107,3 +107,14 @@ struct xyzcoords lmulscvec(XYZCOORDS_DATA b,struct xyzcoords a)
 
   return c;
 }
+
+struct xyzcoords lrotvecz(struct xyzcoords a, float cos_theta,float sin_theta)
+{
+  struct xyzcoords b;
+
+  b.x = a.x*cos_theta - a.y*sin_theta;
+  b.y = a.x*sin_theta + a.y*cos_theta;
+  b.z = a.z;
+
+  return b;
+}

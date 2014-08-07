@@ -595,6 +595,8 @@ typedef struct {
 				/* performed */
   size_t symop_index;           /* Index of selected symmetry */
 				/* operation */
+  int axis;                     /* Axis of rotation */
+  float angle;                  /* Angle of rotation */
 } LAT3D;
 
 /*
@@ -643,11 +645,13 @@ DIFFIMAGE *linitim(void);
 LAT3D *linitlt(void);
 CCP4MAP *linitmap(void);
 int lintdfim(DIFFIMAGE *imdiff);
+int lliquidfaclt(LAT3D *lat);
 struct xyzmatrix lmatmul(struct xyzmatrix a, struct xyzmatrix b);
 int lmedim(DIFFIMAGE *imdiff);
 size_t lmin(size_t arg1, size_t arg2);
 int lminr(LAT3D *lat);
 int lminrim(DIFFIMAGE *imdiff);
+int lmirrorlt(LAT3D *lat,int axis);
 int lmodeim(DIFFIMAGE *imdiff);
 int lmulim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lmullt(LAT3D *lat1, LAT3D *lat2);
@@ -675,10 +679,12 @@ int lreadvtk(LAT3D *lat);
 int lrf2lt(LAT3D *lat);
 float lrfaclt(LAT3D *lat1, LAT3D *lat2);
 int lrmpkim(DIFFIMAGE *imdiff);
-int lrotlt(LAT3D *lat,int axis);
+int lrotlt(LAT3D *lat);
 struct xyzmatrix lrotmat(float rotx, float roty, float rotz);
+struct xyzcoords lrotvecz(struct xyzcoords a, float cos_theta,float sin_theta);
 int lscaleim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lscalelt(LAT3D *lat1, LAT3D *lat2);
+int lshiftlt(LAT3D *lat,struct ijkcoords t);
 int lshim4lt(LAT3D *lat);
 int lshimlt(LAT3D *lat);
 int lsmthim(DIFFIMAGE *imdiff);
@@ -728,6 +734,8 @@ struct ijkcoords lijkrotk(struct ijkcoords vec, float cos_theta,
 			  float sin_theta);
 struct ijkcoords lijkinv(struct ijkcoords vec);
 struct ijkcoords lijkmij(struct ijkcoords vec);
+struct ijkcoords lijkmjk(struct ijkcoords vec);
+struct ijkcoords lijkmki(struct ijkcoords vec);
 int lP1(LAT3D *lat);
 int lP41(LAT3D *lat);
 int lP222(LAT3D *lat);

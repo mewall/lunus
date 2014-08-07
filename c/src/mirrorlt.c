@@ -1,14 +1,14 @@
-/* ROTLT.C - Rotate a lattice according to input line instructions.
+/* MIRRORLT.C - Symmetrize a lattice according to input line instructions.
    
    Author: Mike Wall
    Date: 7/17/2014
    Version: 1.
    
    Usage:
-   		"rotlt <input lattice> <output lattice> <axis code> <angle>"
+   		"mirrorlt <input lattice> <output lattice> <axis code>"
 
-		Input are lattice, axis code specification (1 = x; 2 = y; 3 = z)
-		and angle.  Output is lattice rotated by angle about the specified axis.
+		Input are lattice and axis code specification (1 = x; 2 = y; 3 = z)
+		specification.  Output is lattice with mirror reflection along the specified axis.
    */
 
 #include<mwmask.h>
@@ -25,9 +25,6 @@ int main(int argc, char *argv[])
   int
     axis;
 
-  float
-    angle;
-
   LAT3D 
 	*lat;
 
@@ -42,20 +39,17 @@ int main(int argc, char *argv[])
 	
 	latticein = stdin;
 	latticeout = stdout;
-	angle = 90.0;
 
 /*
  * Read information from input line:
  */
 	switch(argc) {
-    case 8: 
-    origin.k = atol(argv[7]);
-    case 7:
-    origin.j = atol(argv[6]);
+    case 7: 
+    origin.k = atol(argv[6]);
     case 6:
-    origin.i = atol(argv[5]);
-	case 5:
-	  angle = atof(argv[4]);
+    origin.j = atol(argv[5]);
+    case 5:
+    origin.i = atol(argv[4]);
 	  case 4:
 	  axis = atol(argv[3]);
 	  case 3:
@@ -81,7 +75,7 @@ int main(int argc, char *argv[])
 	  break;
 	  default:
 	  printf("\n Usage: rotlt <input lattice> "
-		 "<output lattice> <axis code> <angle>\n\n"
+		 "<output lattice> <axis code>\n\n"
 		 "  Axis Codes:\n"
 		 "    1 = x\n"
 		 "    2 = y\n"
@@ -112,12 +106,10 @@ int main(int argc, char *argv[])
    * Perform symmetry operation:
    */
 
-  if (argc==8) {
+  if (argc==7) {
     lat->origin.i=origin.i; lat->origin.j=origin.j; lat->origin.k=origin.k;
   }
-  lat->axis = axis;
-  lat->angle = angle;
-  lrotlt(lat);
+  lmirrorlt(lat,axis);
   
   /*
    * Write lattice to output file:

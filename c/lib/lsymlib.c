@@ -85,6 +85,26 @@ struct ijkcoords lijkmij(struct ijkcoords vec)
   return(return_value);
 }
 
+struct ijkcoords lijkmjk(struct ijkcoords vec)
+{
+  struct ijkcoords return_value;
+
+  return_value.i = -vec.i;
+  return_value.j = vec.j;
+  return_value.k = vec.k;
+
+  return(return_value);
+}
+struct ijkcoords lijkmki(struct ijkcoords vec)
+{
+  struct ijkcoords return_value;
+
+  return_value.i = vec.i;
+  return_value.j = -vec.j;
+  return_value.k = vec.k;
+
+  return(return_value);
+}
 /*
  * Symmetry operations:
  */

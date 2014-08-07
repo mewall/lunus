@@ -1,14 +1,13 @@
-/* ROTLT.C - Rotate a lattice according to input line instructions.
+/* SHIFTLT.C - Translate the intensity in a lattice by specified coordinate shift.
    
    Author: Mike Wall
    Date: 7/17/2014
    Version: 1.
    
    Usage:
-   		"rotlt <input lattice> <output lattice> <axis code> <angle>"
+   		"shiftlt <input lattice> <output lattice> <x shift> <y shift> <z shift>"
 
-		Input are lattice, axis code specification (1 = x; 2 = y; 3 = z)
-		and angle.  Output is lattice rotated by angle about the specified axis.
+		Input are lattice and shift coords.  Output is lattice with density translated by the shift.
    */
 
 #include<mwmask.h>
@@ -25,16 +24,13 @@ int main(int argc, char *argv[])
   int
     axis;
 
-  float
-    angle;
-
   LAT3D 
 	*lat;
 
   RFILE_DATA_TYPE *rfile;
 
   struct ijkcoords
-    origin;
+    t;
 
 /*
  * Set input line defaults:
@@ -42,22 +38,17 @@ int main(int argc, char *argv[])
 	
 	latticein = stdin;
 	latticeout = stdout;
-	angle = 90.0;
 
 /*
  * Read information from input line:
  */
 	switch(argc) {
-    case 8: 
-    origin.k = atol(argv[7]);
-    case 7:
-    origin.j = atol(argv[6]);
-    case 6:
-    origin.i = atol(argv[5]);
-	case 5:
-	  angle = atof(argv[4]);
-	  case 4:
-	  axis = atol(argv[3]);
+    case 6: 
+    t.k = atol(argv[5]);
+    case 5:
+    t.j = atol(argv[4]);
+    case 4:
+    t.i = atol(argv[3]);
 	  case 3:
 	  if (strcmp(argv[2],"-") == 0) {
 	    latticeout = stdout;
@@ -80,12 +71,8 @@ int main(int argc, char *argv[])
 	  }
 	  break;
 	  default:
-	  printf("\n Usage: rotlt <input lattice> "
-		 "<output lattice> <axis code> <angle>\n\n"
-		 "  Axis Codes:\n"
-		 "    1 = x\n"
-		 "    2 = y\n"
-		 "    3 = z\n\n");
+	  printf("\n Usage: shiftlt <input lattice> "
+		 "<output lattice> <shift>\n\n");
 	  exit(0);
 	}
   
@@ -109,15 +96,10 @@ int main(int argc, char *argv[])
   }
 
   /*
-   * Perform symmetry operation:
+   * Perform shift:
    */
 
-  if (argc==8) {
-    lat->origin.i=origin.i; lat->origin.j=origin.j; lat->origin.k=origin.k;
-  }
-  lat->axis = axis;
-  lat->angle = angle;
-  lrotlt(lat);
+  lshiftlt(lat,t);
   
   /*
    * Write lattice to output file:
