@@ -1,4 +1,4 @@
-/* LROTLT.C - Rotate a lattice by 90 degrees about specified axis.
+/* LROTLT.C - Rotate a lattice about specified axis.
    
    Author: Mike Wall
    Date: 7/17/2014
@@ -88,10 +88,10 @@ int lrotlt(LAT3D *lat)
 	if (index2.i >= 0 && index2.i < lat->xvoxels && index2.j >= 0 && index2.j < lat->yvoxels && 
 	    index2.k >= 0 && index2.k < lat->zvoxels) {
 	  i2 = index2.k*lat->xyvoxels+index2.j*lat->xvoxels+index2.i;
-	  if (ct[i2] == 0 && lat->lattice[i1]!=lat->mask_tag) {
+	  if (ct[i2] == 0 && lat->lattice[i1] != lat->mask_tag) {
 	    lattice[i2] = lat->lattice[i1];
 	    ct[i2]++;
-	  } else{
+	  } else {
 	    lattice[i2] =
 	      ((LATTICE_DATA_TYPE)ct[i2]*lattice[i2]+lat->lattice[i1])/(LATTICE_DATA_TYPE)(ct[i2]+1);
 	    ct[i2]++;

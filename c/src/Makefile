@@ -1,7 +1,7 @@
 VPATH=${C_HOME}/src:${C_HOME}/lib:${C_HOME}/bin:${C_HOME}/include
 CC=gcc
-#CFLAGS= -g -fopenmp -DUSE_OPENMP -L${C_HOME}/lib -I${C_HOME}/include
-CFLAGS= -g -w -L${C_HOME}/lib -I${C_HOME}/include
+CFLAGS= -g -fopenmp -DUSE_OPENMP -L${C_HOME}/lib -I${C_HOME}/include
+#CFLAGS= -g -w -L${C_HOME}/lib -I${C_HOME}/include
 AR=ar
 ARFLAGS=-r
 SHELL=/bin/csh
@@ -104,6 +104,7 @@ all: \
 	shimlt \
 	smthim \
 	solidlt \
+	subenvlt \
 	subim \
 	sublt \
 	subrf \
@@ -121,7 +122,9 @@ all: \
 	tagneg \
 	tailc \
 	thrshim \
+	thrshlt \
 	totiff8 \
+	translt \
 	tst3d \
 	vtk2lat \
 	waveim \
@@ -320,6 +323,8 @@ smthim:smthim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 solidlt:solidlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+subenvlt:subenvlt.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 subim:subim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 sublt:sublt.c ${DEPENDS}
@@ -354,7 +359,11 @@ tailc:tailc.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 thrshim:thrshim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+thrshlt:thrshlt.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 totiff8:totiff8.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+translt:translt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 tst3d:tst3d.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -456,6 +465,7 @@ lshim4lt.o:lshim4lt.c mwmask.h
 lshimlt.o:lshimlt.c mwmask.h
 lsmthim.o:lsmthim.c mwmask.h
 lsolidlt.o:lsolidlt.c mwmask.h
+lsubenvlt.o:lsubenvlt.c mwmask.h
 lsubim.o:lsubim.c mwmask.h
 lsublt.o:lsublt.c mwmask.h
 lsubrf.o:lsubrf.c mwmask.h
@@ -469,7 +479,9 @@ lsymlt.o:lsymlt.c mwmask.h
 ltagim.o:ltagim.c mwmask.h
 ltaglt.o:ltaglt.c mwmask.h
 lthrshim.o:lthrshim.c mwmask.h
+lthrshlt.o:lthrshlt.c mwmask.h
 ltordata.o:ltordata.c mwmask.h
+ltranslt.o:ltranslt.c mwmask.h
 lupdbd.o:lupdbd.c mwmask.h
 lwaveim.o:lwaveim.c mwmask.h
 lwindim.o:lwindim.c mwmask.h
@@ -571,6 +583,7 @@ libmw.a: \
 	lshimlt.o \
 	lsmthim.o \
 	lsolidlt.o \
+	lsubenvlt.o \
 	lsubim.o \
 	lsublt.o \
 	lsubrf.o \
@@ -584,7 +597,9 @@ libmw.a: \
 	ltagim.o \
 	ltaglt.o \
 	lthrshim.o \
+	lthrshlt.o \
 	ltordata.o \
+	ltranslt.o \
 	lupdbd.o \
 	lwaveim.o \
 	lwindim.o \

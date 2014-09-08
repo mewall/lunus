@@ -42,7 +42,12 @@ int lliquidfaclt(LAT3D *lat)
 	rsqr = (rfloat.x*rfloat.x + rfloat.y*rfloat.y + 
 		       rfloat.z*rfloat.z);
 	lat->lattice[lat_index] = (LATTICE_DATA_TYPE)
-	  (1.0 - expf(-rsqr*2.*PI*2.*PI*lat->width*lat->width));
+	  // Clarage et al 1992 model:
+	  	  rsqr*2.*PI*2.*PI*lat->width*lat->width*expf(-rsqr*2.*PI*2.*PI*lat->width*lat->width);
+	// Modfied clarage model:
+	//(1.0 - expf(-rsqr*2.*PI*2.*PI*lat->width*lat->width))*expf(-rsqr*2.*PI*2.*PI*lat->width*lat->width);
+	  // Wall et al 1997 model:
+	//(1.0 - expf(-rsqr*2.*PI*2.*PI*lat->width*lat->width));
 	lat_index++;
       }
     }

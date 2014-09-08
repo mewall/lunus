@@ -1,13 +1,15 @@
-/* LIQUIDFACLT.C - Generate a liquid-like motions prefactor lattice.
+/* THRSHLT.C - Convert all voxels with values outside a specified range in a lattice to an 
+             ignore_tag.
    
    Author: Mike Wall
-   Date: 2/28/95
+   Date: 8/11/2014
    Version: 1.
    
    Usage:
-   		"gausslt <input lattice> <output lattice> <width>"
+   		"thrshlt <input lattice> <output lattice> <lower bound> <upper bound>"
 
-		Input is lattice and width.  Output is liquid-like motions prefactor lattice.
+		Input is an upper and lower bound and an input 
+			lattice.  Output is a lattice.  
    */
 
 #include<mwmask.h>
@@ -20,18 +22,28 @@ int main(int argc, char *argv[])
   
   char
     error_msg[LINESIZE];
-
+  
+  size_t
+    i,
+    j,
+    k,
+    num_read,
+    num_wrote;
+  
   LAT3D 
     *lat;
-
+  
+  RFILE_DATA_TYPE 
+    *rfile;
+  
   float
-    peak,
-    width;
+    lower_bound,upper_bound;
 
 /*
  * Set input line defaults:
  */
-	
+	lower_bound = 0.;
+	upper_bound = (float)MAX_IMAGE_DATA_VALUE;
 	latticein = stdin;
 	latticeout = stdout;
 
@@ -39,15 +51,17 @@ int main(int argc, char *argv[])
  * Read information from input line:
  */
 	switch(argc) {
+	  case 5:
+	  lower_bound = atof(argv[4]);
 	  case 4:
-	  width = atof(argv[3]);
+	  lower_bound = atof(argv[3]);
 	  case 3:
 	  if (strcmp(argv[2],"-") == 0) {
 	    latticeout = stdout;
 	  }
 	  else {
 	    if ((latticeout = fopen(argv[2],"wb")) == NULL) {
-	      printf("\nCan't open %s.\n\n",argv[2]);
+	      printf("\nCan't open %s.\n\n",argv[1]);
 	      exit(0);
 	    }
 	  }
@@ -63,13 +77,13 @@ int main(int argc, char *argv[])
 	  }
 	  break;
 	  default:
-	  printf("\n Usage: liquidfaclt <input lattice> "
-		 "<output lattice> <width>\n\n");
+	  printf("\n Usage: thrshlt <input lattice> <output lattice> "
+		 "<lower bound> <upper bound>\n\n");
 	  exit(0);
 	}
   
   /*
-   * Initialize lattices:
+   * Initialize lattice:
    */
 
   if ((lat = linitlt()) == NULL) {
@@ -87,17 +101,18 @@ int main(int argc, char *argv[])
     exit(0);
   }
 
-  /*
-   * Calculate liquid-like motions prefactor:
-   */
-  
-  lat->width = width;
-  lliquidfaclt(lat);
-  
-  /*
-   * Write lattice to output file:
-   */
-  
+/*
+ * Generate the thresholded lattice:
+ */
+
+  lat->valuebound.min = lower_bound;
+  lat->valuebound.max = upper_bound;
+  lthrshlt(lat);
+
+/*
+ * Write lattice to output file:
+ */
+
   lat->outfile = latticeout;
   if (lwritelt(lat) != 0) {
     perror("Couldn't write lattice.\n\n");
@@ -119,5 +134,3 @@ CloseShop:
   fclose(latticein);
   fclose(latticeout);
 }
-
-

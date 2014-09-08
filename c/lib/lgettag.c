@@ -10,10 +10,16 @@
 
 const char * lgettag(const char *target,const char *tag)
 {
-  char *pos_begin,*pos_end;
+  char *pos_begin,*pos_end,*pos_tmp;
   char *val;
-  
-  if ((pos_begin = strstr(target,tag)) == NULL) {
+
+  pos_tmp = target;
+  while (pos_tmp != NULL) {
+    if ((pos_tmp = strstr(pos_tmp+1,tag)) != NULL) {
+      pos_begin = pos_tmp;
+    }
+  }  
+  if (pos_begin == NULL) {
     //printf("\nWarning: Couldn't find tag %s in image header\n\n",tag);
     return(NULL);
   }

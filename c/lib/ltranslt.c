@@ -32,7 +32,7 @@ int ltranslt(LAT3D *lat,struct ijkcoords t)
   lattice = (LATTICE_DATA_TYPE *)calloc(lat->lattice_length,
 					sizeof(LATTICE_DATA_TYPE));
   if (!lattice) {
-    sprintf(lat->error_msg,"\nLROTLT:  Couldn't allocate lattice.\n\n");
+    sprintf(lat->error_msg,"\nLTRANSLT:  Couldn't allocate lattice.\n\n");
     return_value = 1;
     goto CloseShop;
   }
@@ -48,7 +48,7 @@ int ltranslt(LAT3D *lat,struct ijkcoords t)
   for(index1.k = 0; index1.k < lat->zvoxels; index1.k++) {
     for(index1.j = 0; index1.j < lat->yvoxels; index1.j++) {
       for (index1.i = 0; index1.i < lat->xvoxels; index1.i++) {
-	index2.i = lijksub(index1,t);
+	index2 = lijksub(index1,t);
 	if (index2.i >= 0 && index2.i < lat->xvoxels && index2.j >= 0 && index2.j < lat->yvoxels && 
 	    index2.k >= 0 && index2.k < lat->zvoxels) {
 	  lattice[index2.k*lat->xyvoxels+index2.j*lat->xvoxels+index2.i] =
