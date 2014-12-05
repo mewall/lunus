@@ -60,6 +60,7 @@ all: \
 	hkl2vtk \
 	intdfim \
 	intimdf \
+	lat2hkl \
 	lat2vtk \
 	liquidfaclt \
 	map2lat \
@@ -234,6 +235,8 @@ hkl2vtk:hkl2vtk.c ${DEPENDS}
 intdfim:intdfim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 intimdf:intimdf.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+lat2hkl:lat2hkl.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 lat2vtk:lat2vtk.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -486,6 +489,7 @@ lupdbd.o:lupdbd.c mwmask.h
 lwaveim.o:lwaveim.c mwmask.h
 lwindim.o:lwindim.c mwmask.h
 lwritedf.o:lwritedf.c mwmask.h
+lwritehkl.o:lwritehkl.c mwmask.h
 lwriteim.o:lwriteim.c mwmask.h
 lwritelt.o:lwritelt.c mwmask.h
 lwritemap.o:lwritemap.c mwmask.h
@@ -604,6 +608,7 @@ libmw.a: \
 	lwaveim.o \
 	lwindim.o \
 	lwritedf.o \
+	lwritehkl.o \
 	lwriteim.o \
 	lwritelt.o \
 	lwritemap.o \

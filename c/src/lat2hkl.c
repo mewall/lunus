@@ -1,4 +1,4 @@
-/* LAT2VTK.C - Convert internal .lat format to standard .vtk format.
+/* LAT2HKL.C - Convert internal .lat format to .hkl format (h k l I).
    
    Author: Mike Wall
    Date: 2/4/2014
