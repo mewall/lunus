@@ -676,6 +676,7 @@ int lreadlt(LAT3D *lat);
 int lreadmap(CCP4MAP *map);
 int lreadrf(DIFFIMAGE *imdiff);
 int lreadvtk(LAT3D *lat);
+int lrevyim(DIFFIMAGE *imdiff);
 int lrf2lt(LAT3D *lat);
 float lrfaclt(LAT3D *lat1, LAT3D *lat2);
 int lrmpkim(DIFFIMAGE *imdiff);
