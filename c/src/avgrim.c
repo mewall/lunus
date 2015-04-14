@@ -1,11 +1,11 @@
 /* AVGRIM.C - Calculate the average intensity vs. radius for an
-		input image.
+		input image, smoothing rfile if desired.
    
    Author: Mike Wall   
    Date: 4/3/93
    Version: 1.
    
-   "avgrim <input image> <output rfile> <x origin> <y origin>"
+   "avgrim <input image> <output rfile> <rolling box half-width>"
 
    Input is TIFF TV6 image and pixel origin.  Output is a list of
         values of I(r).
@@ -25,7 +25,8 @@ int main(int argc, char *argv[])
 
   size_t
     num_wrote,
-    num_read;
+    num_read,
+    width;
 
   DIFFIMAGE 
 	*imdiff;
@@ -38,11 +39,13 @@ int main(int argc, char *argv[])
 	
 	imagein = stdin;
 	outfile = stdout;
+	width = 0;
 
 /*
  * Read information from input line:
  */
 	switch(argc) {
+		case 4: width = atoi(argv[3]);
 		case 3:
 			if ( (outfile = fopen(argv[2],"wb")) == NULL ) {
 				printf("Can't open %s.",argv[2]);
@@ -61,7 +64,7 @@ int main(int argc, char *argv[])
 			break;
 		default:
 			printf("\n Usage: avgrim <input image> "
-				"<output rfile> <x origin> <y origin>\n\n");
+				"<output rfile> <rolling box half-width>\n\n");
 			exit(0);
 	}
   
@@ -89,8 +92,13 @@ int main(int argc, char *argv[])
    * Generate rfile:
    */
   
-	printf("Radial averaging image of size %d,%d\n",imdiff->hpixels,imdiff->vpixels); 
 	lavgrim(imdiff);  
+
+  /*
+   * Smooth rfile:
+   */
+      if (width > 0)
+      lsmoothrf(imdiff, width);
 
 /*
  * Write the output rfile:

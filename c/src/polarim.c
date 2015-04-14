@@ -4,7 +4,7 @@
    Date: 4/26/94
    Version: 1.
    
-   "polarim <image in> <image out> <x origin> <y origin>
+   "polarim <image in> <image out> 
       <distance[mm]> <polarization> <offset angle>" 
 
    Input is diffraction image.  Output is polarization corrected image.
@@ -25,8 +25,6 @@ int main(int argc, char *argv[])
   DIFFIMAGE 
 	*imdiff;
 
-  struct rccoords
-	origin;
 
   float 
     polarization_offset,
@@ -36,8 +34,6 @@ int main(int argc, char *argv[])
 /*
  * Set input line defaults:
  */
-  origin.r = DEFAULT_IMAGE_ORIGIN;
-  origin.c = DEFAULT_IMAGE_ORIGIN;
   distance_mm = DEFAULT_DISTANCE_MM;
   polarization = DEFAULT_POLARIZATION;
   imagein = stdin;
@@ -76,8 +72,7 @@ int main(int argc, char *argv[])
 	  break;
 	  default:
 	  printf("\n Usage: polarim <image in> <image out> "
-		 "<x origin> <y origin> <distance [mm]> <polarization> "
-		 "<offset angle>\n\n");
+		 "<distance [mm]> <polarization> <offset angle>\n\n");
 	  exit(0);
 	}
   
@@ -90,12 +85,6 @@ int main(int argc, char *argv[])
     exit(0);
   }
   
-  /*
-   * Set the origin for the image:
-   */
-  
-  //  imdiff->origin = origin;
-
   /*
    * Set sample-to-detector distance for the image
    */

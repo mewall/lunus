@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
 			}
 			break;
 		default:
-			printf("\n Usage: addtag <image in> "
+			printf("\n Usage: settag <image in> "
 			       "<image out> <tag name> <tag value> \n\n");
 			exit(0);
 	}

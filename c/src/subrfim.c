@@ -4,10 +4,10 @@
    Date: 4/4/94
    Version: 1.
    
-   "subrfim <input file> <image in> <image out>"
+   "subrfim <input file> <image in> <image out> <scale>"
 
    Input is rfile and image.  Output is 16-bit 
-   image with rfile subtracted.
+   image with rfile, multipled by scale, subtracted.
 
    */
 
@@ -31,17 +31,23 @@ int main(int argc, char *argv[])
   struct rccoords
 	origin;
 
+  float
+    scale;
+
 /*
  * Set input line defaults:
  */
 	
 	imagein = stdin;
 	imageout = stdout;
-
+	scale = 1;
 /*
  * Read information from input line:
  */
 	switch(argc) {
+		case 5:
+			scale = atof(argv[4]);
+
 		case 4:
 			if (strcmp(argv[3], "-") == 0) {
 				imageout = stdout;
@@ -70,8 +76,7 @@ int main(int argc, char *argv[])
 			break;
 		default:
 			printf("\n Usage: subrfim <input file> "
-				"<image in> <image out> <x origin> "
-				"<y origin>\n\n");
+				"<image in> <image out> <scale>\n\n");
 			exit(0);
 	}
  
@@ -104,11 +109,12 @@ int main(int argc, char *argv[])
     goto CloseShop;
   }
 
+
 /*
  * Subtract rfile from image:
  */
 
-   lsubrfim(imdiff);
+   lsubrfim(imdiff, scale);
 
 /*
  * Write the output image:

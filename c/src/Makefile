@@ -1,7 +1,7 @@
 VPATH=${C_HOME}/src:${C_HOME}/lib:${C_HOME}/bin:${C_HOME}/include
 CC=gcc
-#CFLAGS= -g -fopenmp -DUSE_OPENMP -L${C_HOME}/lib -I${C_HOME}/include
-CFLAGS= -g -w -L${C_HOME}/lib -I${C_HOME}/include
+CFLAGS= -g -fopenmp -DUSE_OPENMP -L${C_HOME}/lib -I${C_HOME}/include
+#CFLAGS= -g -w -L${C_HOME}/lib -I${C_HOME}/include
 AR=ar
 ARFLAGS=-r
 SHELL=/bin/csh
@@ -50,6 +50,7 @@ all: \
 	gencmd \
 	genlat \
 	genmap \
+	getrim \
 	gmparse \
 	hdrlt \
 	headc \
@@ -59,9 +60,11 @@ all: \
 	intdfim \
 	intimdf \
 	lat2vtk \
+	lowrim \
 	map2lat \
 	mapbound \
 	maskimg \
+	mathim \
 	medim \
 	minr \
 	minrim \
@@ -81,13 +84,14 @@ all: \
 	punchim \
 	rad2s \
 	ratioim \
-	rbavrim \
 	rbminrim \
 	revbytelt \
 	rf2char \
+	rf2char2 \
 	rf2lt \
 	rfaclt \
 	rmpkim \
+	rmsdim \
 	scaleim \
 	scalelt \
 	scalerf \
@@ -97,7 +101,7 @@ all: \
 	settag \
 	shim4lt \
 	shimlt \
-	smthim \
+	smoothim \
 	solidlt \
 	subim \
 	sublt \
@@ -106,6 +110,7 @@ all: \
 	subrflt \
 	sumim \
 	sumlt \
+	sumresim \
 	sumrf \
 	swapmw \
 	symlt \
@@ -206,6 +211,8 @@ genlat:genlat.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 genmap:genmap.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+getrim:getrim.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 gmparse:gmparse.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 hdrlt:hdrlt.c ${DEPENDS}
@@ -224,11 +231,15 @@ intimdf:intimdf.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 lat2vtk:lat2vtk.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+lowrim:lowrim.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 map2lat:map2lat.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 mapbound:mapbound.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 maskimg:maskimg.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+mathim:mathim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 medim:medim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -268,19 +279,19 @@ rad2s:rad2s.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 ratioim:ratioim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-rbavrim:rbavrim.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 rbminrim:rbminrim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 revbytelt:revbytelt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-rf2char:rf2char.c ${DEPENDS}
+rf2char2:rf2char2.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 rf2lt:rf2lt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 rfaclt:rfaclt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 rmpkim:rmpkim.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+rmsdim:rmsdim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 scaleim:scaleim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -300,7 +311,7 @@ shim4lt:shim4lt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 shimlt:shimlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-smthim:smthim.c ${DEPENDS}
+smoothim:smoothim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 solidlt:solidlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -317,6 +328,8 @@ subrflt:subrflt.c ${DEPENDS}
 sumim:sumim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 sumlt:sumlt.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+sumresim:sumresim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 sumrf:sumrf.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -386,16 +399,20 @@ lexplt.o:lexplt.c mwmask.h
 lfft.o:lfft.c mwmask.h
 lfreeim.o:lfreeim.c mwmask.h
 lfreelt.o:lfreelt.c mwmask.h
+lfrmsdim.o:lfrmsdim.c mwmask.h
 lgausslt.o:lgausslt.c mwmask.h
 lgensv.o:lgensv.c mwmask.h
 lgetanls.o:lgetanls.c mwmask.h
 lgetmat.o:lgetmat.c mwmask.h
 lgetovld.o:lgetovld.c mwmask.h
 lgetpks.o:lgetpks.c mwmask.h
+lgetrim.o:lgetrim.c mwmask.h
 lgettag.o:lgettag.c mwmask.h
 linitim.o:linitim.c mwmask.h
 linitlt.o:linitlt.c mwmask.h
 lintdfim.o:lintdfim.c mwmask.h
+llowrim.o:llowrim.c mwmask.h
+lmathim.o:lmathim.c mwmask.h
 lmattools.o:lmattools.c mwmask.h
 lmedim.o:lmedim.c mwmask.h
 lmin.o:lmin.c mwmask.h
@@ -415,7 +432,6 @@ lpolarim.o:lpolarim.c mwmask.h
 lpunch.o:lpunch.c mwmask.h
 lpunchim.o:lpunchim.c mwmask.h
 lratioim.o:lratioim.c mwmask.h
-lrbavrim.o:lrbavrim.c mwmask.h
 lrbminrim.o:lrbminrim.c mwmask.h
 lreadcbf.o:lreadcbf.c mwmask.h
 lreaddf.o:lreaddf.c mwmask.h
@@ -428,12 +444,14 @@ lreadvtk.o:lreadvtk.c mwmask.h
 lrf2lt.o:lrf2lt.c mwmask.h
 lrfaclt.o:lrfaclt.c mwmask.h
 lrmpkim.o:lrmpkim.c mwmask.h
+lrmsdim.o:lrmsdim.c mwmask.h
 lscaleim.o:lscaleim.c mwmask.h
 lscalelt.o:lscalelt.c mwmask.h
 lsettag.o:lsettag.c mwmask.h
 lshim4lt.o:lshim4lt.c mwmask.h
 lshimlt.o:lshimlt.c mwmask.h
-lsmthim.o:lsmthim.c mwmask.h
+lsmoothrf.o:lsmoothrf.c mwmask.h
+lsmoothim.o:lsmoothim.c mwmask.h
 lsolidlt.o:lsolidlt.c mwmask.h
 lsubim.o:lsubim.c mwmask.h
 lsublt.o:lsublt.c mwmask.h
@@ -442,6 +460,7 @@ lsubrfim.o:lsubrfim.c mwmask.h
 lsubrflt.o:lsubrflt.c mwmask.h
 lsumim.o:lsumim.c mwmask.h
 lsumlt.o:lsumlt.c mwmask.h
+lsumresim.o:lsumresim.c mwmask.h
 lsumrf.o:lsumrf.c mwmask.h
 lsymlt.o:lsymlt.c mwmask.h
 ltagim.o:ltagim.c mwmask.h
@@ -464,7 +483,7 @@ lxfmask.o:lxfmask.c mwmask.h
 .c.o:
 	$(CC) -c -o ${L}/$*.o $(CFLAGS) ${L}/$*.c
 #
-# Libraries:
+# Libraries: 
 #
 libmw.a: \
 	lavgim.o \
@@ -496,17 +515,21 @@ libmw.a: \
 	lfft.o \
 	lfreeim.o \
 	lfreelt.o \
+	lfrmsdim.o \
 	lgausslt.o \
 	lgensv.o \
 	lgetanls.o \
 	lgetmat.o \
 	lgetovld.o \
 	lgetpks.o \
+	lgetrim.o \
 	lgettag.o \
 	linitim.o \
 	linitlt.o \
 	lintdfim.o \
+	llowrim.o \
 	lmattools.o \
+	lmathim.o \
 	lmedim.o \
 	lmin.o \
 	lminr.o \
@@ -525,7 +548,6 @@ libmw.a: \
 	lpunch.o \
 	lpunchim.o \
 	lratioim.o \
-	lrbavrim.o \
 	lrbminrim.o \
 	lreadcbf.o \
 	lreaddf.o \
@@ -538,12 +560,14 @@ libmw.a: \
 	lrf2lt.o \
 	lrfaclt.o \
 	lrmpkim.o \
+	lrmsdim.o \
 	lscaleim.o \
 	lscalelt.o \
 	lsettag.o \
 	lshim4lt.o \
 	lshimlt.o \
-	lsmthim.o \
+	lsmoothim.o \
+	lsmoothrf.o \
 	lsolidlt.o \
 	lsubim.o \
 	lsublt.o \
@@ -552,6 +576,7 @@ libmw.a: \
 	lsubrflt.o \
 	lsumim.o \
 	lsumlt.o \
+	lsumresim.o \
 	lsumrf.o \
 	lsymlt.o \
 	ltagim.o \

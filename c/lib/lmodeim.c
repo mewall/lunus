@@ -55,23 +55,23 @@ int lmodeim(DIFFIMAGE *imdiff)
     goto CloseShop;
   }
 
-
   half_height = imdiff->mode_height / 2;
   half_width = imdiff->mode_width / 2;
   index = 0;
 
+
   size_t j;
 
 #ifdef USE_OPENMP
-  //  printf("Using OpenMP\n");
-#pragma omp parallel shared(imdiff,image,half_height,half_width,avg_max_count,avg_max_count_count,num_max_count_1) private(j)
+    printf("Using OpenMP\n");
+#pragma omp parallel shared(imdiff,image,half_height,half_width,avg_max_count,avg_max_count_count) private(j)
   {
     #pragma omp for schedule(dynamic,1)
 #endif
   for (j=0; j<imdiff->vpixels; j++) {
     size_t i;
     size_t *count;
-    count = (size_t *)calloc(65537,sizeof(size_t)); //hard-coded value needs to go
+    count = (size_t *)calloc(MAX_IMAGE_DATA_VALUE+32769,sizeof(size_t)); 
     size_t *count_pointer;
     count_pointer = (size_t *)calloc((imdiff->mode_height+1) *
 				     (imdiff->mode_width+1), 
@@ -94,11 +94,6 @@ int lmodeim(DIFFIMAGE *imdiff)
 	    if (!((r < 0) || (r >= imdiff->vpixels) || (c < 0) ||       
 		  (c >= imdiff->hpixels))) {
 	      imd_index = index + n*imdiff->hpixels + m;
-	      if (imd_index == 4343800) {
-		printf("j=%u\ni=%u\nn=%d\nm=%d\nimdiff->hpixels=%d\n",(unsigned int)j,(unsigned int)i,n,m,imdiff->hpixels);
-		printf("index=%u\nimd_index=%u\n", (unsigned int)index, (unsigned int)imd_index);
-	      fflush(stdout);
-	      }
 	      if ((imdiff->image[imd_index] != imdiff->overload_tag) &&
 		  (imdiff->image[imd_index] != imdiff->ignore_tag)) {
 		count_pointer[l]=(imdiff->image[imd_index] - 

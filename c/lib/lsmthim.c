@@ -71,6 +71,7 @@ int lsmthim(DIFFIMAGE *imdiff)
 	  index++;
         }
       }
+	      printf("%f\n", imdiff->weights[weights_index]); 
       weights_index++;
     }
   }

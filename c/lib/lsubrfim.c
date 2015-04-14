@@ -8,7 +8,7 @@
 
 #include<mwmask.h>
 
-int lsubrfim(DIFFIMAGE *imdiff)
+int lsubrfim(DIFFIMAGE *imdiff, float scale)
 {
 	size_t
 		r,
@@ -31,7 +31,7 @@ int lsubrfim(DIFFIMAGE *imdiff)
 	        if ((imdiff->image[index] != imdiff->overload_tag) &&
 		    (imdiff->image[index] != imdiff->ignore_tag)) {
 		  imdiff->image[index] -= 
-			(IMAGE_DATA_TYPE)(imdiff->rfile[radius]); 
+			scale*(IMAGE_DATA_TYPE)(imdiff->rfile[radius]); 
 	        }
 	      }
 	      else {

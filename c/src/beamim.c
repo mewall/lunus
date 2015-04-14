@@ -64,8 +64,7 @@ int main(int argc, char *argv[])
 			break;
 		default:
 			printf("\n Usage: beamim <input file> "
-				"<image in> <image out> <x origin> "
-				"<y origin>\n\n");
+				"<image in> <image out>\n\n");
 			exit(0);
 	}
  

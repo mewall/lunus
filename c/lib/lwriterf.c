@@ -24,8 +24,5 @@ int lwriterf(DIFFIMAGE *imdiff)
 		"rfile.\n\n", num_wrote);
     return_value = 1;
   }
-  printf("rfile length = %d\n", imdiff->rfile_length);
-  printf("sizeof(RFILE_DATA_TYPE) = %d\n", sizeof(RFILE_DATA_TYPE));
-  printf("num_wrote = %d\n", num_wrote);
   return(return_value);
 }
