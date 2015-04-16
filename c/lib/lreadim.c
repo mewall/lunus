@@ -130,8 +130,9 @@ const char * getTag(const char *target,const char *tag)
       pos_begin = pos_tmp;
     }
   }
+  printf("Reading tag %s\n",tag);
   if ((pos_begin = strstr(target,tag)) == NULL) {
-    //printf("\nWarning: Couldn't find tag %s in image header\n\n",tag);
+    printf("\nWarning: Couldn't find tag %s in image header\n\n",tag);
     return(NULL);
   }
   if ((pos_begin = strchr(pos_begin,'='))==NULL) {
