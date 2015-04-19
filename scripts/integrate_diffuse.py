@@ -162,6 +162,14 @@ if __name__=="__main__":
     ifname = "genlat.input"
   else:
     ifname = args.pop(ifnameidx).split("=")[1]
+  # frame number
+  try:
+    framenumidx = [a.find("framenum")==0 for a in args].index(True)
+  except ValueError:
+    framenum=-1
+  else:
+    framenum=int(args.pop(framenumidx).split("=")[1])
+    print "integrating frame ",framenum
   # output diffuse lattice file
   try:
     ofnameidx = [a.find("diffuse.lattice.fname")==0 for a in args].index(True)
@@ -169,27 +177,53 @@ if __name__=="__main__":
     ofname = "diffuse.vtk"
   else:
     ofname = args.pop(ofnameidx).split("=")[1]
+  # output diffuse lattice file
+  try:
+    cfnameidx = [a.find("counts.lattice.fname")==0 for a in args].index(True)
+  except ValueError:
+    cfname = "counts.vtk"
+  else:
+    cfname = args.pop(cfnameidx).split("=")[1]
+  # type of lattice output. "sum" = sum, "mean" = mean
+  try:
+    lattypeidx = [a.find("diffuse.lattice.type")==0 for a in args].index(True)
+  except ValueError:
+    lattype = "mean"
+  else:
+    lattype = args.pop(lattypeidx).split("=")[1]
+    if not((lattype == "sum") or (lattype == "mean")):
+      raise Exception,"Lattice type must be ""sum"" or ""mean"""
   # size of diffuse lattice in x direction
   try:
     latxdimidx = [a.find("latxdim")==0 for a in args].index(True)
   except ValueError:
-    latxdim = -1
+    if (residx == -1):
+        latxdim = -1
   else:
     latxdim = int(args.pop(latxdimidx).split("=")[1])
   # size of diffuse lattice in y direction
   try:
     latydimidx = [a.find("latydim")==0 for a in args].index(True)
   except ValueError:
-    latydim = -1
+    if (residx == -1):
+        latydim = -1
   else:
     latydim = int(args.pop(latydimidx).split("=")[1])
   # size of diffuse lattice in z direction
   try:
     latzdimidx = [a.find("latzdim")==0 for a in args].index(True)
   except ValueError:
-    latzdim = -1
+    if (residx == -1):
+        latzdim = -1
   else:
     latzdim = int(args.pop(latzdimidx).split("=")[1])
+  # specify path to proc directory
+  try:
+    procpathidx = [a.find("path.to.proc")==0 for a in args].index(True)
+  except ValueError:
+    procpath="."
+  else:
+    procpath = args.pop(procpathidx).split("=")[1]
   # read indexing info from a file instead of calculating (not implemented)
   try:
     readindexidx = [a.find("readindex")==0 for a in args].index(True)
@@ -206,9 +240,12 @@ if __name__=="__main__":
   # read input file with list of diffraction images and scale factors
   f = open(ifname,"r")
   lines = []
+  linenum = 1
   for line in f:
     if ((line.strip()!="") and (line[0] != '.')):
-      lines.append(line)
+      if ((framenum == -1) or (framenum == linenum)):
+        lines.append(line)
+      linenum = linenum + 1
   f.close()
 
   from spotfinder.applications.xfel import cxi_phil
@@ -222,6 +259,7 @@ if __name__=="__main__":
   print "done indexing (",tel," sec)"
 
   latsize = latxdim*latydim*latzdim
+  print "Lattice size = ",latsize
   lat = np.zeros(latsize, dtype=np.float32)
   ct = np.zeros(latsize, dtype=np.float32)
 
@@ -243,7 +281,7 @@ if __name__=="__main__":
     # parse the input file line into a diffuse image file name and scale factor
     words = line.split()
 
-    imgname = words[1]
+    imgname = os.path.join(procpath+"/"+words[1])
     scale = float(words[2])
 
     print "processing file %s with scale factor %f"%(imgname,scale)
@@ -294,7 +332,7 @@ if __name__=="__main__":
     Isize1 = I.size1
     Isize2 = I.size2
     # prepare list of arguments to run procimg in parallel
-    tasks = [(Isize2,Isize2,scale,mask_tag,A_matrix,rvec,DATA,latxdim,latydim,latzdim,procid) for procid in range(nproc)]
+    tasks = [(Isize1,Isize2,scale,mask_tag,A_matrix,rvec,DATA,latxdim,latydim,latzdim,procid) for procid in range(nproc)]
     # run procimg in parallel and collect results
     latit = pool.map(procimgstar,tasks)
     tel = clock()-t0
@@ -307,14 +345,15 @@ if __name__=="__main__":
     tel = clock()-t0
     print "Took ",tel," secs to update the lattice"
 
-  # compute the mean intensity at each lattice point
-  for index in range(0,latsize):
-    if ((ct[index] > 0) and (lat[index] != mask_tag)):
-      lat[index] /= ct[index]
-    else:
-      lat[index] = -32768
+  if (lattype == "mean"):
+      # compute the mean intensity at each lattice point
+      for index in range(0,latsize):
+          if ((ct[index] > 0) and (lat[index] != mask_tag)):
+              lat[index] /= ct[index]
+          else:
+              lat[index] = -32768
 
-  # write results to output file
+  # write lattice to output file
   vtkfile = open(ofname,"w")
 
   a_recip = 1./cella
@@ -339,3 +378,33 @@ if __name__=="__main__":
         print >>vtkfile,lat[index],
         index += 1
       print >>vtkfile,""
+
+  vtkfile.close()
+
+  # write counts lattice to output file, if lattice type is "sum"
+  vtkfile = open(cfname,"w")
+
+  a_recip = 1./cella
+  b_recip = 1./cellb
+  c_recip = 1./cellc
+
+  print >>vtkfile,"# vtk DataFile Version 2.0"
+  print >>vtkfile,"Generated using labelit tools"
+  print >>vtkfile,"ASCII"
+  print >>vtkfile,"DATASET STRUCTURED_POINTS"
+  print >>vtkfile,"DIMENSIONS %d %d %d"%(latxdim,latydim,latzdim)
+  print >>vtkfile,"SPACING %f %f %f"%(a_recip,b_recip,c_recip)
+  print >>vtkfile,"ORIGIN %f %f %f"%(-i0*a_recip,-j0*b_recip,-k0*c_recip)
+  print >>vtkfile,"POINT_DATA %d"%(latsize)
+  print >>vtkfile,"SCALARS volume_scalars float 1"
+  print >>vtkfile,"LOOKUP_TABLE default\n"
+
+  index = 0
+  for k in range(0,latzdim):
+    for j in range(0,latydim):
+      for i in range(0,latxdim):
+        print >>vtkfile,ct[index],
+        index += 1
+      print >>vtkfile,""
+
+  vtkfile.close()
