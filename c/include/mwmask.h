@@ -662,6 +662,7 @@ int lmulscmap(CCP4MAP *map);
 int lnign(DIFFIMAGE *imdiff);
 int lnoiseim(DIFFIMAGE *imdiff);
 int lnormim(DIFFIMAGE *imdiff);
+int lnormlt(LAT3D *lat);
 int lpadlt(LAT3D *lat);
 int lpeakim(DIFFIMAGE *imdiff);
 int lpolarim(DIFFIMAGE *imdiff);
