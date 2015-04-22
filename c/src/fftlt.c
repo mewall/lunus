@@ -166,10 +166,11 @@ int main(int argc, char *argv[])
 
 printf("Preparing lattice...\n");/***/
   fft_index = 1; /* Data array starts at position 1 */
-  for(i=0;i<64;i++) {
-    for(j=0;j<64;j++) {
-      for(k=0;k<64;k++) {
-	lat_index = 4096*((k+31)%64) + 64*((j+31)%64) + (i+31)%64;
+  for(i=0;i<lat->xvoxels;i++) {
+    for(j=0;j<lat->yvoxels;j++) {
+      for(k=0;k<lat->zvoxels;k++) {
+	//	lat_index = 4096*((k+31)%64) + 64*((j+31)%64) + (i+31)%64;
+	lat_index = lat->xyvoxels*((k+lat->origin.k)%lat->zvoxels) + lat->xvoxels*((j+lat->origin.j)%lat->yvoxels) + (i+lat->origin.i)%lat->xvoxels;
 	fft_data[fft_index] = (float)lattice1[lat_index];
 	fft_data[fft_index+1] = (float)lattice2[lat_index];
 /*
@@ -202,10 +203,11 @@ printf("...done.\n");
 printf("Extracting lattice...\n");/***/
   fft_index = 1; /* Data array starts at position 1 */
   lat_index = 0;
-  for(i=0;i<64;i++) {
-    for(j=0;j<64;j++) {
-      for(k=0;k<64;k++) {
-	lat_index = 4096*((k+31)%64) + 64*((j+31)%64) + (i+31)%64;
+  for(i=0;i<lat->xvoxels;i++) {
+    for(j=0;j<lat->yvoxels;j++) {
+      for(k=0;k<lat->zvoxels;k++) {
+	//	lat_index = 4096*((k+31)%64) + 64*((j+31)%64) + (i+31)%64;
+	lat_index = lat->xyvoxels*((k+lat->origin.k)%lat->zvoxels) + lat->xvoxels*((j+lat->origin.j)%lat->yvoxels) + (i+lat->origin.i)%lat->xvoxels;
 	if (isign == -1) {
 	  lattice1[lat_index] = 1./inverse_scale * 
 	    (LATTICE_DATA_TYPE)fft_data[fft_index];

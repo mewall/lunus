@@ -30,11 +30,13 @@ all: \
 	binasc \
 	buttim \
 	calcu \
+	ccp4map2lat \
 	ccrlt \
 	constim \
 	constlt \
 	constrf \
 	corrlt \
+	cube2map \
 	culllt \
 	cutim \
 	dat2vtk \
@@ -177,6 +179,8 @@ buttim:buttim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 calcu:calcu.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+ccp4map2lat:ccp4map2lat.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 ccrlt:ccrlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 constim:constim.c ${DEPENDS}
@@ -186,6 +190,8 @@ constlt:constlt.c ${DEPENDS}
 constrf:constrf.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 corrlt:corrlt.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+cube2map:cube2map.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 culllt:culllt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -411,6 +417,7 @@ lconstim.o:lconstim.c mwmask.h
 lconstlt.o:lconstlt.c mwmask.h
 lconstrf.o:lconstrf.c mwmask.h
 lcorrlt.o:lcorrlt.c mwmask.h
+lcpmaplt.o:lcpmaplt.c mwmask.h
 lculllt.o:lculllt.c mwmask.h
 lcutim.o:lcutim.c mwmask.h
 ldf2im.o:ldf2im.c mwmask.h
@@ -532,6 +539,7 @@ libmw.a: \
 	lconstlt.o \
 	lconstrf.o \
 	lcorrlt.o \
+	lcpmaplt.o \
 	lculllt.o \
 	lcutim.o \
 	ldf2im.o \

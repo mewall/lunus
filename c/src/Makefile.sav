@@ -30,11 +30,13 @@ all: \
 	binasc \
 	buttim \
 	calcu \
+	ccp4map2lat \
 	ccrlt \
 	constim \
 	constlt \
 	constrf \
 	corrlt \
+	cube2map \
 	culllt \
 	cutim \
 	dat2vtk \
@@ -81,6 +83,7 @@ all: \
 	noiseim \
 	normim \
 	normim_tv6 \
+	normlt \
 	ovldim \
 	pattim \
 	peakim \
@@ -176,6 +179,8 @@ buttim:buttim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 calcu:calcu.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+ccp4map2lat:ccp4map2lat.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 ccrlt:ccrlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 constim:constim.c ${DEPENDS}
@@ -185,6 +190,8 @@ constlt:constlt.c ${DEPENDS}
 constrf:constrf.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 corrlt:corrlt.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+cube2map:cube2map.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 culllt:culllt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -277,6 +284,8 @@ noiseim:noiseim.c ${DEPENDS}
 normim:normim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 normim_tv6:normim_tv6.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+normlt:normlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 ovldim:ovldim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -447,6 +456,7 @@ lmulsclt.o:lmulsclt.c mwmask.h
 lnign.o:lnign.c mwmask.h
 lnoiseim.o:lnoiseim.c mwmask.h
 lnormim.o:lnormim.c mwmask.h
+lnormlt.o:lnormlt.c mwmask.h
 lpeakim.o:lpeakim.c mwmask.h
 lpolarim.o:lpolarim.c mwmask.h
 lpunch.o:lpunch.c mwmask.h
@@ -567,6 +577,7 @@ libmw.a: \
 	lnign.o \
 	lnoiseim.o \
 	lnormim.o \
+	lnormlt.o \
 	lpeakim.o \
 	lpolarim.o \
 	lpunch.o \

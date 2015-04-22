@@ -182,24 +182,29 @@ int lreadcube(CCP4MAP *map)
   map->amin = amin; // 20
   map->amax = amax; // 21
   map->amean = amean; // 22
+  // Space group 1
+  map->ispg = 1;
+  map->nsymbt = 80;
   // Space group 113
-  map->ispg = 113; 
-  map->nsymbt = 640;
+  //  map->ispg = 113; 
+  //  map->nsymbt = 640;
   // Generate symmetry info for P21 map, generalize this later
   //  map->ispg = 4; // 23
   //  map->nsymbt = 160; // 24. Two lines of symmetry info
   map->machst = DEFAULT_MACHST;
   map->symrec_buf = (void *)realloc(map->symrec_buf,(map->nsymbt+1)*sizeof(void));
   map->symrec = (char *)map->symrec_buf;
-  // Space group 113
+  // Space group 1
   sprintf(&map->symrec[0],"X,Y,Z");
-  sprintf(&map->symrec[80],"Y,-X,-Z");
-  sprintf(&map->symrec[160],"-X,-Y,Z");
-  sprintf(&map->symrec[240],"-Y,X,-Z");
-  sprintf(&map->symrec[320],"X+1/2,-Y+1/2,-Z");
-  sprintf(&map->symrec[400],"-Y+1/2,-X+1/2,Z");
-  sprintf(&map->symrec[480],"-X+1/2,Y+1/2,-Z");
-  sprintf(&map->symrec[560],"Y+1/2,X+1/2,Z");
+  // Space group 113
+  //  sprintf(&map->symrec[0],"X,Y,Z");
+  //  sprintf(&map->symrec[80],"Y,-X,-Z");
+  //  sprintf(&map->symrec[160],"-X,-Y,Z");
+  //  sprintf(&map->symrec[240],"-Y,X,-Z");
+  //  sprintf(&map->symrec[320],"X+1/2,-Y+1/2,-Z");
+  //  sprintf(&map->symrec[400],"-Y+1/2,-X+1/2,Z");
+  //  sprintf(&map->symrec[480],"-X+1/2,Y+1/2,-Z");
+  //  sprintf(&map->symrec[560],"Y+1/2,X+1/2,Z");
   // P21 symmetry
   //sprintf(&map->symrec[0],"X,Y,Z");
   //sprintf(&map->symrec[80],"-X,1/2+Y,-Z");
