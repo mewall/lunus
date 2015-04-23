@@ -15,6 +15,7 @@ all: \
 	addbeam \
 	addosc \
 	addtag \
+	anisoult \
 	avgim \
 	avgpolim \
 	avgr \
@@ -148,6 +149,8 @@ addbeam:addbeam.c ${DEPENDS}
 addosc:addosc.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 addtag:addtag.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+anisoult:anisoult.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 avgim:avgim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -400,6 +403,7 @@ xpl2mw:xpl2mw.c ${DEPENDS}
 #
 # Library functions:
 #
+lanisoult.o:lanisoult.c mwmask.h
 lavgim.o:lavgim.c mwmask.h
 lavgpolim.o:lavgpolim.c mwmask.h
 lavgr.o:lavgr.c mwmask.h
@@ -522,6 +526,7 @@ lxfmask.o:lxfmask.c mwmask.h
 # Libraries:
 #
 libmw.a: \
+	lanisoult.o \
 	lavgim.o \
 	lavgpolim.o \
 	lavgr.o \

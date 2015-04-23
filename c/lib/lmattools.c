@@ -44,6 +44,31 @@ struct xyzmatrix lmatmul(struct xyzmatrix a, struct xyzmatrix b)
   return c;
 }
 
+struct xyzmatrix lmatinv(struct xyzmatrix a)
+{
+  struct xyzmatrix b;
+
+  int i;
+
+  float determinant = a.xx*a.yy*a.zz+a.xy*a.yz*a.zx+a.xz*a.yx*a.zy-a.xx*a.yz*a.zy-a.xy*a.yx*a.zz-a.xz*a.yy*a.zx;
+
+  //  printf("Determinant = %f\n",determinant);
+
+  float invdet = 1/determinant;
+
+  b.xx = (a.yy*a.zz-a.zy*a.yz)*invdet;
+  b.xy = (a.xz*a.zy-a.zz*a.xy)*invdet;
+  b.xz = (a.xy*a.yz-a.yy*a.xz)*invdet;
+  b.yx = (a.yz*a.zx-a.zz*a.yx)*invdet;
+  b.yy = (a.xx*a.zz-a.zx*a.xz)*invdet;
+  b.yz = (a.xz*a.yx-a.yz*a.xx)*invdet;
+  b.zx = (a.yx*a.zy-a.zx*a.yy)*invdet;
+  b.zy = (a.xy*a.zx-a.zy*a.xx)*invdet;
+  b.zz = (a.xx*a.yy-a.yx*a.xy)*invdet;
+
+  return b;
+}
+
 struct xyzcoords lmatvecmul(struct xyzmatrix b,struct xyzcoords a)
 {
   struct xyzcoords c;

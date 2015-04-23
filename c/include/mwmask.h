@@ -597,12 +597,14 @@ typedef struct {
 				/* operation */
   int axis;                     /* Axis of rotation */
   float angle;                  /* Angle of rotation */
+  struct xyzmatrix anisoU;      /* anisotropic U matrix */
 } LAT3D;
 
 /*
  * Subroutines:
  */
 
+int lanisoult(LAT3D *lat);
 int lavgim(DIFFIMAGE *imdiff);
 int lavgr(LAT3D *lat);
 int lavgrf(DIFFIMAGE *imdiff1);
@@ -646,6 +648,7 @@ LAT3D *linitlt(void);
 CCP4MAP *linitmap(void);
 int lintdfim(DIFFIMAGE *imdiff);
 int lliquidfaclt(LAT3D *lat);
+struct xyzmatrix lmatinv(struct xyzmatrix a);
 struct xyzmatrix lmatmul(struct xyzmatrix a, struct xyzmatrix b);
 int lmedim(DIFFIMAGE *imdiff);
 size_t lmin(size_t arg1, size_t arg2);
