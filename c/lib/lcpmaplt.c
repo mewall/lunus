@@ -39,9 +39,20 @@ int lcpmaplt(CCP4MAP *map, LAT3D *lat)
    * Set lattice header info
    */
 
-  lat->xvoxels = map->nr; // MAPR = 1
-  lat->yvoxels = map->ns; // MAPS = 2
-  lat->zvoxels = map->nc; // MAPC = 3
+  if (map->mapc == 3 || map->mapr == 1 || map->maps == 2) {
+    lat->xvoxels = map->nr; // MAPR = 1
+    lat->yvoxels = map->ns; // MAPS = 2
+    lat->zvoxels = map->nc; // MAPC = 3
+  } else if (map->mapc == 3 || map->mapr == 2 || map->maps == 1) {
+    lat->yvoxels = map->nr; // MAPR = 2
+    lat->xvoxels = map->ns; // MAPS = 1
+    lat->zvoxels = map->nc; // MAPC = 3
+  } else {
+    printf("\nUnrecognized CCP4 map x,y,z definitions (MAPC,MAPR,MAPS) = (%d,%d,%d)\n\n",map->mapc,map->mapr,map->maps);
+    return_value = 4;
+    exit(return_value);
+  }
+
   lat->xyvoxels = lat->xvoxels*lat->yvoxels;
   lat->lattice_length = lat->xyvoxels*lat->zvoxels;
   // Reallocate lattice

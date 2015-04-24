@@ -65,6 +65,7 @@ all: \
 	intdfim \
 	intimdf \
 	lat2hkl \
+	lat2map \
 	lat2vtk \
 	liquidfaclt \
 	map2lat \
@@ -250,6 +251,8 @@ intimdf:intimdf.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 lat2hkl:lat2hkl.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+lat2map:lat2map.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 lat2vtk:lat2vtk.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 liquidfaclt:liquidfaclt.c ${DEPENDS}
@@ -421,6 +424,7 @@ lconstim.o:lconstim.c mwmask.h
 lconstlt.o:lconstlt.c mwmask.h
 lconstrf.o:lconstrf.c mwmask.h
 lcorrlt.o:lcorrlt.c mwmask.h
+lcpltmap.o:lcpltmap.c mwmask.h
 lcpmaplt.o:lcpmaplt.c mwmask.h
 lculllt.o:lculllt.c mwmask.h
 lcutim.o:lcutim.c mwmask.h
@@ -544,6 +548,7 @@ libmw.a: \
 	lconstlt.o \
 	lconstrf.o \
 	lcorrlt.o \
+	lcpltmap.o \
 	lcpmaplt.o \
 	lculllt.o \
 	lcutim.o \

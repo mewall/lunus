@@ -622,6 +622,7 @@ int lconstim(DIFFIMAGE *imdiff);
 int lconstlt(LAT3D *lat);
 int lconstrf(DIFFIMAGE *imdiff);
 float lcorrlt(LAT3D *lat1, LAT3D *lat2);
+int lcpltmap(LAT3D *lat,CCP4MAP *map);
 int lcpmaplt(CCP4MAP *map, LAT3D *lat);
 int lculllt(LAT3D *lat);
 int lcutim(DIFFIMAGE *imdiff);
