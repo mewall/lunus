@@ -224,7 +224,7 @@ if __name__=="__main__":
   try:
     procpathidx = [a.find("path.to.proc")==0 for a in args].index(True)
   except ValueError:
-    procpath="."
+    procpath=""
   else:
     procpath = args.pop(procpathidx).split("=")[1]
   # read indexing info from a file instead of calculating (not implemented)

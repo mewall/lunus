@@ -30,6 +30,8 @@ int ldivlt(LAT3D *lat1, LAT3D *lat2)
 	  }
 	  if (lat2->lattice[index]!=0) {
 	    lat1->lattice[index] /= lat2->lattice[index];
+	  } else {
+	    lat1->lattice[index] = lat1->mask_tag;
 	  }
 	}
 	else {
