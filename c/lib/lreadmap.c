@@ -110,6 +110,9 @@ int lreadmap(CCP4MAP *map)
   printf("NC = %d\n",map->nc);
   printf("NR = %d\n",map->nr);
   printf("NS = %d\n",map->ns);
+  printf("NX = %d\n",map->nx);
+  printf("NY = %d\n",map->ny);
+  printf("NZ = %d\n",map->nz);
   printf("NCstart, NRstart, NSstart = %d, %d, %d\n",map->ncstart,map->nrstart,map->nsstart);
   printf("MODE = %d\n",map->mode);
   printf("XLEN = %f\n",map->xlen);

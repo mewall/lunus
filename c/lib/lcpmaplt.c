@@ -39,11 +39,11 @@ int lcpmaplt(CCP4MAP *map, LAT3D *lat)
    * Set lattice header info
    */
 
-  if (map->mapc == 3 || map->mapr == 1 || map->maps == 2) {
+  if (map->mapc == 3 && map->mapr == 1 && map->maps == 2) {
     lat->xvoxels = map->nr; // MAPR = 1
     lat->yvoxels = map->ns; // MAPS = 2
     lat->zvoxels = map->nc; // MAPC = 3
-  } else if (map->mapc == 3 || map->mapr == 2 || map->maps == 1) {
+  } else if (map->mapc == 3 && map->mapr == 2 && map->maps == 1) {
     lat->yvoxels = map->nr; // MAPR = 2
     lat->xvoxels = map->ns; // MAPS = 1
     lat->zvoxels = map->nc; // MAPC = 3
@@ -79,7 +79,7 @@ int lcpmaplt(CCP4MAP *map, LAT3D *lat)
    * Copy data
    */  
 
-  if (map->mapc == 3 || map->mapr == 1 || map->maps == 2) {
+  if (map->mapc == 3 && map->mapr == 1 && map->maps == 2) {
     for (s = 0; s < map->ns; s++) {
       j = s;
       for (r = 0; r < map->nr; r++) {
@@ -92,7 +92,7 @@ int lcpmaplt(CCP4MAP *map, LAT3D *lat)
 	}
       }
     } 
-  } else if (map->mapc == 3 || map->mapr == 2 || map->maps == 1) {
+  } else if (map->mapc == 3 && map->mapr == 2 && map->maps == 1) {
     for (s = 0; s < map->ns; s++) {
       i = s;
       for(r = 0; r < map->nr; r++) {

@@ -1,6 +1,6 @@
 VPATH=${C_HOME}/src:${C_HOME}/lib:${C_HOME}/bin:${C_HOME}/include
-#CC=gcc-mp-4.9
-CC=gcc
+CC=gcc-mp-4.9
+#CC=gcc
 CFLAGS= -g -fopenmp -DUSE_OPENMP -L${C_HOME}/lib -I${C_HOME}/include
 #CFLAGS= -g -w -L${C_HOME}/lib -I${C_HOME}/include
 AR=ar
@@ -21,11 +21,9 @@ all: \
 	avgr \
 	avgrf \
 	avgrim \
-	avgrim_tv6 \
 	avgrlt \
 	avgsqim \
 	avsqrim \
-	avsqrim_tv6 \
 	avsqrlt \
 	beamim \
 	binasc \
@@ -41,6 +39,7 @@ all: \
 	culllt \
 	cutim \
 	dat2vtk \
+	decimap \
 	df2im \
 	dfrflt \
 	dfsqrlt \
@@ -84,7 +83,6 @@ all: \
 	nign \
 	noiseim \
 	normim \
-	normim_tv6 \
 	normlt \
 	ovldim \
 	pattim \
@@ -117,7 +115,6 @@ all: \
 	sublt \
 	subrf \
 	subrfim \
-	subrfim_tv6 \
 	subrflt \
 	sumim \
 	sumlt \
@@ -163,15 +160,11 @@ avgrf:avgrf.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 avgrim:avgrim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-avgrim_tv6:avgrim_tv6.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 avgrlt:avgrlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 avgsqim:avgsqim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 avsqrim:avsqrim.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-avsqrim_tv6:avsqrim_tv6.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 avsqrlt:avsqrlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -202,6 +195,8 @@ culllt:culllt.c ${DEPENDS}
 cutim:cutim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 dat2vtk:dat2vtk.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+decimap:decimap.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 df2im:df2im.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -289,8 +284,6 @@ noiseim:noiseim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 normim:normim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-normim_tv6:normim_tv6.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 normlt:normlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 ovldim:ovldim.c ${DEPENDS}
@@ -354,8 +347,6 @@ sublt:sublt.c ${DEPENDS}
 subrf:subrf.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 subrfim:subrfim.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-subrfim_tv6:subrfim_tv6.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 subrflt:subrflt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -428,6 +419,7 @@ lcpltmap.o:lcpltmap.c mwmask.h
 lcpmaplt.o:lcpmaplt.c mwmask.h
 lculllt.o:lculllt.c mwmask.h
 lcutim.o:lcutim.c mwmask.h
+ldecimap.o:ldecimap.c mwmask.h
 ldf2im.o:ldf2im.c mwmask.h
 ldfrflt.o:ldfrflt.c mwmask.h
 ldfsqrlt.o:ldfsqrlt.c mwmask.h
@@ -552,6 +544,7 @@ libmw.a: \
 	lcpmaplt.o \
 	lculllt.o \
 	lcutim.o \
+	ldecimap.o \
 	ldf2im.o \
 	ldfrflt.o \
 	ldfsqrlt.o \

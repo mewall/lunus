@@ -45,7 +45,7 @@ int lcpltmap(LAT3D *lat,CCP4MAP *map)
     exit(0);
   }
 
-  if (map->mapc == 3 || map->mapr == 1 || map->maps == 2) {
+  if (map->mapc == 3 && map->mapr == 1 && map->maps == 2) {
     for (s = 0; s < map->ns; s++) {
       j = s;
       for (r = 0; r < map->nr; r++) {
@@ -58,7 +58,7 @@ int lcpltmap(LAT3D *lat,CCP4MAP *map)
 	}
       }
     } 
-  } else if (map->mapc == 3 || map->mapr == 2 || map->maps == 1) {
+  } else if (map->mapc == 3 && map->mapr == 2 && map->maps == 1) {
     for (s = 0; s < map->ns; s++) {
       i = s;
       for(r = 0; r < map->nr; r++) {

@@ -542,6 +542,7 @@ typedef struct {
   void *symrec_buf;
   char *symrec;
   void *data_buf;
+  int decimation_factor;
   MAP_DATA_TYPE *data;
   MAP_DATA_TYPE scale_factor;
 } CCP4MAP;
