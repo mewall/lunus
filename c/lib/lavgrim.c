@@ -40,5 +40,5 @@ int lavgrim(DIFFIMAGE *imdiff)
 	    index++;
 	  }
 	}
-	free((size_t *)n);
+	//	free(n);
 }

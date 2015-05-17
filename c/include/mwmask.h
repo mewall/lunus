@@ -543,6 +543,7 @@ typedef struct {
   char *symrec;
   void *data_buf;
   int decimation_factor;
+  struct xyzcoords shift;
   MAP_DATA_TYPE *data;
   MAP_DATA_TYPE scale_factor;
 } CCP4MAP;
@@ -605,6 +606,7 @@ typedef struct {
  * Subroutines:
  */
 
+int labslt(LAT3D *lat);
 int lanisoult(LAT3D *lat);
 int lavgim(DIFFIMAGE *imdiff);
 int lavgr(LAT3D *lat);
@@ -627,6 +629,7 @@ int lcpltmap(LAT3D *lat,CCP4MAP *map);
 int lcpmaplt(CCP4MAP *map, LAT3D *lat);
 int lculllt(LAT3D *lat);
 int lcutim(DIFFIMAGE *imdiff);
+int ldecimap(CCP4MAP *map);
 int ldf2im(DIFFIMAGE *imdiff);
 int ldfrflt(LAT3D *lat1, LAT3D *lat2);
 int ldfsqrlt(LAT3D *lat1, LAT3D *lat2);
@@ -713,6 +716,7 @@ int lthrshim(DIFFIMAGE *imdiff);
 int lthrshlt(LAT3D *lat);
 int ltordata(DIFFIMAGE *imdiff);
 int ltranslt(LAT3D *lat1, struct ijkcoords t);
+int ltransmap(CCP4MAP *map);
 int lupdbd(LAT3D *lat);
 int lwaveim(DIFFIMAGE *imdiff);
 int lwindim(DIFFIMAGE *imdiff);

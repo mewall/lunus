@@ -7,34 +7,29 @@
    */
 
 #include<mwmask.h>
+#ifdef USE_OPENMP
+#include<omp.h>
+#endif
 
 int lanisoult(LAT3D *lat)
 {
-  size_t
-    origin_index,
-    lat_index;
   
   int
-    i,j,k,
+    i,j,k,origin_index,
     return_value = 0;
 
   struct ijkcoords 
-    rvec,
     index;
 
   float
     rscale,
     factor,
-    rsqr,
     denom,
     sum;
 
   struct xyzcoords
     *origin_list,
-    cell,
-    rfloat,
-    rdist,
-    Uinv_times_rdist;
+    cell;
 
   struct xyzmatrix
     Uinv;
@@ -72,22 +67,33 @@ int lanisoult(LAT3D *lat)
   //  factor = 1. / (sqrt(2*PI)*lat->width);
   //  rscale = (lat->xscale*lat->xscale + lat->yscale*lat->yscale +
   //		 lat->zscale*lat->zscale);
-  lat_index = 0;
-  for(index.k = 0; index.k < lat->zvoxels; index.k++) {
-    for(index.j = 0; index.j < lat->yvoxels; index.j++) {
-      for (index.i = 0; index.i < lat->xvoxels; index.i++) {
-	rvec.i = index.i - lat->origin.i;
-	rvec.j = index.j - lat->origin.j;
-	rvec.k = index.k - lat->origin.k;
+#ifdef USE_OPENMP
+#pragma omp parallel for
+#endif
+  for(k = 0; k < lat->zvoxels; k++) {
+    size_t lat_index;
+    lat_index = k*lat->xyvoxels;
+    int j; 
+    for(j = 0; j < lat->yvoxels; j++) {
+      int i;
+      for (i = 0; i < lat->xvoxels; i++) {
+	struct ijkcoords rvec;
+	rvec.i = i - lat->origin.i;
+	rvec.j = j - lat->origin.j;
+	rvec.k = k - lat->origin.k;
+	struct xyzcoords rfloat;
 	rfloat.x = lat->xscale * rvec.i;
 	rfloat.y = lat->yscale * rvec.j;
 	rfloat.z = lat->zscale * rvec.k;
 	lat->lattice[lat_index] = 0;
+	size_t origin_index;
 	for (origin_index=0;origin_index<dim_ss;origin_index++) {
+	  struct xyzcoords rdist, Uinv_times_rdist;
 	  rdist.x = rfloat.x - origin_list[origin_index].x;
 	  rdist.y = rfloat.y - origin_list[origin_index].y;
 	  rdist.z = rfloat.z - origin_list[origin_index].z;	  
 	  Uinv_times_rdist = lmatvecmul(Uinv,rdist);
+	  float rsqr;
 	  rsqr = ldotvec(rdist,Uinv_times_rdist);
 	  lat->lattice[lat_index] += (LATTICE_DATA_TYPE)
 	    expf(-rsqr/2.);
@@ -96,9 +102,10 @@ int lanisoult(LAT3D *lat)
       }
     }
   }
-  lat_index = 0;
   sum = 0.0;
   for(index.k = 0; index.k < lat->zvoxels; index.k++) {
+    size_t lat_index;
+    lat_index = index.k*lat->xyvoxels;
     for(index.j = 0; index.j < lat->yvoxels; index.j++) {
       for (index.i = 0; index.i < lat->xvoxels; index.i++) {
 	sum += lat->lattice[lat_index];
@@ -106,8 +113,9 @@ int lanisoult(LAT3D *lat)
       }
     }
   }
-  lat_index = 0;
   for(index.k = 0; index.k < lat->zvoxels; index.k++) {
+    size_t lat_index;
+    lat_index = index.k*lat->xyvoxels;
     for(index.j = 0; index.j < lat->yvoxels; index.j++) {
       for (index.i = 0; index.i < lat->xvoxels; index.i++) {
 	lat->lattice[lat_index] /= sum;

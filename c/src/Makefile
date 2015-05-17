@@ -1,5 +1,5 @@
 VPATH=${C_HOME}/src:${C_HOME}/lib:${C_HOME}/bin:${C_HOME}/include
-CC=gcc-mp-4.9
+CC=gcc-mp-4.8
 #CC=gcc
 CFLAGS= -g -fopenmp -DUSE_OPENMP -L${C_HOME}/lib -I${C_HOME}/include
 #CFLAGS= -g -w -L${C_HOME}/lib -I${C_HOME}/include
@@ -12,6 +12,7 @@ S=${C_HOME}/src
 B=${C_HOME}/bin
 L=${C_HOME}/lib
 all: \
+	abslt \
 	addbeam \
 	addosc \
 	addtag \
@@ -21,13 +22,16 @@ all: \
 	avgr \
 	avgrf \
 	avgrim \
+	avgrim_tv6 \
 	avgrlt \
 	avgsqim \
 	avsqrim \
+	avsqrim_tv6 \
 	avsqrlt \
 	beamim \
 	binasc \
 	buttim \
+	calcrmap \
 	calcu \
 	ccp4map2lat \
 	ccrlt \
@@ -49,7 +53,9 @@ all: \
 	explt \
 	fftim \
 	fftlt \
+	fftwlt \
 	filter \
+	fobsmap \
 	ftfltim \
 	gausslt \
 	gencmd \
@@ -83,6 +89,7 @@ all: \
 	nign \
 	noiseim \
 	normim \
+	normim_tv6 \
 	normlt \
 	ovldim \
 	pattim \
@@ -115,6 +122,7 @@ all: \
 	sublt \
 	subrf \
 	subrfim \
+	subrfim_tv6 \
 	subrflt \
 	sumim \
 	sumlt \
@@ -130,6 +138,7 @@ all: \
 	thrshlt \
 	totiff8 \
 	translt \
+	transmap \
 	tst3d \
 	vtk2lat \
 	waveim \
@@ -142,6 +151,8 @@ all: \
 #
 # Executables:
 #
+abslt:abslt.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 addbeam:addbeam.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 addosc:addosc.c ${DEPENDS}
@@ -160,11 +171,15 @@ avgrf:avgrf.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 avgrim:avgrim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+avgrim_tv6:avgrim_tv6.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 avgrlt:avgrlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 avgsqim:avgsqim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 avsqrim:avsqrim.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+avsqrim_tv6:avsqrim_tv6.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 avsqrlt:avsqrlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -173,6 +188,8 @@ beamim:beamim.c ${DEPENDS}
 binasc:binasc.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 buttim:buttim.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+calcrmap:calcrmap.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 calcu:calcu.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -216,7 +233,11 @@ fftim:fftim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 fftlt:fftlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+fftwlt:fftwlt.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 filter:filter.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+fobsmap:fobsmap.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 ftfltim:ftfltim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -284,6 +305,8 @@ noiseim:noiseim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 normim:normim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+normim_tv6:normim_tv6.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 normlt:normlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 ovldim:ovldim.c ${DEPENDS}
@@ -348,6 +371,8 @@ subrf:subrf.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 subrfim:subrfim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+subrfim_tv6:subrfim_tv6.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 subrflt:subrflt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 sumim:sumim.c ${DEPENDS}
@@ -378,6 +403,8 @@ totiff8:totiff8.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 translt:translt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+transmap:transmap.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 tst3d:tst3d.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 vtk2lat:vtk2lat.c ${DEPENDS}
@@ -397,6 +424,7 @@ xpl2mw:xpl2mw.c ${DEPENDS}
 #
 # Library functions:
 #
+labslt.o:labslt.c mwmask.h
 lanisoult.o:lanisoult.c mwmask.h
 lavgim.o:lavgim.c mwmask.h
 lavgpolim.o:lavgpolim.c mwmask.h
@@ -501,6 +529,7 @@ lthrshim.o:lthrshim.c mwmask.h
 lthrshlt.o:lthrshlt.c mwmask.h
 ltordata.o:ltordata.c mwmask.h
 ltranslt.o:ltranslt.c mwmask.h
+ltransmap.o:ltransmap.c mwmask.h
 lupdbd.o:lupdbd.c mwmask.h
 lwaveim.o:lwaveim.c mwmask.h
 lwindim.o:lwindim.c mwmask.h
@@ -522,6 +551,7 @@ lxfmask.o:lxfmask.c mwmask.h
 # Libraries:
 #
 libmw.a: \
+	labslt.o \
 	lanisoult.o \
 	lavgim.o \
 	lavgpolim.o \
@@ -626,6 +656,7 @@ libmw.a: \
 	lthrshlt.o \
 	ltordata.o \
 	ltranslt.o \
+	ltransmap.o \
 	lupdbd.o \
 	lwaveim.o \
 	lwindim.o \

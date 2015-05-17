@@ -26,8 +26,24 @@ int lwritemap(CCP4MAP *map)
   int
     return_value = 0;
 
+  // Calculate map statistics
+
+  int i;
+  map->amin=0;
+  map->amax=0;
+  map->amean=0;
+  map->arms=0;
+  for (i = 0;i<map->map_length;i++) {
+    if (map->data[i]<map->amin) map->amin=map->data[i];
+    if (map->data[i]>map->amax) map->amax=map->data[i];
+    map->amean += map->data[i];
+    map->arms += map->data[i]*map->data[i];
+  }
+  map->amean /= (MAP_DATA_TYPE)map->map_length;
+  map->arms = sqrtf(map->arms/(MAP_DATA_TYPE)map->map_length-map->amean*map->amean);
+
   /*
-   * Read in CCP4 map header info:
+   * Write map header info:
    */
   if (map->header) {free(map->header);}
   map->header = (void *)calloc(1024,sizeof(void)); // 256 4-byte words

@@ -8,7 +8,7 @@
 
 #include<mwmask.h>
 
-long ldecimap(CCP4MAP *map)
+int ldecimap(CCP4MAP *map)
 {
   size_t
     i,
@@ -67,21 +67,49 @@ long ldecimap(CCP4MAP *map)
    * Calculate the decimated data
    */  
 
-  nrc=map->nr*map->nc;
+  float *stencil;
+  int dfac_is_even;
+  int stencil_size;
+
+  if (dfac % 2 == 0) {
+    dfac_is_even=1;
+  } else {
+    dfac_is_even=0;
+  }
+
+  if (dfac_is_even) {
+    stencil_size = dfac+1;
+  } else {
+    stencil_size = dfac;
+  }
+
+  stencil = (float *)malloc(sizeof(float)*stencil_size);
+
+  for (i=0;i<stencil_size;i++) {
+    if (dfac_is_even && ((i==0) || (i==(stencil_size-1)))) {
+      stencil[i]=0.5;
+    } else {
+      stencil[i]=1.0;
+    }
+  }
+
+  int stencil_ofst = (stencil_size-1)/2;
+
+  nrc=map->section_length;
   for (s = 0; s < map->ns; s=s+dfac) {
     for (r = 0; r < map->nr; r=r+dfac) {
       for (c = 0; c < map->nc; c=c+dfac) {
 	long ss,rr,cc;
 	dmap_index = ((s*nrc/dfac+r*map->nc)/dfac+c)/dfac;
-	for (ss=s-dfac+1;ss<=s;ss++) {
-	  long sidx = (ss+map->ns)%map->ns;
-	  printf("sidx = %d\n",sidx);
-	  for (rr=r-dfac+1;rr<=r;rr++) {
-	    long ridx = (rr+map->nr)%map->nr;
-	    for (cc=c-dfac+1;cc<=c;cc++) {
-	      long cidx = (cc+map->nc)%map->nc;
+	for (ss=0;ss<stencil_size;ss++) {
+	  long sidx = (s-stencil_ofst+ss+map->ns)%map->ns;
+	  //	  printf("sidx = %d\n",sidx);
+	  for (rr=0;rr<stencil_size;rr++) {
+	    long ridx = (r-stencil_ofst+rr+map->nr)%map->nr;
+	    for (cc=0;cc<stencil_size;cc++) {
+	      long cidx = (c-stencil_ofst+cc+map->nc)%map->nc;
 	      map_index = sidx*nrc+ridx*map->nc+cidx;
-	      ddata[dmap_index]+=map->data[map_index];
+	      ddata[dmap_index]+=map->data[map_index]*stencil[ss]*stencil[rr]*stencil[cc];
 	    }
 	  }
 	} 
@@ -92,14 +120,16 @@ long ldecimap(CCP4MAP *map)
   // Replace original map with decimated map
   
   map->map_length=dlen;
-  map->data=realloc(map->data,sizeof(MAP_DATA_TYPE)*dlen);
-  memcpy((void *)map->data,(void *)ddata,dlen*sizeof(MAP_DATA_TYPE));
+  map->data_buf=(void *)realloc(map->data_buf,sizeof(MAP_DATA_TYPE)*dlen);
+  map->data = (MAP_DATA_TYPE *)map->data_buf;
+  memcpy(map->data_buf,(void *)ddata,dlen*sizeof(MAP_DATA_TYPE));
   map->nr /= dfac;
   map->ns /= dfac;
   map->nc /= dfac;
   map->nx /= dfac;
   map->ny /= dfac;
   map->nz /= dfac;
+  map->section_length /= dfac*dfac;
      
   CloseShop:
   return(return_value);

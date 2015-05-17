@@ -35,7 +35,7 @@ int lwritevtk(LAT3D *lat)
   for (k=0;k<lat->zvoxels;k++) {
     for (j=0;j<lat->yvoxels;j++) {
       for (i=0;i<lat->xvoxels;i++) {
-	fprintf(lat->outfile, "%f ",lat->lattice[index]);
+	fprintf(lat->outfile, "%g ",lat->lattice[index]);
 	index++;
       }
       fprintf(lat->outfile,"\n");
