@@ -1,4 +1,4 @@
-/* LIQUIDFACLT.C - Generate a liquid-like motions prefactor lattice.
+/* LIQUIDCORRLT.C - Generate a liquid-like motions prefactor lattice.
    
    Author: Mike Wall
    Date: 2/28/95
@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
 	  }
 	  break;
 	  default:
-	  printf("\n Usage: liquidfaclt <input lattice> "
+	  printf("\n Usage: liquidcorrlt <input lattice> "
 		 "<output lattice> <width>\n\n");
 	  exit(0);
 	}
@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
    */
   
   lat->width = width;
-  lliquidfaclt(lat);
+  lliquidcorrlt(lat);
   
   /*
    * Write lattice to output file:

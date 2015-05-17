@@ -264,7 +264,7 @@ if __name__=="__main__":
      include scope dials.algorithms.peak_finding.spotfinder_factory.phil_scope
      include scope dials.algorithms.indexing.indexer.index_only_phil_scope
      include scope dials.algorithms.refinement.refiner.phil_scope
-     indexing.known_symmetry.unit_cell=54.84,58.53,67.39,90,90,90
+     indexing.known_symmetry.unit_cell=43,53,89,90,90,90
        .type = unit_cell
      indexing.known_symmetry.space_group=P212121
        .type = space_group
