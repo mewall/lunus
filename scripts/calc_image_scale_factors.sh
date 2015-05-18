@@ -1,8 +1,13 @@
 #!/bin/bash -fx
+<<<<<<< HEAD
 if [ -z ${work_dir+x} ]; then echo "work_dir is unset"; else echo "work_dir is set to '$work_dir'"; fi
 if [ -z ${lunus_image_dir+x} ]; then echo "lunus_image_dir is unset"; else echo "lunus_image_dir is set to '$lunus_image_dir'"; fi
 if [ -z ${image_prefix+x} ]; then echo "image_prefix is unset"; else echo "image_prefix is set to '$image_prefix'"; fi
 if [ -z ${num_images+x} ]; then echo "num_images is unset"; else echo "num_images is set to '$num_images'"; fi
+=======
+
+. $1
+>>>>>>> caef0bace63cd19fcac2b8493cbcb04f858f3c6e
 
 if [ ! -d $work_dir ]; then
 	mkdir $work_dir
@@ -23,11 +28,19 @@ for (( i=1; i <= $num_images ; i++ ))
 
 do
 
+<<<<<<< HEAD
 this_image_name=`printf %s_%05d.img $image_prefix $i`
 
 this_image_path=`printf %s/%s $lunus_image_dir $this_image_name`
 
 radial_average_file=`printf radial_averages/%s_%05d.asc $image_prefix $i`
+=======
+this_image_name=`printf %s_%05d.img $lunus_image_prefix $i`
+
+this_image_path=`printf %s/%s $lunus_image_dir $this_image_name`
+
+radial_average_file=`printf radial_averages/%s_%05d.asc $lunus_image_prefix $i`
+>>>>>>> caef0bace63cd19fcac2b8493cbcb04f858f3c6e
 
 # calculate average properties for scaling
 
@@ -40,7 +53,11 @@ done
 
 # calculate the reference statistic
 
+<<<<<<< HEAD
 radial_average_file=`printf radial_averages/%s_%05d.asc $image_prefix $reference_image_number`
+=======
+radial_average_file=`printf radial_averages/%s_%05d.asc $lunus_image_prefix $reference_image_number`
+>>>>>>> caef0bace63cd19fcac2b8493cbcb04f858f3c6e
 
 tail -n +$scale_inner_radius $radial_average_file > tail.asc
 head -n `echo "$scale_outer_radius-$scale_inner_radius" | bc -l` tail.asc > tail.head.asc
@@ -58,11 +75,19 @@ for (( i=1; i <= $num_images ; i++ ))
 
 do
 
+<<<<<<< HEAD
 this_image_name=`printf %s_%05d.img $image_prefix $i`
 
 this_image_path=`printf %s/%s $lunus_image_dir $this_image_name`
 
 radial_average_file=`printf radial_averages/%s_%05d.asc $image_prefix $i`
+=======
+this_image_name=`printf %s_%05d.img $lunus_image_prefix $i`
+
+this_image_path=`printf %s/%s $lunus_image_dir $this_image_name`
+
+radial_average_file=`printf radial_averages/%s_%05d.asc $lunus_image_prefix $i`
+>>>>>>> caef0bace63cd19fcac2b8493cbcb04f858f3c6e
 
 tail -n +$scale_inner_radius $radial_average_file > tail.asc
 head -n `echo "$scale_outer_radius-$scale_inner_radius" | bc -l` tail.asc > tail.head.asc
@@ -86,4 +111,8 @@ echo "$i $this_image_path $this_scale" >> $scales_output_file
 
 done
 
+<<<<<<< HEAD
 cd -
+=======
+cd -
+>>>>>>> caef0bace63cd19fcac2b8493cbcb04f858f3c6e

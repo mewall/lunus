@@ -2,13 +2,6 @@
 
 . $1
 
-<<<<<<< HEAD
-if [ -z ${work_dir+x} ]; then echo "work_dir is unset"; else echo "work_dir is set to '$work_dir'"; fi
-if [ -z ${image_prefix+x} ]; then echo "image_prefix is unset"; else echo "image_prefix is set to '$image_prefix'"; fi
-if [ -z ${num_images+x} ]; then echo "num_images is unset"; else echo "num_images is set to '$num_images'"; fi
-
-=======
->>>>>>> caef0bace63cd19fcac2b8493cbcb04f858f3c6e
 if [ ! -d $work_dir ]; then
 	mkdir $work_dir
 fi
@@ -76,11 +69,7 @@ cd "tmpdir_"$i
 
 . $cctbx_dir/build/setpaths.sh
 
-<<<<<<< HEAD
 cctbx.python ~/packages/lunus/scripts/integrate_diffuse_dials.py indexing.data=$indexing_data_file_one indexing.data=$indexing_data_file_two indexing.data=$indexing_data_file_three index_only=True cell.a=$cella cell.b=$cellb cell.c=$cellc inputlist.fname=$scales_input_file framenum=$i diffuse.lattice.resolution=$resolution diffuse.lattice.type=sum diffuse.lattice.fname=$this_diffuse_file counts.lattice.fname=$this_counts_file np=1 codecamp.maxcell=$maxcell target_cell=$cella,$cellb,$cellc,$alpha,$beta,$gamma known_setting=5
-=======
-cctbx.python ~/packages/lunus/scripts/integrate_diffuse_dials.py indexing.data=$indexing_data_file_one indexing.data=$indexing_data_file_two indexing.data=$indexing_data_file_three index_only=True cell.a=$cella cell.b=$cellb cell.c=$cellc inputlist.fname=$scales_input_file framenum=$i diffuse.lattice.resolution=$resolution diffuse.lattice.type=sum diffuse.lattice.fname=$this_diffuse_file counts.lattice.fname=$this_counts_file np=1 codecamp.maxcell=$maxcell target_cell=$cella,$cellb,$cellc,$alpha,$beta,$gamma target_sg=$spacegroup known_setting=5
->>>>>>> caef0bace63cd19fcac2b8493cbcb04f858f3c6e
 
 mv $this_diffuse_file $lattice_dir/.
 mv $this_counts_file $lattice_dir/.

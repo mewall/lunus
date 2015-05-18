@@ -147,20 +147,6 @@ if __name__=="__main__":
     raise ValueError,"Lattice constant cell.c must be specified"
   else:
     cellc = float(args.pop(cellcidx).split("=")[1])
-  # target cell for indexing
-  try:
-      targetcellidx = [a.find("target_cell")==0 for a in args].index(True)
-  except ValueError:
-      raise ValueError,"Target cell target_cell must be specified"
-  else:
-      target_cell = args.pop(targetcellidx).split("=")[1]
-  # spacegroup for indexing
-  try:
-      targetsgidx = [a.find("target_sg")==0 for a in args].index(True)
-  except ValueError:
-      raise ValueError,"Target space group target_sg must be specified"
-  else:
-      target_sg = args.pop(targetsgidx).split("=")[1]
   # maximum resolution of diffuse lattice
   try:
     residx = [a.find("diffuse.lattice.resolution")==0 for a in args].index(True)
@@ -273,27 +259,19 @@ if __name__=="__main__":
   #from dials.algorithms.indexing.fft1d import indexer_fft1d as indexer
   from dials.algorithms.indexing.fft3d import indexer_fft3d as indexer
   import copy, os
-
-  print target_cell,target_sg
-
-  phil_scope_str='''
+ 
+  phil_scope = parse('''
      include scope dials.algorithms.peak_finding.spotfinder_factory.phil_scope
      include scope dials.algorithms.indexing.indexer.index_only_phil_scope
      include scope dials.algorithms.refinement.refiner.phil_scope
-<<<<<<< HEAD
      indexing.known_symmetry.unit_cell=54.84,58.53,67.39,90,90,90
-=======
-     indexing.known_symmetry.unit_cell={0}
->>>>>>> caef0bace63cd19fcac2b8493cbcb04f858f3c6e
        .type = unit_cell
-     indexing.known_symmetry.space_group={1}
+     indexing.known_symmetry.space_group=P212121
        .type = space_group
-     indexing.method=real_space_grid_search
-   '''
-  phil_scope = parse(phil_scope_str.format(target_cell,target_sg), process_includes=True)
+   ''', process_includes=True)
   params = phil_scope.extract()
   params.refinement.parameterisation.crystal.scan_varying = False
-#  params.spotfinder.filter.min_spot_size=3
+  params.spotfinder.filter.min_spot_size=3
   
   filenames = []
   for arg in args:

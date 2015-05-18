@@ -22,9 +22,11 @@ all: \
 	avgr \
 	avgrf \
 	avgrim \
+	avgrim_tv6 \
 	avgrlt \
 	avgsqim \
 	avsqrim \
+	avsqrim_tv6 \
 	avsqrlt \
 	beamim \
 	binasc \
@@ -88,6 +90,7 @@ all: \
 	nign \
 	noiseim \
 	normim \
+	normim_tv6 \
 	normlt \
 	ovldim \
 	pattim \
@@ -120,6 +123,7 @@ all: \
 	sublt \
 	subrf \
 	subrfim \
+	subrfim_tv6 \
 	subrflt \
 	sumim \
 	sumlt \
@@ -168,11 +172,15 @@ avgrf:avgrf.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 avgrim:avgrim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+avgrim_tv6:avgrim_tv6.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 avgrlt:avgrlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 avgsqim:avgsqim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 avsqrim:avsqrim.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+avsqrim_tv6:avsqrim_tv6.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 avsqrlt:avsqrlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -300,6 +308,8 @@ noiseim:noiseim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 normim:normim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+normim_tv6:normim_tv6.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 normlt:normlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 ovldim:ovldim.c ${DEPENDS}
@@ -363,6 +373,8 @@ sublt:sublt.c ${DEPENDS}
 subrf:subrf.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 subrfim:subrfim.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+subrfim_tv6:subrfim_tv6.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 subrflt:subrflt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}

@@ -43,7 +43,8 @@ int lliquidcorrlt(LAT3D *lat)
 	rsqr = (rfloat.x*rfloat.x + rfloat.y*rfloat.y + 
 		       rfloat.z*rfloat.z);
 	lat->lattice[lat_index] = (LATTICE_DATA_TYPE)
-	  4.*PI*lat->width*lat->width*lat->width/(1.+lat->width*lat->width*2.*PI*2.*PI*rsqr);
+	  8.*PI*lat->width*lat->width*lat->width/powf((1.+lat->width*lat->width*2.*PI*2.*PI*rsqr),2.);
+	//	  4.*PI*lat->width*lat->width*lat->width/(1.+lat->width*lat->width*2.*PI*2.*PI*rsqr);
 	sum += lat->lattice[lat_index];
 	  // Clarage et al 1992 model:	  
 	  //	  	  rsqr*2.*PI*2.*PI*lat->width*lat->width*expf(-rsqr*2.*PI*2.*PI*lat->width*lat->width);
