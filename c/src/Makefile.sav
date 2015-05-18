@@ -31,6 +31,7 @@ all: \
 	beamim \
 	binasc \
 	buttim \
+	calcrmap \
 	calcu \
 	ccp4map2lat \
 	ccrlt \
@@ -187,6 +188,8 @@ beamim:beamim.c ${DEPENDS}
 binasc:binasc.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 buttim:buttim.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+calcrmap:calcrmap.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 calcu:calcu.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}

@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
 
   corr = lcorrlt(lat1,lat2);
 
-  printf("C = %g\n",corr);
+  printf("%g\n",corr);
 
 CloseShop:
   

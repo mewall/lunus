@@ -22,11 +22,9 @@ all: \
 	avgr \
 	avgrf \
 	avgrim \
-	avgrim_tv6 \
 	avgrlt \
 	avgsqim \
 	avsqrim \
-	avsqrim_tv6 \
 	avsqrlt \
 	beamim \
 	binasc \
@@ -72,6 +70,7 @@ all: \
 	lat2hkl \
 	lat2map \
 	lat2vtk \
+	liquidcorrlt \
 	liquidfaclt \
 	map2lat \
 	mapbound \
@@ -89,7 +88,6 @@ all: \
 	nign \
 	noiseim \
 	normim \
-	normim_tv6 \
 	normlt \
 	ovldim \
 	pattim \
@@ -122,7 +120,6 @@ all: \
 	sublt \
 	subrf \
 	subrfim \
-	subrfim_tv6 \
 	subrflt \
 	sumim \
 	sumlt \
@@ -171,15 +168,11 @@ avgrf:avgrf.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 avgrim:avgrim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-avgrim_tv6:avgrim_tv6.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 avgrlt:avgrlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 avgsqim:avgsqim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 avsqrim:avsqrim.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-avsqrim_tv6:avsqrim_tv6.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 avsqrlt:avsqrlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -271,6 +264,8 @@ lat2map:lat2map.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 lat2vtk:lat2vtk.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+liquidcorrlt:liquidcorrlt.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 liquidfaclt:liquidfaclt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 map2lat:map2lat.c ${DEPENDS}
@@ -304,8 +299,6 @@ nign:nign.c ${DEPENDS}
 noiseim:noiseim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 normim:normim.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-normim_tv6:normim_tv6.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 normlt:normlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -370,8 +363,6 @@ sublt:sublt.c ${DEPENDS}
 subrf:subrf.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 subrfim:subrfim.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-subrfim_tv6:subrfim_tv6.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 subrflt:subrflt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -469,6 +460,7 @@ linitim.o:linitim.c mwmask.h
 linitlt.o:linitlt.c mwmask.h
 linitmap.o:linitmap.c mwmask.h
 lintdfim.o:lintdfim.c mwmask.h
+lliquidcorrlt.o:lliquidcorrlt.c mwmask.h
 lliquidfaclt.o:lliquidfaclt.c mwmask.h
 lmattools.o:lmattools.c mwmask.h
 lmedim.o:lmedim.c mwmask.h
@@ -596,6 +588,7 @@ libmw.a: \
 	linitlt.o \
 	linitmap.o \
 	lintdfim.o \
+	lliquidcorrlt.o \
 	lliquidfaclt.o \
 	lmattools.o \
 	lmedim.o \

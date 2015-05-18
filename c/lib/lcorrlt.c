@@ -42,7 +42,7 @@ float lcorrlt(LAT3D *lat1, LAT3D *lat2)
   avg1 /= (float)ct;
   avg2 /= (float)ct;
 
-  printf("Number of data points, comparisons = %d, %d\n",ctdat,ct);
+  printf("%d %d ",ctdat,ct);
 
   float 
     s11=0.0f,

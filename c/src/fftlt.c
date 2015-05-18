@@ -34,7 +34,6 @@ int main(int argc, char *argv[])
     *lattice2;
 
   float
-    inverse_scale = 262144.,
     *fft_data;
 
   size_t
@@ -154,7 +153,7 @@ int main(int argc, char *argv[])
    * Allocate memory for fft data array:
    */
 
-  fft_data = (float *)calloc(64*64*64*2+1,sizeof(float));
+  fft_data = (float *)calloc(lat->lattice_length*2+1,sizeof(float));
   if (!fft_data) {
     perror("Couldn't allocate fft data array.\n\n");
     exit(0);
@@ -164,7 +163,7 @@ int main(int argc, char *argv[])
    * Prepare lattice for fft:
    */
 
-printf("Preparing lattice...\n");/***/
+  //printf("Preparing lattice...\n");/***/
   fft_index = 1; /* Data array starts at position 1 */
   for(i=0;i<lat->xvoxels;i++) {
     for(j=0;j<lat->yvoxels;j++) {
@@ -185,22 +184,23 @@ printf("Preparing lattice...\n");/***/
       }
     } 
   }
-printf("...done.\n");/***/
+//printf("...done.\n");/***/
   /*
    * Calculate FFT :
    */
   
-  nn[1] = 64;
-  nn[2] = 64;
-  nn[3] = 64;
-printf("Entering FFT...\n");
+  nn[1] = lat->xvoxels;
+  nn[2] = lat->yvoxels;
+  nn[3] = lat->zvoxels;
+//printf("Entering FFT...\n");
   lfft(fft_data,nn,ndim,isign);
-printf("...done.\n");
+  //printf("...done.\n");
   /*
    * Extract lattice from fft data array -- take magnitude.
    */
+  float inverse_scale = (float)lat->lattice_length;
 
-printf("Extracting lattice...\n");/***/
+  //printf("Extracting lattice...\n");/***/
   fft_index = 1; /* Data array starts at position 1 */
   lat_index = 0;
   for(i=0;i<lat->xvoxels;i++) {
@@ -221,29 +221,29 @@ printf("Extracting lattice...\n");/***/
       }
     } 
   }
-printf("...done. fft_index = %d,%d\n",fft_index,lat_index);
+  //printf("...done. fft_index = %d,%d\n",fft_index,lat_index);
 
   /*
    * Prepare lattice for output:
    */
 
-  lat->xscale = 1./lat->xscale*1/64.;
-  lat->yscale = 1./lat->yscale*1/64.;
-  lat->zscale = 1./lat->zscale*1/64.;
+  lat->xscale = 1./lat->xscale*1./(float)lat->xvoxels;
+  lat->yscale = 1./lat->yscale*1./(float)lat->yvoxels;
+  lat->zscale = 1./lat->zscale*1./(float)lat->zvoxels;
   lat->xbound.min = - (LATTICE_DATA_TYPE)(lat->origin.i*lat->xscale);
   lat->xbound.max = (LATTICE_DATA_TYPE)((lat->xvoxels -
-					lat->origin.i - 1)*lat->xscale); 
+					lat->origin.i)*lat->xscale); 
   lat->ybound.min = - (LATTICE_DATA_TYPE)(lat->origin.j*lat->yscale); 
   lat->ybound.max = (LATTICE_DATA_TYPE)((lat->yvoxels -
-					lat->origin.j - 1)*lat->yscale); 
-  lat->zbound.min = - (LATTICE_DATA_TYPE)(lat->origin.i*lat->zscale); 
+					lat->origin.j)*lat->yscale); 
+  lat->zbound.min = - (LATTICE_DATA_TYPE)(lat->origin.k*lat->zscale); 
   lat->zbound.max = (LATTICE_DATA_TYPE)((lat->zvoxels -
-					lat->origin.k - 1)*lat->zscale); 
+					lat->origin.k)*lat->zscale); 
 
   /*
    * Write lattices to output file:
    */
-printf("Writing lattice...\n");/***/  
+//printf("Writing lattice...\n");/***/  
   lat->lattice = lattice1;
   lat->outfile = latticeout1;
   if (lwritelt(lat) != 0) {
@@ -251,7 +251,7 @@ printf("Writing lattice...\n");/***/
     exit(0);
   }
 
-printf("Writing lattice...\n");/***/  
+//printf("Writing lattice...\n");/***/  
   lat->lattice = lattice2;
   lat->outfile = latticeout2;
   if (lwritelt(lat) != 0) {
@@ -265,7 +265,7 @@ CloseShop:
   /*
    * Free allocated memory:
    */
-printf("Freeing memory...\n");
+//printf("Freeing memory...\n");
   lfreelt(lat);
   free((LATTICE_DATA_TYPE *)lattice1);
   free((float *)fft_data);
@@ -273,7 +273,7 @@ printf("Freeing memory...\n");
   /*
    * Close files:
    */
-printf("Closing files...\n");
+//printf("Closing files...\n");
   fclose(latticein1);
   fclose(latticein2);
   fclose(latticeout1);
