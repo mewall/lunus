@@ -1,13 +1,11 @@
 #!/bin/bash -fx
-<<<<<<< HEAD
+
+. $1
+
 if [ -z ${work_dir+x} ]; then echo "work_dir is unset"; else echo "work_dir is set to '$work_dir'"; fi
 if [ -z ${lunus_image_dir+x} ]; then echo "lunus_image_dir is unset"; else echo "lunus_image_dir is set to '$lunus_image_dir'"; fi
 if [ -z ${image_prefix+x} ]; then echo "image_prefix is unset"; else echo "image_prefix is set to '$image_prefix'"; fi
 if [ -z ${num_images+x} ]; then echo "num_images is unset"; else echo "num_images is set to '$num_images'"; fi
-=======
-
-. $1
->>>>>>> caef0bace63cd19fcac2b8493cbcb04f858f3c6e
 
 if [ ! -d $work_dir ]; then
 	mkdir $work_dir

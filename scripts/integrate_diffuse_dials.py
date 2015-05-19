@@ -271,7 +271,8 @@ if __name__=="__main__":
   from dxtbx.datablock import DataBlockFactory
   from dials.array_family import flex
   #from dials.algorithms.indexing.fft1d import indexer_fft1d as indexer
-  from dials.algorithms.indexing.fft3d import indexer_fft3d as indexer
+  #from dials.algorithms.indexing.fft3d import indexer_fft3d as indexer
+  from dials.algorithms.indexing.real_space_grid_search import indexer_real_space_grid_search as indexer
   import copy, os
 
   print target_cell,target_sg
@@ -280,11 +281,7 @@ if __name__=="__main__":
      include scope dials.algorithms.peak_finding.spotfinder_factory.phil_scope
      include scope dials.algorithms.indexing.indexer.index_only_phil_scope
      include scope dials.algorithms.refinement.refiner.phil_scope
-<<<<<<< HEAD
-     indexing.known_symmetry.unit_cell=54.84,58.53,67.39,90,90,90
-=======
      indexing.known_symmetry.unit_cell={0}
->>>>>>> caef0bace63cd19fcac2b8493cbcb04f858f3c6e
        .type = unit_cell
      indexing.known_symmetry.space_group={1}
        .type = space_group
