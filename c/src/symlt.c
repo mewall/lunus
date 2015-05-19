@@ -77,9 +77,11 @@ int main(int argc, char *argv[])
 	  printf("\n Usage: symlt <input lattice> "
 		 "<output lattice> <symmetry_operation>\n\n"
 		 "  Symmetry Operations:\n"
-		 "    0 = P1\n"
-		 "    1 = P41\n"
-		 "    2 = P222\n\n");
+		 "    0 = P 1\n"
+		 "    1 = P 4\n"
+		 "    2 = P 2 2 2\n\n"
+		 "    3 = P m -3\n");
+	      
 	  exit(0);
 	}
   

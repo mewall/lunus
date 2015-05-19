@@ -203,6 +203,71 @@ int lP222(LAT3D *lat)
   lat->symop_count = 8;
 }
 
+int lPm_minus_3(LAT3D *lat)
+{
+  int return_value = 0;
+
+  /*
+   * Generate group:
+   */
+
+  lat->symvec[1].i = -lat->symvec[0].i;
+  lat->symvec[1].j = -lat->symvec[0].j;
+  lat->symvec[1].k = +lat->symvec[0].k;
+
+  lat->symvec[2].i = -lat->symvec[0].i;
+  lat->symvec[2].j = +lat->symvec[0].j;
+  lat->symvec[2].k = -lat->symvec[0].k;
+
+  lat->symvec[3].i = +lat->symvec[0].i;
+  lat->symvec[3].j = -lat->symvec[0].j;
+  lat->symvec[3].k = -lat->symvec[0].k;
+
+  lat->symvec[4].i = +lat->symvec[0].k;
+  lat->symvec[4].j = +lat->symvec[0].i;
+  lat->symvec[4].k = +lat->symvec[0].j;
+
+  lat->symvec[5].i = +lat->symvec[0].k;
+  lat->symvec[5].j = -lat->symvec[0].i;
+  lat->symvec[5].k = -lat->symvec[0].j;
+
+  lat->symvec[6].i = -lat->symvec[0].k;
+  lat->symvec[6].j = -lat->symvec[0].i;
+  lat->symvec[6].k = +lat->symvec[0].j;
+
+  lat->symvec[7].i = -lat->symvec[0].k;
+  lat->symvec[7].j = +lat->symvec[0].i;
+  lat->symvec[7].k = -lat->symvec[0].j;
+
+  lat->symvec[8].i = +lat->symvec[0].j;
+  lat->symvec[8].j = +lat->symvec[0].k;
+  lat->symvec[8].k = +lat->symvec[0].i;
+
+  lat->symvec[9].i = -lat->symvec[0].j;
+  lat->symvec[9].j = +lat->symvec[0].k;
+  lat->symvec[9].k = -lat->symvec[0].i;
+
+  lat->symvec[10].i = +lat->symvec[0].j;
+  lat->symvec[10].j = -lat->symvec[0].k;
+  lat->symvec[10].k = -lat->symvec[0].i;
+
+  lat->symvec[11].i = -lat->symvec[0].j;
+  lat->symvec[11].j = -lat->symvec[0].k;
+  lat->symvec[11].k = +lat->symvec[0].i;
+
+  /*
+   * Generate Friedel mates:
+   */
+
+  int i;
+
+  for (i=0;i<12;i++) {
+    lat->symvec[i+12]=lijkinv(lat->symvec[i]);
+  }
+
+  lat->symop_count = 24;
+}
+
 
 
 
