@@ -31,7 +31,7 @@ this_image_name=`printf %s_%05d.img $image_prefix $i`
 
 this_image_path=`printf %s/%s $raw_image_dir $this_image_name`
 
-lunus_image_name=`printf %s_lunus_%05d.img $image_prefix $i`
+lunus_image_name=`printf %s_%05d.img $lunus_image_prefix $i`
 
 lunus_image_path=`printf %s/%s $lunus_image_dir $lunus_image_name`
 
