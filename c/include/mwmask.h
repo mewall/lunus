@@ -546,6 +546,11 @@ typedef struct {
   struct xyzcoords shift;
   MAP_DATA_TYPE *data;
   MAP_DATA_TYPE scale_factor;
+  struct xyzcoords *xyzlist; // list of atom coords
+  int natoms; // number of atoms in previous list
+  XYZCOORDS_DATA arad;
+  float cc_fore;
+  float cc_back;
 } CCP4MAP;
 
 /*
@@ -693,6 +698,7 @@ int lrmpkim(DIFFIMAGE *imdiff);
 int lrotlt(LAT3D *lat);
 struct xyzmatrix lrotmat(float rotx, float roty, float rotz);
 struct xyzcoords lrotvecz(struct xyzcoords a, float cos_theta,float sin_theta);
+int lrsccmap(CCP4MAP *map1, CCP4MAP *map2);
 int lscaleim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lscalelt(LAT3D *lat1, LAT3D *lat2);
 int lshiftlt(LAT3D *lat,struct ijkcoords t);

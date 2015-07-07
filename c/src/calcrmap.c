@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
 	  }
 	  break;
 	  default:
-	  printf("\n Usage: fobsmap <input reflections .hkl> <input ccp4 map> <output ccp4 map>\n\n");
+	  printf("\n Usage: calcrmap <input reflections .hkl> <input ccp4 map>\n\n");
 	  exit(0);
 	}
   

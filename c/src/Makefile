@@ -22,11 +22,9 @@ all: \
 	avgr \
 	avgrf \
 	avgrim \
-	avgrim_tv6 \
 	avgrlt \
 	avgsqim \
 	avsqrim \
-	avsqrim_tv6 \
 	avsqrlt \
 	beamim \
 	binasc \
@@ -90,7 +88,6 @@ all: \
 	nign \
 	noiseim \
 	normim \
-	normim_tv6 \
 	normlt \
 	ovldim \
 	pattim \
@@ -106,6 +103,7 @@ all: \
 	rfaclt \
 	rmpkim \
 	rotlt \
+	rsccmap \
 	scaleim \
 	scalelt \
 	scalerf \
@@ -123,17 +121,16 @@ all: \
 	sublt \
 	subrf \
 	subrfim \
-	subrfim_tv6 \
 	subrflt \
 	sumim \
 	sumlt \
 	sumrf \
 	swapmw \
 	symlt \
+	tag_overloads \
 	tagim \
 	taglt \
 	tagneg \
-	tag_overloads \
 	tailc \
 	thrshim \
 	thrshlt \
@@ -172,15 +169,11 @@ avgrf:avgrf.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 avgrim:avgrim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-avgrim_tv6:avgrim_tv6.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 avgrlt:avgrlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 avgsqim:avgsqim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 avsqrim:avsqrim.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-avsqrim_tv6:avsqrim_tv6.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 avsqrlt:avsqrlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -308,8 +301,6 @@ noiseim:noiseim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 normim:normim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-normim_tv6:normim_tv6.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 normlt:normlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 ovldim:ovldim.c ${DEPENDS}
@@ -339,6 +330,8 @@ rfaclt:rfaclt.c ${DEPENDS}
 rmpkim:rmpkim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 rotlt:rotlt.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+rsccmap:rsccmap.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 scaleim:scaleim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -374,8 +367,6 @@ subrf:subrf.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 subrfim:subrfim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-subrfim_tv6:subrfim_tv6.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 subrflt:subrflt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 sumim:sumim.c ${DEPENDS}
@@ -388,13 +379,13 @@ swapmw:swapmw.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 symlt:symlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+tag_overloads:tag_overloads.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 tagim:tagim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 taglt:taglt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 tagneg:tagneg.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-tag_overloads:tag_overloads.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 tailc:tailc.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -508,6 +499,7 @@ lrf2lt.o:lrf2lt.c mwmask.h
 lrfaclt.o:lrfaclt.c mwmask.h
 lrmpkim.o:lrmpkim.c mwmask.h
 lrotlt.o:lrotlt.c mwmask.h
+lrsccmap.o:lrsccmap.c mwmask.h
 lscaleim.o:lscaleim.c mwmask.h
 lscalelt.o:lscalelt.c mwmask.h
 lsettag.o:lsettag.c mwmask.h
@@ -636,6 +628,7 @@ libmw.a: \
 	lrfaclt.o \
 	lrmpkim.o \
 	lrotlt.o \
+	lrsccmap.o \
 	lscaleim.o \
 	lscalelt.o \
 	lsettag.o \
