@@ -44,6 +44,7 @@ int main(int argc, char *argv[])
     c,r,s,cc,rr,ss;
   
   float
+    I,sigI,
     F,sigF,
     freal,fimag,fmodel;
 /*
@@ -145,9 +146,11 @@ int main(int argc, char *argv[])
   */
   printf("Scaling the map\n");
   float xx=0.0,xy=0.0;
-  while (fscanf(hklin,"%d %d %d %f %f",&h,&k,&l,&F,&sigF)!=EOF) {
+  while (fscanf(hklin,"%d %d %d %f %f",&h,&k,&l,&I,&sigI)!=EOF) {
     //    printf("%d %d %d\n",k+lat->origin.k,j+lat->origin.j,i+lat->origin.i);
-
+    if (I>0 && sigI>0) {
+      F=sqrtf(I);
+      sigF=sigI/2./F;
     if (map->mapc == 3 && map->mapr == 1 && map->maps == 2) {
       r = h; s = k; c = l;
     } else if (map->mapc == 3 && map->mapr == 2 && map->maps == 1) {
@@ -192,7 +195,7 @@ int main(int argc, char *argv[])
       scaled_fft_data[friedel_index+1] = -scaled_fft_data[fft_index+1];
       */
     }
-  }
+    }}
 
   // Expand using Friedel symmetry
 

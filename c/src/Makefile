@@ -500,6 +500,7 @@ lrfaclt.o:lrfaclt.c mwmask.h
 lrmpkim.o:lrmpkim.c mwmask.h
 lrotlt.o:lrotlt.c mwmask.h
 lrsccmap.o:lrsccmap.c mwmask.h
+lrsrlt.o:lrsrlt.c mwmask.h
 lscaleim.o:lscaleim.c mwmask.h
 lscalelt.o:lscalelt.c mwmask.h
 lsettag.o:lsettag.c mwmask.h
@@ -629,6 +630,7 @@ libmw.a: \
 	lrmpkim.o \
 	lrotlt.o \
 	lrsccmap.o \
+	lrsrlt.o \
 	lscaleim.o \
 	lscalelt.o \
 	lsettag.o \

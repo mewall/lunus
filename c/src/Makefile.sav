@@ -103,6 +103,7 @@ all: \
 	rfaclt \
 	rmpkim \
 	rotlt \
+	rsccmap \
 	scaleim \
 	scalelt \
 	scalerf \
@@ -330,6 +331,8 @@ rmpkim:rmpkim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 rotlt:rotlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+rsccmap:rsccmap.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 scaleim:scaleim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 scalelt:scalelt.c ${DEPENDS}
@@ -496,6 +499,8 @@ lrf2lt.o:lrf2lt.c mwmask.h
 lrfaclt.o:lrfaclt.c mwmask.h
 lrmpkim.o:lrmpkim.c mwmask.h
 lrotlt.o:lrotlt.c mwmask.h
+lrsccmap.o:lrsccmap.c mwmask.h
+lrsrlt.o:lrsrlt.c mwmask.h
 lscaleim.o:lscaleim.c mwmask.h
 lscalelt.o:lscalelt.c mwmask.h
 lsettag.o:lsettag.c mwmask.h
@@ -624,6 +629,8 @@ libmw.a: \
 	lrfaclt.o \
 	lrmpkim.o \
 	lrotlt.o \
+	lrsccmap.o \
+	lrsrlt.o \
 	lscaleim.o \
 	lscalelt.o \
 	lsettag.o \
