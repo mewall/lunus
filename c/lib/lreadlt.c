@@ -33,11 +33,11 @@ int lreadlt(LAT3D *lat)
 
   
   lat->xscale = (float)((lat->xbound.max - lat->xbound.min)/ 
-		         (float)(lat->xvoxels));               
+		         (float)(lat->xvoxels-1));               
   lat->yscale = (float)((lat->ybound.max - lat->ybound.min)/ 
-		         (float)(lat->yvoxels));               
+		         (float)(lat->yvoxels-1));               
   lat->zscale = (float)((lat->zbound.max - lat->zbound.min)/ 
-		         (float)(lat->zvoxels));               
+		         (float)(lat->zvoxels-1));               
 
   lat->origin.i =  (long)(-lat->xbound.min / lat->xscale + .5);
   lat->origin.j =  (long)(-lat->ybound.min / lat->yscale + .5);

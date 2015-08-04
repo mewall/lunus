@@ -1,4 +1,4 @@
-/* LMINR.C - Generate a table of minimum voxel values as a function of radius
+/* LMINRLT.C - Generate a table of minimum voxel values as a function of radius
 		for an input 3D lattice.
    
    Author: Mike Wall
@@ -9,7 +9,7 @@
 
 #include<mwmask.h>
 
-int lminr(LAT3D *lat)
+int lminrlt(LAT3D *lat)
 {
 	size_t
 		i,
@@ -20,12 +20,6 @@ int lminr(LAT3D *lat)
 
 	struct ijkcoords rvec;
 
-	lat->origin.i = (IJKCOORDS_DATA)((-lat->xbound.min / (lat->xbound.max - 
-				lat->xbound.min)) * lat->xvoxels);
-	lat->origin.j = (IJKCOORDS_DATA)((-lat->ybound.min / (lat->ybound.max - 
-				lat->ybound.min)) * lat->yvoxels);
-	lat->origin.k = (IJKCOORDS_DATA)((-lat->zbound.min / (lat->zbound.max - 
-				lat->zbound.min)) * lat->zvoxels);
 	lat->rfile_length = 0;
 	for(k = 0; k < lat->zvoxels; k++) {
 	  for(j = 0; j < lat->yvoxels; j++) {

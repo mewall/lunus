@@ -1,16 +1,3 @@
-VPATH=${C_HOME}/src:${C_HOME}/lib:${C_HOME}/bin:${C_HOME}/include
-#CC=gcc-mp-4.8
-CC=gcc
-CFLAGS= -g -fopenmp -DUSE_OPENMP -L${C_HOME}/lib -I${C_HOME}/include
-#CFLAGS= -g -w -L${C_HOME}/lib -I${C_HOME}/include
-AR=ar
-ARFLAGS=-r
-SHELL=/bin/csh
-LIBS=-lmw -lm
-DEPENDS=mwmask.h libmw.a
-S=${C_HOME}/src
-B=${C_HOME}/bin
-L=${C_HOME}/lib
 all: \
 	abslt \
 	addbeam \
@@ -113,7 +100,6 @@ all: \
 	seesh \
 	settag \
 	shiftlt \
-	shiftsflt \
 	shim4lt \
 	shimlt \
 	smthim \
@@ -353,8 +339,6 @@ settag:settag.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 shiftlt:shiftlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-shiftsflt:shiftsflt.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 shim4lt:shim4lt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 shimlt:shimlt.c ${DEPENDS}
@@ -511,7 +495,6 @@ lscaleim.o:lscaleim.c mwmask.h
 lscalelt.o:lscalelt.c mwmask.h
 lsettag.o:lsettag.c mwmask.h
 lshiftlt.o:lshiftlt.c mwmask.h
-lshiftsflt.o:lshiftsflt.c mwmask.h
 lshim4lt.o:lshim4lt.c mwmask.h
 lshimlt.o:lshimlt.c mwmask.h
 lsmthim.o:lsmthim.c mwmask.h
@@ -642,7 +625,6 @@ libmw.a: \
 	lscalelt.o \
 	lsettag.o \
 	lshiftlt.o \
-	lshiftsflt.o \
 	lshim4lt.o \
 	lshimlt.o \
 	lsmthim.o \
