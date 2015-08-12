@@ -140,6 +140,7 @@ all: \
 	translt \
 	transmap \
 	tst3d \
+	vasp2xtal \
 	vtk2lat \
 	waveim \
 	windim \
@@ -406,6 +407,8 @@ translt:translt.c ${DEPENDS}
 transmap:transmap.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 tst3d:tst3d.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+vasp2xtal:vasp2xtal.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 vtk2lat:vtk2lat.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
