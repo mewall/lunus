@@ -63,9 +63,8 @@ int main(int argc, char *argv[])
 			}
 			break;
 		default:
-			printf("\n Usage: beamim <input file> "
-				"<image in> <image out> <x origin> "
-				"<y origin>\n\n");
+			printf("\n Usage: beamim "
+				"<image in> <image out>\n\n");
 			exit(0);
 	}
  
@@ -87,6 +86,8 @@ int main(int argc, char *argv[])
      perror(imdiff->error_msg);
      goto CloseShop;
    }
+
+   printf("x=%f, y=%f\n",imdiff->beam_mm.x,imdiff->beam_mm.y);
 
    lbeamim(imdiff);
 
