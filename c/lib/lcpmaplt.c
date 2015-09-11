@@ -64,9 +64,9 @@ int lcpmaplt(CCP4MAP *map, LAT3D *lat)
     return_value = 6;
     goto CloseShop;
   }
-  lat->xscale = map->xlen/(float)lat->xvoxels;
-  lat->yscale = map->ylen/(float)lat->yvoxels;
-  lat->zscale = map->zlen/(float)lat->zvoxels;
+  lat->xscale = map->xlen/(float)(lat->xvoxels-1);
+  lat->yscale = map->ylen/(float)(lat->yvoxels-1);
+  lat->zscale = map->zlen/(float)(lat->zvoxels-1);
   lat->origin.i = lat->origin.j = lat->origin.k = 0;
   lat->xbound.min = - lat->origin.i*lat->xscale;               
   lat->xbound.max = (lat->xvoxels - lat->origin.i - 1)*lat->xscale;

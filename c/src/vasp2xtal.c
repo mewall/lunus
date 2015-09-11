@@ -1,14 +1,14 @@
-/* SYMLT.C - Symmetrize a lattice according to input line instructions.
+/* VASP2XTAL.C - Convert VASP cube2map charge density lattice to crystallographic charge.
    
    Author: Mike Wall
-   Date: 2/28/95
+   Date: 3/21/95
    Version: 1.
    
    Usage:
-   		"symlt <input lattice> <output lattice> <symmetry_operation>"
+   		"vasp2xtal <input lattice> <output lattice>"
 
-		Input are lattice and symmetry operation
-		specification.  Output is symmetrized lattice.
+		Input is an input 
+			lattice.  Output is a lattice.  
    */
 
 #include<mwmask.h>
@@ -16,27 +16,34 @@
 int main(int argc, char *argv[])
 {
   FILE
-	*latticein,
-	*latticeout;
-
+    *latticein,
+    *latticeout;
+  
   char
     error_msg[LINESIZE];
-
+  
   size_t
-    symop;
-
+    i,
+    j,
+    k,
+    num_read,
+    num_wrote;
+  
   LAT3D 
-	*lat;
+    *lat;
+  
+  RFILE_DATA_TYPE 
+    *rfile;
+  
+  float
+    scale_factor;
 
-  RFILE_DATA_TYPE *rfile;
-
-  struct ijkcoords
-    origin;
+  float e_fac = 0.036749309;
 
 /*
  * Set input line defaults:
  */
-	
+	scale_factor = 1.;
 	latticein = stdin;
 	latticeout = stdout;
 
@@ -44,21 +51,13 @@ int main(int argc, char *argv[])
  * Read information from input line:
  */
 	switch(argc) {
-    case 7: 
-    origin.k = atol(argv[6]);
-    case 6:
-    origin.j = atol(argv[5]);
-    case 5:
-    origin.i = atol(argv[4]);
-	  case 4:
-	  symop = atol(argv[3]);
 	  case 3:
 	  if (strcmp(argv[2],"-") == 0) {
 	    latticeout = stdout;
 	  }
 	  else {
 	    if ((latticeout = fopen(argv[2],"wb")) == NULL) {
-	      printf("\nCan't open %s.\n\n",argv[2]);
+	      printf("\nCan't open %s.\n\n",argv[1]);
 	      exit(0);
 	    }
 	  }
@@ -74,20 +73,13 @@ int main(int argc, char *argv[])
 	  }
 	  break;
 	  default:
-	  printf("\n Usage: symlt <input lattice> "
-		 "<output lattice> <symmetry_operation>\n\n"
-		 "  Symmetry Operations:\n"
-		 "    0 = P1\n"
-		 "    1 = P4/m (P41)\n"
-		 "    2 = Pmmm (P212121)\n\n"
-		 "    3 = P m -3\n\n"
-		 "    4 = Immm (I222)\n");
-	      
+	  printf("\n Usage: mulsclt <input lattice> <output lattice> "
+		 "<scale factor>\n\n");
 	  exit(0);
 	}
   
   /*
-   * Initialize lattices:
+   * Initialize lattice:
    */
 
   if ((lat = linitlt()) == NULL) {
@@ -105,20 +97,17 @@ int main(int argc, char *argv[])
     exit(0);
   }
 
-  /*
-   * Perform symmetry operation:
-   */
+/*
+ * Generate the scaled lattice:
+ */
 
-  lat->symop_index = symop;
-  if (argc==7) {
-    lat->origin.i=origin.i; lat->origin.j=origin.j; lat->origin.k=origin.k;
-  }
-  lsymlt(lat);
-  
-  /*
-   * Write lattice to output file:
-   */
-  
+  lat->rfile[0] = 1./e_fac;
+  lmulsclt(lat);
+
+/*
+ * Write lattice to output file:
+ */
+
   lat->outfile = latticeout;
   if (lwritelt(lat) != 0) {
     perror("Couldn't write lattice.\n\n");
@@ -140,5 +129,4 @@ CloseShop:
   fclose(latticein);
   fclose(latticeout);
 }
-
 

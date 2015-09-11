@@ -1,16 +1,3 @@
-VPATH=${C_HOME}/src:${C_HOME}/lib:${C_HOME}/bin:${C_HOME}/include
-#CC=gcc-mp-4.8
-CC=gcc
-CFLAGS= -g -fopenmp -DUSE_OPENMP -L${C_HOME}/lib -I${C_HOME}/include
-#CFLAGS= -g -w -L${C_HOME}/lib -I${C_HOME}/include
-AR=ar
-ARFLAGS=-r
-SHELL=/bin/csh
-LIBS=-lmw -lm
-DEPENDS=mwmask.h libmw.a
-S=${C_HOME}/src
-B=${C_HOME}/bin
-L=${C_HOME}/lib
 all: \
 	abslt \
 	addbeam \
@@ -31,11 +18,7 @@ all: \
 	calcrmap \
 	calcrsf \
 	calcu \
-<<<<<<< HEAD
-	ccrim \
-=======
 	ccp4map2lat \
->>>>>>> v0.1a
 	ccrlt \
 	constim \
 	constlt \
@@ -54,7 +37,6 @@ all: \
 	divrf \
 	explt \
 	fftim \
-	fillpixim \
 	fftlt \
 	fftwlt \
 	filter \
@@ -64,7 +46,6 @@ all: \
 	gencmd \
 	genlat \
 	genmap \
-	getrim \
 	gmparse \
 	hdrlt \
 	headc \
@@ -76,16 +57,11 @@ all: \
 	lat2hkl \
 	lat2map \
 	lat2vtk \
-<<<<<<< HEAD
-	lowrim \
-=======
 	liquidcorrlt \
 	liquidfaclt \
->>>>>>> v0.1a
 	map2lat \
 	mapbound \
 	maskimg \
-	mathim \
 	medim \
 	minrim \
 	minrlt \
@@ -108,24 +84,14 @@ all: \
 	punchim \
 	rad2s \
 	ratioim \
-	rbminrim \
 	revbytelt \
 	revyim \
 	rf2char \
-	rf2char2 \
 	rf2lt \
 	rfaclt \
-	rmpixim \
 	rmpkim \
-<<<<<<< HEAD
-	rmsdim \
-=======
 	rotlt \
-<<<<<<< HEAD
->>>>>>> v0.1a
-=======
 	rsccmap \
->>>>>>> v0.1a
 	scaleim \
 	scalelt \
 	scalerf \
@@ -134,10 +100,9 @@ all: \
 	seesh \
 	settag \
 	shiftlt \
-	shiftsflt \
 	shim4lt \
 	shimlt \
-	smoothim \
+	smthim \
 	solidlt \
 	subenvlt \
 	subim \
@@ -147,14 +112,13 @@ all: \
 	subrflt \
 	sumim \
 	sumlt \
-	sumresim \
 	sumrf \
 	swapmw \
 	symlt \
+	tag_overloads \
 	tagim \
 	taglt \
 	tagneg \
-	tag_overloads \
 	tailc \
 	thrshim \
 	thrshlt \
@@ -162,7 +126,6 @@ all: \
 	translt \
 	transmap \
 	tst3d \
-	vasp2xtal \
 	vtk2lat \
 	waveim \
 	windim \
@@ -212,11 +175,7 @@ calcrsf:calcrsf.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 calcu:calcu.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-<<<<<<< HEAD
-ccrim:ccrim.c ${DEPENDS}
-=======
 ccp4map2lat:ccp4map2lat.c ${DEPENDS}
->>>>>>> v0.1a
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 ccrlt:ccrlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -254,8 +213,6 @@ explt:explt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 fftim:fftim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-fillpixim:fillpixim.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 fftlt:fftlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 fftwlt:fftwlt.c ${DEPENDS}
@@ -273,8 +230,6 @@ gencmd:gencmd.c ${DEPENDS}
 genlat:genlat.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 genmap:genmap.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-getrim:getrim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 gmparse:gmparse.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -298,21 +253,15 @@ lat2map:lat2map.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 lat2vtk:lat2vtk.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-<<<<<<< HEAD
-lowrim:lowrim.c ${DEPENDS}
-=======
 liquidcorrlt:liquidcorrlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 liquidfaclt:liquidfaclt.c ${DEPENDS}
->>>>>>> v0.1a
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 map2lat:map2lat.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 mapbound:mapbound.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 maskimg:maskimg.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-mathim:mathim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 medim:medim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -358,31 +307,19 @@ rad2s:rad2s.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 ratioim:ratioim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-rbminrim:rbminrim.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 revbytelt:revbytelt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-<<<<<<< HEAD
-rf2char2:rf2char2.c ${DEPENDS}
-=======
 revyim:revyim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 rf2char:rf2char.c ${DEPENDS}
->>>>>>> v0.1a
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 rf2lt:rf2lt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 rfaclt:rfaclt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-rmpixim:rmpixim.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 rmpkim:rmpkim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-<<<<<<< HEAD
-rmsdim:rmsdim.c ${DEPENDS}
-=======
 rotlt:rotlt.c ${DEPENDS}
->>>>>>> v0.1a
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 rsccmap:rsccmap.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -402,13 +339,11 @@ settag:settag.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 shiftlt:shiftlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-shiftsflt:shiftsflt.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 shim4lt:shim4lt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 shimlt:shimlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-smoothim:smoothim.c ${DEPENDS}
+smthim:smthim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 solidlt:solidlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -427,8 +362,6 @@ subrflt:subrflt.c ${DEPENDS}
 sumim:sumim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 sumlt:sumlt.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-sumresim:sumresim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 sumrf:sumrf.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -457,8 +390,6 @@ translt:translt.c ${DEPENDS}
 transmap:transmap.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 tst3d:tst3d.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-vasp2xtal:vasp2xtal.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 vtk2lat:vtk2lat.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -489,7 +420,6 @@ lavsqrim.o:lavsqrim.c mwmask.h
 lavsqrlt.o:lavsqrlt.c mwmask.h
 lbeamim.o:lbeamim.c mwmask.h
 lbuttim.o:lbuttim.c mwmask.h
-lccrim.o:lccrim.c mwmask.h
 lccrlt.o:lccrlt.c mwmask.h
 lchbyte.o:lchbyte.c mwmask.h
 lconstim.o:lconstim.c mwmask.h
@@ -509,30 +439,21 @@ ldivlt.o:ldivlt.c mwmask.h
 ldivrf.o:ldivrf.c mwmask.h
 lexplt.o:lexplt.c mwmask.h
 lfft.o:lfft.c mwmask.h
-lfillpixim.o:lfillpixim.c mwmask.h
 lfreeim.o:lfreeim.c mwmask.h
 lfreelt.o:lfreelt.c mwmask.h
-lfrmsdim.o:lfrmsdim.c mwmask.h
 lgausslt.o:lgausslt.c mwmask.h
 lgensv.o:lgensv.c mwmask.h
 lgetanls.o:lgetanls.c mwmask.h
 lgetmat.o:lgetmat.c mwmask.h
 lgetovld.o:lgetovld.c mwmask.h
-lgetpix.o:lgetpix.c mwmask.h
 lgetpks.o:lgetpks.c mwmask.h
-lgetrim.o:lgetrim.c mwmask.h
 lgettag.o:lgettag.c mwmask.h
 linitim.o:linitim.c mwmask.h
 linitlt.o:linitlt.c mwmask.h
 linitmap.o:linitmap.c mwmask.h
 lintdfim.o:lintdfim.c mwmask.h
-<<<<<<< HEAD
-llowrim.o:llowrim.c mwmask.h
-lmathim.o:lmathim.c mwmask.h
-=======
 lliquidcorrlt.o:lliquidcorrlt.c mwmask.h
 lliquidfaclt.o:lliquidfaclt.c mwmask.h
->>>>>>> v0.1a
 lmattools.o:lmattools.c mwmask.h
 lmedim.o:lmedim.c mwmask.h
 lmin.o:lmin.c mwmask.h
@@ -555,16 +476,10 @@ lpolarim.o:lpolarim.c mwmask.h
 lpunch.o:lpunch.c mwmask.h
 lpunchim.o:lpunchim.c mwmask.h
 lratioim.o:lratioim.c mwmask.h
-<<<<<<< HEAD
-lrbminrim.o:lrbminrim.c mwmask.h
-lreadcbf.o:lreadcbf.c mwmask.h
-=======
 lreadcube.o:lreadcube.c mwmask.h
->>>>>>> v0.1a
 lreaddf.o:lreaddf.c mwmask.h
 lreadhkl.o:lreadhkl.c mwmask.h
 lreadim.o:lreadim.c mwmask.h
-lreadim_orig.o:lreadim_orig.c mwmask.h
 lreadlt.o:lreadlt.c mwmask.h
 lreadmap.o:lreadmap.c mwmask.h
 lreadrf.o:lreadrf.c mwmask.h
@@ -573,25 +488,16 @@ lrevyim.o:lrevyim.c mwmask.h
 lrf2lt.o:lrf2lt.c mwmask.h
 lrfaclt.o:lrfaclt.c mwmask.h
 lrmpkim.o:lrmpkim.c mwmask.h
-<<<<<<< HEAD
-lrmsdim.o:lrmsdim.c mwmask.h
-=======
 lrotlt.o:lrotlt.c mwmask.h
-<<<<<<< HEAD
->>>>>>> v0.1a
-=======
 lrsccmap.o:lrsccmap.c mwmask.h
 lrsrlt.o:lrsrlt.c mwmask.h
->>>>>>> v0.1a
 lscaleim.o:lscaleim.c mwmask.h
 lscalelt.o:lscalelt.c mwmask.h
 lsettag.o:lsettag.c mwmask.h
 lshiftlt.o:lshiftlt.c mwmask.h
-lshiftsflt.o:lshiftsflt.c mwmask.h
 lshim4lt.o:lshim4lt.c mwmask.h
 lshimlt.o:lshimlt.c mwmask.h
-lsmoothrf.o:lsmoothrf.c mwmask.h
-lsmoothim.o:lsmoothim.c mwmask.h
+lsmthim.o:lsmthim.c mwmask.h
 lsolidlt.o:lsolidlt.c mwmask.h
 lsubenvlt.o:lsubenvlt.c mwmask.h
 lsubim.o:lsubim.c mwmask.h
@@ -601,7 +507,6 @@ lsubrfim.o:lsubrfim.c mwmask.h
 lsubrflt.o:lsubrflt.c mwmask.h
 lsumim.o:lsumim.c mwmask.h
 lsumlt.o:lsumlt.c mwmask.h
-lsumresim.o:lsumresim.c mwmask.h
 lsumrf.o:lsumrf.c mwmask.h
 lsymlib.o:lsymlib.c mwmask.h
 lsymlt.o:lsymlt.c mwmask.h
@@ -630,7 +535,7 @@ lxfmask.o:lxfmask.c mwmask.h
 .c.o:
 	$(CC) -c -o ${L}/$*.o $(CFLAGS) ${L}/$*.c
 #
-# Libraries: 
+# Libraries:
 #
 libmw.a: \
 	labslt.o \
@@ -645,7 +550,6 @@ libmw.a: \
 	lavsqrlt.o \
 	lbeamim.o \
 	lbuttim.o \
-	lccrim.o \
 	lccrlt.o \
 	lchbyte.o \
 	lconstim.o \
@@ -665,31 +569,22 @@ libmw.a: \
 	ldivrf.o \
 	lexplt.o \
 	lfft.o \
-	lfillpixim.o \
 	lfreeim.o \
 	lfreelt.o \
-	lfrmsdim.o \
 	lgausslt.o \
 	lgensv.o \
 	lgetanls.o \
 	lgetmat.o \
 	lgetovld.o \
-	lgetpix.o \
 	lgetpks.o \
-	lgetrim.o \
 	lgettag.o \
 	linitim.o \
 	linitlt.o \
 	linitmap.o \
 	lintdfim.o \
-<<<<<<< HEAD
-	llowrim.o \
-=======
 	lliquidcorrlt.o \
 	lliquidfaclt.o \
->>>>>>> v0.1a
 	lmattools.o \
-	lmathim.o \
 	lmedim.o \
 	lmin.o \
 	lminrim.o \
@@ -711,16 +606,10 @@ libmw.a: \
 	lpunch.o \
 	lpunchim.o \
 	lratioim.o \
-<<<<<<< HEAD
-	lrbminrim.o \
-	lreadcbf.o \
-=======
 	lreadcube.o \
->>>>>>> v0.1a
 	lreaddf.o \
 	lreadhkl.o \
 	lreadim.o \
-	lreadim_orig.o \
 	lreadlt.o \
 	lreadmap.o \
 	lreadrf.o \
@@ -729,25 +618,16 @@ libmw.a: \
 	lrf2lt.o \
 	lrfaclt.o \
 	lrmpkim.o \
-<<<<<<< HEAD
-	lrmsdim.o \
-=======
 	lrotlt.o \
-<<<<<<< HEAD
->>>>>>> v0.1a
-=======
 	lrsccmap.o \
 	lrsrlt.o \
->>>>>>> v0.1a
 	lscaleim.o \
 	lscalelt.o \
 	lsettag.o \
 	lshiftlt.o \
-	lshiftsflt.o \
 	lshim4lt.o \
 	lshimlt.o \
-	lsmoothim.o \
-	lsmoothrf.o \
+	lsmthim.o \
 	lsolidlt.o \
 	lsubenvlt.o \
 	lsubim.o \
@@ -757,7 +637,6 @@ libmw.a: \
 	lsubrflt.o \
 	lsumim.o \
 	lsumlt.o \
-	lsumresim.o \
 	lsumrf.o \
 	lsymlib.o \
 	lsymlt.o \

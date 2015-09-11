@@ -162,7 +162,8 @@
  * Miscellaneous:
  */
 
-#define PI 3.14159			/* PI */
+#define PI 3.14159265359	      	/* PI */
+#define TWOPI 6.28318530718             /* 2.*PI */
 #define BOHR 0.52917721092              /* Bohr radius in Angstroms */
 #define DEFAULT_MACHST 16708            /* Default CCP4 machine stamp */
 #define VALUE_ALLOCATED 1		/* Flag for imdiff->value allocated */
@@ -513,6 +514,8 @@ typedef struct {
   XYZCOORDS_DATA arad;
   float cc_fore;
   float cc_back;
+  float rsr_fore;
+  float rsr_back;
 } CCP4MAP;
 
 /*
@@ -567,6 +570,7 @@ typedef struct {
   int axis;                     /* Axis of rotation */
   float angle;                  /* Angle of rotation */
   struct xyzmatrix anisoU;      /* anisotropic U matrix */
+  struct xyzcoords shift;       /* translation vector */
 } LAT3D;
 
 /*
@@ -606,6 +610,7 @@ int ldivrf(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lexplt(LAT3D *lat);
 void lfft(float *data,int *nn,int ndim,int isign);
 int lfilltaglt(LAT3D *lat);
+int lfmtlt(LAT3D *lat);
 int lfreeim(DIFFIMAGE *imdiff);
 int lfreelt(LAT3D *lat);
 int lgausslt(LAT3D *lat);
@@ -629,6 +634,7 @@ int lminr(LAT3D *lat);
 int lminrim(DIFFIMAGE *imdiff);
 int lmirrorlt(LAT3D *lat,int axis);
 int lmodeim(DIFFIMAGE *imdiff);
+int lmuldwflt(LAT3D *lat);
 int lmulim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lmullt(LAT3D *lat1, LAT3D *lat2);
 int lmulrf(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
@@ -653,6 +659,7 @@ int lreadlt(LAT3D *lat);
 int lreadmap(CCP4MAP *map);
 int lreadrf(DIFFIMAGE *imdiff);
 int lreadvtk(LAT3D *lat);
+int lresizelt(LAT3D *lat1, LAT3D *lat2);
 int lrevyim(DIFFIMAGE *imdiff);
 int lrf2lt(LAT3D *lat);
 float lrfaclt(LAT3D *lat1, LAT3D *lat2);
@@ -661,9 +668,11 @@ int lrotlt(LAT3D *lat);
 struct xyzmatrix lrotmat(float rotx, float roty, float rotz);
 struct xyzcoords lrotvecz(struct xyzcoords a, float cos_theta,float sin_theta);
 int lrsccmap(CCP4MAP *map1, CCP4MAP *map2);
+float lrsrlt(LAT3D *lat1, LAT3D *lat2);
 int lscaleim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lscalelt(LAT3D *lat1, LAT3D *lat2);
 int lshiftlt(LAT3D *lat,struct ijkcoords t);
+int lshiftsflt(LAT3D *lat1,LAT3D *lat2);
 int lshim4lt(LAT3D *lat);
 int lshimlt(LAT3D *lat);
 int lsmthim(DIFFIMAGE *imdiff);

@@ -78,11 +78,13 @@ int ltransmap(CCP4MAP *map)
 
   int wss,wsr,wsc;
 
-  printf("grid x length = %f\n",map->xlen/(float)map->nx);
+  printf("xlen,ylen,zeln = %f,%f,%f\n",map->xlen,map->ylen,map->zlen);
 
   normshift.x = map->shift.x/(map->xlen/(float)map->nx);
   normshift.y = map->shift.y/(map->ylen/(float)map->ny);
   normshift.z = map->shift.z/(map->zlen/(float)map->nz);
+
+  printf("normshift.x,y,z=%f,%f,%f\n",normshift.x,normshift.y,normshift.z);
 
   wholeshift.i = (int)normshift.x;
   wholeshift.j = (int)normshift.y;

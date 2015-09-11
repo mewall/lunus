@@ -58,7 +58,6 @@ int lreadmap(CCP4MAP *map)
   map->ispg = (long) header_long[22];
   map->nsymbt = (long) header_long[23];
   map->machst = (long) header_long[53];
-  printf("map->machst = %d\n",map->machst);
   map->section_length = map->nc*map->nr;
   map->map_length = map->section_length*map->ns;
   map->arms = (float)header_float[54];
@@ -106,7 +105,8 @@ int lreadmap(CCP4MAP *map)
   map->data = (MAP_DATA_TYPE *)map->data_buf;
 
   // Print some useful info from the header
-
+#ifdef DEBUG
+  printf("map->machst = %d\n",map->machst);
   printf("NC = %d\n",map->nc);
   printf("NR = %d\n",map->nr);
   printf("NS = %d\n",map->ns);
@@ -125,6 +125,7 @@ int lreadmap(CCP4MAP *map)
   printf("Symmetry record:\n\n%s\n",map->symrec);
   printf("First three data values: %f, %f, %f\n",map->data[0],map->data[1],map->data[2]);
   printf("RMSD = %f\n",map->arms);
+#endif
   CloseShop:
   return(return_value);
 }
