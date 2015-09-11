@@ -65,11 +65,7 @@ int main(int argc, char *argv[])
 			}
 			break;
 		default:
-<<<<<<< HEAD
 			printf("\n Usage: avgpolim <input image> "
-=======
-			printf("\n Usage: avgrim <input image> "
->>>>>>> v0.1a
 				"<output rfile> <inner radius> <outer radius>\n\n");
 			exit(0);
 	}

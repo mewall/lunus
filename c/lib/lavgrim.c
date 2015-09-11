@@ -15,7 +15,6 @@ Version: 2.
 
 int lavgrim(DIFFIMAGE *imdiff)
 {
-<<<<<<< HEAD
   size_t
     *n,
     radius,
@@ -26,9 +25,6 @@ int lavgrim(DIFFIMAGE *imdiff)
     c;
 
   struct xycoords rvec;
-
-  //temporary edit!!
-  //float angle;
 
   n = (size_t *)calloc(MAX_RFILE_LENGTH, sizeof(size_t));
   imdiff->rfile_length = 0;
@@ -45,19 +41,6 @@ int lavgrim(DIFFIMAGE *imdiff)
       if (radius > MAX_RFILE_LENGTH)
 	  printf("alert! alert!\n");
 
-      //temporary edit!! for vertical signal
-      /*
-      angle = atan(rvec.y/rvec.x);
-      if ((angle < -1.833) || (angle > 1.833)) {
-	index++;
-	continue;
-      }
-      if ((angle > -1.309) && (angle < 1.309)) {
-	index++;
-	continue;
-      }
-      */
-
       //temporary edit!! for horizontal signal
      /* 
       angle = atan(rvec.y/rvec.x);
@@ -69,7 +52,6 @@ int lavgrim(DIFFIMAGE *imdiff)
 	index++;
 	continue;
       }
-      
 */
 
       if ((imdiff->image[index] != imdiff->overload_tag) &&
@@ -84,7 +66,7 @@ int lavgrim(DIFFIMAGE *imdiff)
     }
   }
   free((size_t *)n);
-=======
+  /*
 	size_t
 		r,
 		c,
@@ -114,5 +96,5 @@ int lavgrim(DIFFIMAGE *imdiff)
 	    index++;
 	  }
 	}
->>>>>>> v0.1a
+*/
 }
