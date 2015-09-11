@@ -122,7 +122,7 @@ int main(int argc, char *argv[])
 
   // Print results
 
-  printf("%11.9f %11.9f\n",map1->cc_fore,map1->cc_back);
+  printf("CC_fore: %11.9f CC_back: %11.9f RSR_fore: %11.9f RSR_back: %11.9f\n",map1->cc_fore,map1->cc_back,map1->rsr_fore,map1->rsr_back);
 
 
 CloseShop:

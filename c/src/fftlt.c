@@ -203,6 +203,13 @@ int main(int argc, char *argv[])
   //printf("Extracting lattice...\n");/***/
   fft_index = 1; /* Data array starts at position 1 */
   lat_index = 0;
+  if (isign==1) {
+    lat->origin.i=lat->xvoxels/2-1;
+    lat->origin.j=lat->yvoxels/2-1;
+    lat->origin.k=lat->zvoxels/2-1;
+  } else {
+    lat->origin.i=lat->origin.j=lat->origin.k=0;
+  }
   for(i=0;i<lat->xvoxels;i++) {
     for(j=0;j<lat->yvoxels;j++) {
       for(k=0;k<lat->zvoxels;k++) {
@@ -232,13 +239,13 @@ int main(int argc, char *argv[])
   lat->zscale = 1./lat->zscale*1./(float)lat->zvoxels;
   lat->xbound.min = - (LATTICE_DATA_TYPE)(lat->origin.i*lat->xscale);
   lat->xbound.max = (LATTICE_DATA_TYPE)((lat->xvoxels -
-					lat->origin.i)*lat->xscale); 
+					lat->origin.i-1)*lat->xscale); 
   lat->ybound.min = - (LATTICE_DATA_TYPE)(lat->origin.j*lat->yscale); 
   lat->ybound.max = (LATTICE_DATA_TYPE)((lat->yvoxels -
-					lat->origin.j)*lat->yscale); 
+					lat->origin.j-1)*lat->yscale); 
   lat->zbound.min = - (LATTICE_DATA_TYPE)(lat->origin.k*lat->zscale); 
   lat->zbound.max = (LATTICE_DATA_TYPE)((lat->zvoxels -
-					lat->origin.k)*lat->zscale); 
+					lat->origin.k-1)*lat->zscale); 
 
   /*
    * Write lattices to output file:

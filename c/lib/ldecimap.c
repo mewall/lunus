@@ -85,6 +85,8 @@ int ldecimap(CCP4MAP *map)
 
   stencil = (float *)malloc(sizeof(float)*stencil_size);
 
+  float stencil_weight=1./(float)dfac/(float)dfac/(float)dfac;
+
   for (i=0;i<stencil_size;i++) {
     if (dfac_is_even && ((i==0) || (i==(stencil_size-1)))) {
       stencil[i]=0.5;
@@ -109,7 +111,7 @@ int ldecimap(CCP4MAP *map)
 	    for (cc=0;cc<stencil_size;cc++) {
 	      long cidx = (c-stencil_ofst+cc+map->nc)%map->nc;
 	      map_index = sidx*nrc+ridx*map->nc+cidx;
-	      ddata[dmap_index]+=map->data[map_index]*stencil[ss]*stencil[rr]*stencil[cc];
+	      ddata[dmap_index]+=map->data[map_index]*stencil[ss]*stencil[rr]*stencil[cc]*stencil_weight;
 	    }
 	  }
 	} 

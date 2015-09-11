@@ -1,4 +1,4 @@
-/* AVGR.C - Generate a table of average voxel values as a function of radius
+/* MINRLT.C - Generate a table of minimum voxel values as a function of radius
 		for an input 3D lattice.
    
    Author: Mike Wall
@@ -6,18 +6,16 @@
    Version: 1.
    
    Usage:
-   		"avgr <input file> <output file>"
+   		"minrlt <input file> <output file>"
 
-   Input is a 3D lattice.  Output is a list of average value by radius, to be 
-	labelled (0,1,2,3,...).
+   Input is a 3D lattice.  Output is a list of minima by radius, to be labelled
+	(0,1,2,3,...).
 
    */
 
 #include<mwmask.h>
 
-int main(argc, argv)
-	short argc;
-	char *argv[];
+int main(int argc, char *argv[])
 {
   FILE
 	*infile,
@@ -78,7 +76,7 @@ int main(argc, argv)
 		case 1:
 			break;
 		default:
-			printf("\n Usage: avgr <input file> "
+			printf("\n Usage: minrlt <input file> "
 				"<output file>\n\n");
 			exit(0);
 	}
@@ -149,10 +147,10 @@ int main(argc, argv)
   }
 
 /*
- * Generate average rfile:
+ * Generate minimum rfile:
  */
 
-  lavgr(lat);
+  lminrlt(lat);
 
 /*
  * Write rfile to output file:

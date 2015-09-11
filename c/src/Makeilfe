@@ -1,16 +1,3 @@
-VPATH=${C_HOME}/src:${C_HOME}/lib:${C_HOME}/bin:${C_HOME}/include
-#CC=gcc-mp-4.8
-CC=gcc
-CFLAGS= -g -fopenmp -DUSE_OPENMP -L${C_HOME}/lib -I${C_HOME}/include
-#CFLAGS= -g -w -L${C_HOME}/lib -I${C_HOME}/include
-AR=ar
-ARFLAGS=-r
-SHELL=/bin/csh
-LIBS=-lmw -lm
-DEPENDS=mwmask.h libmw.a
-S=${C_HOME}/src
-B=${C_HOME}/bin
-L=${C_HOME}/lib
 all: \
 	abslt \
 	addbeam \
@@ -97,7 +84,6 @@ all: \
 	punchim \
 	rad2s \
 	ratioim \
-	resizelt \
 	revbytelt \
 	revyim \
 	rf2char \
@@ -114,7 +100,6 @@ all: \
 	seesh \
 	settag \
 	shiftlt \
-	shiftsflt \
 	shim4lt \
 	shimlt \
 	smthim \
@@ -141,7 +126,6 @@ all: \
 	translt \
 	transmap \
 	tst3d \
-	vasp2xtal \
 	vtk2lat \
 	waveim \
 	windim \
@@ -323,8 +307,6 @@ rad2s:rad2s.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 ratioim:ratioim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-resizelt:resizelt.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 revbytelt:revbytelt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 revyim:revyim.c ${DEPENDS}
@@ -356,8 +338,6 @@ seesh:seesh.c ${DEPENDS}
 settag:settag.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 shiftlt:shiftlt.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-shiftsflt:shiftsflt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 shim4lt:shim4lt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -410,8 +390,6 @@ translt:translt.c ${DEPENDS}
 transmap:transmap.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 tst3d:tst3d.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-vasp2xtal:vasp2xtal.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 vtk2lat:vtk2lat.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -506,7 +484,6 @@ lreadlt.o:lreadlt.c mwmask.h
 lreadmap.o:lreadmap.c mwmask.h
 lreadrf.o:lreadrf.c mwmask.h
 lreadvtk.o:lreadvtk.c mwmask.h
-lresizelt.o:lresizelt.c mwmask.h
 lrevyim.o:lrevyim.c mwmask.h
 lrf2lt.o:lrf2lt.c mwmask.h
 lrfaclt.o:lrfaclt.c mwmask.h
@@ -518,7 +495,6 @@ lscaleim.o:lscaleim.c mwmask.h
 lscalelt.o:lscalelt.c mwmask.h
 lsettag.o:lsettag.c mwmask.h
 lshiftlt.o:lshiftlt.c mwmask.h
-lshiftsflt.o:lshiftsflt.c mwmask.h
 lshim4lt.o:lshim4lt.c mwmask.h
 lshimlt.o:lshimlt.c mwmask.h
 lsmthim.o:lsmthim.c mwmask.h
@@ -638,7 +614,6 @@ libmw.a: \
 	lreadmap.o \
 	lreadrf.o \
 	lreadvtk.o \
-	lresizelt.o \
 	lrevyim.o \
 	lrf2lt.o \
 	lrfaclt.o \
@@ -650,7 +625,6 @@ libmw.a: \
 	lscalelt.o \
 	lsettag.o \
 	lshiftlt.o \
-	lshiftsflt.o \
 	lshim4lt.o \
 	lshimlt.o \
 	lsmthim.o \
