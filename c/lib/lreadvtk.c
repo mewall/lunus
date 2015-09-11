@@ -108,13 +108,13 @@ int lreadvtk(LAT3D *lat)
 
   lat->xyvoxels = lat->xvoxels*lat->yvoxels;
 
-  lat->xbound.max = lat->xbound.min + lat->xvoxels*lat->xscale;
-  lat->ybound.max = lat->ybound.min + lat->yvoxels*lat->yscale;
-  lat->zbound.max = lat->zbound.min + lat->zvoxels*lat->zscale;
+  lat->xbound.max = lat->xbound.min + ((float)lat->xvoxels)*lat->xscale;
+  lat->ybound.max = lat->ybound.min + ((float)lat->yvoxels)*lat->yscale;
+  lat->zbound.max = lat->zbound.min + ((float)lat->zvoxels)*lat->zscale;
 
-  lat->origin.i = (IJKCOORDS_DATA)(-lat->xbound.min/lat->xscale+.49);
-  lat->origin.j = (IJKCOORDS_DATA)(-lat->ybound.min/lat->yscale+.49);
-  lat->origin.k = (IJKCOORDS_DATA)(-lat->zbound.min/lat->zscale+.49);
+  lat->origin.i = (IJKCOORDS_DATA)(-lat->xbound.min/lat->xscale + .5);
+  lat->origin.j = (IJKCOORDS_DATA)(-lat->ybound.min/lat->yscale + .5);
+  lat->origin.k = (IJKCOORDS_DATA)(-lat->zbound.min/lat->zscale + .5);
 
   int index = 0,ct=0;
   int i,j,k;

@@ -7,15 +7,15 @@ struct xyzmatrix lrotmat(float rotx, float roty, float rotz)
   struct xyzmatrix R,Rx,Ry,Rz;
 
   Rx.xx = 1.; Rx.xy = 0.; Rx.xz = 0.;
-  Rx.yx = 0.; Rx.yy = cos(rotx); Rx.yz = sin(rotx);
-  Rx.zx = 0.; Rx.zy = -sin(rotx); Rx.zz = cos(rotx);
+  Rx.yx = 0.; Rx.yy = cosf(rotx); Rx.yz = sinf(rotx);
+  Rx.zx = 0.; Rx.zy = -sinf(rotx); Rx.zz = cosf(rotx);
 
-  Ry.xx = cos(roty); Ry.xy = 0.; Ry.xz = -sin(roty);
+  Ry.xx = cosf(roty); Ry.xy = 0.; Ry.xz = -sinf(roty);
   Ry.yx = 0.; Ry.yy = 1.; Ry.yz = 0.;
-  Ry.zx = sin(roty); Ry.zy = 0.; Ry.zz = cos(roty);
+  Ry.zx = sinf(roty); Ry.zy = 0.; Ry.zz = cosf(roty);
 
-  Rz.xx = cos(rotz); Rz.xy = sin(rotz); Rz.xz = 0.;
-  Rz.yx = -sin(rotz); Rz.yy = cos(rotz); Rz.yz = 0.;
+  Rz.xx = cosf(rotz); Rz.xy = sinf(rotz); Rz.xz = 0.;
+  Rz.yx = -sinf(rotz); Rz.yy = cosf(rotz); Rz.yz = 0.;
   Rz.zx = 0.; Rz.zy = 0.; Rz.zz = 1.;
 
   R = lmatmul(Ry,Rx);
@@ -44,6 +44,31 @@ struct xyzmatrix lmatmul(struct xyzmatrix a, struct xyzmatrix b)
   return c;
 }
 
+struct xyzmatrix lmatinv(struct xyzmatrix a)
+{
+  struct xyzmatrix b;
+
+  int i;
+
+  float determinant = a.xx*a.yy*a.zz+a.xy*a.yz*a.zx+a.xz*a.yx*a.zy-a.xx*a.yz*a.zy-a.xy*a.yx*a.zz-a.xz*a.yy*a.zx;
+
+  //  printf("Determinant = %f\n",determinant);
+
+  float invdet = 1/determinant;
+
+  b.xx = (a.yy*a.zz-a.zy*a.yz)*invdet;
+  b.xy = (a.xz*a.zy-a.zz*a.xy)*invdet;
+  b.xz = (a.xy*a.yz-a.yy*a.xz)*invdet;
+  b.yx = (a.yz*a.zx-a.zz*a.yx)*invdet;
+  b.yy = (a.xx*a.zz-a.zx*a.xz)*invdet;
+  b.yz = (a.xz*a.yx-a.yz*a.xx)*invdet;
+  b.zx = (a.yx*a.zy-a.zx*a.yy)*invdet;
+  b.zy = (a.xy*a.zx-a.zy*a.xx)*invdet;
+  b.zz = (a.xx*a.yy-a.yx*a.xy)*invdet;
+
+  return b;
+}
+
 struct xyzcoords lmatvecmul(struct xyzmatrix b,struct xyzcoords a)
 {
   struct xyzcoords c;
@@ -53,4 +78,68 @@ struct xyzcoords lmatvecmul(struct xyzmatrix b,struct xyzcoords a)
   c.z = b.zx*a.x + b.zy*a.y + b.zz*a.z;
 
   return c;
+}
+
+XYZCOORDS_DATA ldotvec(struct xyzcoords b,struct xyzcoords a)
+{
+  XYZCOORDS_DATA c;
+
+  c = a.x*b.x + a.y*b.y + a.z*b.z;
+
+  return c;
+}
+
+struct xyzcoords linvvec(struct xyzcoords a)
+{
+  struct xyzcoords c;
+
+  c.x = - a.x;
+  c.y = - a.y;
+  c.z = - a.z;
+
+  return c;
+}
+
+struct xyzcoords laddvec(struct xyzcoords b,struct xyzcoords a)
+{
+  struct xyzcoords c;
+
+  c.x = a.x + b.x;
+  c.y = a.y + b.y;
+  c.z = a.z + b.z;
+
+  return c;
+}
+
+struct xyzcoords lsubvec(struct xyzcoords b,struct xyzcoords a)
+{
+  struct xyzcoords c;
+
+  c.x = b.x - a.x;
+  c.y = b.y - a.y;
+  c.z = b.z - a.z;
+
+  return c;
+}
+
+struct xyzcoords lmulscvec(XYZCOORDS_DATA b,struct xyzcoords a)
+{
+  struct xyzcoords c;
+
+  c.x = b*a.x;
+  c.y = b*a.y;
+  c.z = b*a.z;
+
+  return c;
+}
+
+struct xyzcoords lrotvecz(struct xyzcoords a, float cos_theta,float sin_theta)
+{
+  struct xyzcoords b;
+
+  b.x = a.x*cos_theta - a.y*sin_theta;
+  b.y = a.x*sin_theta + a.y*cos_theta;
+  b.z = a.z;
+
+  return b;
 }

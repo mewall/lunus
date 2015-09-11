@@ -24,7 +24,15 @@ int ldivlt(LAT3D *lat1, LAT3D *lat2)
       for (i = 0; i < lat1->xvoxels; i++) {
 	if ((lat1->lattice[index] != lat1->mask_tag) &&
 	    (lat2->lattice[index] != lat1->mask_tag)) {
-	  lat1->lattice[index] /= lat2->lattice[index];
+	  if ((lat1->lattice[index]!=0) && (lat2->lattice[index]==0)) {
+	    printf("Divide by zero at i,j,k=%d,%d,%d\n",i,j,k);
+	    exit(1);
+	  }
+	  if (lat2->lattice[index]!=0) {
+	    lat1->lattice[index] /= lat2->lattice[index];
+	  } else {
+	    lat1->lattice[index] = lat1->mask_tag;
+	  }
 	}
 	else {
 	  lat1->lattice[index] = lat1->mask_tag;
