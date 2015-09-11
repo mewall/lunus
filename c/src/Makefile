@@ -27,6 +27,8 @@ all: \
 	binasc \
 	buttim \
 	calcu \
+	ccrim \
+	ccrim_full \
 	ccrlt \
 	constim \
 	constlt \
@@ -43,6 +45,7 @@ all: \
 	divrf \
 	explt \
 	fftim \
+	fillpixim \
 	fftlt \
 	filter \
 	ftfltim \
@@ -90,6 +93,7 @@ all: \
 	rf2char2 \
 	rf2lt \
 	rfaclt \
+	rmpixim \
 	rmpkim \
 	rmsdim \
 	scaleim \
@@ -165,6 +169,10 @@ buttim:buttim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 calcu:calcu.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+ccrim:ccrim.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+ccrim_full:ccrim_full.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 ccrlt:ccrlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 constim:constim.c ${DEPENDS}
@@ -196,6 +204,8 @@ divrf:divrf.c ${DEPENDS}
 explt:explt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 fftim:fftim.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+fillpixim:fillpixim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 fftlt:fftlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -289,6 +299,8 @@ rf2lt:rf2lt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 rfaclt:rfaclt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+rmpixim:rmpixim.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 rmpkim:rmpkim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 rmsdim:rmsdim.c ${DEPENDS}
@@ -381,6 +393,8 @@ lavsqrim.o:lavsqrim.c mwmask.h
 lavsqrlt.o:lavsqrlt.c mwmask.h
 lbeamim.o:lbeamim.c mwmask.h
 lbuttim.o:lbuttim.c mwmask.h
+lccrim.o:lccrim.c mwmask.h
+lccrim_helper.o:lccrim_helper.c mwmask.h
 lccrlt.o:lccrlt.c mwmask.h
 lchbyte.o:lchbyte.c mwmask.h
 lconstim.o:lconstim.c mwmask.h
@@ -397,6 +411,7 @@ ldivlt.o:ldivlt.c mwmask.h
 ldivrf.o:ldivrf.c mwmask.h
 lexplt.o:lexplt.c mwmask.h
 lfft.o:lfft.c mwmask.h
+lfillpixim.o:lfillpixim.c mwmask.h
 lfreeim.o:lfreeim.c mwmask.h
 lfreelt.o:lfreelt.c mwmask.h
 lfrmsdim.o:lfrmsdim.c mwmask.h
@@ -405,6 +420,7 @@ lgensv.o:lgensv.c mwmask.h
 lgetanls.o:lgetanls.c mwmask.h
 lgetmat.o:lgetmat.c mwmask.h
 lgetovld.o:lgetovld.c mwmask.h
+lgetpix.o:lgetpix.c mwmask.h
 lgetpks.o:lgetpks.c mwmask.h
 lgetrim.o:lgetrim.c mwmask.h
 lgettag.o:lgettag.c mwmask.h
@@ -497,6 +513,8 @@ libmw.a: \
 	lavsqrlt.o \
 	lbeamim.o \
 	lbuttim.o \
+	lccrim.o \
+	lccrim_helper.o \
 	lccrlt.o \
 	lchbyte.o \
 	lconstim.o \
@@ -513,6 +531,7 @@ libmw.a: \
 	ldivrf.o \
 	lexplt.o \
 	lfft.o \
+	lfillpixim.o \
 	lfreeim.o \
 	lfreelt.o \
 	lfrmsdim.o \
@@ -521,6 +540,7 @@ libmw.a: \
 	lgetanls.o \
 	lgetmat.o \
 	lgetovld.o \
+	lgetpix.o \
 	lgetpks.o \
 	lgetrim.o \
 	lgettag.o \

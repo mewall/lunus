@@ -55,7 +55,7 @@
 #define DEFAULT_IMAGELENGTH 1048576	/* TV6 TIFF image #pixels */
 #define DEFAULT_VALUE_OFFSET 0          /* Default offset. 0 for TV6, PILATUS, 40 for ADXV .img */
 #define MAX_OVERLOADS 10000		/* Max # of overloads in an image */
-#define MAX_PEAKS 20000			/* Max # of peaks in an image */
+#define MAX_PEAKS 900000			/* Max # of peaks in an image */
 #define DEFAULT_IMAGE_ORIGIN 512	/* Default x and y for image origin */
 
 /*
@@ -96,7 +96,7 @@
 
 #define DEFAULT_RFILE_MASK_TAG 0	/* Mask tag for rfiles */
 #define DEFAULT_RFILE_LENGTH 724	/* Default rfile length for writing */
-#define MAX_RFILE_LENGTH 2000		/* Maximum length of rfile */
+#define MAX_RFILE_LENGTH 2500		/* Maximum length of rfile */
 
 /*
  * Old Bragg peak and overflow "masking" specifications:
@@ -228,7 +228,7 @@ typedef unsigned short IMAGE_DATA_TYPE;
 #define DEFAULT_CASSETTE_ROTZ 0         /* temp */
 #define DEFAULT_OVERLOAD_TAG 0xffff	/* 65535 */
 #define DEFAULT_IGNORE_TAG 0xffff	/* 65535 */
-#define PUNCH_TAG 0xffff		/* 65535 */
+#define PUNCH_TAG 0xfffe		/* 65534 */
 #define MAX_IMAGE_DATA_VALUE 65535	/* not 1048577 due to img conversion */
 typedef unsigned short IMAGE_DATA_TYPE;
 #endif

@@ -19,8 +19,8 @@ int lfreeim(DIFFIMAGE *imdiff)
    * Free diffraction image:
    */
   
-  free((RFILE_DATA_TYPE *)imdiff->imscaler);
   free((RFILE_DATA_TYPE *)imdiff->rfile);
+  free((RFILE_DATA_TYPE *)imdiff->imscaler);
   free((RFILE_DATA_TYPE *)imdiff->imoffsetr);
   free((struct rccoords *)imdiff->mask);
   free((IMAGE_DATA_TYPE *)imdiff->image);

@@ -41,6 +41,8 @@ int lavgrim(DIFFIMAGE *imdiff)
       radius = (size_t)sqrtf(rvec.y*rvec.y + rvec.x*rvec.x);
       if (radius > imdiff->rfile_length) 
 	imdiff->rfile_length = radius;
+      if (radius > MAX_RFILE_LENGTH)
+	  printf("alert! alert!\n");
 
       //temporary edit!! for vertical signal
       /*
