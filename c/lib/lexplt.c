@@ -1,5 +1,4 @@
-/* LEXPLT.C - Multiply each voxel value in a lattice by an exponential,
-             to correct for a Debye-Waller factor.
+/* LEXPLT.C - Create an exponential decay lattice.
    
    Author: Mike Wall
    Date: 3/21/95
@@ -24,6 +23,7 @@ int lexplt(LAT3D *lat)
   struct ijkcoords rvec;
   
   float
+    rf,
     rscale;
 
   struct xyzcoords
@@ -46,12 +46,12 @@ int lexplt(LAT3D *lat)
 	rfloat.x = lat->xscale * rvec.i;
 	rfloat.y = lat->yscale * rvec.j;
 	rfloat.z = lat->zscale * rvec.k;
-	r = (size_t)(sqrtf((rfloat.x*rfloat.x + rfloat.y*rfloat.y + 
-		       rfloat.z*rfloat.z) / rscale)+.5);
-	if (r > lat->rfile_length) lat->rfile_length = r;
+	rf = sqrtf(rfloat.x*rfloat.x + rfloat.y*rfloat.y + rfloat.z*rfloat.z);
+	//	r = (size_t)(sqrtf((rfloat.x*rfloat.x + rfloat.y*rfloat.y + 
+	//		       rfloat.z*rfloat.z) / rscale)+.5);
+	//	if (r > lat->rfile_length) lat->rfile_length = r;
 	if (lat->lattice[index] != lat->mask_tag) {
-	  lat->lattice[index] *=
-	    expf(4*3.14159*3.14159*r*r*lat->rfile[0]*lat->rfile[0]); 
+	  lat->lattice[index] =	expf(-rf*lat->rfile[0]); 
 	}
 	index++;
       }

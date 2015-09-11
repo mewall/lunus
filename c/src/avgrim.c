@@ -116,7 +116,7 @@ CloseShop:
  * Free allocated memory:
  */
 
-  lfreeim(imdiff);
+//  lfreeim(imdiff);
 
 /*
  * Close files:

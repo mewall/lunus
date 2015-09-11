@@ -116,6 +116,7 @@ int main(int argc, char *argv[])
   //imdiff->value_offset = value_offset;
   imdiff->cassette.x = cassette.x;
   imdiff->cassette.y = cassette.y;
+  imdiff->cassette.z = 0.0;
   if (beam.x != 0) {imdiff->beam_mm.y = beam.x;};
   if (beam.y != 0) {imdiff->beam_mm.x = beam.y;};
   lnormim(imdiff);

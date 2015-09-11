@@ -10,6 +10,7 @@
    
    */
 
+
 #include<mwmask.h>
 
 int lnormim(DIFFIMAGE *imdiff)

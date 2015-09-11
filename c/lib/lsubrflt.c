@@ -40,9 +40,11 @@ int lsubrflt(LAT3D *lat)
 	rfloat.z = lat->zscale * rvec.k;
 	rf = sqrtf((rfloat.x*rfloat.x + rfloat.y*rfloat.y + 
 		       rfloat.z*rfloat.z) / rscale);
-	r = (size_t)rf;
+	//	r = (size_t)(rf+.5);
+	r = (size_t)(rf);
 	if ((r < lat->rfile_length) && 
 	    (lat->lattice[index] != lat->mask_tag)) {
+	  //    lat->lattice[index] -= lat->rfile[r];
 	  lat->lattice[index] -= (lat->rfile[r] + 
 				  (rf - (float)r)*(lat->rfile[r+1] - 
 						   lat->rfile[r]));

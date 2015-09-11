@@ -77,10 +77,10 @@ int lreadim(DIFFIMAGE *imdiff)
       imdiff->origin.r = imdiff->beam_mm.y/imdiff->pixel_size_mm+.5;
       imdiff->distance_mm = atof(lgettag(imdiff->header,"DISTANCE"));
       imdiff->wavelength = atof(lgettag(imdiff->header,"WAVELENGTH"));
-      if (!strcmp(lgettag(imdiff->header,"BYTE_ORDER"),"big_endian"))
-	imdiff->big_endian=1;
-      else if (!strcmp(lgettag(imdiff->header,"BYTE_ORDER"),"little_endian"))
+      if (!strcmp(lgettag(imdiff->header,"BYTE_ORDER"),"little_endian"))
 	imdiff->big_endian=0;
+      else if (!strcmp(lgettag(imdiff->header,"BYTE_ORDER"),"big_endian"))
+	imdiff->big_endian=1;
       else {
 	sprintf(imdiff->error_msg,"\nByte order %s not recognized.\n\n",lgettag(imdiff->header,"BYTE_ORDER"));
 	return(7);
@@ -121,11 +121,18 @@ int lreadim(DIFFIMAGE *imdiff)
 
 const char * getTag(const char *target,const char *tag)
 {
-  char *pos_begin,*pos_end;
+  char *pos_begin,*pos_end,*pos_tmp;
   char *val;
-  
+
+  pos_tmp = target;
+  while (pos_tmp != NULL) {
+    if ((pos_tmp = strstr(pos_tmp+1,tag)) != NULL) {
+      pos_begin = pos_tmp;
+    }
+  }
+  printf("Reading tag %s\n",tag);
   if ((pos_begin = strstr(target,tag)) == NULL) {
-    //printf("\nWarning: Couldn't find tag %s in image header\n\n",tag);
+    printf("\nWarning: Couldn't find tag %s in image header\n\n",tag);
     return(NULL);
   }
   if ((pos_begin = strchr(pos_begin,'='))==NULL) {

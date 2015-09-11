@@ -21,6 +21,8 @@ int lreadlt(LAT3D *lat)
    * Read in 3D lattice descriptor:
    */
 
+  rewind(lat->infile);
+
   num_read = fread(&lat->xvoxels, sizeof(uint32_t), 1, lat->infile);
   num_read = fread(&lat->yvoxels, sizeof(uint32_t), 1, lat->infile);
   num_read = fread(&lat->zvoxels, sizeof(uint32_t), 1, lat->infile);
@@ -31,11 +33,11 @@ int lreadlt(LAT3D *lat)
 
   
   lat->xscale = (float)((lat->xbound.max - lat->xbound.min)/ 
-		         (float)(lat->xvoxels - 1));               
+		         (float)(lat->xvoxels));               
   lat->yscale = (float)((lat->ybound.max - lat->ybound.min)/ 
-		         (float)(lat->yvoxels - 1));               
+		         (float)(lat->yvoxels));               
   lat->zscale = (float)((lat->zbound.max - lat->zbound.min)/ 
-		         (float)(lat->zvoxels - 1));               
+		         (float)(lat->zvoxels));               
 
   lat->origin.i =  (long)(-lat->xbound.min / lat->xscale + .5);
   lat->origin.j =  (long)(-lat->ybound.min / lat->yscale + .5);

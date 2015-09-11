@@ -8,81 +8,78 @@
 
    Input is input image, output image, tag name, and tag value.  Output is input image with tag added to header
 
-   */
+*/
 
 #include<mwmask.h>
 
 int main(int argc, char *argv[])
 {
   FILE
-	*imagein,
-	*imageout;
+    *imagein,
+    *imageout;
   
   size_t
     i;
 
   DIFFIMAGE 
-	*imdiff;
+    *imdiff;
 
   IMAGE_DATA_TYPE
-	image_value;
-
-  float
-    tagval;
-
+    image_value;
   char
     *buf;
 
-  char *tag;
+  char *tag,*tagval;
   
   tag = (char *)malloc(1000);
+  tagval = (char *)malloc(1000);
+  
 
+  /*
+   * Set input line defaults:
+   */
+  
+  imagein = stdin;
+  imageout = stdout;
 
-/*
- * Set input line defaults:
- */
-	
-	imagein = stdin;
-	imageout = stdout;
-
-/*
- * Read information from input line:
- */
-	switch(argc) {
-                case 5:
-		  tagval = atof(argv[4]);
-	case 4:
-	  strcpy(tag,argv[3]);
-		case 3:
-			if (strcmp(argv[2], "-") == 0) {
-				imageout = stdout;
-			}
-			else {
-			 if ( (imageout = fopen(argv[2],"wb")) == NULL ) {
-				printf("Can't open %s.",argv[2]);
-				exit(0);
-			 }
-			}
-		case 2:
-			if (strcmp(argv[1], "-") == 0) {
-				imagein = stdin;
-			}
-			else {
-			 if ( (imagein = fopen(argv[1],"rb")) == NULL ) {
-				printf("Can't open %s.",argv[1]);
-				exit(0);
-			 }
-			}
-			break;
-		default:
-			printf("\n Usage: addtag <image in> "
-			       "<image out> <tag name> <tag value> \n\n");
-			exit(0);
-	}
+  /*
+   * Read information from input line:
+   */
+  switch(argc) {
+  case 5:
+    strcpy(tagval,argv[4]);
+  case 4:
+    strcpy(tag,argv[3]);
+  case 3:
+    if (strcmp(argv[2], "-") == 0) {
+      imageout = stdout;
+    }
+    else {
+      if ( (imageout = fopen(argv[2],"wb")) == NULL ) {
+	printf("Can't open %s.",argv[2]);
+	exit(0);
+      }
+    }
+  case 2:
+    if (strcmp(argv[1], "-") == 0) {
+      imagein = stdin;
+    }
+    else {
+      if ( (imagein = fopen(argv[1],"rb")) == NULL ) {
+	printf("Can't open %s.",argv[1]);
+	exit(0);
+      }
+    }
+    break;
+  default:
+    printf("\n Usage: addtag <image in> "
+	   "<image out> <tag name> <tag value> \n\n");
+    exit(0);
+  }
  
-/*
- * Initialize diffraction image:
- */
+  /*
+   * Initialize diffraction image:
+   */
     
   if ((imdiff = linitim()) == NULL) {
     perror("\nCouldn't initialize diffraction image.\n\n");
@@ -90,55 +87,68 @@ int main(int argc, char *argv[])
   }
 
 
- /*
-  * Read diffraction image:
-  */
+  /*
+   * Read diffraction image:
+   */
 
-   imdiff->infile = imagein;
-   if (lreadim(imdiff) != 0) {
-     perror(imdiff->error_msg);
-     goto CloseShop;
-   }
+  imdiff->infile = imagein;
+  if (lreadim(imdiff) != 0) {
+    perror(imdiff->error_msg);
+    goto CloseShop;
+  }
 
-/*
- * Change the header:
- */
+  /*
+   * Change the header:
+   */
 
-   buf = imdiff->header;
-   if (strstr(buf,tag)==NULL) {
-     char *tagstr;
-     tagstr = (char *)malloc(1000);
-     sprintf(tagstr,"%s=%f;%c}  ",tag,tagval,0x0a);
-     tagstr[strlen(tagstr)-2]=0x0c;
-     tagstr[strlen(tagstr)-1]=0x0a;
-     if (strchr(buf,0x7d)==NULL) {
-       perror("Couldn't find terminator sequence in header\n");
-       exit(0);
-     }
-     strcpy(strchr(buf,0x7d),tagstr);
-   }
+  buf = imdiff->header;
+  if (strstr(buf,tag)==NULL) {
+    char *tagstr;
+    tagstr = (char *)malloc(1000);
+    sprintf(tagstr,"%s=%f;%c}  ",tag,tagval,0x0a);
+    tagstr[strlen(tagstr)-2]=0x0c;
+    tagstr[strlen(tagstr)-1]=0x0a;
+    if (strchr(buf,0x7d)==NULL) {
+      perror("Couldn't find terminator sequence in header\n");
+      exit(0);
+    }
+    strcpy(strchr(buf,0x7d),tagstr);
+  }
+  else {
+    printf("Found tag\n");
+    char *startpos,*endpos,*tagstr;
+    int vallen;
+    startpos = strstr(buf,tag)+strlen(tag)+1;
+    endpos = strchr(startpos,0x3b);
+    vallen = endpos - startpos;
+    printf("length of value string = %d\n",vallen);
+    if (vallen != strlen(tagval)) {
+      printf("Length of tagval doesn't match current length\n");
+      exit(0);
+    }
+    memcpy(startpos,tagval,vallen);
+  }
+  /*
+   * Write the output image:
+   */
 
-/*
- * Write the output image:
- */
-
-   imdiff->outfile = imageout;
-   if(lwriteim(imdiff) != 0) {
-     perror(imdiff->error_msg);
-     goto CloseShop;
-   }
+  imdiff->outfile = imageout;
+  if(lwriteim(imdiff) != 0) {
+    perror(imdiff->error_msg);
+    goto CloseShop;
+  }
    
  CloseShop:
   
-/*
- * Free allocated memory:
- */
+  /*
+   * Free allocated memory:
+   */
 
   lfreeim(imdiff);
 
-/*
- * Close files:
- */
+  /*
+   * Close files:
+   */
   
   fclose(imagein);
   fclose(imageout);

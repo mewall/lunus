@@ -54,7 +54,12 @@ int lshimlt(LAT3D *lat)
 /*
  * Divide by 4 in x (8/7/95):
  */
-	theta = ((float)i/4. - (float)shim_origin.c) * theta_scale;
+/*
+ * Remove divide by 4 (7/9/14):
+ */
+
+//	theta = ((float)i/4. - (float)shim_origin.c) * theta_scale;
+	theta = ((float)i - (float)shim_origin.c) * theta_scale;
 	rfloat.x = (float)r*rscale*cosf(theta)*cosf(phi);
 	rfloat.y = (float)r*rscale*sinf(theta)*cosf(phi);
 	rfloat.z = (float)r*rscale*sinf(phi);

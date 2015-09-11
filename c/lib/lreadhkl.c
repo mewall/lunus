@@ -51,7 +51,7 @@ int lreadhkl(LAT3D *lat,LAT3D *tmpl)
   lat->origin.i = tmpl->origin.i;
   lat->origin.j = tmpl->origin.j;
   lat->origin.k = tmpl->origin.k;
-  printf("origin: %d %d %d\n",lat->origin.k,lat->origin.j,lat->origin.i);
+  printf("origin: %d %d %d\n",lat->origin.i,lat->origin.j,lat->origin.k);
 
   int index = 0,ct=0;
   int i,j,k;
@@ -76,7 +76,12 @@ int lreadhkl(LAT3D *lat,LAT3D *tmpl)
 
   while (fscanf(lat->infile,"%d %d %d %f",&i,&j,&k,&I)!=EOF) {
     //    printf("%d %d %d\n",k+lat->origin.k,j+lat->origin.j,i+lat->origin.i);
-    lat->lattice[(k+lat->origin.k)*lat->xyvoxels+(j+lat->origin.j)*lat->xvoxels+i+lat->origin.i] = I;
+    int kidx = k+lat->origin.k;
+    int jidx = j+lat->origin.j;
+    int iidx = i+lat->origin.i;
+    if ((iidx>=0 && iidx < lat->xvoxels) && (jidx>=0 && jidx < lat->yvoxels) && (kidx>=0 && kidx < lat->zvoxels)) {
+      lat->lattice[(k+lat->origin.k)*lat->xyvoxels+(j+lat->origin.j)*lat->xvoxels+i+lat->origin.i] = I;
+    }
   }
 
   printf("...done\n");

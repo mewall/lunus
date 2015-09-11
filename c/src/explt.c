@@ -1,15 +1,14 @@
-/* EXPLT.C - Multiply each voxel value in a lattice by an exponential,
-             to correct for a Debye-Waller factor.
+/* EXPLT.C - Create an exponential decay lattice based on a template.
    
    Author: Mike Wall
-   Date: 3/21/95
+   Date: 7/25/2014
    Version: 1.
    
    Usage:
-   		"explt <input lattice> <width> <output lattice>"
+   		"explt <input lattice template> <output lattice> <decay constant>"
 
-		Input is an input lattice and the width of a gaussian.
-		Output is Debye-Waller factor corrected lattice.  
+		Input is an input lattice template and the decay constant of an exponential.
+		Output is exponential decay lattice.  
    */
 
 #include<mwmask.h>
@@ -37,12 +36,12 @@ int main(int argc, char *argv[])
     *rfile;
   
   float
-    scale_factor;
+    decay_constant;
 
 /*
  * Set input line defaults:
  */
-	scale_factor = 1.;
+	decay_constant = 1.;
 	latticein = stdin;
 	latticeout = stdout;
 
@@ -51,7 +50,7 @@ int main(int argc, char *argv[])
  */
 	switch(argc) {
 	  case 4:
-	  scale_factor = atof(argv[3]);
+	  decay_constant = atof(argv[3]);
 	  case 3:
 	  if (strcmp(argv[2],"-") == 0) {
 	    latticeout = stdout;
@@ -74,8 +73,8 @@ int main(int argc, char *argv[])
 	  }
 	  break;
 	  default:
-	  printf("\n Usage: mulsclt <input lattice> <output lattice> "
-		 "<scale factor>\n\n");
+	  printf("\n Usage: explt <input lattice template> <decay constant> <output lattice> "
+		 "\n\n");
 	  exit(0);
 	}
   
@@ -102,7 +101,7 @@ int main(int argc, char *argv[])
  * Generate the scaled lattice:
  */
 
-  lat->rfile[0] = scale_factor;
+  lat->rfile[0] = decay_constant;
   lexplt(lat);
 
 /*
