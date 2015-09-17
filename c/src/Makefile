@@ -67,6 +67,7 @@ all: \
 	hkl2vtk \
 	intdfim \
 	intimdf \
+	intxdslt \
 	lat2hkl \
 	lat2map \
 	lat2vtk \
@@ -262,6 +263,8 @@ hkl2vtk:hkl2vtk.c ${DEPENDS}
 intdfim:intdfim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 intimdf:intimdf.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+intxdslt:intxdslt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 lat2hkl:lat2hkl.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -474,6 +477,7 @@ linitim.o:linitim.c mwmask.h
 linitlt.o:linitlt.c mwmask.h
 linitmap.o:linitmap.c mwmask.h
 lintdfim.o:lintdfim.c mwmask.h
+lintxdslt.o:lintxdslt.c mwmask.h
 lliquidcorrlt.o:lliquidcorrlt.c mwmask.h
 lliquidfaclt.o:lliquidfaclt.c mwmask.h
 lmattools.o:lmattools.c mwmask.h
@@ -606,6 +610,7 @@ libmw.a: \
 	linitlt.o \
 	linitmap.o \
 	lintdfim.o \
+	lintxdslt.o \
 	lliquidcorrlt.o \
 	lliquidfaclt.o \
 	lmattools.o \

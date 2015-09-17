@@ -662,6 +662,7 @@ DIFFIMAGE *linitim(void);
 LAT3D *linitlt(void);
 CCP4MAP *linitmap(void);
 int lintdfim(DIFFIMAGE *imdiff);
+int lintxdslt(DIFFIMAGE *imdiff,LAT3D *lat);
 int lliquidcorrlt(LAT3D *lat);
 int lliquidfaclt(LAT3D *lat);
 struct xyzmatrix lmatinv(struct xyzmatrix a);
