@@ -30,18 +30,19 @@ int lwritecube(LAT3D *lat)
   int index = 0,ct=0;
   int i,j,k;
 
-  for (k=0;k<lat->zvoxels;k++) {
+  for (i=0;i<lat->xvoxels;i++) {
     for (j=0;j<lat->yvoxels;j++) {
-      for (i=0;i<lat->xvoxels;i++) {
+      for (k=0;k<lat->zvoxels;k++) {
+	index = lat->xyvoxels*k+lat->xvoxels*j+i;
 	fprintf(lat->outfile, "%g ",lat->lattice[index]);
-	index++;
+	if (k%6 == 5) fprintf(lat->outfile,"\n");
+	ct++;
       }
-      fprintf(lat->outfile,"\n");
     }
   }
   
 
-  if (index != lat->lattice_length) {
+  if (ct != lat->lattice_length) {
     printf("/nCouldn't write all of the lattice to output file.\n\n");
     return_value = 1;
     goto CloseShop;
