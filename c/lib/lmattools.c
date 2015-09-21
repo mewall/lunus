@@ -89,6 +89,17 @@ XYZCOORDS_DATA ldotvec(struct xyzcoords b,struct xyzcoords a)
   return c;
 }
 
+struct xyzcoords lcrossvec(struct xyzcoords a,struct xyzcoords b)
+{
+  struct xyzcoords c;
+
+  c.z = a.x*b.y;
+  c.y = a.z*b.x;
+  c.x = a.y*b.z;
+
+  return c;
+}
+
 struct xyzcoords linvvec(struct xyzcoords a)
 {
   struct xyzcoords c;

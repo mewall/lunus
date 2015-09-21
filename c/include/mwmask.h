@@ -87,7 +87,9 @@
 					/* voxels to a lattice */
 #define DEFAULT_OUTER_RADIUS_LT 1.	/* Outer radius threshold for mapping*/
 					/* voxels to a lattice */
-
+#define DEFAULT_SPACE_GROUP_STR_LEN 256       /* Default space group string length */
+#define DEFAULT_CELL_STR_LEN 1024       /* Default unit cell string length */
+#define DEFAULT_LATTICE_TYPE_STR_LEN 8  /* Default lattice type string length */
 /* 
  * Shell image specifications:
  */
@@ -421,6 +423,7 @@ typedef struct
   IMAGE_DATA_TYPE upper_threshold;
   DIFFUSE_FEATURE *feature;     /* List of diffuse features */
   size_t feature_count;
+  char *cell_str;               /* Unit cell string a,b,c,alpha,beta,gamma */
   struct unit_cell cell;        /* Unit cell data type */
   float wavelength;
   struct xyzmatrix u;
@@ -565,6 +568,7 @@ typedef struct {
   FILE *infile;
   FILE *outfile;
   char error_msg[LINESIZE];      /*Error message string */
+  char *lattice_type_str;       /* Lattice type string = (P1,AU) */ 
   struct voxel *map3D;	        /* Pointer to list of voxels */
   LATTICE_DATA_TYPE *lattice;   /* Pointer to lattice */
   uint32_t xvoxels;		/* Number of x-voxels */
@@ -579,7 +583,15 @@ typedef struct {
   struct bounds ybound;	        /* Max and min of y-coord */
   struct bounds zbound;	        /* Max and min of z-coord */
   struct bounds valuebound;     /* Max and min of voxel value */
+  char *space_group_str;        /* Space group in string format */
+  char *cell_str;               /* Unit cell string a,b,c,alpha,beta,gamma */
   struct unit_cell cell;        /* Unit cell descriptor */
+  struct xyzcoords a;           /* Reciprocal lattice vector astar */
+  struct xyzcoords b;           /* Reciprocal lattice vector bstar */
+  struct xyzcoords c;           /* Reciprocal lattice vector cstar */
+  struct xyzcoords astar;       /* Reciprocal lattice vector astar */
+  struct xyzcoords bstar;       /* Reciprocal lattice vector bstar */
+  struct xyzcoords cstar;       /* Reciprocal lattice vector cstar */
   LATTICE_DATA_TYPE mask_tag;   /* Masked voxel value tag */
   LATTICE_DATA_TYPE threshold;  /* Threshold for use in correlation calculation, and perhaps elsewhere */
   struct ijkcoords origin;      /* Origin voxel position */
@@ -636,6 +648,7 @@ int lconstrf(DIFFIMAGE *imdiff);
 float lcorrlt(LAT3D *lat1, LAT3D *lat2);
 int lcpltmap(LAT3D *lat,CCP4MAP *map);
 int lcpmaplt(CCP4MAP *map, LAT3D *lat);
+struct xyzcoords lcrossvec(struct xyzcoords a,struct xyzcoords b);
 int lculllt(LAT3D *lat);
 int lcutim(DIFFIMAGE *imdiff);
 int ldecimap(CCP4MAP *map);
@@ -685,6 +698,7 @@ int lnoiseim(DIFFIMAGE *imdiff);
 int lnormim(DIFFIMAGE *imdiff);
 int lnormlt(LAT3D *lat);
 int lpadlt(LAT3D *lat);
+int lparsecelllt(LAT3D *lat);
 int lpeakim(DIFFIMAGE *imdiff);
 int lpolarim(DIFFIMAGE *imdiff);
 int lpunch(DIFFIMAGE *imdiff);
@@ -737,6 +751,7 @@ int ltransmap(CCP4MAP *map);
 int lupdbd(LAT3D *lat);
 int lwaveim(DIFFIMAGE *imdiff);
 int lwindim(DIFFIMAGE *imdiff);
+int lwritecube(LAT3D *lat);
 int lwritedf(DIFFIMAGE *imdiff);
 int lwriteim(DIFFIMAGE *imdiff);
 int lwritehkl(LAT3D *lat);
