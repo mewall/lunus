@@ -553,6 +553,7 @@ ltransmap.o:ltransmap.c mwmask.h
 lupdbd.o:lupdbd.c mwmask.h
 lwaveim.o:lwaveim.c mwmask.h
 lwindim.o:lwindim.c mwmask.h
+lwritecube.o:lwritecube.c mwmask.h
 lwritedf.o:lwritedf.c mwmask.h
 lwritehkl.o:lwritehkl.c mwmask.h
 lwriteim.o:lwriteim.c mwmask.h
@@ -688,6 +689,7 @@ libmw.a: \
 	lupdbd.o \
 	lwaveim.o \
 	lwindim.o \
+	lwritecube.o \
 	lwritedf.o \
 	lwritehkl.o \
 	lwriteim.o \
