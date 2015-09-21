@@ -18,7 +18,7 @@ int lreadvtk(LAT3D *lat)
     len_inl = 100000;
 
   char
-    *token, *inl;
+    *token, *inl,*inl1,*inl2;
 
   char
     *fgets_status;
@@ -29,17 +29,51 @@ int lreadvtk(LAT3D *lat)
 
   int header_done = 0;
 
+
+  //  printf("Allocating input lines\n");
   inl = (char *)malloc(len_inl);
+  inl1 = (char *)malloc(len_inl);
+  inl2 = (char *)malloc(len_inl);
 
-  // Skip the first two lines
+  // Read the first two lines
 
-  if (fgets(inl,len_inl-1,lat->infile) == NULL) {
-    perror("Couldn't read line from input file\n");
+  //  printf("Reading the first two input lines\n");
+
+  if (fgets(inl1,len_inl-1,lat->infile) == NULL) {
+    perror("Couldn't read first line from input file\n");
     exit(1);
   }
-  if (fgets(inl,len_inl-1,lat->infile) == NULL) {
-    perror("Couldn't read line from input file\n");
+  if (fgets(inl2,len_inl-1,lat->infile) == NULL) {
+    perror("Couldn't read second line from input file\n");
     exit(1);
+  }
+
+  // Parse the second line 
+
+  //  printf("Parsing the second line\n");
+
+  if (strstr(inl2,"lattice_type=")!=NULL) {
+    //    printf("reading lattice type...\n");
+    //    printf("lattice_type=%s\n",lgettag(inl2,"lattice_type"));
+    strcpy(lat->lattice_type_str,lgettag(inl2,"lattice_type"));
+  }
+
+  //  printf("Parsing the unit cell\n");
+
+  if (strstr(inl2,"unit_cell=")!=NULL) {
+    //    printf("reading unit cell...\n");
+    strcpy(lat->cell_str,lgettag(inl2,"unit_cell"));
+    // Parse unit cell
+
+    lparsecelllt(lat); // parse the cell string and place results in lat->cell,
+                     //    lat->astar, lat->bstar, and lat->cstar
+    //    printf("unit_cell=%s\n",lat->cell_str);
+  }
+
+  if (strstr(inl2,"space_group=")!=NULL) {
+    //    printf("reading space group...\n");
+    strcpy(lat->space_group_str,lgettag(inl2,"space_group"));
+    //    printf("space_group=%s\n",lat->space_group_str);
   }
 
   // Parse the header, stopping when the LOOKUP_TABLE line is encountered

@@ -34,6 +34,9 @@ LAT3D *linitlt(void)
   lat->minrange.y = DEFAULT_MINRANGE;
   lat->minrange.z = DEFAULT_MINRANGE;
   lat->origin.i = lat->origin.j = lat->origin.k = DEFAULT_LATTICE_ORIGIN;
+  lat->lattice_type_str = (char *)calloc(DEFAULT_LATTICE_TYPE_STR_LEN,sizeof(char)); 
+  lat->space_group_str = (char *)calloc(DEFAULT_SPACE_GROUP_STR_LEN,sizeof(char)); 
+  lat->cell_str = (char *)calloc(DEFAULT_CELL_STR_LEN,sizeof(char)); 
   lat->cell.a = DEFAULT_CELL_A;
   lat->cell.b = DEFAULT_CELL_B;
   lat->cell.c = DEFAULT_CELL_C;

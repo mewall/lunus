@@ -1,6 +1,6 @@
 VPATH=${C_HOME}/src:${C_HOME}/lib:${C_HOME}/bin:${C_HOME}/include
-#CC=gcc-mp-4.8
-CC=gcc
+CC=gcc-mp-4.8
+#CC=gcc
 CFLAGS= -g -fopenmp -DUSE_OPENMP -L${C_HOME}/lib -I${C_HOME}/include
 #CFLAGS= -g -w -L${C_HOME}/lib -I${C_HOME}/include
 AR=ar
@@ -67,6 +67,7 @@ all: \
 	hkl2vtk \
 	intdfim \
 	intimdf \
+	intxdslt \
 	lat2hkl \
 	lat2map \
 	lat2vtk \
@@ -142,6 +143,7 @@ all: \
 	transmap \
 	tst3d \
 	vasp2xtal \
+	vtk2cube \
 	vtk2lat \
 	waveim \
 	windim \
@@ -262,6 +264,8 @@ hkl2vtk:hkl2vtk.c ${DEPENDS}
 intdfim:intdfim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 intimdf:intimdf.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+intxdslt:intxdslt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 lat2hkl:lat2hkl.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -413,6 +417,8 @@ tst3d:tst3d.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 vasp2xtal:vasp2xtal.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+vtk2cube:vtk2cube.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 vtk2lat:vtk2lat.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 waveim:waveim.c ${DEPENDS}
@@ -474,6 +480,7 @@ linitim.o:linitim.c mwmask.h
 linitlt.o:linitlt.c mwmask.h
 linitmap.o:linitmap.c mwmask.h
 lintdfim.o:lintdfim.c mwmask.h
+lintxdslt.o:lintxdslt.c mwmask.h
 lliquidcorrlt.o:lliquidcorrlt.c mwmask.h
 lliquidfaclt.o:lliquidfaclt.c mwmask.h
 lmattools.o:lmattools.c mwmask.h
@@ -493,6 +500,8 @@ lnign.o:lnign.c mwmask.h
 lnoiseim.o:lnoiseim.c mwmask.h
 lnormim.o:lnormim.c mwmask.h
 lnormlt.o:lnormlt.c mwmask.h
+lparsecell.o:lparsecell.c mwmask.h
+lparsecelllt.o:lparsecelllt.c mwmask.h
 lpeakim.o:lpeakim.c mwmask.h
 lpolarim.o:lpolarim.c mwmask.h
 lpunch.o:lpunch.c mwmask.h
@@ -606,6 +615,7 @@ libmw.a: \
 	linitlt.o \
 	linitmap.o \
 	lintdfim.o \
+	lintxdslt.o \
 	lliquidcorrlt.o \
 	lliquidfaclt.o \
 	lmattools.o \
@@ -625,6 +635,8 @@ libmw.a: \
 	lnoiseim.o \
 	lnormim.o \
 	lnormlt.o \
+	lparsecell.o \
+	lparsecelllt.o \
 	lpeakim.o \
 	lpolarim.o \
 	lpunch.o \

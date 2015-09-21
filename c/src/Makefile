@@ -1,6 +1,6 @@
 VPATH=${C_HOME}/src:${C_HOME}/lib:${C_HOME}/bin:${C_HOME}/include
-#CC=gcc-mp-4.8
-CC=gcc
+CC=gcc-mp-4.8
+#CC=gcc
 CFLAGS= -g -fopenmp -DUSE_OPENMP -L${C_HOME}/lib -I${C_HOME}/include
 #CFLAGS= -g -w -L${C_HOME}/lib -I${C_HOME}/include
 AR=ar
@@ -143,6 +143,7 @@ all: \
 	transmap \
 	tst3d \
 	vasp2xtal \
+	vtk2cube \
 	vtk2lat \
 	waveim \
 	windim \
@@ -416,6 +417,8 @@ tst3d:tst3d.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 vasp2xtal:vasp2xtal.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+vtk2cube:vtk2cube.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 vtk2lat:vtk2lat.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 waveim:waveim.c ${DEPENDS}
@@ -497,6 +500,8 @@ lnign.o:lnign.c mwmask.h
 lnoiseim.o:lnoiseim.c mwmask.h
 lnormim.o:lnormim.c mwmask.h
 lnormlt.o:lnormlt.c mwmask.h
+lparsecell.o:lparsecell.c mwmask.h
+lparsecelllt.o:lparsecelllt.c mwmask.h
 lpeakim.o:lpeakim.c mwmask.h
 lpolarim.o:lpolarim.c mwmask.h
 lpunch.o:lpunch.c mwmask.h
@@ -548,6 +553,7 @@ ltransmap.o:ltransmap.c mwmask.h
 lupdbd.o:lupdbd.c mwmask.h
 lwaveim.o:lwaveim.c mwmask.h
 lwindim.o:lwindim.c mwmask.h
+lwritecube.o:lwritecube.c mwmask.h
 lwritedf.o:lwritedf.c mwmask.h
 lwritehkl.o:lwritehkl.c mwmask.h
 lwriteim.o:lwriteim.c mwmask.h
@@ -630,6 +636,8 @@ libmw.a: \
 	lnoiseim.o \
 	lnormim.o \
 	lnormlt.o \
+	lparsecell.o \
+	lparsecelllt.o \
 	lpeakim.o \
 	lpolarim.o \
 	lpunch.o \
@@ -681,6 +689,7 @@ libmw.a: \
 	lupdbd.o \
 	lwaveim.o \
 	lwindim.o \
+	lwritecube.o \
 	lwritedf.o \
 	lwritehkl.o \
 	lwriteim.o \
