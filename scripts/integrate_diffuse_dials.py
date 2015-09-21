@@ -521,7 +521,7 @@ if __name__=="__main__":
       c_recip = 1./cellc
 
       print >>vtkfile,"# vtk DataFile Version 2.0"
-  print >>vtkfile,"lattice_type=PR;unit_cell={0};space_group={1};".format(target_cell,target_sg)
+      print >>vtkfile,"lattice_type=PR;unit_cell={0};space_group={1};".format(target_cell,target_sg)
       print >>vtkfile,"ASCII"
       print >>vtkfile,"DATASET STRUCTURED_POINTS"
       print >>vtkfile,"DIMENSIONS %d %d %d"%(latxdim,latydim,latzdim)
