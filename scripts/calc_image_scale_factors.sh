@@ -85,7 +85,7 @@ this_scale_error=`echo "sqrt($xx+$yy*$this_scale*$this_scale-2.*$this_scale*$xy)
 
 echo "$i $this_image_name $this_image_path scale=$this_scale scale_error=$this_scale_error"
 
-echo "$i $this_image_path $this_scale" >> $scales_output_file 
+echo "$i $this_image_path $this_scale $this_scale_error" >> $scales_output_file 
 
 done
 
