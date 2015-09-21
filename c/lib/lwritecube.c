@@ -22,10 +22,12 @@ int lwritecube(LAT3D *lat)
 
   fprintf(lat->outfile,"Gaussian cube format\n");
   fprintf(lat->outfile,"lattice_type_str=%s;unit_cell=%s;space_group=%s;\n",lat->lattice_type_str,lat->cell_str,lat->space_group_str);
-  fprintf(lat->outfile,"%d %e %e %e\n",0,lat->xbound.min,lat->ybound.min,lat->zbound.min);
+  fprintf(lat->outfile,"%d %e %e %e\n",1,lat->xbound.min,lat->ybound.min,lat->zbound.min);
+  //  fprintf(lat->outfile,"%d %e %e %e\n",0,0.0,0.0,0.0);
   fprintf(lat->outfile,"%d %e %e %e\n",lat->xvoxels,lat->astar.x,lat->astar.y,lat->astar.z);
   fprintf(lat->outfile,"%d %e %e %e\n",lat->yvoxels,lat->bstar.x,lat->bstar.y,lat->bstar.z);
   fprintf(lat->outfile,"%d %e %e %e\n",lat->zvoxels,lat->cstar.x,lat->cstar.y,lat->cstar.z);
+  fprintf(lat->outfile,"1 0.0 0.0 0.0 0.0\n");
 
   int index = 0,ct=0;
   int i,j,k;
