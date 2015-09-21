@@ -167,6 +167,32 @@ int lP41(LAT3D *lat)
   lat->symop_count = 16;
 }
 
+int lsg10(LAT3D *lat)
+{
+  int return_value = 0;
+
+  /*
+   * Generate group:
+   */
+
+  lat->symvec[1].i = +lat->symvec[0].i;
+  lat->symvec[1].j = -lat->symvec[0].j;
+  lat->symvec[1].k = lat->symvec[0].k;
+
+  /*
+   * Generate reflections:
+   */
+
+  /*
+   * Generate Friedel mates:
+   */
+
+  lat->symvec[2] = lijkinv(lat->symvec[0]);
+  lat->symvec[3] = lijkinv(lat->symvec[1]);
+
+  lat->symop_count = 4;
+}
+
 int lP222(LAT3D *lat)
 {
   int return_value = 0;
