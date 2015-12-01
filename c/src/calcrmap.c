@@ -152,8 +152,8 @@ int main(int argc, char *argv[])
     Icalc[h] = ignore_tag;
     Fcalc[h] = ignore_tag;
   }
-  //  printf("Iobs[0]=%f\n",Iobs[0]);
-  //  printf("Scaling the map\n");
+    printf("Iobs[0]=%f\n",Iobs[0]);
+    printf("Scaling the map\n");
   float xx_R=0.0, xy_R=0.0;
   float xx_goof=0.0,xy_goof=0.0;
   float xx_wR2_shelx=0.0,xy_wR2_shelx=0.0;
