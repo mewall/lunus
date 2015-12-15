@@ -48,13 +48,13 @@ int lshiftsflt(LAT3D *lat1,LAT3D *lat2)
   v0 = floor(lat1->shift.y);
   w0 = floor(lat1->shift.z);
 
-  printf("u0=%d,v0=%d,w0=%d\n",u0,v0,w0);
+  //  printf("u0=%d,v0=%d,w0=%d\n",u0,v0,w0);
 
   u1 = lat1->shift.x - u0;
   v1 = lat1->shift.y - v0;
   w1 = lat1->shift.z - w0;
 
-  printf("u1=%f,v1=%f,w1=%f\n",u1,v1,w1);
+  //  printf("u1=%f,v1=%f,w1=%f\n",u1,v1,w1);
 
   g000 = (1.-u1)*(1.-v1)*(1.-w1) + 0.*I;
   g100 = u1*(1.-v1)*(1.-w1) + 0.*I;

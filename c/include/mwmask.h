@@ -90,6 +90,11 @@
 #define DEFAULT_SPACE_GROUP_STR_LEN 256       /* Default space group string length */
 #define DEFAULT_CELL_STR_LEN 1024       /* Default unit cell string length */
 #define DEFAULT_LATTICE_TYPE_STR_LEN 8  /* Default lattice type string length */
+
+// Crystal structure specifications:
+
+#define DEFAULT_NATOMS 100000           /* Number of atoms */
+
 /* 
  * Shell image specifications:
  */
@@ -295,6 +300,13 @@ typedef struct {
   char allocate_flag;           /* Has the array been allocated? */
   size_t count;                 /* Number of pixels in value array */
 } RDATA_DATA_TYPE;
+struct fom
+{
+  float R;
+  float wR2_ccp4;
+  float wR2_shelx;
+  float goof;
+};
 struct rccoords		/* 2D coordinates in type short */
 {
   RCCOORDS_DATA r;	        /* Row coordinate */
@@ -316,6 +328,22 @@ struct xyzcoords	/* 3D coordinates in type float */
   XYZCOORDS_DATA x;	        /* X coordinate */
   XYZCOORDS_DATA y;	        /* Y coordinate */
   XYZCOORDS_DATA z;	        /* Z coordinate */
+};
+struct adps
+{
+  XYZCOORDS_DATA U11;
+  XYZCOORDS_DATA U22;
+  XYZCOORDS_DATA U33;
+  XYZCOORDS_DATA U12;
+  XYZCOORDS_DATA U13;
+  XYZCOORDS_DATA U23;
+};
+struct hklI
+{
+  IJKCOORDS_DATA h;
+  IJKCOORDS_DATA k;
+  IJKCOORDS_DATA l;
+  LATTICE_DATA_TYPE I;
 };
 struct xyzmatrix
 {
@@ -623,6 +651,16 @@ typedef struct {
   struct xyzcoords shift;       /* translation vector */
 } LAT3D;
 
+// Crystal structure data type
+typedef struct {
+  char *filename;
+  FILE *infile;
+  FILE *outfile;
+  size_t natoms;
+  struct xyzcoords *pos;
+  struct adps *u;
+} XTALSTRUCT;
+
 /*
  * Subroutines:
  */
@@ -640,6 +678,7 @@ int lavsqrim(DIFFIMAGE *imdiff);
 int lavsqrlt(LAT3D *lat);
 int lbeamim(DIFFIMAGE *imdiff);
 int lbuttim(DIFFIMAGE *imdiff);
+struct fom lcalcrsf(char *hklfname, LAT3D *lat1,LAT3D *lat2);
 int lccrlt(LAT3D *lat1, LAT3D *lat2);
 int lchbyte(void *ptr, size_t packet_size, size_t list_length);
 int lconstim(DIFFIMAGE *imdiff);
@@ -674,6 +713,7 @@ const char * lgettag(const char *target,const char *tag);
 DIFFIMAGE *linitim(void);
 LAT3D *linitlt(void);
 CCP4MAP *linitmap(void);
+XTALSTRUCT *linitxs(void);
 int lintdfim(DIFFIMAGE *imdiff);
 int lintxdslt(DIFFIMAGE *imdiff,LAT3D *lat);
 int lliquidcorrlt(LAT3D *lat);
@@ -712,6 +752,7 @@ int lreadlt(LAT3D *lat);
 int lreadmap(CCP4MAP *map);
 int lreadrf(DIFFIMAGE *imdiff);
 int lreadvtk(LAT3D *lat);
+int lreadxs(XTALSTRUCT *xs);
 int lresizelt(LAT3D *lat1, LAT3D *lat2);
 int lrevyim(DIFFIMAGE *imdiff);
 int lrf2lt(LAT3D *lat);
