@@ -60,6 +60,7 @@ all: \
 	genlat \
 	genmap \
 	gmparse \
+	harsf \
 	hdrlt \
 	headc \
 	histim \
@@ -250,6 +251,8 @@ genlat:genlat.c ${DEPENDS}
 genmap:genmap.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 gmparse:gmparse.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+harsf:harsf.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 hdrlt:hdrlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -448,6 +451,7 @@ lavsqrim.o:lavsqrim.c mwmask.h
 lavsqrlt.o:lavsqrlt.c mwmask.h
 lbeamim.o:lbeamim.c mwmask.h
 lbuttim.o:lbuttim.c mwmask.h
+lcalcrsf.o:lcalcrsf.c mwmask.h
 lccrlt.o:lccrlt.c mwmask.h
 lchbyte.o:lchbyte.c mwmask.h
 lconstim.o:lconstim.c mwmask.h
@@ -479,6 +483,7 @@ lgettag.o:lgettag.c mwmask.h
 linitim.o:linitim.c mwmask.h
 linitlt.o:linitlt.c mwmask.h
 linitmap.o:linitmap.c mwmask.h
+linitxs.o:linitxs.c mwmask.h
 lintdfim.o:lintdfim.c mwmask.h
 lintxdslt.o:lintxdslt.c mwmask.h
 lliquidcorrlt.o:lliquidcorrlt.c mwmask.h
@@ -515,6 +520,7 @@ lreadlt.o:lreadlt.c mwmask.h
 lreadmap.o:lreadmap.c mwmask.h
 lreadrf.o:lreadrf.c mwmask.h
 lreadvtk.o:lreadvtk.c mwmask.h
+lreadxs.o:lreadxs.c mwmask.h
 lresizelt.o:lresizelt.c mwmask.h
 lrevyim.o:lrevyim.c mwmask.h
 lrf2lt.o:lrf2lt.c mwmask.h
@@ -584,6 +590,7 @@ libmw.a: \
 	lavsqrlt.o \
 	lbeamim.o \
 	lbuttim.o \
+	lcalcrsf.o \
 	lccrlt.o \
 	lchbyte.o \
 	lconstim.o \
@@ -615,6 +622,7 @@ libmw.a: \
 	linitim.o \
 	linitlt.o \
 	linitmap.o \
+	linitxs.o \
 	lintdfim.o \
 	lintxdslt.o \
 	lliquidcorrlt.o \
@@ -651,6 +659,7 @@ libmw.a: \
 	lreadmap.o \
 	lreadrf.o \
 	lreadvtk.o \
+	lreadxs.o \
 	lresizelt.o \
 	lrevyim.o \
 	lrf2lt.o \

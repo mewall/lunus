@@ -107,6 +107,7 @@ int main(int argc, char *argv[])
    * Copy shift vector to lattice
    */
 
+  // The input shift units are fraction of unit cell. Change to number of grid points.
   lat1->shift.x = shift.x*(float)lat1->xvoxels;
   lat1->shift.y = shift.y*(float)lat1->yvoxels;
   lat1->shift.x = shift.z*(float)lat1->zvoxels;

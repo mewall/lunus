@@ -5,9 +5,9 @@
    Version: 1.
    
    Usage:
-   		"calcrsf <input reflections .hkl> <input real sf> <input imag sf"
+   		"calcrsf <input reflections .hkl> <input real sf> <input imag sf>"
 
-		Input is a .hkl reflections file and structure factors in CCP4 format. 
+		Input is a .hkl reflections file and real,imag structure factors in lattice format. 
 			Output is R factor and other figures of merit to stdout.  
    */
 
@@ -114,7 +114,7 @@ int main(int argc, char *argv[])
 
   /*
    * Read the .hkl reflections file one line at a time, and replace fft amplitudes with reflections. 
-   * Assume amplitudes instead of intensities in hkl file. Also assume only positive values of hkl.
+   * Assume intensities in hkl file.
    */
 
   float *Iobs,*sigmaIobs,*Fobs,*sigmaFobs,*Fcalc,*Icalc;
