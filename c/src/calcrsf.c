@@ -37,7 +37,8 @@ int main(int argc, char *argv[])
     kk,
     ll,
     nn[4],
-    c,r,s,cc,rr,ss;
+    c,r,s,cc,rr,ss,
+    nfit;
   
   float
     I,sigI,Imodel,
@@ -47,11 +48,14 @@ int main(int argc, char *argv[])
  * Set input line defaults:
  */
   hklin = stdin;
+  nfit=1;
 
 /*
  * Read information from input line:
  */
 	switch(argc) {
+	  case 5:
+	    nfit=atoi(argv[4]);
 	  case 4:
 	    if ((lat2in = fopen(argv[3],"rb")) == NULL) {
 	      printf("\nCan't open %s.\n\n",argv[3]);
@@ -212,7 +216,7 @@ int main(int argc, char *argv[])
 float R = R_num/R_denom;
 float wR2_ccp4 = sqrtf(wR2_ccp4_num/wR2_ccp4_denom);
 float wR2_shelx = sqrtf(wR2_shelx_num/wR2_shelx_denom);
-float goof = sqrtf(wR2_shelx_num/((float)ndat-1.));
+float goof = sqrtf(wR2_shelx_num/((float)ndat-(float)nfit));
 
 printf("%11.9f %11.9f %11.9f %11.9f\n",R,wR2_ccp4,wR2_shelx,goof);
 

@@ -21,20 +21,27 @@ int lminrim(DIFFIMAGE *imdiff)
 
 	struct xycoords rvec;
 
+	size_t *n;
+
+	n = (size_t *)calloc(10000,sizeof(size_t));
+
 	imdiff->rfile_length = 0;
 	for(r = 0; r < imdiff->vpixels; r++) {
+	  rvec.y = r*imdiff->pixel_size_mm - imdiff->beam_mm.y;
 	  for(c = 0; c < imdiff->hpixels; c++) {
-	      rvec.y = (XYZCOORDS_DATA)(r - imdiff->origin.r);
-	      rvec.x = (XYZCOORDS_DATA)(c - imdiff->origin.c);
-	      radius = (size_t)sqrtf(rvec.y*rvec.y + rvec.x*rvec.x);
+	      rvec.x = c*imdiff->pixel_size_mm - imdiff->beam_mm.x;
+	      radius = (size_t)(sqrtf(rvec.x*rvec.x + rvec.y*rvec.y)/imdiff->pixel_size_mm+.5);
 	      if (radius > imdiff->rfile_length) imdiff->rfile_length = radius;
-	      if (imdiff->image[index] != imdiff->overload_tag) {
-		if ((imdiff->image[index] != 
+	      if (imdiff->image[index] != imdiff->overload_tag && imdiff->image[index] != imdiff->mask_tag && imdiff->image[index] != imdiff->ignore_tag) {
+		/*		if ((imdiff->image[index] != 
 			(IMAGE_DATA_TYPE)imdiff->rfile_mask_tag) && 
 			((imdiff->rfile[radius] == imdiff->rfile_mask_tag) ||
 		    	(imdiff->rfile[radius] > 
-				(RFILE_DATA_TYPE)imdiff->image[index]))) {
+			(IMAGE_DATA_TYPE)imdiff->image[index]))) {*/
+		if (imdiff->rfile[radius] > 
+		    (RFILE_DATA_TYPE)imdiff->image[index] || n[radius]==0) {
 		  imdiff->rfile[radius] = (RFILE_DATA_TYPE)imdiff->image[index];
+		  n[radius]++;
 	        }
 	      }
 	  index++;

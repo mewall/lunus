@@ -376,6 +376,11 @@ struct unit_cell	/* Unit cell geometry structure */
   float beta;	                /* a-c angle */
   float gamma;	                /* a-b angle */
 };
+struct irange /* range of integers */
+{
+  int l;
+  int u;
+};
 
 /*
  * Diffuse feature data type:
@@ -459,6 +464,7 @@ typedef struct
   float amplitude;              /* Amplitude of noise or fluctuation */
   float pitch;                  /* Pitch of fluctuation */
   struct xyzcoords q;
+  struct irange rfirange;       /* Range of rfile index values */
 } DIFFIMAGE;
 
 /*
@@ -688,6 +694,7 @@ float lcorrlt(LAT3D *lat1, LAT3D *lat2);
 int lcpltmap(LAT3D *lat,CCP4MAP *map);
 int lcpmaplt(CCP4MAP *map, LAT3D *lat);
 struct xyzcoords lcrossvec(struct xyzcoords a,struct xyzcoords b);
+int lcullim(DIFFIMAGE *imdiff);
 int lculllt(LAT3D *lat);
 int lcutim(DIFFIMAGE *imdiff);
 int ldecimap(CCP4MAP *map);

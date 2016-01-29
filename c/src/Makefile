@@ -38,6 +38,7 @@ all: \
 	constrf \
 	corrlt \
 	cube2map \
+	cullim \
 	culllt \
 	cutim \
 	dat2vtk \
@@ -99,6 +100,7 @@ all: \
 	punchim \
 	rad2s \
 	ratioim \
+	raw2img \
 	resizelt \
 	revbytelt \
 	revyim \
@@ -207,6 +209,8 @@ constrf:constrf.c ${DEPENDS}
 corrlt:corrlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 cube2map:cube2map.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+cullim:cullim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 culllt:culllt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -329,6 +333,8 @@ punchim:punchim.c ${DEPENDS}
 rad2s:rad2s.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 ratioim:ratioim.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+raw2img:raw2img.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 resizelt:resizelt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -460,6 +466,7 @@ lconstrf.o:lconstrf.c mwmask.h
 lcorrlt.o:lcorrlt.c mwmask.h
 lcpltmap.o:lcpltmap.c mwmask.h
 lcpmaplt.o:lcpmaplt.c mwmask.h
+lcullim.o:lcullim.c mwmask.h
 lculllt.o:lculllt.c mwmask.h
 lcutim.o:lcutim.c mwmask.h
 ldecimap.o:ldecimap.c mwmask.h
@@ -599,6 +606,7 @@ libmw.a: \
 	lcorrlt.o \
 	lcpltmap.o \
 	lcpmaplt.o \
+	lcullim.o \
 	lculllt.o \
 	lcutim.o \
 	ldecimap.o \

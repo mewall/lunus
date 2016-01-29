@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
 	  }
 	  break;
 	  default:
-	  printf("\n Usage: decimap <input ccp4 map> <output ccp4 map> <decimation factor>\n\n");
+	  printf("\n Usage: transmap <input ccp4 map> <output ccp4 map> <x trans> <y trans> <z trans>\n\n");
 	  exit(0);
 	}
   
@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
   
 
   /*
-   * Decimate the map:
+   * Translate the map:
    */
 
   map->shift.x=shift.x;
