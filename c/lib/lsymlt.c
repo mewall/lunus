@@ -67,6 +67,9 @@ int lsymlt(LAT3D *lat)
 	case 3:
 	  lPm_minus_3(lat);
 	  break;
+	case 4:
+	  lsg10(lat);
+	  break;
 	}
 	op_count = lat->symop_count;
 	ct = 0;

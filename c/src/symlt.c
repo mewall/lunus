@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
 		 "    1 = P4/m (P41)\n"
 		 "    2 = Pmmm (P212121)\n\n"
 		 "    3 = P m -3\n\n"
-		 "    4 = Immm (I222)\n");
+		 "    4 = P 2/m (P21)\n");
 	      
 	  exit(0);
 	}

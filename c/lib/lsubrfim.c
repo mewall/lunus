@@ -29,7 +29,8 @@ int lsubrfim(DIFFIMAGE *imdiff)
 	      if (radius < imdiff->rfile_length) {
 		index = r*imdiff->hpixels+c;
 	        if ((imdiff->image[index] != imdiff->overload_tag) &&
-		    (imdiff->image[index] != imdiff->ignore_tag)) {
+		    (imdiff->image[index] != imdiff->ignore_tag) &&
+		    (imdiff->image[index] != imdiff->mask_tag)) {
 		  imdiff->image[index] -= 
 			(IMAGE_DATA_TYPE)(imdiff->rfile[radius]); 
 	        }

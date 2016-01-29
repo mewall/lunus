@@ -93,7 +93,7 @@ def procimg(Isize1,Isize2,scale,mask_tag,A_matrix,rvec,D,procid):
           ip[y][x] *= 8/ndat
   return ip
 
-def procimg_single(Isize1,Isize2,scale,lattice_mask_tag,A_matrix,rvec,D,procid):
+def procimg_single(Isize1,Isize2,scale,lattice_mask_tag,A_matrix,rvec,D):
   # returns a 3D lattice with integrated data from a chunk of data points
   from scitbx.matrix import col
   # define the lattice indices at which h,k,l = 0,0,0
@@ -494,7 +494,7 @@ if __name__=="__main__":
 #      tasks = [(Isize1,Isize1,scale,mask_tag,A_matrix,x_vectors,DATA,latxdim,latydim,latzdim,procid) for procid in range(nproc)]
 # Serial procimg
       image_mask_tag=32767.
-      diffim = procimg_single(Isize1,Isize2,scale,lattice_mask_tag,A_matrix,x_vectors,D,procid)
+      diffim = procimg_single(Isize1,Isize2,scale,lattice_mask_tag,A_matrix,x_vectors,D)
       # run procimg in parallel and collect results
 #      diffim = pool.map(procimgstar,tasks)
     tel = clock()-t0

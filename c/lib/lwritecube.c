@@ -14,32 +14,39 @@ int lwritecube(LAT3D *lat)
   int
     return_value = 0;
 
+  struct xyzcoords o;
+
 /*
  * Write lattice to output file:
  */
 
 //  printf("Writing cube file\n");
 
+  o.x = lat->origin.i*lat->astar.x + lat->origin.j*lat->bstar.x + lat->origin.k*lat->cstar.x;
+  o.y = lat->origin.i*lat->astar.y + lat->origin.j*lat->bstar.y + lat->origin.k*lat->cstar.y;
+  o.z = lat->origin.i*lat->astar.z + lat->origin.j*lat->bstar.z + lat->origin.k*lat->cstar.z;
+
   fprintf(lat->outfile,"Gaussian cube format\n");
   fprintf(lat->outfile,"lattice_type_str=%s;unit_cell=%s;space_group=%s;\n",lat->lattice_type_str,lat->cell_str,lat->space_group_str);
-  fprintf(lat->outfile,"%d %e %e %e\n",1,lat->xbound.min,lat->ybound.min,lat->zbound.min);
+  fprintf(lat->outfile,"%5d%12.6f%12.6f%12.6f\n",1,-o.z,-o.x,-o.y);
   //  fprintf(lat->outfile,"%d %e %e %e\n",0,0.0,0.0,0.0);
-  fprintf(lat->outfile,"%d %e %e %e\n",lat->xvoxels,lat->astar.x,lat->astar.y,lat->astar.z);
-  fprintf(lat->outfile,"%d %e %e %e\n",lat->yvoxels,lat->bstar.x,lat->bstar.y,lat->bstar.z);
-  fprintf(lat->outfile,"%d %e %e %e\n",lat->zvoxels,lat->cstar.x,lat->cstar.y,lat->cstar.z);
-  fprintf(lat->outfile,"1 0.0 0.0 0.0 0.0\n");
+  fprintf(lat->outfile,"%5d%12.6f%12.6f%12.6f\n",lat->zvoxels,lat->cstar.z,lat->cstar.x,lat->cstar.y);
+  fprintf(lat->outfile,"%5d%12.6f%12.6f%12.6f\n",lat->yvoxels,lat->bstar.z,lat->bstar.x,lat->bstar.y);
+  fprintf(lat->outfile,"%5d%12.6f%12.6f%12.6f\n",lat->xvoxels,lat->astar.z,lat->astar.x,lat->astar.y);
+  fprintf(lat->outfile,"%5d%12.6f%12.6f%12.6f%12.6f\n",1,0.0,0.0,0.0,0.0);
 
   int index = 0,ct=0;
   int i,j,k;
 
-  for (i=0;i<lat->xvoxels;i++) {
+  for (k=0;k<lat->zvoxels;k++) {
     for (j=0;j<lat->yvoxels;j++) {
-      for (k=0;k<lat->zvoxels;k++) {
+      for (i=0;i<lat->xvoxels;i++) {
 	index = lat->xyvoxels*k+lat->xvoxels*j+i;
-	fprintf(lat->outfile, "%g ",lat->lattice[index]);
-	if (k%6 == 5) fprintf(lat->outfile,"\n");
+	fprintf(lat->outfile, "%12.6g",lat->lattice[index]);
+	if (i%6 == 5) fprintf(lat->outfile,"\n");
 	ct++;
       }
+      fprintf(lat->outfile, "\n");
     }
   }
   

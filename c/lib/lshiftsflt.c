@@ -35,8 +35,11 @@ int lshiftsflt(LAT3D *lat1,LAT3D *lat2)
   float complex F0;
 
   float complex ph,pkl,pl;
+  
+  struct xyzcoords shift;
 
   //  printf("in lshiftsflt\n");
+
 
   data = (float complex *)malloc(lat1->lattice_length*sizeof(float complex));
 
@@ -44,17 +47,25 @@ int lshiftsflt(LAT3D *lat1,LAT3D *lat2)
   N2 = (int)lat1->yvoxels;
   N3 = (int)lat1->zvoxels;
 
-  u0 = floor(lat1->shift.x);
-  v0 = floor(lat1->shift.y);
-  w0 = floor(lat1->shift.z);
+  shift = lat1->shift;
 
-  printf("u0=%d,v0=%d,w0=%d\n",u0,v0,w0);
+  // Convert shift from fraction cell to grid units
 
-  u1 = lat1->shift.x - u0;
-  v1 = lat1->shift.y - v0;
-  w1 = lat1->shift.z - w0;
+  shift.x = shift.x*(float)N1;
+  shift.y = shift.y*(float)N2;
+  shift.z = shift.z*(float)N3;
 
-  printf("u1=%f,v1=%f,w1=%f\n",u1,v1,w1);
+  u0 = floor(shift.x);
+  v0 = floor(shift.y);
+  w0 = floor(shift.z);
+
+  //  printf("u0=%d,v0=%d,w0=%d\n",u0,v0,w0);
+
+  u1 = shift.x - u0;
+  v1 = shift.y - v0;
+  w1 = shift.z - w0;
+
+  //  printf("u1=%f,v1=%f,w1=%f\n",u1,v1,w1);
 
   g000 = (1.-u1)*(1.-v1)*(1.-w1) + 0.*I;
   g100 = u1*(1.-v1)*(1.-w1) + 0.*I;

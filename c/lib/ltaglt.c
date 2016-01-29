@@ -22,7 +22,7 @@ int ltaglt(LAT3D *lat)
     for(j = 0; j < lat->yvoxels; j++) {
       for (i = 0; i < lat->xvoxels; i++) {
 	if (lat->lattice[index] == lat->rfile[0]) {
-	  lat->lattice[index] = lat->mask_tag;
+	  lat->lattice[index] = lat->rfile[1];
 	}
 	index++;
       }

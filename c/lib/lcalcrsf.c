@@ -13,11 +13,9 @@
 
 #include<mwmask.h>
 
-int main(int argc, char *argv[])
+struct fom lcalcrsf(char *hklfname, LAT3D *lat1,LAT3D *lat2)
 {
   FILE
-    *lat1in,
-    *lat2in,
     *hklin;
   
   char
@@ -28,89 +26,22 @@ int main(int argc, char *argv[])
     num_read,
     num_wrote;
 
-  LAT3D 
-    *lat1,*lat2;
-
   int
     i,
     hh,
     kk,
     ll,
     nn[4],
-    c,r,s,cc,rr,ss,
-    nfit;
+    c,r,s,cc,rr,ss;
   
   float
     I,sigI,Imodel,
     F,sigF,
     freal,fimag;
-/*
- * Set input line defaults:
- */
-  hklin = stdin;
-  nfit=1;
 
-/*
- * Read information from input line:
- */
-	switch(argc) {
-	  case 5:
-	    nfit=atoi(argv[4]);
-	  case 4:
-	    if ((lat2in = fopen(argv[3],"rb")) == NULL) {
-	      printf("\nCan't open %s.\n\n",argv[3]);
-	      exit(0);
-	    }
-	  case 3:
-	    if ( (lat1in = fopen(argv[2],"rb")) == NULL ) {
-	      printf("\nCan't open %s.\n\n",argv[2]);
-	      exit(0);
-	    }
-	  case 2:
-	  if (strcmp(argv[1],"-") == 0) {
-	    hklin = stdin;
-	  }
-	  else {
-	    if ( (hklin = fopen(argv[1],"r")) == NULL ) {
-	      printf("\nCan't open %s.\n\n",argv[1]);
-	      exit(0);
-	    }
-	  }
-	  break;
-	  default:
-	  printf("\n Usage: calcrsf <input reflections .hkl> <input real sf lat> <input imag sf lat>\n\n");
-	  exit(0);
-	}
   
-  /*
-   * Initialize lattices:
-   */
-
-  if ((lat1 = linitlt()) == NULL) {
-    perror("Couldn't initialize lattice.\n\n");
-    exit(0);
-  }
-
-  if ((lat2 = linitlt()) == NULL) {
-    perror("Couldn't initialize lattice.\n\n");
-    exit(0);
-  }
-  
-  /*
-   * Read in lattices:
-   */
-
-  lat1->filename = filename;
-  lat1->infile = lat1in;
-  if (lreadlt(lat1) != 0) {
-    perror("Couldn't read map.\n\n");
-    exit(0);
-  }
-
-  lat2->filename = filename;
-  lat2->infile = lat2in;
-  if (lreadlt(lat2) != 0) {
-    perror("Couldn't read map.\n\n");
+  if ( (hklin = fopen(hklfname,"r")) == NULL ) {
+    printf("\nCan't open %s.\n\n",hklfname);
     exit(0);
   }
 
@@ -216,19 +147,16 @@ int main(int argc, char *argv[])
 float R = R_num/R_denom;
 float wR2_ccp4 = sqrtf(wR2_ccp4_num/wR2_ccp4_denom);
 float wR2_shelx = sqrtf(wR2_shelx_num/wR2_shelx_denom);
-float goof = sqrtf(wR2_shelx_num/((float)ndat-(float)nfit));
+float goof = sqrtf(wR2_shelx_num/((float)ndat-1.));
 
-printf("%11.9f %11.9f %11.9f %11.9f\n",R,wR2_ccp4,wR2_shelx,goof);
+//printf("%11.9f %11.9f %11.9f %11.9f\n",R,wR2_ccp4,wR2_shelx,goof);
+ struct fom f;
 
+ f.R = R; f.wR2_ccp4 = wR2_ccp4; f.wR2_shelx = wR2_shelx; f.goof = goof;
 
-CloseShop:
-  
-  /*
-   * Close files:
-   */
-  
-  fclose(hklin);
-  fclose(lat1in);
-  fclose(lat2in);
+ fclose(hklin);
+
+ return f;
 }
+
 

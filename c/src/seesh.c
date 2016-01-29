@@ -153,6 +153,7 @@ int main(int argc, char *argv[])
 		pix_value = (short)pix.one_byte.high_byte * 256 + 
 			(short)pix.one_byte.low_byte;
 		if ((pix_value < lower_threshold) || (pix_value >= 32766)) {
+		  printf("%d,",pix_value);
 			outstream[i] = 0;
 		}
 		else if (pix_value > upper_threshold) {
