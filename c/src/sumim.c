@@ -125,6 +125,13 @@ int main(int argc, char *argv[])
     goto CloseShop;
   }
 
+  // Set oscillation range for summed image. 
+
+  char osc_range_tag[256];
+
+  sprintf(osc_range_tag,"%07.3f",imdiff1->osc_range+imdiff2->osc_range);
+
+  lsettag(imdiff1->header,"OSC_RANGE",osc_range_tag);
 
 /*
  * Write the output image:
