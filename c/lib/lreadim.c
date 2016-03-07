@@ -77,6 +77,8 @@ int lreadim(DIFFIMAGE *imdiff)
       imdiff->origin.r = imdiff->beam_mm.y/imdiff->pixel_size_mm+.5;
       imdiff->distance_mm = atof(lgettag(imdiff->header,"DISTANCE"));
       imdiff->wavelength = atof(lgettag(imdiff->header,"WAVELENGTH"));
+      imdiff->osc_start = atof(lgettag(imdiff->header,"OSC_START"));
+      imdiff->osc_range = atof(lgettag(imdiff->header,"OSC_RANGE"));
       if (!strcmp(lgettag(imdiff->header,"BYTE_ORDER"),"little_endian"))
 	imdiff->big_endian=0;
       else if (!strcmp(lgettag(imdiff->header,"BYTE_ORDER"),"big_endian"))

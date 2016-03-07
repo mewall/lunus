@@ -28,7 +28,7 @@ const char * lgettag(const char *target,const char *tag)
   //  printf("Found the tag\n");
 
   if (pos_begin_found==0) {
-    printf("\nWarning: Couldn't find tag %s in image header\n\n",tag);
+    //    printf("\nWarning: Couldn't find tag %s in image header\n\n",tag);
     return(NULL);
   }
   while (pos_tmp != NULL) {

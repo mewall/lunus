@@ -426,6 +426,8 @@ typedef struct
   IMAGE_DATA_TYPE punch_tag;
   struct rccoords pos;	        /* Coordinates of current pixel */
   float spindle_deg;	        /* Spindle angle for this image */
+  float osc_start;              /* Starting phi angle */
+  float osc_range;              /* Phi angle oscillation range */
   struct voxel *map3D;	        /* List of voxels */
   float pixel_size_mm;	        /* Size of square detector pixel (mm) */
   float distance_mm;	        /* Sample-detector distance (mm) */
