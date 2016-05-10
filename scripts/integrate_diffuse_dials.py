@@ -278,7 +278,7 @@ if __name__=="__main__":
   print target_cell,target_sg
 
   phil_scope_str='''
-     include scope dials.algorithms.peak_finding.spotfinder_factory.phil_scope
+     include scope dials.algorithms.spot_finding.factory.phil_scope
      include scope dials.algorithms.indexing.indexer.index_only_phil_scope
      include scope dials.algorithms.refinement.refiner.phil_scope
      indexing.known_symmetry.unit_cell={0}
@@ -290,6 +290,11 @@ if __name__=="__main__":
   phil_scope = parse(phil_scope_str.format(target_cell,target_sg), process_includes=True)
   params = phil_scope.extract()
   params.refinement.parameterisation.crystal.scan_varying = False
+  params.spotfinder.filter.resolution_range = []
+  params.indexing.scan_range = []
+  params.refinement.parameterisation.crystal.unit_cell.restraints.tie_to_target = []
+  params.refinement.parameterisation.crystal.unit_cell.restraints.tie_to_group = []
+#  params.indexing.max_cell=800
 #  params.spotfinder.filter.min_spot_size=3
   
   filenames = []
@@ -317,6 +322,11 @@ if __name__=="__main__":
 #  from spotfinder.applications.xfel import cxi_phil
 #  horizons_phil = cxi_phil.cxi_versioned_extract(args)
 
+  print imagesets[0].get_beam()
+  print imagesets[2].get_beam()
+  print imagesets[0].get_beam() == imagesets[0].get_beam()
+  print imagesets[1].get_beam() == imagesets[0].get_beam()
+  print imagesets[2].get_beam() == imagesets[0].get_beam()
 
   print "indexing..."
   t0 = clock()

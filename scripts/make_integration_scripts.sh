@@ -67,7 +67,7 @@ qstat -j $JOB_ID                                  # This is useful for debugging
 mkdir "tmpdir_"$i
 cd "tmpdir_"$i
 
-. $cctbx_dir/build/setpaths.sh
+. $phenix_dir/phenix_env.sh
 
 EOF
 
