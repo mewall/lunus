@@ -1,13 +1,15 @@
-/* LIQUIDCORRLT.C - Generate a liquid-like motions reciprocal-space smearing lattice.
+/* CULLCONELT.C - Throw away part of a lattice shaped like a cone.
    
    Author: Mike Wall
-   Date: 2/28/95
+   Date: 9/28/2016
    Version: 1.
    
    Usage:
-   		"liquidfaclt <input lattice> <output lattice> <width>"
+   		"cullconelt <input lattice> <output lattice> <cell_str> <axis>"
 
-		Input is lattice and width.  Output is liquid-like motions reciprocal space smearing function.
+		Input is a lattice and axis specification. 
+		Output is a culled lattice, with voxels in the cone about the axis
+		masked.  
    */
 
 #include<mwmask.h>
@@ -19,35 +21,48 @@ int main(int argc, char *argv[])
     *latticeout;
   
   char
+    cell_str[256],
     error_msg[LINESIZE];
+  
 
+  int
+    axis;
+
+  size_t
+    i,
+    j,
+    k,
+    num_read,
+    num_wrote;
+  
   LAT3D 
     *lat;
-
-  float
-    peak,
-    width;
+  
+  RFILE_DATA_TYPE 
+    *rfile;
+  
 
 /*
  * Set input line defaults:
  */
-	
-	latticein = stdin;
-	latticeout = stdout;
+  latticein = stdin;
+  latticeout = stdout;
 
 /*
  * Read information from input line:
  */
 	switch(argc) {
-	  case 4:
-	  width = atof(argv[3]);
+	  case 5:
+	  axis = atoi(argv[4]);
+	case 4:
+	  strcpy(cell_str,argv[3]);
 	  case 3:
 	  if (strcmp(argv[2],"-") == 0) {
 	    latticeout = stdout;
 	  }
 	  else {
 	    if ((latticeout = fopen(argv[2],"wb")) == NULL) {
-	      printf("\nCan't open %s.\n\n",argv[2]);
+	      printf("\nCan't open %s.\n\n",argv[1]);
 	      exit(0);
 	    }
 	  }
@@ -63,13 +78,14 @@ int main(int argc, char *argv[])
 	  }
 	  break;
 	  default:
-	  printf("\n Usage: liquidcorrlt <input lattice> "
-		 "<output lattice> <width>\n\n");
+	  printf("\n Usage: culllt <input lattice> "
+		 "<output lattice> <inner radius> <outer radius>"
+		 "\n\n");
 	  exit(0);
 	}
   
   /*
-   * Initialize lattices:
+   * Initialize lattice:
    */
 
   if ((lat = linitlt()) == NULL) {
@@ -87,17 +103,19 @@ int main(int argc, char *argv[])
     exit(0);
   }
 
-  /*
-   * Calculate liquid-like motions prefactor:
-   */
-  
-  lat->width = width;
-  lliquidcorrlt(lat);
-  
-  /*
-   * Write lattice to output file:
-   */
-  
+/*
+ * Cull the lattice:
+ */
+
+  strcpy(lat->cell_str,cell_str);
+  lparsecelllt(lat);
+  lat->axis = axis;
+  lcullconelt(lat);
+
+/*
+ * Write lattice to output file:
+ */
+
   lat->outfile = latticeout;
   if (lwritelt(lat) != 0) {
     perror("Couldn't write lattice.\n\n");

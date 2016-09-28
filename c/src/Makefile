@@ -1,12 +1,13 @@
 VPATH=${C_HOME}/src:${C_HOME}/lib:${C_HOME}/bin:${C_HOME}/include
 #CC=gcc-mp-4.8
-CC=gcc
-CFLAGS= -g -fopenmp -DUSE_OPENMP -L${C_HOME}/lib -I${C_HOME}/include
+CC=gcc-mp-5
+FFTWROOT=/Users/mewall/packages/fftw-3.3.4/inst_dir
+CFLAGS= -g -fopenmp -DUSE_FFTW -DUSE_OPENMP -L${FFTWROOT}/lib -I${FFTWROOT}/include -L${C_HOME}/lib -I${C_HOME}/include
 #CFLAGS= -g -w -L${C_HOME}/lib -I${C_HOME}/include
 AR=ar
 ARFLAGS=-r
 SHELL=/bin/csh
-LIBS=-lmw -lm
+LIBS=-lmw -lfftw3f -lm
 DEPENDS=mwmask.h libmw.a
 S=${C_HOME}/src
 B=${C_HOME}/bin
@@ -16,6 +17,7 @@ all: \
 	addbeam \
 	addosc \
 	addtag \
+	anisolt \
 	anisoult \
 	avgim \
 	avgpolim \
@@ -36,8 +38,10 @@ all: \
 	constim \
 	constlt \
 	constrf \
+	corranlt \
 	corrlt \
 	cube2map \
+	cullconelt \
 	cullim \
 	culllt \
 	cutim \
@@ -75,6 +79,7 @@ all: \
 	lat2vtk \
 	liquidcorrlt \
 	liquidfaclt \
+	llmlt \
 	map2lat \
 	mapbound \
 	maskimg \
@@ -134,10 +139,10 @@ all: \
 	sumrf \
 	swapmw \
 	symlt \
+	tag_overloads \
 	tagim \
 	taglt \
 	tagneg \
-	tag_overloads \
 	tailc \
 	thrshim \
 	thrshlt \
@@ -165,6 +170,8 @@ addbeam:addbeam.c ${DEPENDS}
 addosc:addosc.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 addtag:addtag.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+anisolt:anisolt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 anisoult:anisoult.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -206,9 +213,13 @@ constlt:constlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 constrf:constrf.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+corranlt:corranlt.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 corrlt:corrlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 cube2map:cube2map.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+cullconelt:cullconelt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 cullim:cullim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -283,6 +294,8 @@ lat2vtk:lat2vtk.c ${DEPENDS}
 liquidcorrlt:liquidcorrlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 liquidfaclt:liquidfaclt.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+llmlt:llmlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 map2lat:map2lat.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -402,13 +415,13 @@ swapmw:swapmw.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 symlt:symlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+tag_overloads:tag_overloads.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 tagim:tagim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 taglt:taglt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 tagneg:tagneg.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-tag_overloads:tag_overloads.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 tailc:tailc.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -446,6 +459,7 @@ xpl2mw:xpl2mw.c ${DEPENDS}
 # Library functions:
 #
 labslt.o:labslt.c mwmask.h
+lanisolt.o:lanisolt.c mwmask.h
 lanisoult.o:lanisoult.c mwmask.h
 lavgim.o:lavgim.c mwmask.h
 lavgpolim.o:lavgpolim.c mwmask.h
@@ -466,6 +480,7 @@ lconstrf.o:lconstrf.c mwmask.h
 lcorrlt.o:lcorrlt.c mwmask.h
 lcpltmap.o:lcpltmap.c mwmask.h
 lcpmaplt.o:lcpmaplt.c mwmask.h
+lcullconelt.o:lcullconelt.c mwmask.h
 lcullim.o:lcullim.c mwmask.h
 lculllt.o:lculllt.c mwmask.h
 lcutim.o:lcutim.c mwmask.h
@@ -495,6 +510,7 @@ lintdfim.o:lintdfim.c mwmask.h
 lintxdslt.o:lintxdslt.c mwmask.h
 lliquidcorrlt.o:lliquidcorrlt.c mwmask.h
 lliquidfaclt.o:lliquidfaclt.c mwmask.h
+lllmlt.o:lllmlt.c mwmask.h
 lmattools.o:lmattools.c mwmask.h
 lmedim.o:lmedim.c mwmask.h
 lmin.o:lmin.c mwmask.h
@@ -554,6 +570,7 @@ lsubrflt.o:lsubrflt.c mwmask.h
 lsumim.o:lsumim.c mwmask.h
 lsumlt.o:lsumlt.c mwmask.h
 lsumrf.o:lsumrf.c mwmask.h
+lsvtools.o:lsvtools.c mwmask.h
 lsymlib.o:lsymlib.c mwmask.h
 lsymlt.o:lsymlt.c mwmask.h
 ltagim.o:ltagim.c mwmask.h
@@ -586,6 +603,7 @@ lxfmask.o:lxfmask.c mwmask.h
 #
 libmw.a: \
 	labslt.o \
+	lanisolt.o \
 	lanisoult.o \
 	lavgim.o \
 	lavgpolim.o \
@@ -606,6 +624,7 @@ libmw.a: \
 	lcorrlt.o \
 	lcpltmap.o \
 	lcpmaplt.o \
+	lcullconelt.o \
 	lcullim.o \
 	lculllt.o \
 	lcutim.o \
@@ -635,6 +654,7 @@ libmw.a: \
 	lintxdslt.o \
 	lliquidcorrlt.o \
 	lliquidfaclt.o \
+	lllmlt.o \
 	lmattools.o \
 	lmedim.o \
 	lmin.o \
@@ -694,6 +714,7 @@ libmw.a: \
 	lsumim.o \
 	lsumlt.o \
 	lsumrf.o \
+	lsvtools.o \
 	lsymlib.o \
 	lsymlt.o \
 	ltagim.o \

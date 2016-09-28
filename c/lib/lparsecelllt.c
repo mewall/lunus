@@ -36,12 +36,21 @@ int lparsecelllt(LAT3D *lat)
     rfloat;
 
   strcpy(cell_str,lat->cell_str);
-  i=0;
-  token=strtok(cell_str,",");
-  while (token!=NULL) {
-    ((float *)&lat->cell)[i]=atof(token);
-    token = strtok(NULL,",");
-    i++;
+  if (!strcmp(cell_str,"default")) {
+      lat->cell.a = 1./lat->xscale;
+      lat->cell.b = 1./lat->yscale;
+      lat->cell.c = 1./lat->zscale;
+      lat->cell.alpha = 90.;
+      lat->cell.beta = 90.;
+      lat->cell.gamma = 90.;
+  } else {
+    i=0;
+    token=strtok(cell_str,",");
+    while (token!=NULL) {
+      ((float *)&lat->cell)[i]=atof(token);
+      token = strtok(NULL,",");
+      i++;
+    }
   }
   lat->a.x = lat->cell.a;
   lat->a.y = 0.0;

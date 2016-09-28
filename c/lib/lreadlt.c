@@ -16,6 +16,12 @@ int lreadlt(LAT3D *lat)
 
   int
     return_value = 0;
+  
+  char 
+    hb;
+
+  uint32_t
+    first_uint32;
 
   /*
    * Read in 3D lattice descriptor:
@@ -23,13 +29,26 @@ int lreadlt(LAT3D *lat)
 
   rewind(lat->infile);
 
-  num_read = fread(&lat->xvoxels, sizeof(uint32_t), 1, lat->infile);
-  num_read = fread(&lat->yvoxels, sizeof(uint32_t), 1, lat->infile);
-  num_read = fread(&lat->zvoxels, sizeof(uint32_t), 1, lat->infile);
-  num_read = fread(&lat->xbound, sizeof(struct bounds), 1, lat->infile);
-  num_read = fread(&lat->ybound, sizeof(struct bounds), 1, lat->infile);
-  num_read = fread(&lat->zbound, sizeof(struct bounds), 1, lat->infile);
+  fread(&first_uint32,sizeof(uint32_t),1,lat->infile);
 
+
+  // Check the high byte of the first uint32 in the header, to determine the format
+  //   hb = 0, original .lat format, orthogonal unit cell, no angles, extra info
+  //   hb = 1, revised .lat format, general unit cell, space group, real vs recip info
+
+  hb = ((char *)&first_uint32)[3];
+
+  rewind(lat->infile);
+
+  if (hb == 0) {
+
+    num_read = fread(&lat->xvoxels, sizeof(uint32_t), 1, lat->infile);
+    num_read = fread(&lat->yvoxels, sizeof(uint32_t), 1, lat->infile);
+    num_read = fread(&lat->zvoxels, sizeof(uint32_t), 1, lat->infile);
+    num_read = fread(&lat->xbound, sizeof(struct bounds), 1, lat->infile);
+    num_read = fread(&lat->ybound, sizeof(struct bounds), 1, lat->infile);
+    num_read = fread(&lat->zbound, sizeof(struct bounds), 1, lat->infile);
+  }
 
   
   lat->xscale = (float)((lat->xbound.max - lat->xbound.min)/ 

@@ -27,7 +27,8 @@ int lllmlt(LAT3D *lat)
   float
     rscale,
     factor,
-    rsqr;
+    rsqr,
+    dwf;
 
   struct xyzcoords
     r1,r2,r3,rfloat;
@@ -52,15 +53,8 @@ int lllmlt(LAT3D *lat)
   for(index.k = 0; index.k < lat->zvoxels; index.k++) {
     for(index.j = 0; index.j < lat->yvoxels; index.j++) {
       for (index.i = 0; index.i < lat->xvoxels; index.i++) {
-	rvec.i = index.i - latG->origin.i;
-	rvec.j = index.j - latG->origin.j;
-	rvec.k = index.k - latG->origin.k;
-	r1 = lmulscvec((XYZCOORDS_DATA)rvec.i,lat->astar);
-	r2 = lmulscvec((XYZCOORDS_DATA)rvec.j,lat->bstar);
-	r3 = lmulscvec((XYZCOORDS_DATA)rvec.k,lat->cstar);
-	rfloat = laddvec(laddvec(r1,r2),r3);
-	rsqr = (rfloat.x*rfloat.x + rfloat.y*rfloat.y + 
-		       rfloat.z*rfloat.z);
+	latG->index = index;
+	rsqr = lssqrFromIndex(latG);
 	latG->lattice[lat_index] = (LATTICE_DATA_TYPE)
 	  8.*PI*lat->gamma*lat->gamma*lat->gamma/powf((1.+lat->gamma*lat->gamma*2.*PI*2.*PI*rsqr),2.);
 	//	  4.*PI*lat->width*lat->width*lat->width/(1.+lat->width*lat->width*2.*PI*2.*PI*rsqr);
@@ -114,22 +108,16 @@ int lllmlt(LAT3D *lat)
   for(index.k = 0; index.k < lat->zvoxels; index.k++) {
     for(index.j = 0; index.j < lat->yvoxels; index.j++) {
       for (index.i = 0; index.i < lat->xvoxels; index.i++) {
-	rvec.i = index.i - lat->origin.i;
-	rvec.j = index.j - lat->origin.j;
-	rvec.k = index.k - lat->origin.k;
-	r1 = lmulscvec((XYZCOORDS_DATA)rvec.i,lat->astar);
-	r2 = lmulscvec((XYZCOORDS_DATA)rvec.j,lat->bstar);
-	r3 = lmulscvec((XYZCOORDS_DATA)rvec.k,lat->cstar);
-	rfloat = laddvec(laddvec(r1,r2),r3);
-	rsqr = (rfloat.x*rfloat.x + rfloat.y*rfloat.y + 
-		       rfloat.z*rfloat.z);
-	sf[lat_index] *= (LATTICE_DATA_TYPE)
-	  	  rsqr*2.*PI*2.*PI*lat->sigma*lat->sigma*expf(-rsqr*2.*PI*2.*PI*lat->sigma*lat->sigma)/((LATTICE_DATA_TYPE)lat->lattice_length*sqrtf((LATTICE_DATA_TYPE)lat->lattice_length));
+	lat->index = index;
+	rsqr = lssqrFromIndex(lat);
+	dwf = expf(-rsqr*2.*PI*2.*PI*lat->sigma*lat->sigma);
+	sf[lat_index] *= (LATTICE_DATA_TYPE)(1-dwf)*dwf/((LATTICE_DATA_TYPE)lat->lattice_length*sqrtf((LATTICE_DATA_TYPE)lat->lattice_length));
 	lat_index++;
       }
     }
   }
-  
+
+
   fftwf_free(sf_t);
   fftwf_free(gamma_t);
   CloseShop:
