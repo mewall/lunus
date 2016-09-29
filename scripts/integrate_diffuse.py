@@ -281,7 +281,7 @@ if __name__=="__main__":
     # parse the input file line into a diffuse image file name and scale factor
     words = line.split()
 
-    imgname = os.path.join(procpath+"/"+words[1])
+    imgname = words[1]
     scale = float(words[2])
 
     print "processing file %s with scale factor %f"%(imgname,scale)

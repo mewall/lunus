@@ -75,7 +75,7 @@ if [ -z ${resolution+x} ]; then
 
 cat >>$script_path<<EOF
 
-cctbx.python ~/packages/lunus/scripts/integrate_diffuse_dials.py indexing.data=$indexing_data_file_one indexing.data=$indexing_data_file_two indexing.data=$indexing_data_file_three index_only=True cell.a=$cella cell.b=$cellb cell.c=$cellc inputlist.fname=$scales_input_file framenum=$i latxdim=$latxdim latydim=$latydim latzdim=$latzdim diffuse.lattice.type=sum diffuse.lattice.fname=$this_diffuse_file counts.lattice.fname=$this_counts_file np=1 codecamp.maxcell=$maxcell target_cell=$cella,$cellb,$cellc,$alpha,$beta,$gamma target_sg=$spacegroup 
+libtbx.python $lunus_dir/scripts/integrate_diffuse_dials.py indexing.data=$indexing_data_file_one indexing.data=$indexing_data_file_two indexing.data=$indexing_data_file_three index_only=True cell.a=$cella cell.b=$cellb cell.c=$cellc inputlist.fname=$scales_input_file framenum=$i latxdim=$latxdim latydim=$latydim latzdim=$latzdim diffuse.lattice.type=sum diffuse.lattice.fname=$this_diffuse_file counts.lattice.fname=$this_counts_file np=1 codecamp.maxcell=$maxcell target_cell=$cella,$cellb,$cellc,$alpha,$beta,$gamma target_sg=$spacegroup 
 
 EOF
 
@@ -83,7 +83,7 @@ else
 
 cat >>$script_path<<EOF
 
-cctbx.python ~/packages/lunus/scripts/integrate_diffuse_dials.py indexing.data=$indexing_data_file_one indexing.data=$indexing_data_file_two indexing.data=$indexing_data_file_three index_only=True cell.a=$cella cell.b=$cellb cell.c=$cellc inputlist.fname=$scales_input_file framenum=$i diffuse.lattice.resolution=$resolution diffuse.lattice.type=sum diffuse.lattice.fname=$this_diffuse_file counts.lattice.fname=$this_counts_file np=1 codecamp.maxcell=$maxcell target_cell=$cella,$cellb,$cellc,$alpha,$beta,$gamma target_sg=$spacegroup 
+libtbx.python $lunus_dir/scripts/integrate_diffuse_dials.py indexing.data=$indexing_data_file_one indexing.data=$indexing_data_file_two indexing.data=$indexing_data_file_three index_only=True cell.a=$cella cell.b=$cellb cell.c=$cellc inputlist.fname=$scales_input_file framenum=$i diffuse.lattice.resolution=$resolution diffuse.lattice.type=sum diffuse.lattice.fname=$this_diffuse_file counts.lattice.fname=$this_counts_file np=1 codecamp.maxcell=$maxcell target_cell=$cella,$cellb,$cellc,$alpha,$beta,$gamma target_sg=$spacegroup 
 
 EOF
 
@@ -91,8 +91,8 @@ fi
 
 cat >>$script_path<<EOF
 
-mv $this_diffuse_file $lattice_dir/.
-mv $this_counts_file $lattice_dir/.
+mv $this_diffuse_file $lattice_dir
+mv $this_counts_file $lattice_dir
 cd ..
 rm -r "tmpdir_"$i
 

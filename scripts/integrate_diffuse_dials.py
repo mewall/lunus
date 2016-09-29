@@ -85,6 +85,7 @@ def procimg(Isize1,Isize2,scale,mask_tag,A_matrix,rvec,DATA,latxdim,latydim,latz
 #      val = int(DATA[(x,y)])
 #dials values
       val = int(DATA[(y,x)])
+      print val
       # integrate the data only if it's not in the immediate neighborhood of a Bragg peak
       if ((val != mask_tag) and (val != 0) and not((dh < .25) and (dk < .25) and (dl < .25))):
         # i, j, and k are indices into the lattice
@@ -274,6 +275,7 @@ if __name__=="__main__":
   #from dials.algorithms.indexing.fft3d import indexer_fft3d as indexer
   from dials.algorithms.indexing.real_space_grid_search import indexer_real_space_grid_search as indexer
   import copy, os
+  # from dials.algorithms import refinement
 
   print target_cell,target_sg
 
@@ -286,10 +288,11 @@ if __name__=="__main__":
      indexing.known_symmetry.space_group={1}
        .type = space_group
      indexing.method=real_space_grid_search
+     output.shoeboxes = False
    '''
   phil_scope = parse(phil_scope_str.format(target_cell,target_sg), process_includes=True)
   params = phil_scope.extract()
-  params.refinement.parameterisation.crystal.scan_varying = False
+  params.refinement.parameterisation.scan_varying = False
   params.spotfinder.filter.resolution_range = []
   params.indexing.scan_range = []
   params.refinement.parameterisation.crystal.unit_cell.restraints.tie_to_target = []

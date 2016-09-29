@@ -77,11 +77,17 @@ int main(int argc, char *argv[])
 	  printf("\n Usage: symlt <input lattice> "
 		 "<output lattice> <symmetry_operation>\n\n"
 		 "  Symmetry Operations:\n"
-		 "    0 = P1\n"
-		 "    1 = P4/m (P41)\n"
-		 "    2 = Pmmm (P212121)\n\n"
-		 "    3 = P m -3\n\n"
-		 "    4 = P 2/m (P21)\n");
+		 "    0   =  Laue class     -1    (space group        1)\n"
+		 "    1   =  Laue class    2/m    (space groups     3-5)\n"
+		 "    2   =  Laue class    mmm    (space groups   16-24)\n"
+		 "    3   =  Laue class    4/m    (space groups   75-80)\n"
+     "    4   =  Laue class  4/mmm    (space groups   89-98)\n"
+     "    5   =  Laue class     -3    (space groups 143-146)\n"
+     "    6   =  Laue class    -3m    (space groups 149-155)\n"
+     "    7   =  Laue class    6/m    (space groups 168-173)\n"
+     "    8   =  Laue class  6/mmm    (space groups 177-182)\n"
+     "    9   =  Laue class    m-3    (space groups 195-199)\n"
+		 "    10  =  Laue class   m-3m    (space groups 207-214)\n");
 	      
 	  exit(0);
 	}
