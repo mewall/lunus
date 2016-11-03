@@ -622,15 +622,18 @@ typedef struct {
   char *space_group_str;        /* Space group in string format */
   char *cell_str;               /* Unit cell string a,b,c,alpha,beta,gamma */
   struct unit_cell cell;        /* Unit cell descriptor */
-  struct xyzcoords a;           /* Reciprocal lattice vector astar */
-  struct xyzcoords b;           /* Reciprocal lattice vector bstar */
-  struct xyzcoords c;           /* Reciprocal lattice vector cstar */
+  struct xyzcoords a;           /* Lattice vector a */
+  struct xyzcoords b;           /* Lattice vector b */
+  struct xyzcoords c;           /* Lattice vector c */
+  struct xyzcoords celldiag;    /* Cell diagonal vector */
   struct xyzcoords astar;       /* Reciprocal lattice vector astar */
   struct xyzcoords bstar;       /* Reciprocal lattice vector bstar */
   struct xyzcoords cstar;       /* Reciprocal lattice vector cstar */
+  struct xyzcoords cellstardiag;/* Reciprocal lattice cell diagonal vector */
   LATTICE_DATA_TYPE mask_tag;   /* Masked voxel value tag */
   LATTICE_DATA_TYPE threshold;  /* Threshold for use in correlation calculation, and perhaps elsewhere */
   struct ijkcoords origin;      /* Origin voxel position */
+  struct ijkcoords index;       /* Currently selected voxel position index */
   RFILE_DATA_TYPE *rfile;       /* Radial distribution function */
   size_t rfile_length;	        /* Number of rfile values */
   struct xyzcoords minrange;    /* Minimum valid distances to Bragg */
@@ -641,6 +644,9 @@ typedef struct {
 				/* calcs */
   float peak;                   /* Gaussian peak value */
   float width;                  /* Gaussian width */
+  float chi;                    /* LLM chi */
+  float sigma;                  /* LLM sigma */
+  float gamma;                  /* LLM gamma */
   SHIM_DATA_TYPE *shim;         /* Shell image */
   size_t shim_length;           /* Total number of pixels in shell image */
   size_t shim_hsize;            /* Number of horizontal pixels in */
@@ -673,8 +679,10 @@ typedef struct {
  * Subroutines:
  */
 
+int labsim(DIFFIMAGE *imdiff);
 int labslt(LAT3D *lat);
 int lanisoult(LAT3D *lat);
+void lanisolt(LAT3D *lat);
 int lavgim(DIFFIMAGE *imdiff);
 int lavgr(LAT3D *lat);
 int lavgrf(DIFFIMAGE *imdiff1);
@@ -696,6 +704,7 @@ float lcorrlt(LAT3D *lat1, LAT3D *lat2);
 int lcpltmap(LAT3D *lat,CCP4MAP *map);
 int lcpmaplt(CCP4MAP *map, LAT3D *lat);
 struct xyzcoords lcrossvec(struct xyzcoords a,struct xyzcoords b);
+void lcullconelt(LAT3D *lat);
 int lcullim(DIFFIMAGE *imdiff);
 int lculllt(LAT3D *lat);
 int lcutim(DIFFIMAGE *imdiff);
@@ -727,6 +736,8 @@ int lintdfim(DIFFIMAGE *imdiff);
 int lintxdslt(DIFFIMAGE *imdiff,LAT3D *lat);
 int lliquidcorrlt(LAT3D *lat);
 int lliquidfaclt(LAT3D *lat);
+int lllmhyblt(LAT3D *lat1, LAT3D *lat2);
+int lllmlt(LAT3D *lat);
 struct xyzmatrix lmatinv(struct xyzmatrix a);
 struct xyzmatrix lmatmul(struct xyzmatrix a, struct xyzmatrix b);
 int lmedim(DIFFIMAGE *imdiff);
@@ -740,6 +751,7 @@ int lmulim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lmullt(LAT3D *lat1, LAT3D *lat2);
 int lmulrf(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lmulrfim(DIFFIMAGE *imdiff);
+int lmulscim(DIFFIMAGE *imdiff);
 int lmulsclt(LAT3D *lat);
 int lmulscmap(CCP4MAP *map);
 int lnign(DIFFIMAGE *imdiff);
@@ -773,19 +785,23 @@ struct xyzcoords lrotvecz(struct xyzcoords a, float cos_theta,float sin_theta);
 int lrsccmap(CCP4MAP *map1, CCP4MAP *map2);
 float lrsrlt(LAT3D *lat1, LAT3D *lat2);
 int lscaleim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
+int lscalerfim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lscalelt(LAT3D *lat1, LAT3D *lat2);
+struct xyzcoords lsFromIndex(LAT3D *lat);
 int lshiftlt(LAT3D *lat,struct ijkcoords t);
 int lshiftsflt(LAT3D *lat1,LAT3D *lat2);
 int lshim4lt(LAT3D *lat);
 int lshimlt(LAT3D *lat);
 int lsmthim(DIFFIMAGE *imdiff);
 int lsolidlt(LAT3D *lat);
+float lssqrFromIndex(LAT3D *lat);
 int lsubenvlt(LAT3D *lat1, LAT3D *lat2);
 int lsubim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lsublt(LAT3D *lat1, LAT3D *lat2);
 int lsubrf(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lsubrfim(DIFFIMAGE *imdiff);
 int lsubrflt(LAT3D *lat);
+int lsumscim(DIFFIMAGE *imdiff);
 int lsumim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lsumlt(LAT3D *lat1, LAT3D *lat2);
 int lsummap(CCP4MAP *map1, CCP4MAP *map2);

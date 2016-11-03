@@ -5,9 +5,9 @@
    Version: 1.
    
    Usage:
-   		"llmlt <input lattice> <output lattice> <sigma> <gamma>"
+   		"llmlt <input lattice> <output lattice> <cell_str> <gamma> <sigma1> <sigma2>"
 
-		Input is I0(hkl) lattice and sigma, gamma from llm model.  Output is liquid-like motions model of diffuse scattering.
+		Input is I0(hkl) lattice, unit cell, gamma, sigma1, sigma2 from llm model.  Output is liquid-like motions model of diffuse scattering.
    */
 
 #include<mwmask.h>
@@ -19,13 +19,15 @@ int main(int argc, char *argv[])
     *latticeout;
   
   char
+    cell_str[256],
     error_msg[LINESIZE];
 
   LAT3D 
     *lat;
 
   float
-    sigma,
+    sigma1,
+    sigma2,
     gamma;
 
 /*
@@ -34,15 +36,19 @@ int main(int argc, char *argv[])
 	
 	latticein = stdin;
 	latticeout = stdout;
-
+	sigma2 = 0.0;
 /*
  * Read information from input line:
  */
 	switch(argc) {
+	  case 7:
+	  sigma2 = atof(argv[6]);
+	  case 6:
+	  sigma1 = atof(argv[5]);
 	  case 5:
 	  gamma = atof(argv[4]);
-	  case 4:
-	  sigma = atof(argv[3]);
+	case 4:
+	  strcpy(cell_str,argv[3]);
 	  case 3:
 	  if (strcmp(argv[2],"-") == 0) {
 	    latticeout = stdout;
@@ -69,10 +75,15 @@ int main(int argc, char *argv[])
 		 "<output lattice> <sigma> <gamma>\n\n");
 	  exit(0);
 	}
+
+	if (sigma2 == 0.0) {
+	  sigma2 = sigma1;
+	}
   
   /*
    * Initialize lattices:
    */
+
 
   if ((lat = linitlt()) == NULL) {
     perror("Couldn't initialize lattice.\n\n");
@@ -93,10 +104,18 @@ int main(int argc, char *argv[])
    * Calculate liquid-like motions prefactor:
    */
   
-  lat->sigma = sigma;
+  lat->sigma = sigma1;
+  lat->anisoU.xx = sigma1*sigma1;
+  lat->anisoU.xy = 0.0;
+  lat->anisoU.xz = 0.0;
+  lat->anisoU.yx = 0.0;
+  lat->anisoU.yy = sigma2*sigma2;
+  lat->anisoU.yz = 0.0;
+  lat->anisoU.zx = 0.0;
+  lat->anisoU.zy = 0.0;
+  lat->anisoU.zz = sigma1*sigma1;
   lat->gamma = gamma;
-  //For now, just calculate for ICH
-  lat->cell_str = "57.154,57.965,69.092,90.00,112.77,90.00";
+  strcpy(lat->cell_str,cell_str);
   lparsecelllt(lat);
   lllmlt(lat);
   

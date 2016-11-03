@@ -41,6 +41,8 @@ int main(int argc, char *argv[])
     inner_radius,
     outer_radius;
 
+  char cell_str[256];
+
 /*
  * Set input line defaults:
  */
@@ -48,11 +50,14 @@ int main(int argc, char *argv[])
   latticeout = stdout;
   inner_radius = DEFAULT_INNER_RADIUS;
   outer_radius = DEFAULT_OUTER_RADIUS;
+  strcpy(cell_str, "default");
 
 /*
  * Read information from input line:
  */
 	switch(argc) {
+    case 6:
+      strcpy(cell_str,argv[5]);
 	  case 5:
 	  outer_radius = atof(argv[4]);
 	  case 4:
@@ -107,6 +112,9 @@ int main(int argc, char *argv[])
 /*
  * Cull the lattice:
  */
+
+  strcpy(lat->cell_str,cell_str);
+  lparsecelllt(lat);
 
   lat->inner_radius = inner_radius;
   lat->outer_radius = outer_radius;

@@ -20,6 +20,8 @@ int main(int argc, char *argv[])
   char
     error_msg[LINESIZE];
 
+  char cell_str[256];
+
   LAT3D 
     *lat;
 
@@ -28,11 +30,14 @@ int main(int argc, char *argv[])
  */
 	
 	latticein = stdin;
+  strcpy(cell_str, "default");
 
 /*
  * Read information from input line:
  */
 	switch(argc) {
+    case 3:
+      strcpy(cell_str,argv[2]);
 	  case 2:
 	  if (strcmp(argv[1],"-") == 0) {
 	    latticein = stdin;
@@ -68,6 +73,9 @@ int main(int argc, char *argv[])
     exit(0);
   }
 
+  strcpy(lat->cell_str,cell_str);
+  lparsecelllt(lat);
+
   /*
    * Write lattice info to stdout:
    */
@@ -80,9 +88,10 @@ int main(int argc, char *argv[])
   printf("ORIGIN: (%d,%d,%d)\n",lat->origin.i,lat->origin.j,lat->origin.k);
   printf("VOXEL SCALE: %f %f %f\n",(float)lat->xscale,(float)lat->yscale,
 	 (float)lat->zscale);
-  printf("VOXEL DIAGONAL: %f\n",sqrtf((double)(lat->xscale*lat->xscale +
-					      lat->yscale*lat->yscale +
-					      lat->zscale*lat->zscale)));
+  /* printf("VOXEL DIAGONAL: %f\n",sqrtf((double)(lat->xscale*lat->xscale + */
+  /* 					      lat->yscale*lat->yscale + */
+  /* 					      lat->zscale*lat->zscale))); */
+  printf("RECIPROCAL LATTICE DIAGONAL: %f\n",sqrtf(ldotvec(lat->cellstardiag,lat->cellstardiag)));
 CloseShop:
   
   /*

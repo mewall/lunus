@@ -36,6 +36,8 @@ int main(int argc, char *argv[])
   
   latticein = stdin;
   latticeout = stdout;
+
+  strcpy(cell_str,"None");
   
   /*
    * Read information from input line:
@@ -91,7 +93,16 @@ int main(int argc, char *argv[])
 
   // Calculate anisotropic component of lattices
 
-  strcpy(lat->cell_str,cell_str);
+  if (!(strcmp(cell_str,"None")==0)) {
+    strcpy(lat->cell_str,cell_str);
+  } else {
+    lat->cell.a = 1./lat->xscale;
+    lat->cell.b = 1./lat->yscale;
+    lat->cell.c = 1./lat->zscale;
+    lat->cell.alpha = lat->cell.beta = lat->cell.gamma = 90.0;
+    sprintf(cell_str,"%f,%f,%f,90.0,90.0,90.0",(float)lat->cell.a,(float)lat->cell.b,(float)lat->cell.c);
+    printf("%s\n",cell_str);
+  }
   lparsecelllt(lat);
   lanisolt(lat);
 

@@ -13,6 +13,7 @@ S=${C_HOME}/src
 B=${C_HOME}/bin
 L=${C_HOME}/lib
 all: \
+	absim \
 	abslt \
 	addbeam \
 	addosc \
@@ -38,7 +39,6 @@ all: \
 	constim \
 	constlt \
 	constrf \
-	corranlt \
 	corrlt \
 	cube2map \
 	cullconelt \
@@ -79,6 +79,7 @@ all: \
 	lat2vtk \
 	liquidcorrlt \
 	liquidfaclt \
+	llmhyblt \
 	llmlt \
 	map2lat \
 	mapbound \
@@ -93,6 +94,7 @@ all: \
 	mullt \
 	mulrf \
 	mulrfim \
+	mulscim \
 	mulsclt \
 	nign \
 	noiseim \
@@ -118,6 +120,7 @@ all: \
 	scaleim \
 	scalelt \
 	scalerf \
+	scalerfim \
 	see \
 	seecat \
 	seesh \
@@ -137,6 +140,7 @@ all: \
 	sumim \
 	sumlt \
 	sumrf \
+	sumscim \
 	swapmw \
 	symlt \
 	tag_overloads \
@@ -163,6 +167,8 @@ all: \
 #
 # Executables:
 #
+absim:absim.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 abslt:abslt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 addbeam:addbeam.c ${DEPENDS}
@@ -212,8 +218,6 @@ constim:constim.c ${DEPENDS}
 constlt:constlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 constrf:constrf.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-corranlt:corranlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 corrlt:corrlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -295,6 +299,8 @@ liquidcorrlt:liquidcorrlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 liquidfaclt:liquidfaclt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+llmhyblt:llmhyblt.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 llmlt:llmlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 map2lat:map2lat.c ${DEPENDS}
@@ -322,6 +328,8 @@ mullt:mullt.c ${DEPENDS}
 mulrf:mulrf.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 mulrfim:mulrfim.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+mulscim:mulscim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 mulsclt:mulsclt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -373,6 +381,8 @@ scalelt:scalelt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 scalerf:scalerf.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+scalerfim:scalerfim.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 see:see.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 seecat:seecat.c ${DEPENDS}
@@ -410,6 +420,8 @@ sumim:sumim.c ${DEPENDS}
 sumlt:sumlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 sumrf:sumrf.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+sumscim:sumscim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 swapmw:swapmw.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -458,6 +470,7 @@ xpl2mw:xpl2mw.c ${DEPENDS}
 #
 # Library functions:
 #
+labsim.o:labsim.c mwmask.h
 labslt.o:labslt.c mwmask.h
 lanisolt.o:lanisolt.c mwmask.h
 lanisoult.o:lanisoult.c mwmask.h
@@ -510,6 +523,7 @@ lintdfim.o:lintdfim.c mwmask.h
 lintxdslt.o:lintxdslt.c mwmask.h
 lliquidcorrlt.o:lliquidcorrlt.c mwmask.h
 lliquidfaclt.o:lliquidfaclt.c mwmask.h
+lllmhyblt.o:lllmhyblt.c mwmask.h
 lllmlt.o:lllmlt.c mwmask.h
 lmattools.o:lmattools.c mwmask.h
 lmedim.o:lmedim.c mwmask.h
@@ -523,6 +537,7 @@ lmulim.o:lmulim.c mwmask.h
 lmullt.o:lmullt.c mwmask.h
 lmulrf.o:lmulrf.c mwmask.h
 lmulrfim.o:lmulrfim.c mwmask.h
+lmulscim.o:lmulscim.c mwmask.h
 lmulsclt.o:lmulsclt.c mwmask.h
 lnign.o:lnign.c mwmask.h
 lnoiseim.o:lnoiseim.c mwmask.h
@@ -554,6 +569,7 @@ lrsccmap.o:lrsccmap.c mwmask.h
 lrsrlt.o:lrsrlt.c mwmask.h
 lscaleim.o:lscaleim.c mwmask.h
 lscalelt.o:lscalelt.c mwmask.h
+lscalerfim.o:lscalerfim.c mwmask.h
 lsettag.o:lsettag.c mwmask.h
 lshiftlt.o:lshiftlt.c mwmask.h
 lshiftsflt.o:lshiftsflt.c mwmask.h
@@ -570,6 +586,7 @@ lsubrflt.o:lsubrflt.c mwmask.h
 lsumim.o:lsumim.c mwmask.h
 lsumlt.o:lsumlt.c mwmask.h
 lsumrf.o:lsumrf.c mwmask.h
+lsumscim.o:lsumscim.c mwmask.h
 lsvtools.o:lsvtools.c mwmask.h
 lsymlib.o:lsymlib.c mwmask.h
 lsymlt.o:lsymlt.c mwmask.h
@@ -602,6 +619,7 @@ lxfmask.o:lxfmask.c mwmask.h
 # Libraries:
 #
 libmw.a: \
+	labsim.o \
 	labslt.o \
 	lanisolt.o \
 	lanisoult.o \
@@ -654,6 +672,7 @@ libmw.a: \
 	lintxdslt.o \
 	lliquidcorrlt.o \
 	lliquidfaclt.o \
+	lllmhyblt.o \
 	lllmlt.o \
 	lmattools.o \
 	lmedim.o \
@@ -667,6 +686,7 @@ libmw.a: \
 	lmullt.o \
 	lmulrf.o \
 	lmulrfim.o \
+	lmulscim.o \
 	lmulsclt.o \
 	lnign.o \
 	lnoiseim.o \
@@ -698,6 +718,7 @@ libmw.a: \
 	lrsrlt.o \
 	lscaleim.o \
 	lscalelt.o \
+	lscalerfim.o \
 	lsettag.o \
 	lshiftlt.o \
 	lshiftsflt.o \
@@ -714,6 +735,7 @@ libmw.a: \
 	lsumim.o \
 	lsumlt.o \
 	lsumrf.o \
+	lsumscim.o \
 	lsvtools.o \
 	lsymlib.o \
 	lsymlt.o \

@@ -55,7 +55,7 @@ void lanisolt(LAT3D *lat)
 
   // subtract isotropic component
 
-  size_t maxr=40;
+  //  size_t maxr=40;
   lat_index = 0;
   for(index.k = 0; index.k < lat->zvoxels; index.k++) {
     for(index.j = 0; index.j < lat->yvoxels; index.j++) {
@@ -66,13 +66,13 @@ void lanisolt(LAT3D *lat)
 	if ((r < lat->rfile_length) && 
 	    (lat->lattice[lat_index] != lat->mask_tag)) {
 	  //    lat->lattice[index] -= lat->rfile[r];
-	  if (r <= maxr) {
+	  //	  if (r <= maxr) {
 	    lat->lattice[lat_index] -= (lat->rfile[r] + 
 				  (rf - (float)r)*(lat->rfile[r+1] - 
 						   lat->rfile[r]));
-	  } else {
-	    lat->lattice[lat_index] = lat->mask_tag;
-	  }
+	    //	  } else {
+	    //	    lat->lattice[lat_index] = lat->mask_tag;
+	    //	  }
 	}
 
 	lat_index++;

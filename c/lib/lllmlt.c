@@ -31,7 +31,7 @@ int lllmlt(LAT3D *lat)
     dwf;
 
   struct xyzcoords
-    r1,r2,r3,rfloat;
+    r1,r2,r3,rfloat,s,U_times_s;
 
   float *sf,*gamma;
   fftwf_complex *sf_t,*gamma_t;
@@ -104,14 +104,18 @@ int lllmlt(LAT3D *lat)
   fftwf_destroy_plan(p);
 
   lat_index = 0;
+  float exparg;
   // Multiply by resolution sigma-dependent factor
   for(index.k = 0; index.k < lat->zvoxels; index.k++) {
     for(index.j = 0; index.j < lat->yvoxels; index.j++) {
       for (index.i = 0; index.i < lat->xvoxels; index.i++) {
 	lat->index = index;
-	rsqr = lssqrFromIndex(lat);
-	dwf = expf(-rsqr*2.*PI*2.*PI*lat->sigma*lat->sigma);
-	sf[lat_index] *= (LATTICE_DATA_TYPE)(1-dwf)*dwf/((LATTICE_DATA_TYPE)lat->lattice_length*sqrtf((LATTICE_DATA_TYPE)lat->lattice_length));
+	s = lsFromIndex(lat);
+	U_times_s = lmatvecmul(lat->anisoU,s);	
+	exparg = 2.*PI*2.*PI*ldotvec(s,U_times_s);
+	dwf = expf(-exparg);
+	//	sf[lat_index] *= (LATTICE_DATA_TYPE)(1.-dwf)*dwf/((LATTICE_DATA_TYPE)lat->lattice_length*sqrtf((LATTICE_DATA_TYPE)lat->lattice_length));
+	sf[lat_index] *= (LATTICE_DATA_TYPE)exparg*dwf/((LATTICE_DATA_TYPE)lat->lattice_length*sqrtf((LATTICE_DATA_TYPE)lat->lattice_length));
 	lat_index++;
       }
     }

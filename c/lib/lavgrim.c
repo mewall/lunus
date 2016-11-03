@@ -20,6 +20,7 @@ int lavgrim(DIFFIMAGE *imdiff)
 
 	struct xycoords rvec;
 
+	index = 0;
 	n = (size_t *)calloc(MAX_RFILE_LENGTH, sizeof(size_t));
 	imdiff->rfile_length = 0;
 	for(r = 0; r < imdiff->vpixels; r++) {

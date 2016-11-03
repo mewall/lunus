@@ -50,21 +50,26 @@ int lccrlt(LAT3D *lat1, LAT3D *lat2)
     goto CloseShop;
   }
 
-  rscale = (lat1->xscale*lat1->xscale + lat1->yscale*lat1->yscale +
-		 lat1->zscale*lat1->zscale);
+  rscale = ldotvec(lat1->cellstardiag,lat1->cellstardiag);
+  //  rscale = (lat1->xscale*lat1->xscale + lat1->yscale*lat1->yscale +
+  //		 lat1->zscale*lat1->zscale);
   lat1->rfile_length = 0;
   // Calculate means
   for(k = 0; k < lat1->zvoxels; k++) {
     for(j = 0; j < lat1->yvoxels; j++) {
       for (i = 0; i < lat1->xvoxels; i++) {
-	rvec.i = i - lat1->origin.i;
-	rvec.j = j - lat1->origin.j;
-	rvec.k = k - lat1->origin.k;
-	rfloat.x = lat1->xscale * rvec.i;
-	rfloat.y = lat1->yscale * rvec.j;
-	rfloat.z = lat1->zscale * rvec.k;
-	r = (size_t)(sqrtf((rfloat.x*rfloat.x + rfloat.y*rfloat.y + 
-		       rfloat.z*rfloat.z) / rscale)+.5);
+	lat1->index.i = i;
+	lat1->index.j = j;
+	lat1->index.k = k;
+	/* rvec.i = i - lat1->origin.i; */
+	/* rvec.j = j - lat1->origin.j; */
+	/* rvec.k = k - lat1->origin.k; */
+	/* rfloat.x = lat1->xscale * rvec.i; */
+	/* rfloat.y = lat1->yscale * rvec.j; */
+	/* rfloat.z = lat1->zscale * rvec.k; */
+	/*	r = (size_t)(sqrtf((rfloat.x*rfloat.x + rfloat.y*rfloat.y + 
+		rfloat.z*rfloat.z) / rscale)+.5); */
+	r = (size_t)(sqrtf(lssqrFromIndex(lat1)/rscale)+0.5);
 	if (r > lat1->rfile_length) lat1->rfile_length = r;
 	if ((lat1->lattice[index] != lat1->mask_tag) &&
 	    (lat2->lattice[index] != lat1->mask_tag)) {

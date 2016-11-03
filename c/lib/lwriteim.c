@@ -21,7 +21,7 @@ int lwriteim(DIFFIMAGE *imdiff)
  * Reverse byte order if neccessary:
  */
 
-  if (DOS_BYTE_ORDER!=0) {
+  if (DOS_BYTE_ORDER!=0 || imdiff->big_endian!=0) {
         lchbyte(imdiff->image, sizeof(IMAGE_DATA_TYPE), imdiff->image_length);
   }
 
