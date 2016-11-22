@@ -1,8 +1,9 @@
 VPATH=${C_HOME}/src:${C_HOME}/lib:${C_HOME}/bin:${C_HOME}/include
 #CC=gcc-mp-4.8
-CC=gcc-mp-5
-FFTWROOT=/Users/mewall/packages/fftw-3.3.4/inst_dir
-CFLAGS= -g -fopenmp -DUSE_FFTW -DUSE_OPENMP -L${FFTWROOT}/lib -I${FFTWROOT}/include -L${C_HOME}/lib -I${C_HOME}/include
+#CC=gcc-mp-5
+CC=gcc
+#FFTWROOT=/Users/mewall/packages/fftw-3.3.4/inst_dir
+CFLAGS= -g -fopenmp -DUSE_FFTW -DUSE_OPENMP -L${FFTW_DIR} -I${FFTW_INC} -L${C_HOME}/lib -I${C_HOME}/include
 #CFLAGS= -g -w -L${C_HOME}/lib -I${C_HOME}/include
 AR=ar
 ARFLAGS=-r
@@ -62,9 +63,7 @@ all: \
 	ftfltim \
 	gausslt \
 	gencmd \
-	genlat \
 	genmap \
-	gmparse \
 	harsf \
 	hdrlt \
 	headc \
@@ -143,10 +142,10 @@ all: \
 	sumscim \
 	swapmw \
 	symlt \
-	tag_overloads \
 	tagim \
 	taglt \
 	tagneg \
+	tag_overloads \
 	tailc \
 	thrshim \
 	thrshlt \
@@ -162,7 +161,6 @@ all: \
 	writehdr \
 	xflt \
 	xfmask \
-	xpl2mw \
 	libmw.a
 #
 # Executables:
@@ -265,11 +263,7 @@ gausslt:gausslt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 gencmd:gencmd.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-genlat:genlat.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 genmap:genmap.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-gmparse:gmparse.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 harsf:harsf.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -427,13 +421,13 @@ swapmw:swapmw.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 symlt:symlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-tag_overloads:tag_overloads.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 tagim:tagim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 taglt:taglt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 tagneg:tagneg.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+tag_overloads:tag_overloads.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 tailc:tailc.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -464,8 +458,6 @@ writehdr:writehdr.c ${DEPENDS}
 xflt:xflt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 xfmask:xfmask.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-xpl2mw:xpl2mw.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 #
 # Library functions:
@@ -543,7 +535,6 @@ lnign.o:lnign.c mwmask.h
 lnoiseim.o:lnoiseim.c mwmask.h
 lnormim.o:lnormim.c mwmask.h
 lnormlt.o:lnormlt.c mwmask.h
-lparsecell.o:lparsecell.c mwmask.h
 lparsecelllt.o:lparsecelllt.c mwmask.h
 lpeakim.o:lpeakim.c mwmask.h
 lpolarim.o:lpolarim.c mwmask.h
@@ -692,7 +683,6 @@ libmw.a: \
 	lnoiseim.o \
 	lnormim.o \
 	lnormlt.o \
-	lparsecell.o \
 	lparsecelllt.o \
 	lpeakim.o \
 	lpolarim.o \

@@ -72,7 +72,7 @@ cat > $script_path<<EOF
 date
 hostname
 
-qstat -j $JOB_ID                                  # This is useful for debugging and usage purposes,
+#qstat -j $JOB_ID                                  # This is useful for debugging and usage purposes,
 							# e.g. "did my job exceed its memory request?"
 mkdir "tmpdir_"$i
 

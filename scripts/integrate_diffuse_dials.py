@@ -278,22 +278,25 @@ if __name__=="__main__":
   print target_cell,target_sg
 
   phil_scope_str='''
-     include scope dials.algorithms.spot_finding.factory.phil_scope
-     include scope dials.algorithms.indexing.indexer.index_only_phil_scope
-     include scope dials.algorithms.refinement.refiner.phil_scope
-     indexing.known_symmetry.unit_cell={0}
-       .type = unit_cell
-     indexing.known_symmetry.space_group={1}
-       .type = space_group
-     indexing.method=real_space_grid_search
-   '''
+    output {{
+      shoeboxes = True
+	.type = bool
+	.help = Save the raw pixel values inside the reflection shoeboxes.
+    }}
+    include scope dials.algorithms.spot_finding.factory.phil_scope
+    include scope dials.algorithms.indexing.indexer.index_only_phil_scope
+    include scope dials.algorithms.refinement.refiner.phil_scope
+    indexing.known_symmetry.unit_cell={0}
+      .type = unit_cell
+    indexing.known_symmetry.space_group={1}
+      .type = space_group
+  '''
   phil_scope = parse(phil_scope_str.format(target_cell,target_sg), process_includes=True)
-  params = phil_scope.extract()
-  params.refinement.parameterisation.crystal.scan_varying = False
-  params.spotfinder.filter.resolution_range = []
-  params.indexing.scan_range = []
-  params.refinement.parameterisation.crystal.unit_cell.restraints.tie_to_target = []
-  params.refinement.parameterisation.crystal.unit_cell.restraints.tie_to_group = []
+  from dials.util.options import OptionParser
+  parser = OptionParser(phil=phil_scope)
+  params, options = parser.parse_args(args=[], show_diff_phil=True)
+  params.refinement.parameterisation.scan_varying = False
+  params.indexing.method='real_space_grid_search'
 #  params.indexing.max_cell=800
 #  params.spotfinder.filter.min_spot_size=3
   
