@@ -41,6 +41,9 @@ int lmodeim(DIFFIMAGE *imdiff)
 
   int
     return_value = 0;
+
+  int
+    nt;
   
   /* 
    * Allocate working image: 
@@ -62,10 +65,12 @@ int lmodeim(DIFFIMAGE *imdiff)
   size_t j;
 
 #ifdef USE_OPENMP
-  //  printf("Using OpenMP\n");
-#pragma omp parallel shared(imdiff,image,half_height,half_width,avg_max_count,avg_max_count_count,num_max_count_1) private(j)
+  //  omp_set_num_threads(16);
+  nt = omp_get_max_threads();
+  printf("Using OpenMP with %d threads\n",nt);
   {
-    #pragma omp for schedule(dynamic,1)
+    //    #pragma omp for schedule(dynamic,1)
+#pragma omp parallel for shared(imdiff,image,half_height,half_width,avg_max_count,avg_max_count_count,num_max_count_1) private(j)
 #endif
   for (j=0; j<imdiff->vpixels; j++) {
     size_t i;

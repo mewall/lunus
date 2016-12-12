@@ -1,14 +1,18 @@
 VPATH=${C_HOME}/src:${C_HOME}/lib:${C_HOME}/bin:${C_HOME}/include
 #CC=gcc-mp-4.8
 #CC=gcc-mp-5
-CC=gcc
+#CC=gcc
+CC=cc
 #FFTWROOT=/Users/mewall/packages/fftw-3.3.4/inst_dir
-CFLAGS= -g -fopenmp -DUSE_FFTW -DUSE_OPENMP -L${FFTW_DIR} -I${FFTW_INC} -L${C_HOME}/lib -I${C_HOME}/include
+#CFLAGS= -g -fopenmp -DUSE_FFTW -DUSE_OPENMP -L${FFTW_DIR} -I${FFTW_INC} -L${C_HOME}/lib -I${C_HOME}/include
+#CFLAGS= -g -O3 -axcore-avx2,mic-avx512 -qopenmp -DUSE_OPENMP -L${C_HOME}/lib -I${C_HOME}/include
+CFLAGS= -g -O3 -axcore-avx2,mic-avx512 -L${C_HOME}/lib -I${C_HOME}/include
 #CFLAGS= -g -w -L${C_HOME}/lib -I${C_HOME}/include
 AR=ar
 ARFLAGS=-r
 SHELL=/bin/csh
-LIBS=-lmw -lfftw3f -lm
+#LIBS=-lmw -lfftw3f -lm
+LIBS=-lmw 
 DEPENDS=mwmask.h libmw.a
 S=${C_HOME}/src
 B=${C_HOME}/bin
@@ -161,7 +165,6 @@ all: \
 	writehdr \
 	xflt \
 	xfmask \
-	xpl2mw \
 	libmw.a
 #
 # Executables:
@@ -459,8 +462,6 @@ writehdr:writehdr.c ${DEPENDS}
 xflt:xflt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 xfmask:xfmask.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-xpl2mw:xpl2mw.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 #
 # Library functions:
