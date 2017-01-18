@@ -663,6 +663,7 @@ typedef struct {
   float angle;                  /* Angle of rotation */
   struct xyzmatrix anisoU;      /* anisotropic U matrix */
   struct xyzcoords shift;       /* translation vector */
+  int decimation_factor;        /* decimation factor */
 } LAT3D;
 
 // Crystal structure data type
