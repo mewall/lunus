@@ -29,7 +29,8 @@ float lcorrlt(LAT3D *lat1, LAT3D *lat2)
       for (i = 0; i < lat1->xvoxels; i++) {
         if (lat1->lattice[index] != lat1->mask_tag) ctdat++;
 	if ((lat1->lattice[index] != lat1->mask_tag) &&
-	    (lat2->lattice[index] != lat1->mask_tag) && (lat1->lattice[index] >= lat1->threshold)) {
+	    (lat2->lattice[index] != lat1->mask_tag)) {
+	  //	    (lat2->lattice[index] != lat1->mask_tag) && (lat1->lattice[index] >= lat1->threshold)) {
 	  avg1 += lat1->lattice[index];
 	  avg2 += lat2->lattice[index];
 	  ct++;
@@ -58,7 +59,8 @@ float lcorrlt(LAT3D *lat1, LAT3D *lat2)
     for(j = 0; j < lat1->yvoxels; j++) {
       for (i = 0; i < lat1->xvoxels; i++) {
 	if ((lat1->lattice[index] != lat1->mask_tag) &&
-	    (lat2->lattice[index] != lat2->mask_tag) && (lat1->lattice[index] >= lat1->threshold)) {
+	    (lat2->lattice[index] != lat2->mask_tag)) {
+	  //	    (lat2->lattice[index] != lat2->mask_tag) && (lat1->lattice[index] >= lat1->threshold)) {
 	  float d1 = (lat1->lattice[index]-avg1);
 	  float d2 = (lat2->lattice[index]-avg2);
 	  s11 += d1*d1;
