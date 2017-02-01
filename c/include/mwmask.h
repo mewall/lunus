@@ -661,8 +661,10 @@ typedef struct {
 				/* operation */
   int axis;                     /* Axis of rotation */
   float angle;                  /* Angle of rotation */
+  struct bounds resolution;     /* Resolution bounds */
   struct xyzmatrix anisoU;      /* anisotropic U matrix */
   struct xyzcoords shift;       /* translation vector */
+  int decimation_factor;
 } LAT3D;
 
 // Crystal structure data type
@@ -707,6 +709,7 @@ struct xyzcoords lcrossvec(struct xyzcoords a,struct xyzcoords b);
 void lcullconelt(LAT3D *lat);
 int lcullim(DIFFIMAGE *imdiff);
 int lculllt(LAT3D *lat);
+int lcullreslt(LAT3D *lat);
 int lcutim(DIFFIMAGE *imdiff);
 int ldecimap(CCP4MAP *map);
 int ldf2im(DIFFIMAGE *imdiff);
