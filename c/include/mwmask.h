@@ -642,6 +642,7 @@ typedef struct {
 				/* calcs */
   size_t outer_radius;          /* Outer radius threshold for lattice */
 				/* calcs */
+  struct bounds resolution;     /* resolution range */
   float peak;                   /* Gaussian peak value */
   float width;                  /* Gaussian width */
   float chi;                    /* LLM chi */
@@ -708,6 +709,7 @@ struct xyzcoords lcrossvec(struct xyzcoords a,struct xyzcoords b);
 void lcullconelt(LAT3D *lat);
 int lcullim(DIFFIMAGE *imdiff);
 int lculllt(LAT3D *lat);
+int lcullreslt(LAT3D *lat);
 int lcutim(DIFFIMAGE *imdiff);
 int ldecimap(CCP4MAP *map);
 int ldf2im(DIFFIMAGE *imdiff);

@@ -40,9 +40,9 @@ int lreadhkl(LAT3D *lat,LAT3D *tmpl)
   lat->xbound.min = tmpl->xbound.min;
   lat->ybound.min = tmpl->ybound.min;
   lat->zbound.min = tmpl->zbound.min;
-  lat->xbound.max = lat->xbound.min + lat->xvoxels*lat->xscale;
-  lat->ybound.max = lat->ybound.min + lat->yvoxels*lat->yscale;
-  lat->zbound.max = lat->zbound.min + lat->zvoxels*lat->zscale;  
+  lat->xbound.max = lat->xbound.min + (lat->xvoxels-1)*lat->xscale;
+  lat->ybound.max = lat->ybound.min + (lat->yvoxels-1)*lat->yscale;
+  lat->zbound.max = lat->zbound.min + (lat->zvoxels-1)*lat->zscale;  
   /*
   lat->origin.i = (IJKCOORDS_DATA)(-lat->xbound.min*lat->xscale+.49);
   lat->origin.j = (IJKCOORDS_DATA)(-lat->ybound.min*lat->yscale+.49);

@@ -51,6 +51,7 @@ int lccrlt(LAT3D *lat1, LAT3D *lat2)
   }
 
   rscale = ldotvec(lat1->cellstardiag,lat1->cellstardiag);
+  printf("scattering vector scale = %f\n",sqrtf(rscale));
   //  rscale = (lat1->xscale*lat1->xscale + lat1->yscale*lat1->yscale +
   //		 lat1->zscale*lat1->zscale);
   lat1->rfile_length = 0;
