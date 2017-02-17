@@ -111,6 +111,7 @@ all: \
 	rad2s \
 	ratioim \
 	raw2img \
+	rbtlt \
 	resizelt \
 	revbytelt \
 	revyim \
@@ -366,6 +367,8 @@ ratioim:ratioim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 raw2img:raw2img.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+rbtlt:rbtlt.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 resizelt:resizelt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 revbytelt:revbytelt.c ${DEPENDS}
@@ -559,6 +562,7 @@ lpolarim.o:lpolarim.c mwmask.h
 lpunch.o:lpunch.c mwmask.h
 lpunchim.o:lpunchim.c mwmask.h
 lratioim.o:lratioim.c mwmask.h
+lrbtlt.o:lrbtlt.c mwmask.h
 lreadcube.o:lreadcube.c mwmask.h
 lreaddf.o:lreaddf.c mwmask.h
 lreadhkl.o:lreadhkl.c mwmask.h
@@ -708,6 +712,7 @@ libmw.a: \
 	lpunch.o \
 	lpunchim.o \
 	lratioim.o \
+	lrbtlt.o \
 	lreadcube.o \
 	lreaddf.o \
 	lreadhkl.o \

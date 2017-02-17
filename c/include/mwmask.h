@@ -768,6 +768,7 @@ int lpolarim(DIFFIMAGE *imdiff);
 int lpunch(DIFFIMAGE *imdiff);
 int lpunchim(DIFFIMAGE *imdiff);
 int lratioim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
+int lrbtlt(LAT3D *lat);
 int lreadcube(CCP4MAP *map);
 int lreaddf(DIFFIMAGE *imdiff);
 int lreadhkl(LAT3D *lat,LAT3D *tmpl);
