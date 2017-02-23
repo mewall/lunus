@@ -740,6 +740,7 @@ int lintxdslt(DIFFIMAGE *imdiff,LAT3D *lat);
 int lliquidcorrlt(LAT3D *lat);
 int lliquidfaclt(LAT3D *lat);
 int lllmhyblt(LAT3D *lat1, LAT3D *lat2);
+int lllmdclt(LAT3D *lat)
 int lllmlt(LAT3D *lat);
 struct xyzmatrix lmatinv(struct xyzmatrix a);
 struct xyzmatrix lmatmul(struct xyzmatrix a, struct xyzmatrix b);
