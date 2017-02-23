@@ -81,6 +81,7 @@ all: \
 	lat2vtk \
 	liquidcorrlt \
 	liquidfaclt \
+	llmdclt \
 	llmhyblt \
 	llmlt \
 	makelt \
@@ -306,6 +307,8 @@ lat2vtk:lat2vtk.c ${DEPENDS}
 liquidcorrlt:liquidcorrlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 liquidfaclt:liquidfaclt.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+llmdclt:llmdclt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 llmhyblt:llmhyblt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -536,6 +539,7 @@ lintdfim.o:lintdfim.c mwmask.h
 lintxdslt.o:lintxdslt.c mwmask.h
 lliquidcorrlt.o:lliquidcorrlt.c mwmask.h
 lliquidfaclt.o:lliquidfaclt.c mwmask.h
+lllmdclt.o:lllmdclt.c mwmask.h
 lllmhyblt.o:lllmhyblt.c mwmask.h
 lllmlt.o:lllmlt.c mwmask.h
 lmattools.o:lmattools.c mwmask.h
@@ -686,6 +690,7 @@ libmw.a: \
 	lintxdslt.o \
 	lliquidcorrlt.o \
 	lliquidfaclt.o \
+	lllmdclt.o \
 	lllmhyblt.o \
 	lllmlt.o \
 	lmattools.o \
