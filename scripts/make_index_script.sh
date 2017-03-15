@@ -57,13 +57,15 @@ hostname
 							# e.g. "did my job exceed its memory request?"
 #. proc.all
 
-. $phenix_dir/phenix_env.sh
+. $cctbx_dir/setpaths_all.sh
 
 EOF
 
 cat >>$script_path<<EOF
 
-time cctbx.python $lunus_dir/scripts/index_cctbx.py indexing.data=$indexing_data_file_one indexing.data=$indexing_data_file_two indexing.data=$indexing_data_file_three inputlist.fname=$scales_input_file np=1 framenum=-1 codecamp.maxcell=$maxcell target_cell=$cella,$cellb,$cellc,$alpha,$beta,$gamma target_sg=$spacegroup 
+time libtbx.python $lunus_dir/scripts/index_cctbx.py indexing.data=$indexing_data_file_one indexing.data=$indexing_data_file_two indexing.data=$indexing_data_file_three inputlist.fname=$scales_input_file np=1 framenum=-1 codecamp.maxcell=$maxcell target_cell=$cella,$cellb,$cellc,$alpha,$beta,$gamma target_sg=$spacegroup 
+
+#time libtbx.python -m cProfile $lunus_dir/scripts/index_cctbx.py indexing.data=$indexing_data_file_one indexing.data=$indexing_data_file_two indexing.data=$indexing_data_file_three inputlist.fname=$scales_input_file np=1 framenum=-1 codecamp.maxcell=$maxcell target_cell=$cella,$cellb,$cellc,$alpha,$beta,$gamma target_sg=$spacegroup 
 
 EOF
 

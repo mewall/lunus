@@ -11,9 +11,9 @@ except:
 def procimg(Isize1,Isize2,scale,mask_tag,A_matrix,rvec,DATA,latxdim,latydim,latzdim,procid):
   # returns a 3D lattice with integrated data from a chunk of data points
   # define the lattice indices at which h,k,l = 0,0,0
-  i0=latxdim/2-1
-  j0=latydim/2-1
-  k0=latzdim/2-1
+  i0=int(latxdim/2-1)
+  j0=int(latydim/2-1)
+  k0=int(latzdim/2-1)
   # total number of voxels in the lattice
   latsize = latxdim*latydim*latzdim
   lat = np.zeros(latsize*2, dtype=np.float32).reshape((2,latsize))
@@ -38,15 +38,20 @@ def procimg(Isize1,Isize2,scale,mask_tag,A_matrix,rvec,DATA,latxdim,latydim,latz
     Hintlist = np.rint(Hlist)
     dHlist = np.abs(Hlist - Hintlist)
     vallist = np.asarray(DATA[y*Isize1:(y+1)*Isize1])
-    ilist = Hintlist[:,0] + i0
-    jlist = Hintlist[:,1] + j0
-    klist = Hintlist[:,2] + k0
+    Hintpphkllist = np.rint(Hlist*float(pphkl))
+    ilist = Hintpphkllist[:,0] + i0
+    jlist = Hintpphkllist[:,1] + j0
+    klist = Hintpphkllist[:,2] + k0
     maskrightvals = np.logical_and((vallist>0),(vallist != mask_tag))
     masknotnearhkl = np.logical_or(np.logical_or((dHlist[:,0] >= 0.25),(dHlist[:,1] >= 0.25)),(dHlist[:,2] >= 0.25))
+#    print 'not near hkl = {0}, total = {1}'.format(np.sum(masknotnearhkl),len(dHlist[:,0]))
     maskinbounds = np.logical_and(np.logical_and(np.logical_and(np.logical_and(np.logical_and(ilist>=0,jlist>=0),klist>=0),ilist<latxdim),jlist<latydim),klist<latzdim)
-    maskall = np.logical_and(np.logical_and(maskrightvals,masknotnearhkl),maskinbounds)
+    if (filterhkl):
+        maskall = np.logical_and(np.logical_and(maskrightvals,masknotnearhkl),maskinbounds)
+    else:
+        maskall = np.logical_and(maskrightvals,maskinbounds)
 #    indexlist = klist*latxdim*latydim + jlist*latxdim + ilist
-    indexlist = klist[maskall]*latxdim*latydim + jlist[maskall]*latxdim + ilist[maskall]
+    indexlist = np.int32(klist[maskall]*latxdim*latydim + jlist[maskall]*latxdim + ilist[maskall])
 #    print len(indexlist2)
 #    indexlist[maskall] = 0
     valscalelist = vallist[maskall]*scale
@@ -165,9 +170,6 @@ if __name__=="__main__":
     residx = -1
   else:
     res = float(args.pop(residx).split("=")[1])
-    latxdim = (int(cella/res)+1)*2
-    latydim = (int(cellb/res)+1)*2
-    latzdim = (int(cellc/res)+1)*2
   # input file with list of diffuse images and scale factors
   try:
     ifnameidx = [a.find("inputlist.fname")==0 for a in args].index(True)
@@ -204,8 +206,25 @@ if __name__=="__main__":
     lattype = "mean"
   else:
     lattype = args.pop(lattypeidx).split("=")[1]
-    if not((lattype == "sum") or (lattype == "mean")):
-      raise Exception("Lattice type must be ""sum"" or ""mean""")
+    if not((lattype == "sum") or (lattype == "mean") or (lattype == "npz")):
+      raise Exception("Lattice type must be ""sum"" or ""mean"" or ""npz""")
+  # diffuse lattice points per hkl value
+  try:
+    pphklidx = [a.find("pphkl")==0 for a in args].index(True)
+  except ValueError:
+    pphkl = 1
+  else:
+    pphkl = int(args.pop(pphklidx).split("=")[1])
+  # diffuse lattice points per hkl value
+  try:
+    filterhklidx = [a.find("filterhkl")==0 for a in args].index(True)
+  except ValueError:
+    filterhkl = True
+  else:
+    if (args.pop(filterhklidx).split("=")[1] == "False"):
+        filterhkl = False
+    else:
+        filterhkl = True
   # size of diffuse lattice in x direction
   try:
     latxdimidx = [a.find("latxdim")==0 for a in args].index(True)
@@ -263,6 +282,11 @@ if __name__=="__main__":
 
   #########################################################################
   # new dials
+
+# lattice dimensions
+  latxdim = (int(float(pphkl)*cella/res)+1)*2
+  latydim = (int(float(pphkl)*cellb/res)+1)*2
+  latzdim = (int(float(pphkl)*cellc/res)+1)*2
 
   latsize = latxdim*latydim*latzdim
   print "Lattice size = ",latsize
@@ -342,41 +366,42 @@ if __name__=="__main__":
           else:
               lat[index] = -32768
 
+  if ((lattype == "mean" or lattype == "sum")):
   # write lattice to output file
-  vtkfile = open(ofname,"w")
+      vtkfile = open(ofname,"w")
 
-  a_recip = 1./cella
-  b_recip = 1./cellb
-  c_recip = 1./cellc
+      a_recip = 1./cella/float(pphkl)
+      b_recip = 1./cellb/float(pphkl)
+      c_recip = 1./cellc/float(pphkl)
 
-  print >>vtkfile,"# vtk DataFile Version 2.0"
-  print >>vtkfile,"lattice_type=PR;unit_cell={0};space_group={1};".format(target_cell,target_sg)
-  print >>vtkfile,"ASCII"
-  print >>vtkfile,"DATASET STRUCTURED_POINTS"
-  print >>vtkfile,"DIMENSIONS %d %d %d"%(latxdim,latydim,latzdim)
-  print >>vtkfile,"SPACING %f %f %f"%(a_recip,b_recip,c_recip)
-  print >>vtkfile,"ORIGIN %f %f %f"%(-i0*a_recip,-j0*b_recip,-k0*c_recip)
-  print >>vtkfile,"POINT_DATA %d"%(latsize)
-  print >>vtkfile,"SCALARS volume_scalars float 1"
-  print >>vtkfile,"LOOKUP_TABLE default\n"
+      print >>vtkfile,"# vtk DataFile Version 2.0"
+      print >>vtkfile,"lattice_type=PR;unit_cell={0};space_group={1};".format(target_cell,target_sg)
+      print >>vtkfile,"ASCII"
+      print >>vtkfile,"DATASET STRUCTURED_POINTS"
+      print >>vtkfile,"DIMENSIONS %d %d %d"%(latxdim,latydim,latzdim)
+      print >>vtkfile,"SPACING %f %f %f"%(a_recip,b_recip,c_recip)
+      print >>vtkfile,"ORIGIN %f %f %f"%(-i0*a_recip,-j0*b_recip,-k0*c_recip)
+      print >>vtkfile,"POINT_DATA %d"%(latsize)
+      print >>vtkfile,"SCALARS volume_scalars float 1"
+      print >>vtkfile,"LOOKUP_TABLE default\n"
 
-  index = 0
-  for k in range(0,latzdim):
-    for j in range(0,latydim):
-      for i in range(0,latxdim):
-        print >>vtkfile,lat[index],
-        index += 1
-      print >>vtkfile,""
+      index = 0
+      for k in range(0,latzdim):
+          for j in range(0,latydim):
+              for i in range(0,latxdim):
+                  print >>vtkfile,lat[index],
+                  index += 1
+              print >>vtkfile,""
 
-  vtkfile.close()
+      vtkfile.close()
 
   # write counts lattice to output file, if lattice type is "sum"
   if (lattype=="sum"):
       vtkfile = open(cfname,"w")
 
-      a_recip = 1./cella
-      b_recip = 1./cellb
-      c_recip = 1./cellc
+      a_recip = 1./cella/float(pphkl)
+      b_recip = 1./cellb/float(pphkl)
+      c_recip = 1./cellc/float(pphkl)
 
       print >>vtkfile,"# vtk DataFile Version 2.0"
       print >>vtkfile,"lattice_type=PR;unit_cell={0};space_group={1};".format(target_cell,target_sg)
@@ -398,3 +423,7 @@ if __name__=="__main__":
               print >>vtkfile,""
 
       vtkfile.close()
+
+  if ((lattype == "npz")):
+      np.savez_compressed(ofname,lat=lat)
+      np.savez_compressed(cfname,ct=ct)
