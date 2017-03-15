@@ -662,6 +662,7 @@ typedef struct {
 				/* operation */
   int axis;                     /* Axis of rotation */
   float angle;                  /* Angle of rotation */
+  struct bounds resolution;     /* Resolution bounds */
   struct xyzmatrix anisoU;      /* anisotropic U matrix */
   struct xyzcoords shift;       /* translation vector */
   int decimation_factor;        /* decimation factor */

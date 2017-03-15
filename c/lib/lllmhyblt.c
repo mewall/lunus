@@ -8,10 +8,13 @@
 
 #include<mwmask.h>
 #include<complex.h>
+#ifdef USE_FFTW
 #include<fftw3.h>
+#endif
 
 int lllmhyblt(LAT3D *lat1, LAT3D *lat2)
 {
+#ifdef USE_FFTW
   size_t
     lat_index = 0;
   
@@ -145,6 +148,6 @@ int lllmhyblt(LAT3D *lat1, LAT3D *lat2)
   fftwf_free(gamma_t);
   CloseShop:
   return(return_value);
+#endif
 }
-
 

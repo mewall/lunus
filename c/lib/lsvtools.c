@@ -8,7 +8,6 @@
 
 #include<mwmask.h>
 #include<complex.h>
-#include<fftw3.h>
 
   float lssqrFromIndex(LAT3D *lat) 
   {

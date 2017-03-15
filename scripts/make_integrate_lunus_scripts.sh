@@ -24,8 +24,8 @@ script_name=`printf script_integration_%05d.sh $i`
 
 script_path=`printf scripts/%s $script_name`
 
-this_diffuse_file=`printf "%s_diffuse_%05d.vtk" $diffuse_lattice_prefix $i`
-this_counts_file=`printf "%s_counts_%05d.vtk" $diffuse_lattice_prefix $i`
+this_diffuse_file=`printf "%s_diffuse_%05d.npz" $diffuse_lattice_prefix $i`
+this_counts_file=`printf "%s_counts_%05d.npz" $diffuse_lattice_prefix $i`
 
 cat > $script_path<<EOF
 
@@ -60,22 +60,32 @@ cat > $script_path<<EOF
 date
 hostname
 
+module load python/2.7-anaconda-4.1.1
+
 #qstat -j $JOB_ID                                  # This is useful for debugging and usage purposes,
 							# e.g. "did my job exceed its memory request?"
 #. proc.all
 
-mkdir "tmpdir_"$i
+#mkdir "tmpdir_"$i
 cd "tmpdir_"$i
 
-. $phenix_dir/phenix_env.sh
+#. $phenix_dir/phenix_env.sh
 
 EOF
+
+if [ -z ${pphkl+x} ]; then 
+  pphkl=1
+fi
+
+if [ -z ${filterhkl+x} ]; then 
+  filterhkl=True
+fi
 
 if [ -z ${resolution+x} ]; then 
 
 cat >>$script_path<<EOF
 
-cctbx.python $lunus_dir/scripts/integrate_diffuse_dials.py indexing.data=$indexing_data_file_one indexing.data=$indexing_data_file_two indexing.data=$indexing_data_file_three index_only=True cell.a=$cella cell.b=$cellb cell.c=$cellc inputlist.fname=$scales_input_file framenum=$i latxdim=$latxdim latydim=$latydim latzdim=$latzdim diffuse.lattice.type=sum diffuse.lattice.fname=$this_diffuse_file counts.lattice.fname=$this_counts_file np=1 codecamp.maxcell=$maxcell target_cell=$cella,$cellb,$cellc,$alpha,$beta,$gamma target_sg=$spacegroup 
+python $lunus_dir/scripts/integrate_lunus.py cell.a=$cella cell.b=$cellb cell.c=$cellc inputlist.fname=$scales_input_file framenum=$i latxdim=$latxdim latydim=$latydim latzdim=$latzdim diffuse.lattice.type=npz diffuse.lattice.fname=$this_diffuse_file counts.lattice.fname=$this_counts_file np=$nproc codecamp.maxcell=$maxcell target_cell=$cella,$cellb,$cellc,$alpha,$beta,$gamma target_sg=$spacegroup pphkl=$pphkl filterhkl=$filterhkl 
 
 EOF
 
@@ -83,7 +93,7 @@ else
 
 cat >>$script_path<<EOF
 
-cctbx.python $lunus_dir/scripts/integrate_diffuse_dials.py indexing.data=$indexing_data_file_one indexing.data=$indexing_data_file_two indexing.data=$indexing_data_file_three index_only=True cell.a=$cella cell.b=$cellb cell.c=$cellc inputlist.fname=$scales_input_file framenum=$i diffuse.lattice.resolution=$resolution diffuse.lattice.type=sum diffuse.lattice.fname=$this_diffuse_file counts.lattice.fname=$this_counts_file np=1 codecamp.maxcell=$maxcell target_cell=$cella,$cellb,$cellc,$alpha,$beta,$gamma target_sg=$spacegroup 
+python $lunus_dir/scripts/integrate_lunus.py cell.a=$cella cell.b=$cellb cell.c=$cellc inputlist.fname=$scales_input_file framenum=$i diffuse.lattice.resolution=$resolution diffuse.lattice.type=npz diffuse.lattice.fname=$this_diffuse_file counts.lattice.fname=$this_counts_file np=$nproc codecamp.maxcell=$maxcell target_cell=$cella,$cellb,$cellc,$alpha,$beta,$gamma target_sg=$spacegroup pphkl=$pphkl filterhkl=$filterhkl
 
 EOF
 

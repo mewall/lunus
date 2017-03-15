@@ -21,6 +21,17 @@ if [ ! -d "scripts" ]; then
 	mkdir scripts
 fi
 
+if [ -z ${integrate_using_norm+x} ]; then 
+    echo "integrate_using_norm is unset, using mode image for integration"
+    image_for_integration=tmp2.img
+else 
+    if [ "$integrate_using_norm" == 1 ]; then
+	image_for_integration=tmp1.img
+    else
+	image_for_integration=tmp2.img
+    fi
+fi
+
 for (( i=1; i <= $num_images ; i=$i+1 ))
 
 do
@@ -30,6 +41,10 @@ do
 this_image_name=`printf %s_%05d.img $image_prefix $i`
 
 this_image_path=`printf %s/%s $raw_image_dir $this_image_name`
+
+scale_image_name=`printf %s_%05d.img $scale_image_prefix $i`
+
+scale_image_path=`printf %s/%s $lunus_image_dir $scale_image_name`
 
 lunus_image_name=`printf %s_%05d.img $lunus_image_prefix $i`
 
@@ -72,7 +87,7 @@ cat > $script_path<<EOF
 date
 hostname
 
-qstat -j $JOB_ID                                  # This is useful for debugging and usage purposes,
+#qstat -j $JOB_ID                                  # This is useful for debugging and usage purposes,
 							# e.g. "did my job exceed its memory request?"
 mkdir "tmpdir_"$i
 
@@ -90,7 +105,9 @@ modeim tmp1.img tmp2.img $modeim_kernel_width $modeim_bin_size
 
 # copy results to processed image name
 
-cp tmp2.img $lunus_image_path
+cp $image_for_integration $lunus_image_path
+
+cp tmp2.img $scale_image_path
 
 cd ..
 

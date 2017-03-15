@@ -16,16 +16,9 @@ if [ ! -d "scripts" ]; then
 	mkdir scripts
 fi
 
-for (( i=1; i <= $num_images ; i=$i+1 ))
-
-do
-
-script_name=`printf script_integration_%05d.sh $i`
+script_name=`printf script_index.sh $i`
 
 script_path=`printf scripts/%s $script_name`
-
-this_diffuse_file=`printf "%s_diffuse_%05d.vtk" $diffuse_lattice_prefix $i`
-this_counts_file=`printf "%s_counts_%05d.vtk" $diffuse_lattice_prefix $i`
 
 cat > $script_path<<EOF
 
@@ -64,41 +57,23 @@ hostname
 							# e.g. "did my job exceed its memory request?"
 #. proc.all
 
-mkdir "tmpdir_"$i
-cd "tmpdir_"$i
-
-. $phenix_dir/phenix_env.sh
+. $cctbx_dir/setpaths_all.sh
 
 EOF
 
-if [ -z ${resolution+x} ]; then 
-
 cat >>$script_path<<EOF
 
-cctbx.python $lunus_dir/scripts/integrate_diffuse_dials.py indexing.data=$indexing_data_file_one indexing.data=$indexing_data_file_two indexing.data=$indexing_data_file_three index_only=True cell.a=$cella cell.b=$cellb cell.c=$cellc inputlist.fname=$scales_input_file framenum=$i latxdim=$latxdim latydim=$latydim latzdim=$latzdim diffuse.lattice.type=sum diffuse.lattice.fname=$this_diffuse_file counts.lattice.fname=$this_counts_file np=1 codecamp.maxcell=$maxcell target_cell=$cella,$cellb,$cellc,$alpha,$beta,$gamma target_sg=$spacegroup 
+time libtbx.python $lunus_dir/scripts/index_cctbx.py indexing.data=$indexing_data_file_one indexing.data=$indexing_data_file_two indexing.data=$indexing_data_file_three inputlist.fname=$scales_input_file np=1 framenum=-1 codecamp.maxcell=$maxcell target_cell=$cella,$cellb,$cellc,$alpha,$beta,$gamma target_sg=$spacegroup 
+
+#time libtbx.python -m cProfile $lunus_dir/scripts/index_cctbx.py indexing.data=$indexing_data_file_one indexing.data=$indexing_data_file_two indexing.data=$indexing_data_file_three inputlist.fname=$scales_input_file np=1 framenum=-1 codecamp.maxcell=$maxcell target_cell=$cella,$cellb,$cellc,$alpha,$beta,$gamma target_sg=$spacegroup 
 
 EOF
 
-else
-
 cat >>$script_path<<EOF
 
-cctbx.python $lunus_dir/scripts/integrate_diffuse_dials.py indexing.data=$indexing_data_file_one indexing.data=$indexing_data_file_two indexing.data=$indexing_data_file_three index_only=True cell.a=$cella cell.b=$cellb cell.c=$cellc inputlist.fname=$scales_input_file framenum=$i diffuse.lattice.resolution=$resolution diffuse.lattice.type=sum diffuse.lattice.fname=$this_diffuse_file counts.lattice.fname=$this_counts_file np=1 codecamp.maxcell=$maxcell target_cell=$cella,$cellb,$cellc,$alpha,$beta,$gamma target_sg=$spacegroup 
-
-EOF
-
-fi
-
-cat >>$script_path<<EOF
-
-mv $this_diffuse_file $lattice_dir/.
-mv $this_counts_file $lattice_dir/.
-cd ..
-rm -r "tmpdir_"$i
 
 date
 EOF
 
 #more $i_$y".pbs"
 
-done
