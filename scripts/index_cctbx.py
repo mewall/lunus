@@ -1,9 +1,8 @@
 from time import clock, time
 import numpy as np
 import re
-from xfel.cxi.display_spots import run_one_index_core
+#from xfel.cxi.display_spots import run_one_index_core
 from cctbx.array_family import flex
-from labelit.command_line.imagefiles import QuickImage
 from multiprocessing import Pool
 import subprocess, shlex
 
@@ -70,8 +69,9 @@ if __name__=="__main__":
   from dxtbx.datablock import DataBlockFactory
   from dials.array_family import flex
   #from dials.algorithms.indexing.fft1d import indexer_fft1d as indexer
-  #from dials.algorithms.indexing.fft3d import indexer_fft3d as indexer
-  from dials.algorithms.indexing.real_space_grid_search import indexer_real_space_grid_search as indexer
+#  from dials.algorithms.indexing.fft3d import indexer_fft3d as indexer
+  from dials.algorithms.indexing.indexer import indexer_base
+  #from dials.algorithms.indexing.real_space_grid_search import indexer_real_space_grid_search as indexer
   import copy, os
 
 #  print target_cell,target_sg
@@ -94,8 +94,10 @@ if __name__=="__main__":
   from dials.util.options import OptionParser
   parser = OptionParser(phil=phil_scope)
   params, options = parser.parse_args(args=[], show_diff_phil=True)
+  
   params.refinement.parameterisation.scan_varying = False
-  params.indexing.method='real_space_grid_search'
+#  params.indexing.method='real_space_grid_search'
+  params.indexing.method='fft3d'
 #  params.indexing.max_cell=800
 #  params.spotfinder.filter.min_spot_size=3
   
@@ -132,8 +134,10 @@ if __name__=="__main__":
 
   print "indexing..."
   t0 = time()
-# new dials
-  idxr = indexer(observed, imagesets, params=working_params)
+# new dials, fix by Aaron
+  idxr = indexer_base.from_parameters(observed, imagesets, params=params)
+  idxr.index()
+#  idxr = indexer(observed, imagesets, params=working_params)
 # old labelit
 #  results = run_one_index_core(horizons_phil)
   tel = time()-t0
@@ -218,6 +222,8 @@ if __name__=="__main__":
     imgname = os.path.join(procpath+"/"+words[1])
     scale = float(words[2])
 
+#    dxtbx.print_header(imgname)
+
 #    print "processing file %s with scale factor %f"%(imgname,scale)
 #    I = QuickImage(imgname)
 #    I.read()
@@ -257,6 +263,7 @@ if __name__=="__main__":
 #      print "Isize1 = ",Isize1,", Isize2 = ",Isize2
 #      print "there are ",Isize1*Isize2," pixels in this diffraction image"
       if len(detector) > 1:
+        
         DATA = img.get_raw_data(panel_id)
       else:
         DATA = img.get_raw_data()

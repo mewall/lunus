@@ -26,11 +26,11 @@ for (( i=1; i <= $num_images ; i++ ))
 
 do
 
-this_image_name=`printf %s_%05d.img $lunus_image_prefix $i`
+this_image_name=`printf %s_%05d.img $scale_image_prefix $i`
 
 this_image_path=`printf %s/%s $lunus_image_dir $this_image_name`
 
-radial_average_file=`printf radial_averages/%s_%05d.asc $lunus_image_prefix $i`
+radial_average_file=`printf radial_averages/%s_%05d.asc $scale_image_prefix $i`
 
 # calculate average properties for scaling
 
@@ -43,7 +43,7 @@ done
 
 # calculate the reference statistic
 
-radial_average_file=`printf radial_averages/%s_%05d.asc $lunus_image_prefix $reference_image_number`
+radial_average_file=`printf radial_averages/%s_%05d.asc $scale_image_prefix $reference_image_number`
 
 tail -n +$scale_inner_radius $radial_average_file > tail.asc
 head -n `echo "$scale_outer_radius-$scale_inner_radius" | bc -l` tail.asc > tail.head.asc
@@ -61,11 +61,15 @@ for (( i=1; i <= $num_images ; i++ ))
 
 do
 
-this_image_name=`printf %s_%05d.img $lunus_image_prefix $i`
+this_image_name=`printf %s_%05d.img $scale_image_prefix $i`
 
 this_image_path=`printf %s/%s $lunus_image_dir $this_image_name`
 
-radial_average_file=`printf radial_averages/%s_%05d.asc $lunus_image_prefix $i`
+lunus_image_name=`printf %s_%05d.img $lunus_image_prefix $i`
+
+lunus_image_path=`printf %s/%s $lunus_image_dir $lunus_image_name`
+
+radial_average_file=`printf radial_averages/%s_%05d.asc $scale_image_prefix $i`
 
 tail -n +$scale_inner_radius $radial_average_file > tail.asc
 head -n `echo "$scale_outer_radius-$scale_inner_radius" | bc -l` tail.asc > tail.head.asc
@@ -83,9 +87,9 @@ this_scale_error=`echo "sqrt($xx+$yy*$this_scale*$this_scale-2.*$this_scale*$xy)
 #rm tail.* xy.rf yy.rf
 
 
-echo "$i $this_image_name $this_image_path scale=$this_scale scale_error=$this_scale_error"
+echo "$i $lunus_image_name using $this_image_path scale=$this_scale scale_error=$this_scale_error"
 
-echo "$i $this_image_path $this_scale $this_scale_error" >> $scales_output_file 
+echo "$i $lunus_image_path $this_scale $this_scale_error" >> $scales_output_file 
 
 done
 
