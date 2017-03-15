@@ -51,7 +51,9 @@ int lwritehkl(LAT3D *lat)
 	  goto CloseShop;
 	}
 	if (abs(hh)<=hmax && abs(kk)<=kmax && abs(ll) <= lmax) {
-	  fprintf(lat->outfile, "%4d %4d %4d   %10.2f\n",hh,kk,ll,lat->lattice[index]);
+	  if (lat->lattice[index] != lat->mask_tag) {
+	    fprintf(lat->outfile, "%4d %4d %4d   %10.2f\n",hh,kk,ll,lat->lattice[index]);
+	  }
 	}
 	ct++;
       }

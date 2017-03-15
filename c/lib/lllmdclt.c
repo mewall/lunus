@@ -93,7 +93,7 @@ int lllmdclt(LAT3D *lat)
 	s = lsFromIndex(lat);
 	U_times_s = lmatvecmul(lat->anisoU,s);	
 	exparg = 2.*PI*2.*PI*ldotvec(s,U_times_s);
-	if (exparg >= 0.001) {
+	if (exparg <= 0.001) {
 	  exparg = 0.001;
 	}
 	dwf = expf(-exparg);

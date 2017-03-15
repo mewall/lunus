@@ -1,16 +1,16 @@
-/* MINRLT.C - Generate a table of minimum voxel values as a function of radius
-		for an input 3D lattice.
+/* MINRLT.C - Calculate the minimum voxel value vs. radius for an 
+              input lattice
    
    Author: Mike Wall
-   Date: 3/28/93
+   Date: 3/1/95
    Version: 1.
    
    Usage:
-   		"minrlt <input file> <output file>"
+   		"avgrlt <input lattice> <output rfile> <x-origin>
+		        <y-origin> <z-origin>"
 
-   Input is a 3D lattice.  Output is a list of minima by radius, to be labelled
-	(0,1,2,3,...).
-
+		Input is a 3D lattice and voxel coordinates for the
+		origin.  Output is an rfile.  
    */
 
 #include<mwmask.h>
@@ -18,136 +18,87 @@
 int main(int argc, char *argv[])
 {
   FILE
-	*infile,
-	*outfile;
-
+    *latticein,
+    *outfile;
+  
   char
     error_msg[LINESIZE];
-
+  
   size_t
-	i,
-	j,
-	k,
-	xyvoxels,
-	num_read,
-	num_wrote;
-
+    i,
+    j,
+    k,
+    num_wrote;
+  
   LAT3D 
-	*lat;
-
+    *lat;
+  
   RFILE_DATA_TYPE *rfile;
-
-  float 
-	xscale,
-	yscale,
-	zscale;
-
-/*
- * Set input line defaults:
- */
-	
-	infile = stdin;
-	outfile = stdout;
-
-/*
- * Read information from input line:
- */
-	switch(argc) {
-		case 3:
-			if (strcmp(argv[2],"-") == 0) {
-				outfile = stdout;
-			}
-			else {
-			 if ((outfile = fopen(argv[2],"wb")) == NULL) {
-				printf("\nCan't open %s.\n\n",argv[2]);
-				exit(0);
-			 }
-			}
-		case 2:
-			if (strcmp(argv[1],"-") == 0) {
-				infile = stdin;
-			}
-			else {
-			 if ( (infile = fopen(argv[1],"rb")) == NULL ) {
-				printf("\nCan't open %s.\n\n",argv[1]);
-				exit(0);
-			 }
-			}
-		case 1:
-			break;
-		default:
-			printf("\n Usage: minrlt <input file> "
-				"<output file>\n\n");
-			exit(0);
-	}
   
-/*
- * Allocate memory for lattice:
- */
+  struct ijkcoords
+    origin;
 
-  lat = (LAT3D *)malloc(sizeof(LAT3D));
-  if (!lat) {
-    printf("\n***Unable to allocate all memory.\n");
-    goto CloseShop;
-  }
+  /*
+   * Set input line defaults:
+   */
   
-/*
- * Set main defaults:
- */
-
-	lat->infile = infile;
-	lat->outfile = outfile;
-	lat->mask_tag = DEFAULT_LATTICE_MASK_TAG;
-
-/*
- * Read in 3D lattice descriptor:
- */
-
-  num_read = fread(&lat->xvoxels, sizeof(uint32_t), 1, infile);
-  num_read = fread(&lat->yvoxels, sizeof(uint32_t), 1, infile);
-  num_read = fread(&lat->zvoxels, sizeof(uint32_t), 1, infile);
-  num_read = fread(&lat->xbound, sizeof(struct bounds), 1, infile);
-  num_read = fread(&lat->ybound, sizeof(struct bounds), 1, infile);
-  num_read = fread(&lat->zbound, sizeof(struct bounds), 1, infile);
-  xyvoxels = lat->xvoxels * lat->yvoxels;
-  lat->lattice_length = xyvoxels * lat->zvoxels;
-  lat->rfile_length = 0;
-
-/*
- * Allocate memory for 3D lattice:
- */
-
-  lat->lattice = (LATTICE_DATA_TYPE *)calloc(lat->lattice_length,
-				sizeof(LATTICE_DATA_TYPE));
-  if (!lat->lattice) {
-	printf("\nNot enough room to allocate 3D lattice.\n\n");
+  latticein = stdin;
+  outfile = stdout;
+  
+  /*
+   * Read information from input line:
+   */
+  switch(argc) {
+    case 6: 
+    origin.k = atol(argv[5]);
+    case 5:
+    origin.j = atol(argv[4]);
+    case 4:
+    origin.i = atol(argv[3]);
+    case 3:
+    if ((outfile = fopen(argv[2],"wb")) == NULL) {
+      printf("\nCan't open %s.\n\n",argv[2]);
+      exit(0);
+    }
+    case 2:
+    if (strcmp(argv[1],"-") == 0) {
+      latticein = stdin;
+    }
+    else {
+      if ( (latticein = fopen(argv[1],"rb")) == NULL ) {
+	printf("\nCan't open %s.\n\n",argv[1]);
 	exit(0);
+      }
+    }
+    break;
+    default:
+    printf("\n Usage: avgrlt <input lattice> "
+	   "<output rfile> <x-origin> "
+	   "<y-origin> <z-origin>\n\n");
+    exit(0);
   }
+  
+  /*
+   * Initialize lattice:
+   */
+  
+  if ((lat = linitlt()) == NULL) {
+    perror("Couldn't initialize lattice.\n\n");
+    exit(0);
+  }
+  
+  /*
+   * Read in lattice:
+   */
 
-/*
- * Read in lattice:
- */
-
-  num_read = fread(lat->lattice, sizeof(LATTICE_DATA_TYPE), lat->lattice_length,
-						infile);
-  if (num_read != lat->lattice_length) {
-    printf("/nCouldn't read all of the lattice from input file.\n\n");
+  lat->infile = latticein;
+  if (lreadlt(lat) != 0) {
+    perror("Couldn't read lattice.\n\n");
     exit(0);
   }
 
 /*
- * Allocate memory for rfile:
- */
-
-  lat->rfile = (LATTICE_DATA_TYPE *)calloc(MAX_RFILE_LENGTH, 
-					sizeof(LATTICE_DATA_TYPE));
-  if (!lat->lattice) {
-  	printf("\nNot enough room to allocate 3D lattice.\n\n");
-  	exit(0);
-  }
-
-/*
- * Generate minimum rfile:
+ * Generate the minimum vs radius:
  */
 
   lminrlt(lat);
@@ -156,23 +107,26 @@ int main(int argc, char *argv[])
  * Write rfile to output file:
  */
 
-  num_wrote = fwrite(lat->rfile, sizeof(RFILE_DATA_TYPE), lat->rfile_length, 
-				outfile);
+  num_wrote = fwrite(lat->rfile, sizeof(RFILE_DATA_TYPE),
+		     lat->rfile_length, outfile);
+  if (num_wrote != lat->rfile_length) {
+    printf("\nCouldn't write rfile.\n\n");
+    goto CloseShop;
+  }
+
 CloseShop:
   
   /*
    * Free allocated memory:
    */
 
-  free((LATTICE_DATA_TYPE *)lat->lattice);
-  free((LATTICE_DATA_TYPE *)lat->rfile);
-  free((LAT3D *)lat);
+  lfreelt(lat);
 
   /*
    * Close files:
    */
   
-  fclose(infile);
   fclose(outfile);
+  fclose(latticein);
 }
 
