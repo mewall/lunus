@@ -111,9 +111,12 @@ cp $image_for_integration $lunus_image_path
 
 cp tmp2.img $scale_image_path
 
+# Calculate radial average
+
 avgrim $scale_image_path tmp.rf
 binasc 2 < tmp.rf > $radial_average_file
 
+# calculate 
 
 cd ..
 

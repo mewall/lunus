@@ -18,28 +18,10 @@ if [ ! -d radial_averages ]; then
 fi
 
 if [ -e $scales_output_file ]; then
-    echo "Output file $scales_output_file already exists. Delete first."
+    rm $scales_output_file
+#    echo "Output file $scales_output_file already exists. Delete first."
     return
 fi
-
-for (( i=1; i <= $num_images ; i++ ))
-
-do
-
-this_image_name=`printf %s_%05d.img $scale_image_prefix $i`
-
-this_image_path=`printf %s/%s $lunus_image_dir $this_image_name`
-
-radial_average_file=`printf radial_averages/%s_%05d.asc $scale_image_prefix $i`
-
-# calculate average properties for scaling
-
-echo "Averaging $this_image_name"
-
-avgrim $this_image_path tmp.rf
-binasc 2 < tmp.rf > $radial_average_file
-
-done
 
 # calculate the reference statistic
 
