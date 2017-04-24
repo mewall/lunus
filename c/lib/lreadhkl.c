@@ -74,7 +74,8 @@ int lreadhkl(LAT3D *lat,LAT3D *tmpl)
 
   printf("Reading the hkl file data...\n");
 
-  while (fscanf(lat->infile,"%d %d %d %f %f",&i,&j,&k,&I,&sigI)!=EOF) {
+  while (fscanf(lat->infile,"%d %d %d %f",&i,&j,&k,&I)!=EOF) {
+//  while (fscanf(lat->infile,"%d %d %d %f %f",&i,&j,&k,&I,&sigI)!=EOF) {
     //    printf("%d %d %d\n",k+lat->origin.k,j+lat->origin.j,i+lat->origin.i);
     int kidx = k+lat->origin.k;
     int jidx = j+lat->origin.j;
