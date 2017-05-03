@@ -16,6 +16,10 @@ if [ ! -d "scripts" ]; then
 	mkdir scripts
 fi
 
+# Reference file
+
+reference_image_path=`printf %s/%s_%05d.img $lunus_image_dir $scale_image_prefix $reference_image_number`
+
 for (( i=1; i <= $num_images ; i=$i+1 ))
 
 do
@@ -25,7 +29,18 @@ script_name=`printf script_integration_%05d.sh $i`
 script_path=`printf scripts/%s $script_name`
 
 this_diffuse_file=`printf "%s_diffuse_%05d.npz" $diffuse_lattice_prefix $i`
+
 this_counts_file=`printf "%s_counts_%05d.npz" $diffuse_lattice_prefix $i`
+
+scale_image_name=`printf %s_%05d.img $scale_image_prefix $i`
+
+scale_image_path=`printf %s/%s $lunus_image_dir $scale_image_name`
+
+integration_image_name=`printf %s_%05d.img $integration_image_prefix $i`
+
+integration_image_path=`printf %s/%s $lunus_image_dir $integration_image_name`
+
+tmpdir_name="tmpdir_"$i
 
 cat > $script_path<<EOF
 
@@ -62,14 +77,26 @@ hostname
 
 module load python/2.7-anaconda-4.1.1
 
+. $cctbx_dir/setpaths_all.sh
+
 #qstat -j $JOB_ID                                  # This is useful for debugging and usage purposes,
 							# e.g. "did my job exceed its memory request?"
 #. proc.all
 
 #mkdir "tmpdir_"$i
-cd "tmpdir_"$i
+
+echo "Image conversion for "$integration_image_path
+time libtbx.python $lunus_dir/scripts/convert_image_to_npy.py input.fname=$integration_image_path output.dir=$tmpdir_name
+
+cd $tmpdir_name
 
 #. $phenix_dir/phenix_env.sh
+
+scaleim $reference_image_path $scale_image_path $scale_inner_radius $scale_outer_radius > scale_output.txt
+
+echo "$i $lunus_image_path using $this_image_path scale,scale_error:"
+
+cat scale_output.txt
 
 EOF
 
@@ -93,7 +120,9 @@ else
 
 cat >>$script_path<<EOF
 
-python $lunus_dir/scripts/integrate_lunus.py cell.a=$cella cell.b=$cellb cell.c=$cellc inputlist.fname=$scales_input_file framenum=$i diffuse.lattice.resolution=$resolution diffuse.lattice.type=npz diffuse.lattice.fname=$this_diffuse_file counts.lattice.fname=$this_counts_file np=$nproc codecamp.maxcell=$maxcell target_cell=$cella,$cellb,$cellc,$alpha,$beta,$gamma target_sg=$spacegroup pphkl=$pphkl filterhkl=$filterhkl
+#python $lunus_dir/scripts/integrate_lunus.py cell.a=$cella cell.b=$cellb cell.c=$cellc inputlist.fname=$scales_input_file framenum=$i diffuse.lattice.resolution=$resolution diffuse.lattice.type=npz diffuse.lattice.fname=$this_diffuse_file counts.lattice.fname=$this_counts_file np=$nproc codecamp.maxcell=$maxcell target_cell=$cella,$cellb,$cellc,$alpha,$beta,$gamma target_sg=$spacegroup pphkl=$pphkl filterhkl=$filterhkl
+
+python $lunus_dir/scripts/integrate_lunus.py libtbx.modules.path=$cctbx_dir/modules cell.a=$cella cell.b=$cellb cell.c=$cellc scale.fname=scale_output.txt diffimg.fname=$lunus_image_path diffuse.lattice.resolution=$resolution diffuse.lattice.type=npz diffuse.lattice.fname=$this_diffuse_file counts.lattice.fname=$this_counts_file np=$nproc codecamp.maxcell=$maxcell target_cell=$cella,$cellb,$cellc,$alpha,$beta,$gamma target_sg=$spacegroup pphkl=$pphkl filterhkl=$filterhkl
 
 EOF
 

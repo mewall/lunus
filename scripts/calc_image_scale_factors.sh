@@ -23,19 +23,9 @@ if [ -e $scales_output_file ]; then
     return
 fi
 
-# calculate the reference statistic
+# Reference file
 
-radial_average_file=`printf radial_averages/%s_%05d.asc $scale_image_prefix $reference_image_number`
-
-tail -n +$scale_inner_radius $radial_average_file > tail.asc
-head -n `echo "$scale_outer_radius-$scale_inner_radius" | bc -l` tail.asc > tail.head.asc
-binasc 3 < tail.head.asc > reference.rf
-mulrf reference.rf reference.rf xx.rf
-xx_raw=`avgrf xx.rf`
-xx=`printf "%f" $xx_raw`
-rm xx.rf
-rm tail.asc
-rm tail.head.asc
+reference_image_path=`printf %s/%s_%05d.img $lunus_image_dir $scale_image_prefix $reference_image_number`
 
 # Calculate the scale factors
 
@@ -47,31 +37,19 @@ this_image_name=`printf %s_%05d.img $scale_image_prefix $i`
 
 this_image_path=`printf %s/%s $lunus_image_dir $this_image_name`
 
+scale_image_name=`printf %s_%05d.img $scale_image_prefix $i`
+
+scale_image_path=`printf %s/%s $lunus_image_dir $scale_image_name`
+
 lunus_image_name=`printf %s_%05d.img $lunus_image_prefix $i`
 
 lunus_image_path=`printf %s/%s $lunus_image_dir $lunus_image_name`
 
-radial_average_file=`printf radial_averages/%s_%05d.asc $scale_image_prefix $i`
+scale_output=`scaleim $reference_image_path $scale_image_path $scale_inner_radius $scale_outer_radius`
 
-tail -n +$scale_inner_radius $radial_average_file > tail.asc
-head -n `echo "$scale_outer_radius-$scale_inner_radius" | bc -l` tail.asc > tail.head.asc
-binasc 3 < tail.head.asc > tail.head.rf
-mulrf reference.rf tail.head.rf xy.rf
-mulrf tail.head.rf tail.head.rf yy.rf
-yy_raw=`avgrf yy.rf`
-yy=`printf "%f" $yy_raw`
-xy_raw=`avgrf xy.rf`
-xy=`printf "%f" $xy_raw`
-this_scale=`echo "$xx/$xy" | bc -l`
-this_scale_error=`echo "sqrt($xx+$yy*$this_scale*$this_scale-2.*$this_scale*$xy)/sqrt($xx)" | bc -l`
-#echo $this_scale $this_scale_error
-#perl -e 'print sqrt(`cat xx.avg`+`cat yy.avg`*`cat scale`*`cat scale`-2*`cat scale`*`cat xy.avg`)/sqrt(`cat xx.avg`),"\n"' > {$1:r}.scale.error 
-#rm tail.* xy.rf yy.rf
+echo "$i $lunus_image_name using $this_image_path scale,scale_error=$scale_output"
 
-
-echo "$i $lunus_image_name using $this_image_path scale=$this_scale scale_error=$this_scale_error"
-
-echo "$i $lunus_image_path $this_scale $this_scale_error" >> $scales_output_file 
+echo "$i $lunus_image_path $scale_output" >> $scales_output_file 
 
 done
 
