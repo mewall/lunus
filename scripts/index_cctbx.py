@@ -176,8 +176,8 @@ if __name__=="__main__":
   imgname = filenames[0]
 #  import dxtbx
   t0=time()
-  img = FormatSMVADSCNoDateStamp(imgname)
-#  img = dxtbx.load(imgname)
+#  img = FormatSMVADSCNoDateStamp(imgname)
+  img = dxtbx.load(imgname)
   detector = img.get_detector()
   beam = img.get_beam()
   scan = img.get_scan()
@@ -236,8 +236,8 @@ if __name__=="__main__":
 #    dxtbx.print_header(imgname)
 
 #    t0 = time()
-    img = FormatSMVADSCNoDateStamp(imgname)
-#    img = dxtbx.load(imgname)
+#    img = FormatSMVADSCNoDateStamp(imgname)
+    img = dxtbx.load(imgname)
     tel = time()-t0
 #    print "Took {0} secs to read {1}".format(tel,imgname)
     detector = img.get_detector()

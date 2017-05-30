@@ -44,11 +44,14 @@ if __name__=="__main__":
 
   if (pymodpath == ""):
     from dxtbx.format.FormatSMVADSCNoDateStamp import FormatSMVADSCNoDateStamp
+    import dxtbx
   else:	
     import imp
     FormatSMVADSCNoDateStamp = imp.load_module("dxtbx.format.FormatSMVADSCNoDateStamp",None,os.path.join(pymodpath,"/cctbx_project/dxtbx/format"),('','',5))
+    dxtbx = imp.load_module("dxtbx",None,os.path.join(pymodpath,"/cctbx_project/dxtbx"),('','',5))
 
-  img = FormatSMVADSCNoDateStamp(diffimgname)
+#  img = FormatSMVADSCNoDateStamp(diffimgname)
+  img = dxtbx.load(diffimgname)
   detector = img.get_detector()
   if len(detector)>1:
       raise Exception("Multi-panel detector, aborting.")
