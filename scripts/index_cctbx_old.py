@@ -1,14 +1,15 @@
 from time import clock, time
 import numpy as np
+import re
 #from xfel.cxi.display_spots import run_one_index_core
-#from cctbx.array_family import flex
+from cctbx.array_family import flex
 from multiprocessing import Pool
 import subprocess, shlex
 
-#try:
-#    import cPickle as pickle
-#except:
-#    import pickle
+try:
+    import cPickle as pickle
+except:
+    import pickle
     
 if __name__=="__main__":
   import sys
@@ -26,13 +27,6 @@ if __name__=="__main__":
 
  # Read command line arguments
 
-  # get libtbx.python modules path
-  try:
-    pymodpathidx = [a.find("libtbx.python.modules")==0 for a in args].index(True)
-  except ValueError:
-    pymodpath = ""
-  else:
-    pymodpath = args.pop(pymodpathidx).split("=")[1]
  # number of processors available for pool
   try:
     nprocidx = [a.find("np")==0 for a in args].index(True)
@@ -68,36 +62,17 @@ if __name__=="__main__":
   else:
     ifname = args.pop(ifnameidx).split("=")[1]
 
-  import copy, os
-
-  if (pymodpath == ""):
-    import dxtbx
-    from dxtbx.format.FormatSMVADSCNoDateStamp import FormatSMVADSCNoDateStamp
-    from iotbx.phil import parse
-    from dxtbx.datablock import DataBlockFactory
-    from dials.array_family import flex
-    from dials.algorithms.indexing.indexer import indexer_base
-    from dials.util.options import OptionParser
-  else:	
-    import imp
-    dxtbx = imp.load_module("dxtbx",None,os.path.join(pymodpath,"/cctbx_project/dxtbx"),('','',5))
-    FormatSMVADSCNoDateStamp = imp.load_module("dxtbx.format.FormatSMVADSCNoDateStamp",None,os.path.join(pymodpath,"/cctbx_project/dxtbx/format"),('','',5))
-    parse = imp.load_module("iotbx.phil.parse",None,os.path.join(pymodpath+"/cctbx_project/iotbx/phil"),('','',5))
-    DataBlockFactory = imp.load_module("dxtbx.datablock.DataBlockFactory",None,os.path.join(pymodpath+"/cctbx_project/dxtbx/datablock"),('','',5))
-    flex = imp.load_module("dials.array_family.flex",None,os.path.join(pymodpath+"/cctbx_project/dials/array_family"),('','',5))
-    indexer_base = imp.load_module("dials.algorithms.indexing.indexer",None,os.path.join(pymodpath
-+"/cctbx_project/dials/algorithms/indexing/indexer"),('','',5))
-    OptionParser = imp.load_module("dials.util.options.OptionParser",None,os.path.join(pymodpath+"/cctbx_project/dials/util/options"),('','',5))
+  import os
 
   # new dials
-#  from iotbx.phil import parse
-#  from dxtbx.datablock import DataBlockFactory
-#  from dials.array_family import flex
+  from iotbx.phil import parse
+  from dxtbx.datablock import DataBlockFactory
+  from dials.array_family import flex
   #from dials.algorithms.indexing.fft1d import indexer_fft1d as indexer
 #  from dials.algorithms.indexing.fft3d import indexer_fft3d as indexer
-#  from dials.algorithms.indexing.indexer import indexer_base
+  from dials.algorithms.indexing.indexer import indexer_base
   #from dials.algorithms.indexing.real_space_grid_search import indexer_real_space_grid_search as indexer
-#  import copy, os
+  import copy, os
 
 #  print target_cell,target_sg
 
@@ -116,7 +91,7 @@ if __name__=="__main__":
       .type = space_group
   '''
   phil_scope = parse(phil_scope_str.format(target_cell,target_sg), process_includes=True)
-#  from dials.util.options import OptionParser
+  from dials.util.options import OptionParser
   parser = OptionParser(phil=phil_scope)
   params, options = parser.parse_args(args=[], show_diff_phil=True)
   
@@ -147,11 +122,24 @@ if __name__=="__main__":
   working_params = copy.deepcopy(params)
   imagesets = datablock.extract_imagesets()
 
+# old labelit
+#  from spotfinder.applications.xfel import cxi_phil
+#  horizons_phil = cxi_phil.cxi_versioned_extract(args)
+
+#  print imagesets[0].get_beam()
+#  print imagesets[2].get_beam()
+#  print imagesets[0].get_beam() == imagesets[0].get_beam()
+#  print imagesets[1].get_beam() == imagesets[0].get_beam()
+#  print imagesets[2].get_beam() == imagesets[0].get_beam()
+
   print "indexing..."
   t0 = time()
 # new dials, fix by Aaron
   idxr = indexer_base.from_parameters(observed, imagesets, params=params)
   idxr.index()
+#  idxr = indexer(observed, imagesets, params=working_params)
+# old labelit
+#  results = run_one_index_core(horizons_phil)
   tel = time()-t0
   print "done indexing (",tel," sec)"
 
@@ -174,9 +162,10 @@ if __name__=="__main__":
 
 
   imgname = filenames[0]
-#  import dxtbx
-  t0=time()
-#  img = FormatSMVADSCNoDateStamp(imgname)
+#    I = QuickImage(imgname)
+#    I.read()
+#    DATA = I.linearintdata
+  import dxtbx
   img = dxtbx.load(imgname)
   detector = img.get_detector()
   beam = img.get_beam()
@@ -190,6 +179,9 @@ if __name__=="__main__":
   lab_coordinates = flex.vec3_double()
   for panel in detector: 
     pixels = flex.vec2_double(panel.get_image_size())
+      #for j in xrange(panel.get_image_size()[1]):
+      #  for i in xrange(panel.get_image_size()[0]):
+#	  pixels.append((i,j))
     mms = panel.pixel_to_millimeter(pixels)
     lab_coordinates.extend(panel.get_lab_coord(mms))
 
@@ -203,27 +195,23 @@ if __name__=="__main__":
   print "done creating pixel map (",tel," sec)"
     
   workdir="tmpdir_common"
-#  if (os.path.isdir(workdir)):
-#    command = 'rm -r {0}'.format(workdir)
-#    call_params = shlex.split(command)
-#    subprocess.call(call_params)
-#  print "Made it"
-  if (not os.path.isdir(workdir)):
-    command = 'mkdir {0}'.format(workdir)
+  if (os.path.isdir(workdir)):
+    command = 'rm -r {0}'.format(workdir)
     call_params = shlex.split(command)
     subprocess.call(call_params)
-#  command = 'lfs setstripe -c -1 {0}'.format(workdir)
-#  call_params = shlex.split(command)
-#  subprocess.call(call_params)
+  print "Made it"
+  command = 'mkdir {0}'.format(workdir)
+  call_params = shlex.split(command)
+  subprocess.call(call_params)
+  command = 'lfs setstripe -c -1 {0}'.format(workdir)
+  call_params = shlex.split(command)
+  subprocess.call(call_params)
 
   DATAsize = np.asarray(detector[0].get_image_size())
 
-# write common files; note: at this point there should already be a file correction.imf in the same directory as these files
-  print "Writing common files."
-  t0 = time()
+# write common files
   np.save(workdir+"/x_vectors.npy",x_vectors)
   np.save(workdir+"/DATAsize.npy",DATAsize)
-  print "Took {0} secs to write the common files.".format(time()-t0)
 
   imnum=0
   for line in lines:
@@ -236,16 +224,24 @@ if __name__=="__main__":
 
 #    dxtbx.print_header(imgname)
 
-#    t0 = time()
-#    img = FormatSMVADSCNoDateStamp(imgname)
+#    print "processing file %s with scale factor %f"%(imgname,scale)
+#    I = QuickImage(imgname)
+#    I.read()
+#    DATA = I.linearintdata
+#    import dxtbx
+    t0 = time()
     img = dxtbx.load(imgname)
-    tel = time()-t0
-#    print "Took {0} secs to read {1}".format(tel,imgname)
     detector = img.get_detector()
     beam = img.get_beam()
     scan = img.get_scan()
     gonio = img.get_goniometer()
+#    print "Time to get image properties and data = ",time()-t0," sec"
+#    AI.setData(raw_spot_input_all)
+#    f = AI.film_to_camera()
+#    rvec = AI.camera_to_xyz()
   
+#    A_matrix = sqr(AI.getOrientation().direct_matrix())
+
     t0 = time()
     crystal = copy.deepcopy(experiments.crystals()[0])
     axis = gonio.get_rotation_axis()
@@ -255,9 +251,43 @@ if __name__=="__main__":
     At = np.asarray(A_matrix.transpose()).reshape((3,3))
 #    print "Time to get A matrix = ",time()-t0," sec"
 
+#    print "Integrating diffuse scattering in parallel using ",nproc," processors..."
+    t0 = time()
+    if len(detector)>1:
+        print "Multi-panel detector"
+    for panel_id, panel in enumerate(detector):
+      #    z = 0
+      #Isize1 = I.size1
+      #Isize2 = I.size2
+#      Isize1, Isize2 = panel.get_image_size()
+#      print "Isize1 = ",Isize1,", Isize2 = ",Isize2
+#      print "there are ",Isize1*Isize2," pixels in this diffraction image"
+      if len(detector) > 1:
+        
+        DATA = img.get_raw_data(panel_id)
+      else:
+        DATA = img.get_raw_data()
+# write A matrix and diffraction image data to temporary working directory
+#    print "Time to read data from image = ",time()-t0," sec"
     workdir="tmpdir_{0}".format(imnum)
     if (not os.path.isdir(workdir)):
         command = 'mkdir {}'.format(workdir)
         call_params = shlex.split(command)
         subprocess.call(call_params)
     np.save(workdir+"/At.npy",At)
+    t0 = time()
+#    DATA.tofile(workdir+"/DATA")
+#    print DATA.size()
+#    DATAnp = np.frombuffer(DATA.copy_to_byte_str(),dtype='int16').reshape((Isize2,Isize1))
+#    print type(DATA)
+#    print type(x_vectors)
+    DATAnp = np.int16(np.asarray(np.frombuffer(DATA.copy_to_byte_str(),dtype='int32')))
+    np.save(workdir+"/DATA.npy",DATAnp)
+#    if (np.all(np.asarray(DATA) == DATAnp)):
+#        print "Same"
+#    else:
+#        print "Different"
+#    print len(DATAnp)
+#    print type(DATAnp)
+#   np.save(workdir+"DATA.npy",DATA)
+#    print "Time to write ",workdir+"/DATA.npy = ",time()-t0," sec"

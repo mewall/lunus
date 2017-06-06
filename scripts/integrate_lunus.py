@@ -174,9 +174,16 @@ if __name__=="__main__":
   try:
     ifnameidx = [a.find("inputlist.fname")==0 for a in args].index(True)
   except ValueError:
-    ifname = "genlat.input"
+    ifname = ""
   else:
     ifname = args.pop(ifnameidx).split("=")[1]
+  # scale factor for diffuse image
+  try:
+    scalenameidx = [a.find("scale.fname")==0 for a in args].index(True)
+  except ValueError:
+    scalename = ""
+  else:
+    scalename = args.pop(scalenameidx).split("=")[1]    
   # frame number
   try:
     framenumidx = [a.find("framenum")==0 for a in args].index(True)
@@ -269,17 +276,11 @@ if __name__=="__main__":
 
   import os
 
-  # read input file with list of diffraction images and scale factors
-  f = open(ifname,"r")
-  lines = []
-  linenum = 1
-  for line in f:
-    if ((line.strip()!="") and (line[0] != '.')):
-      if ((framenum == -1) or (framenum == linenum)):
-        lines.append(line)
-      linenum = linenum + 1
-  f.close()
-
+  # otherwise, create a line from provided diffraction image and scale factor
+  if (scalename != ""):
+      scale = np.loadtxt(scalename,dtype=np.float)[0]
+  else:
+      raise Exception("Must either provide a list of files and scale factors using inputlist.fname or filename and scale factor using diffimg.fname and scale.") 
   #########################################################################
   # new dials
 
@@ -307,56 +308,46 @@ if __name__=="__main__":
 
   pool = Pool(processes=nproc)
 
-  for line in lines:
+  print "processing file with scale factor %f"%(scale)
+  # Read x vectors
+  x_vectors = np.load("../tmpdir_common/x_vectors.npy")
 
-    # parse the input file line into a diffuse image file name and scale factor
-    words = line.split()
-
-    imgname = os.path.join(procpath+"/"+words[1])
-    scale = float(words[2])
-
-    print "processing file %s with scale factor %f"%(imgname,scale)
-#    I = QuickImage(imgname)
-#    I.read()
-#    DATA = I.linearintdata
-    # Read x vectors
-    x_vectors = np.load("../tmpdir_common/x_vectors.npy")
-
-    print "there are ",len(x_vectors)," elements in x_vectors"
-
-#    AI.setData(raw_spot_input_all)
-#    f = AI.film_to_camera()
-#    rvec = AI.camera_to_xyz()
+  print "there are ",len(x_vectors)," elements in x_vectors"
   
-# Read At matrix
-    A_matrix = np.load("At.npy")
-    print "Integrating diffuse scattering in parallel using ",nproc," processors..."
-    telmatmul=0
-    t0 = time()
-    latit = None
-# Read image size
-    Isize1, Isize2 = np.load("../tmpdir_common/DATAsize.npy")
-    print "Isize1 = ",Isize1,", Isize2 = ",Isize2
-    print "there are ",Isize1*Isize2," pixels in this diffraction image"
-# Read image data values
-    DATA = np.load("DATA.npy")
-    tasks = [(Isize1,Isize2,scale,mask_tag,A_matrix,x_vectors,DATA,latxdim,latydim,latzdim,procid) for procid in range(nproc)]
-#      tasks = [(Isize1,Isize1,scale,mask_tag,A_matrix,x_vectors,DATA,latxdim,latydim,latzdim,procid) for procid in range(nproc)]
-      # run procimg in parallel and collect results
-    tmp_latit = pool.map(procimgstar,tasks)
-    if latit is None:
+  # Read At matrix
+  A_matrix = np.load("At.npy")
+  print "Integrating diffuse scattering in parallel using ",nproc," processors..."
+  telmatmul=0
+  t0 = time()
+  latit = None
+  # Read image size
+  Isize1, Isize2 = np.load("../tmpdir_common/DATAsize.npy")
+  print "Isize1 = ",Isize1,", Isize2 = ",Isize2
+  print "there are ",Isize1*Isize2," pixels in this diffraction image"
+  # Read image data values
+  DATAimg = np.load("DATA.npy")
+  # Read correction file
+  correction = np.fromfile(open("../tmpdir_common/correction.imf","rb"),dtype=np.float32)
+#  print "Mean of correction,DATAimg is {0},{1}".format(np.mean(correction),DATAimg.astype(np.float32))
+  correction[DATAimg==32767]=1.
+  # apply correction (normim, polarim steps using floating point arithmetic)
+  DATA = np.multiply(correction,DATAimg.astype(np.float32))
+  tasks = [(Isize1,Isize2,scale,mask_tag,A_matrix,x_vectors,DATA,latxdim,latydim,latzdim,procid) for procid in range(nproc)]
+  # run procimg in parallel and collect results
+  tmp_latit = pool.map(procimgstar,tasks)
+  if latit is None:
       latit = tmp_latit
-    else:
+  else:
       latit += tmp_latit
-    tel = time()-t0
-    print "done integrating diffuse scattering (",tel," sec wall clock time)"
-    t0 = time()
-    # accumulate integration data into a single lattice
-    for l in latit:
+  tel = time()-t0
+  print "done integrating diffuse scattering (",tel," sec wall clock time)"
+  t0 = time()
+  # accumulate integration data into a single lattice
+  for l in latit:
       lat = np.add(lat,l[0])
       ct = np.add(ct,l[1])
-    tel = time()-t0
-    print "Took ",tel," secs to update the lattice"
+  tel = time()-t0
+  print "Took ",tel," secs to update the lattice"
 
   if (lattype == "mean"):
       # compute the mean intensity at each lattice point
@@ -367,7 +358,7 @@ if __name__=="__main__":
               lat[index] = -32768
 
   if ((lattype == "mean" or lattype == "sum")):
-  # write lattice to output file
+      # write lattice to output file
       vtkfile = open(ofname,"w")
 
       a_recip = 1./cella/float(pphkl)

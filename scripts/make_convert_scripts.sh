@@ -12,8 +12,8 @@ fi
 
 cd $work_dir
 
-if [ ! -d "$work_dir/scripts" ]; then
-	mkdir $work_dir/scripts
+if [ ! -d "scripts" ]; then
+	mkdir scripts
 fi
 
 for (( i=1; i <= $num_images ; i++ ))
@@ -27,16 +27,6 @@ integration_image_path=`printf %s/%s $lunus_image_dir $integration_image_name`
 echo "$i $integration_image_path 1.0 0.0" >> $scales_output_file 
 
 done
-
-# Path to the correction factor image
-
-if [ ! -d "$work_dir/scripts/tmpdir_common" ]; then
-   mkdir $work_dir/scripts/tmpdir_common
-fi
-
-# Use indexing file number one as the template correction factor image
-
-template_image_path="$indexing_data_file_one"
 
 script_name=`printf script_index.sh $i`
 
@@ -83,13 +73,11 @@ hostname
 #. $phenix_dir/phenix_env.sh
 
 
-corrfacim $template_image_path $work_dir/scripts/tmpdir_common/correction.imf $polarim_dist $polarim_polarization $polarim_offset
-
 EOF
 
 cat >>$script_path<<EOF
 
-time libtbx.python $lunus_dir/scripts/index_cctbx.py libtbx.modules.path=$cctbx_dir/modules indexing.data=$indexing_data_file_one indexing.data=$indexing_data_file_two indexing.data=$indexing_data_file_three inputlist.fname=$scales_input_file np=1 framenum=-1 codecamp.maxcell=$maxcell target_cell=$cella,$cellb,$cellc,$alpha,$beta,$gamma target_sg=$spacegroup 
+time libtbx.python $lunus_dir/scripts/index_cctbx.py indexing.data=$indexing_data_file_one indexing.data=$indexing_data_file_two indexing.data=$indexing_data_file_three inputlist.fname=$scales_input_file np=1 framenum=-1 codecamp.maxcell=$maxcell target_cell=$cella,$cellb,$cellc,$alpha,$beta,$gamma target_sg=$spacegroup 
 
 #time libtbx.python -m cProfile $lunus_dir/scripts/index_cctbx.py indexing.data=$indexing_data_file_one indexing.data=$indexing_data_file_two indexing.data=$indexing_data_file_three inputlist.fname=$scales_input_file np=1 framenum=-1 codecamp.maxcell=$maxcell target_cell=$cella,$cellb,$cellc,$alpha,$beta,$gamma target_sg=$spacegroup 
 

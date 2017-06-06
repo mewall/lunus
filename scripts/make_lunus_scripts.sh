@@ -21,17 +21,6 @@ if [ ! -d "scripts" ]; then
 	mkdir scripts
 fi
 
-if [ -z ${integrate_using_norm+x} ]; then 
-    echo "integrate_using_norm is unset, using mode image for integration"
-    image_for_integration=tmp2.img
-else 
-    if [ "$integrate_using_norm" == 1 ]; then
-	image_for_integration=tmp1.img
-    else
-	image_for_integration=tmp2.img
-    fi
-fi
-
 for (( i=1; i <= $num_images ; i=$i+1 ))
 
 do
@@ -53,6 +42,17 @@ lunus_image_path=`printf %s/%s $lunus_image_dir $lunus_image_name`
 script_name=`printf script_lunus_%05d.sh $i`
 
 script_path=`printf scripts/%s $script_name`
+
+#if [ -z ${integrate_using_norm+x} ]; then 
+#    echo "integrate_using_norm is unset, using mode image for integration"
+#    image_for_integration=tmp2.img
+#else 
+#    if [ "$integrate_using_norm" == 1 ]; then
+#	image_for_integration=tmp1.img
+#    else
+#	image_for_integration=tmp2.img
+#    fi
+#fi
 
 cat > $script_path<<EOF
 
@@ -105,8 +105,7 @@ modeim tmp1.img tmp2.img $modeim_kernel_width $modeim_bin_size
 
 # copy results to processed image name
 
-cp $image_for_integration $lunus_image_path
-
+cp tmp00.img $lunus_image_path
 cp tmp2.img $scale_image_path
 
 cd ..
@@ -116,5 +115,6 @@ rm -r "tmpdir_"$i
 EOF
 
 done
+
 
 cd -

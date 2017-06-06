@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
     goto CloseShop;
   }
 
-  printf("%f\n",imdiff1->rfile[0]);
+  printf("%f %f\n",imdiff1->rfile[0],imdiff1->rfile[1]);
 
  CloseShop:
   

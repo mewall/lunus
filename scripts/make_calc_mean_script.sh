@@ -94,6 +94,8 @@ fi
 
 cat >>$script_path<<EOF
 
+rm $diffuse_glob
+rm $counts_glob
 date
 EOF
 

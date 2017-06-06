@@ -11,10 +11,12 @@
 int lscaleim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2)
 {
 	float
-	  tmp,
 	  xx,xy,
+=======
+	  xx,xy,yy,
 	  avg_xx,
-	  avg_xy;
+	  avg_xy,
+	  avg_yy;
 
 	int 
 		return_value = 0;
@@ -44,8 +46,10 @@ int lscaleim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2)
 		  radius < imdiff1->mask_outer_radius) {
 		xx = imdiff1->image[index]*imdiff1->image[index];
 		xy = imdiff2->image[index]*imdiff1->image[index];
+		yy = imdiff2->image[index]*imdiff2->image[index];
 		avg_xx += xx;
 		avg_xy += xy;
+		avg_yy += yy;
 		ct++;
 	      }
 	    }
@@ -58,10 +62,17 @@ int lscaleim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2)
 
 	imdiff1->rfile[0] = (RFILE_DATA_TYPE)avg_xx/avg_xy;
 
-	tmp = imdiff1->rfile[0];
+//	tmp = imdiff1->rfile[0];
 	
-	printf("scale=%f\n",imdiff1->rfile[0]);
+//	printf("scale=%f\n",imdiff1->rfile[0]);
 
+	avg_xx /= (float)ct;
+	avg_xy /= (float)ct;
+	avg_yy /= (float)ct;
+
+	imdiff1->rfile[0] = (RFILE_DATA_TYPE)avg_xx/avg_xy;
+	imdiff1->rfile[1] = (RFILE_DATA_TYPE)sqrtf(avg_xx+avg_yy*imdiff1->rfile[0]*imdiff1->rfile[0]-2.*imdiff1->rfile[0]*avg_xy)/sqrtf(avg_xx);
+	//sqrt($xx+$yy*$this_scale*$this_scale-2.*$this_scale*$xy)/sqrt($xx)	
 
 
 EndPaper:
