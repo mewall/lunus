@@ -133,7 +133,7 @@ int main(int argc, char *argv[])
    */
   
   imdiff->correction[0]=scale;
-  lcorrfacim(imdiff);
+  lcfim(imdiff);
   
   /*
    * Write the correction image:
