@@ -12,8 +12,8 @@ fi
 
 cd $work_dir
 
-if [ ! -d "scripts" ]; then
-	mkdir scripts
+if [ ! -d "$work_dir/scripts" ]; then
+	mkdir $work_dir/scripts
 fi
 
 for (( i=1; i <= $num_images ; i++ ))
@@ -27,6 +27,16 @@ integration_image_path=`printf %s/%s $lunus_image_dir $integration_image_name`
 echo "$i $integration_image_path 1.0 0.0" >> $scales_output_file 
 
 done
+
+# Path to the correction factor image
+
+if [ ! -d "$work_dir/scripts/tmpdir_common" ]; then
+   mkdir $work_dir/scripts/tmpdir_common
+fi
+
+# Use indexing file number one as the template correction factor image
+
+template_image_path="$indexing_data_file_one"
 
 script_name=`printf script_index.sh $i`
 
@@ -72,6 +82,8 @@ hostname
 . $cctbx_dir/setpaths_all.sh
 #. $phenix_dir/phenix_env.sh
 
+
+corrfacim $template_image_path $work_dir/scripts/tmpdir_common/correction.imf $polarim_dist $polarim_polarization $polarim_offset
 
 EOF
 

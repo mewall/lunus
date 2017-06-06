@@ -325,7 +325,13 @@ if __name__=="__main__":
   print "Isize1 = ",Isize1,", Isize2 = ",Isize2
   print "there are ",Isize1*Isize2," pixels in this diffraction image"
   # Read image data values
-  DATA = np.load("DATA.npy")
+  DATAimg = np.load("DATA.npy")
+  # Read correction file
+  correction = np.fromfile(open("../tmpdir_common/correction.imf","rb"),dtype=np.float32)
+#  print "Mean of correction,DATAimg is {0},{1}".format(np.mean(correction),DATAimg.astype(np.float32))
+  correction[DATAimg==32767]=1.
+  # apply correction (normim, polarim steps using floating point arithmetic)
+  DATA = np.multiply(correction,DATAimg.astype(np.float32))
   tasks = [(Isize1,Isize2,scale,mask_tag,A_matrix,x_vectors,DATA,latxdim,latydim,latzdim,procid) for procid in range(nproc)]
   # run procimg in parallel and collect results
   tmp_latit = pool.map(procimgstar,tasks)

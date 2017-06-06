@@ -467,6 +467,7 @@ typedef struct
   float pitch;                  /* Pitch of fluctuation */
   struct xyzcoords q;
   struct irange rfirange;       /* Range of rfile index values */
+  float *correction;             /* Correction factor, pixel by pixel */
 } DIFFIMAGE;
 
 /*
@@ -702,6 +703,7 @@ int lchbyte(void *ptr, size_t packet_size, size_t list_length);
 int lconstim(DIFFIMAGE *imdiff);
 int lconstlt(LAT3D *lat);
 int lconstrf(DIFFIMAGE *imdiff);
+int lcorrfacim(DIFFIMAGE *imdiff);
 float lcorrlt(LAT3D *lat1, LAT3D *lat2);
 int lcpltmap(LAT3D *lat,CCP4MAP *map);
 int lcpmaplt(CCP4MAP *map, LAT3D *lat);

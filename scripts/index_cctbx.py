@@ -203,21 +203,22 @@ if __name__=="__main__":
   print "done creating pixel map (",tel," sec)"
     
   workdir="tmpdir_common"
-  if (os.path.isdir(workdir)):
-    command = 'rm -r {0}'.format(workdir)
+#  if (os.path.isdir(workdir)):
+#    command = 'rm -r {0}'.format(workdir)
+#    call_params = shlex.split(command)
+#    subprocess.call(call_params)
+#  print "Made it"
+  if (not os.path.isdir(workdir)):
+    command = 'mkdir {0}'.format(workdir)
     call_params = shlex.split(command)
     subprocess.call(call_params)
-#  print "Made it"
-  command = 'mkdir {0}'.format(workdir)
-  call_params = shlex.split(command)
-  subprocess.call(call_params)
-  command = 'lfs setstripe -c -1 {0}'.format(workdir)
-  call_params = shlex.split(command)
-  subprocess.call(call_params)
+#  command = 'lfs setstripe -c -1 {0}'.format(workdir)
+#  call_params = shlex.split(command)
+#  subprocess.call(call_params)
 
   DATAsize = np.asarray(detector[0].get_image_size())
 
-# write common files
+# write common files; note: at this point there should already be a file correction.imf in the same directory as these files
   print "Writing common files."
   t0 = time()
   np.save(workdir+"/x_vectors.npy",x_vectors)

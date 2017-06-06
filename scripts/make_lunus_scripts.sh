@@ -105,7 +105,7 @@ modeim tmp1.img tmp2.img $modeim_kernel_width $modeim_bin_size
 
 # copy results to processed image name
 
-cp tmp1.img $lunus_image_path
+cp tmp00.img $lunus_image_path
 cp tmp2.img $scale_image_path
 
 cd ..
