@@ -1,4 +1,4 @@
-/* LCORRFACIM.C - Calculate correction factor for a diffraction image.
+/* LCFIM.C - Calculate correction factor for a diffraction image.
    
    Author: Mike Wall
    Date: 6/5/2017
@@ -8,7 +8,7 @@
 
 #include<mwmask.h>
 
-int lcorrfacim(DIFFIMAGE *imdiff)
+int lcfim(DIFFIMAGE *imdiff)
 {
   size_t 
     index = 0;

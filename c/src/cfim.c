@@ -1,11 +1,11 @@
-/* CORRFACIM.C - Create a correction factor field for a diffraction image.
+/* CFIM.C - Create a correction factor field for a diffraction image.
    
    Author: Mike Wall
    Date: 6/5/2017
    Version: 1.
    
-   "corrfacim <image in> <correction out> 
-      <distance[mm]> <polarization> <offset angle>" 
+   "cfim <image in> <correction out> 
+      <distance[mm]> <polarization> <offset angle> <scale>" 
 
    Input is diffraction image.  Output is floating point correction image.
 
@@ -31,11 +31,14 @@ int main(int argc, char *argv[])
   float 
     polarization_offset,
     polarization,
-    distance_mm;
+    distance_mm,
+    scale;
 
 /*
  * Set input line defaults:
  */
+
+  scale = 1.;
   origin.r = DEFAULT_IMAGE_ORIGIN;
   origin.c = DEFAULT_IMAGE_ORIGIN;
   distance_mm = DEFAULT_DISTANCE_MM;
@@ -47,6 +50,8 @@ int main(int argc, char *argv[])
  * Read information from input line:
  */
 	switch(argc) {
+	  case 7:
+	  scale = atof(argv[6]);
 	  case 6:
 	  polarization_offset = atof(argv[5]);
 	  case 5:
@@ -127,6 +132,7 @@ int main(int argc, char *argv[])
    * Calculate the correction image:
    */
   
+  imdiff->correction[0]=scale;
   lcorrfacim(imdiff);
   
   /*
