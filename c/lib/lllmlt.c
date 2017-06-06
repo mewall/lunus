@@ -58,7 +58,8 @@ int lllmlt(LAT3D *lat)
 	latG->index = index;
 	rsqr = lssqrFromIndex(latG);
 	latG->lattice[lat_index] = (LATTICE_DATA_TYPE)
-	  8.*PI*lat->gamma*lat->gamma*lat->gamma/powf((1.+lat->gamma*lat->gamma*2.*PI*2.*PI*rsqr),2.);
+	  //          sqrtf(PI/2.)*lat->gamma*expf(-2.*PI*2.*PI*rsqr*lat->gamma*lat->gamma);
+		  8.*PI*lat->gamma*lat->gamma*lat->gamma/powf((1.+lat->gamma*lat->gamma*2.*PI*2.*PI*rsqr),2.);
 	//	  4.*PI*lat->width*lat->width*lat->width/(1.+lat->width*lat->width*2.*PI*2.*PI*rsqr);
 	sum += latG->lattice[lat_index];
 	  // Clarage et al 1992 model:	  

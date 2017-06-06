@@ -11,6 +11,7 @@
 int lscaleim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2)
 {
 	float
+	  tmp,
 	  xx,xy,
 	  avg_xx,
 	  avg_xy;
@@ -51,11 +52,16 @@ int lscaleim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2)
 	    index++;
 	  }
 	}
-	avg_xx /= (float)ct;
-	avg_xy /= (float)ct;
+		printf("avg_xx=%g, avg_xy=%g, ct=%ld\n",avg_xx,avg_xy,ct);
+		//	avg_xx /= (float)ct;
+	//	avg_xy /= (float)ct;
 
 	imdiff1->rfile[0] = (RFILE_DATA_TYPE)avg_xx/avg_xy;
+
+	tmp = imdiff1->rfile[0];
 	
+	printf("scale=%f\n",imdiff1->rfile[0]);
+
 
 
 EndPaper:

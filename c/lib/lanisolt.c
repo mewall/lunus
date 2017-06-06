@@ -26,8 +26,12 @@ void lanisolt(LAT3D *lat)
   }
 
   lat->rfile_length = 0;
-  rscale = (lat->xscale*lat->xscale + lat->yscale*lat->yscale +
-		 lat->zscale*lat->zscale);
+  lat->index.i=lat->origin.i+1;
+  lat->index.j=lat->origin.j+1;
+  lat->index.k=lat->origin.k+1;
+  rscale=lssqrFromIndex(lat);
+  //  rscale = (lat->xscale*lat->xscale + lat->yscale*lat->yscale +
+  //	    lat->zscale*lat->zscale);
   // calculate isotropic component
   lat_index = 0;
   for(index.k = 0; index.k < lat->zvoxels; index.k++) {

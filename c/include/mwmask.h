@@ -812,6 +812,7 @@ int lsumlt(LAT3D *lat1, LAT3D *lat2);
 int lsummap(CCP4MAP *map1, CCP4MAP *map2);
 int lsumrf(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lsymlt(LAT3D *lat);
+int lsymminlt(LAT3D *lat);
 int ltagim(DIFFIMAGE *imdiff);
 int ltaglt(LAT3D *lat);
 int lthrshim(DIFFIMAGE *imdiff);

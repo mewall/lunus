@@ -60,6 +60,8 @@ int lreadim(DIFFIMAGE *imdiff)
 	imdiff->value_offset = DEFAULT_VALUE_OFFSET;
       }
       imdiff->rfile_length = (size_t)(imdiff->hpixels < imdiff->vpixels ? imdiff->hpixels : imdiff->vpixels);
+      imdiff->rfile = (RFILE_DATA_TYPE *)realloc(imdiff->rfile,
+		      imdiff->rfile_length*sizeof(RFILE_DATA_TYPE));
       imdiff->image_length = imdiff->hpixels*imdiff->vpixels;
       imdiff->image = (IMAGE_DATA_TYPE *)realloc(imdiff->image,imdiff->image_length*sizeof(IMAGE_DATA_TYPE));
       imdiff->pixel_size_mm = atof(lgettag(imdiff->header,"PIXEL_SIZE"));

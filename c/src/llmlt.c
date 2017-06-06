@@ -71,8 +71,7 @@ int main(int argc, char *argv[])
 	  }
 	  break;
 	  default:
-	  printf("\n Usage: liquidcorrlt <input lattice> "
-		 "<output lattice> <sigma> <gamma>\n\n");
+	    printf("\n Usage: llmlt <input lattice> <output lattice> <cell_str> <gamma> <sigma1> <sigma2>\n\n");
 	  exit(0);
 	}
 

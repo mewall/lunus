@@ -118,6 +118,8 @@ int main(int argc, char *argv[])
     perror(imdiff->error_msg);
     goto CloseShop;
   }
+
+  //  printf("imdiff->value_offset=%f\n",imdiff->value_offset);
   
   /*
    * Polarization correct image:

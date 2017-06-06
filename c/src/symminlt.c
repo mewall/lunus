@@ -1,13 +1,14 @@
-/* RBTLT.C - Generate a rigid-body translation model.
+/* SYMMINLT.C - Symmetrize a lattice using the minimum value among symmetry related points.
    
    Author: Mike Wall
-   Date: 9/26/2016
+   Date: 5/19/2017
    Version: 1.
    
    Usage:
-   		"llmlt <input lattice> <output lattice> <cell_str> <sigma>"
+   		"symminlt <input lattice> <output lattice> <symmetry_operation>"
 
-		Input is I0(hkl) lattice, unit cell, sigma from rigid body translation model.  Output is rigid body translation model of diffuse scattering.
+		Input are lattice and symmetry operation
+		specification.  Output is symmetrized lattice.
    */
 
 #include<mwmask.h>
@@ -15,18 +16,22 @@
 int main(int argc, char *argv[])
 {
   FILE
-    *latticein,
-    *latticeout;
-  
+	*latticein,
+	*latticeout;
+
   char
-    cell_str[256],
     error_msg[LINESIZE];
 
-  LAT3D 
-    *lat;
+  size_t
+    symop;
 
-  float
-    sigma;
+  LAT3D 
+	*lat;
+
+  RFILE_DATA_TYPE *rfile;
+
+  struct ijkcoords
+    origin;
 
 /*
  * Set input line defaults:
@@ -34,15 +39,19 @@ int main(int argc, char *argv[])
 	
 	latticein = stdin;
 	latticeout = stdout;
-	sigma = 0.0;
+
 /*
  * Read information from input line:
  */
 	switch(argc) {
-	  case 5:
-	  sigma = atof(argv[4]);
+    case 7: 
+    origin.k = atol(argv[6]);
+    case 6:
+    origin.j = atol(argv[5]);
+    case 5:
+    origin.i = atol(argv[4]);
 	  case 4:
-	  strcpy(cell_str,argv[3]);
+	  symop = atol(argv[3]);
 	  case 3:
 	  if (strcmp(argv[2],"-") == 0) {
 	    latticeout = stdout;
@@ -65,8 +74,15 @@ int main(int argc, char *argv[])
 	  }
 	  break;
 	  default:
-	  printf("\n Usage: liquidcorrlt <input lattice> "
-		 "<output lattice> <sigma> <gamma>\n\n");
+	  printf("\n Usage: symlt <input lattice> "
+		 "<output lattice> <symmetry_operation>\n\n"
+		 "  Symmetry Operations:\n"
+		 "    0 = P1\n"
+		 "    1 = P4/m (P41)\n"
+		 "    2 = Pmmm (P212121)\n\n"
+		 "    3 = P m -3\n\n"
+		 "    4 = P 2/m (P21)\n");
+	      
 	  exit(0);
 	}
   
@@ -90,22 +106,14 @@ int main(int argc, char *argv[])
   }
 
   /*
-   * Calculate liquid-like motions prefactor:
+   * Perform symmetry operation:
    */
-  
-  lat->sigma = sigma;
-  lat->anisoU.xx = sigma*sigma;
-  lat->anisoU.xy = 0.0;
-  lat->anisoU.xz = 0.0;
-  lat->anisoU.yx = 0.0;
-  lat->anisoU.yy = sigma*sigma;
-  lat->anisoU.yz = 0.0;
-  lat->anisoU.zx = 0.0;
-  lat->anisoU.zy = 0.0;
-  lat->anisoU.zz = sigma*sigma;
-  strcpy(lat->cell_str,cell_str);
-  lparsecelllt(lat);
-  lrbtlt(lat);
+
+  lat->symop_index = symop;
+  if (argc==7) {
+    lat->origin.i=origin.i; lat->origin.j=origin.j; lat->origin.k=origin.k;
+  }
+  lsymminlt(lat);
   
   /*
    * Write lattice to output file:

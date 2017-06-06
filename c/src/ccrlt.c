@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
     break;
     default:
     printf("\n Usage: ccrlt <input lattice 1> <input lattice 2>"
-	   "<output rfile>\n\n");
+	   "<output rfile> <cell_str>\n\n");
     exit(0);
   }
   
