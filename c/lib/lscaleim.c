@@ -11,8 +11,6 @@
 int lscaleim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2)
 {
 	float
-	  xx,xy,
-=======
 	  xx,xy,yy,
 	  avg_xx,
 	  avg_xy,
