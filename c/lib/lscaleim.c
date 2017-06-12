@@ -54,7 +54,7 @@ int lscaleim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2)
 	    index++;
 	  }
 	}
-		printf("avg_xx=%g, avg_xy=%g, ct=%ld\n",avg_xx,avg_xy,ct);
+	//		printf("avg_xx=%g, avg_xy=%g, ct=%ld\n",avg_xx,avg_xy,ct);
 		//	avg_xx /= (float)ct;
 	//	avg_xy /= (float)ct;
 

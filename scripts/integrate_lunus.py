@@ -300,7 +300,7 @@ if __name__=="__main__":
   i0=latxdim/2-1
   j0=latydim/2-1
   k0=latzdim/2-1
-  mask_tag = 32767
+  mask_tag = 32767.
 
 #  fileidx = 0
 

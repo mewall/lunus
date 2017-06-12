@@ -83,7 +83,7 @@ hostname
 #. $phenix_dir/phenix_env.sh
 
 
-corrfacim $template_image_path $work_dir/scripts/tmpdir_common/correction.imf $polarim_dist $polarim_polarization $polarim_offset
+cfim $template_image_path $work_dir/scripts/tmpdir_common/correction.imf $polarim_dist $polarim_polarization $polarim_offset
 
 EOF
 
