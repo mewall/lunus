@@ -84,9 +84,6 @@ int main(int argc, char *argv[])
     exit(0);
   }
 
-// Allocate correction factor
-
-  imdiff->correction = (float *)malloc(imdiff->image_length*sizeof(float));
 
  
  /*
@@ -99,11 +96,20 @@ int main(int argc, char *argv[])
     goto CloseShop;
   }
 
+// Allocate correction factor
+
+  imdiff->correction = (float *)malloc(imdiff->image_length*sizeof(float));
+
   // Read correction factor
 
   num_read = fread(imdiff->correction, sizeof(float), imdiff->image_length,
 		 cfin);
 
+  //printf("num_read = %ld\n",num_read);
+  if (num_read != imdiff->image_length) {
+	perror(imdiff->error_msg);
+        goto CloseShop;
+  }
   if (lmulcfim(imdiff) != 0) {
     perror(imdiff->error_msg);
     goto CloseShop;
