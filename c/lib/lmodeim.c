@@ -77,12 +77,12 @@ int lmodeim(DIFFIMAGE *imdiff)
     size_t i;
     size_t *count;
     count = (size_t *)calloc(65537,sizeof(size_t));
-    size_t *count_pointer;
-    count_pointer = (size_t *)calloc((imdiff->mode_height+1) *
+    unsigned int *count_pointer;
+    count_pointer = (unsigned int *)calloc((imdiff->mode_height+1) *
 				     (imdiff->mode_width+1), 
-				       sizeof(size_t));
+					   sizeof(unsigned int));
     for (i=0; i<imdiff->hpixels; i++) {
-      size_t mode_value=0;
+      float mode_value=0.0;
       size_t max_count=0;
       size_t mode_ct=1;
       size_t l=0;
@@ -101,9 +101,11 @@ int lmodeim(DIFFIMAGE *imdiff)
 	      imd_index = index + n*imdiff->hpixels + m;
 	      if ((imdiff->image[imd_index] != imdiff->overload_tag) &&
 		  (imdiff->image[imd_index] != imdiff->ignore_tag)) {
-		count_pointer[l]=(imdiff->image[imd_index] - 
-				    (imdiff->image[imd_index] % 
-				     imdiff->mode_binsize) + 32768);
+		//		count_pointer[l]=(imdiff->image[imd_index] - 
+		//				    (imdiff->image[imd_index] % 
+		//				     imdiff->mode_binsize) + 32768);
+		count_pointer[l]=imdiff->image[imd_index];
+		//		l++;
 		count[count_pointer[l++]]++;
 	      }
 	    }
@@ -114,21 +116,24 @@ int lmodeim(DIFFIMAGE *imdiff)
 	  image[index]=imdiff->ignore_tag;
 	}
 	else {
-	  for(k=0;k<=l-1;k++) {
+	  //	  for(k=0;k<l;k++) {
+	  //	    count[count_pointer[k]]++;
+	  //	  }
+	  for(k=0;k<l;k++) {
 	    if (count[count_pointer[k]] == max_count) {
-	      mode_value = (size_t)((float)(mode_ct*mode_value +
-					    count_pointer[k])/ 
+	      mode_value = ((float)((float)mode_ct*mode_value +
+				    (float)count_pointer[k])/ 
 				    (float)(mode_ct+1));
 	      mode_ct++;
 	    }
 	    else if (count[count_pointer[k]] > max_count) {
-	      mode_value = count_pointer[k];
+	      mode_value = (float)count_pointer[k];
 	      max_count = count[count_pointer[k]];
 	      mode_ct = 1;
 	    }
 	  }
-	  for(k=0;k<=l-1;k++) count[count_pointer[k]] = 0;
-	  image[index] = (IMAGE_DATA_TYPE)mode_value - 32768;
+	  for(k=0;k<l;k++) count[count_pointer[k]] = 0;
+	  image[index] = (IMAGE_DATA_TYPE)mode_value;
 	  //	  avg_max_count += max_count;
 	  //	  avg_max_count = (avg_max_count*avg_max_count_count +
 	  // max_count) / (float)(avg_max_count_count + 1);
