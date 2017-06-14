@@ -295,6 +295,17 @@ typedef float MAP_DATA_TYPE;
 typedef short SHIM_DATA_TYPE;
 typedef short IMAGE_DATA_TYPE;
 typedef float WEIGHTS_DATA_TYPE;
+
+// MPI
+
+typedef struct {
+  int argc;
+  char **argv;
+  int my_id;
+  int num_procs;
+  int ierr;
+} MPIVARS;
+
 typedef struct {
   IMAGE_DATA_TYPE *value;	/* Pixel value */
   char allocate_flag;           /* Has the array been allocated? */
@@ -454,6 +465,8 @@ typedef struct
   size_t rdata_radius;	        /* Maximum radius in rdata */
   struct rccoords window_lower; /* Upper left corner of window */
   struct rccoords window_upper; /* Lower right corner of window */
+  struct rccoords punchim_lower; /* Upper left corner of punchim */
+  struct rccoords punchim_upper; /* Lower right corner of punchim */
   IMAGE_DATA_TYPE lower_threshold;
   IMAGE_DATA_TYPE upper_threshold;
   DIFFUSE_FEATURE *feature;     /* List of diffuse features */
@@ -722,6 +735,7 @@ int ldivrf(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lexplt(LAT3D *lat);
 void lfft(float *data,int *nn,int ndim,int isign);
 int lfilltaglt(LAT3D *lat);
+void lfinalMPI(MPIVARS *mpiv);
 int lfmtlt(LAT3D *lat);
 int lfreeim(DIFFIMAGE *imdiff);
 int lfreelt(LAT3D *lat);
@@ -735,6 +749,7 @@ const char * lgettag(const char *target,const char *tag);
 DIFFIMAGE *linitim(void);
 LAT3D *linitlt(void);
 CCP4MAP *linitmap(void);
+void linitMPI(MPIVARS *mpiv);
 XTALSTRUCT *linitxs(void);
 int lintxdslt(DIFFIMAGE *imdiff,LAT3D *lat);
 int lliquidcorrlt(LAT3D *lat);

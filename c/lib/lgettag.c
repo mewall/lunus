@@ -41,8 +41,10 @@ const char * lgettag(const char *target,const char *tag)
     exit(6);
   }
   if ((pos_end = strchr(pos_begin,';'))==NULL) {
-    perror("\nImage header tag syntax not recognized\n\n");
-    exit(6);
+    if ((pos_end = strchr(pos_begin,'\n'))==NULL) {
+      perror("\nImage header tag syntax not recognized\n\n");
+      exit(6);
+    }
   }
   int len = pos_end-pos_begin-1;
   val = (char *)calloc(sizeof(char),len+1);
