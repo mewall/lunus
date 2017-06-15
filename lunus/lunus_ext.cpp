@@ -85,12 +85,12 @@ namespace boost_python { namespace {
     using namespace boost::python;
     typedef return_value_policy<return_by_value> rbv;
     typedef default_call_policies dcp;
-    
+
     class_<lunus::LunusIMAd>("LunusIMAd",init<>())
       .def("get_image_data_type_size",&lunus::LunusIMAd::get_image_data_type_size)
       .def("set_modeim_width",&lunus::LunusIMAd::set_modeim_width)
     ;
-    
+
     def("foo2",&lunus::foo2);
   }
 
