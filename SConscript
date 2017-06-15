@@ -4,7 +4,10 @@ op = os.path
 Import("env_base", "env_etc")
 
 env_etc.lunus_dist = libtbx.env.dist_path("lunus")
-env_etc.lunus_include = os.path.dirname(env_etc.lunus_dist)
+
+print "env_etc.lunus_dist",env_etc.lunus_dist
+
+env_etc.lunus_include = env_etc.lunus_dist
 env_etc.lunus_common_includes = [
   env_etc.libtbx_include,
   env_etc.scitbx_include,
@@ -14,6 +17,20 @@ env_etc.lunus_common_includes = [
   op.dirname(libtbx.env.find_in_repositories(
     relative_path="tbxx", optional=False))
 ]
+
+CPPP = os.path.join(env_etc.lunus_include,"c","include")
+print "INCLUDE_PATH-->",CPPP
+
+#env = env_base.Clone(
+#  SHLINKFLAGS=env_etc.shlinkflags)
+
+
+env_base.StaticLibrary(target='#lib/lunus',
+  source = [os.path.join(env_etc.lunus_dist,"c","lib","linitim.c"),
+            os.path.join(env_etc.lunus_dist,"c","lib","lfreeim.c")],
+  CPPPATH=[CPPP] )
+print "LIBRARY OK"
+
 
 if (not env_etc.no_boost_python):
   Import("env_no_includes_boost_python_ext")
