@@ -27,7 +27,11 @@ print "INCLUDE_PATH-->",CPPP
 
 env_base.StaticLibrary(target='#lib/lunus',
   source = [os.path.join(env_etc.lunus_dist,"c","lib","linitim.c"),
-            os.path.join(env_etc.lunus_dist,"c","lib","lfreeim.c")],
+            os.path.join(env_etc.lunus_dist,"c","lib","lfreeim.c"),
+            os.path.join(env_etc.lunus_dist,"c","lib","lmodeim.c"),
+	    os.path.join(env_etc.lunus_dist,"c","lib","lpunchim.c"),
+	    os.path.join(env_etc.lunus_dist,"c","lib","lwindim.c"),
+	    os.path.join(env_etc.lunus_dist,"c","lib","lthrshim.c")],
   CPPPATH=[CPPP] )
 print "LIBRARY OK"
 
