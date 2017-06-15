@@ -5,7 +5,9 @@
 #include <scitbx/array_family/flex_types.h>
 #include <scitbx/array_family/shared.h>
 
+extern "C" {
 #include <c/include/mwmask.h>
+}
 
 #include <string>
 #include <vector>
@@ -24,8 +26,8 @@ namespace lunus {
     DIFFIMAGE *imdiff;
 
   public:
-    inline LunusIMAd() {
-      printf("in default constr.");
+    inline  LunusIMAd() {
+      printf("in default XXX constr.\n");
       imdiff = linitim();
     }
 
@@ -62,7 +64,7 @@ namespace lunus {
       imdiff->punchim_upper.r = r;
     }
 
-    inline void set_modeim_width(size_t w) {
+    inline void set_modeim_width(std::size_t w) {
       imdiff->mode_width = w;
     }
 
@@ -85,6 +87,8 @@ namespace boost_python { namespace {
     typedef default_call_policies dcp;
     
     class_<lunus::LunusIMAd>("LunusIMAd",init<>())
+      .def("get_image_data_type_size",&lunus::LunusIMAd::get_image_data_type_size)
+      .def("set_modeim_width",&lunus::LunusIMAd::set_modeim_width)
     ;
     
     def("foo2",&lunus::foo2);

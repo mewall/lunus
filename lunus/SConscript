@@ -1,4 +1,6 @@
 Import("env")
+env = env.Clone()
+env.Prepend(LIBS=["lunus"])
 
 env.SharedLibrary(
   target="#lib/lunus_ext",
