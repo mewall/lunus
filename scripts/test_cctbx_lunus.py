@@ -1,7 +1,7 @@
 import lunus
 import dxtbx
 from dxtbx.format.FormatCBFMini import FormatCBFMini
-from lunus import LunusIMAd
+from lunus import LunusDIFFIMAGE
 import os
 
 img = dxtbx.load("g150aich_274_6_1_00001.cbf")
@@ -18,7 +18,7 @@ print data
 
 #print img
 
-A = LunusIMAd()
+A = LunusDIFFIMAGE()
 A.set_raw_data(data)
 print A.get_image_data_type_size()
 A.set_punchim_lower(1203,1250)

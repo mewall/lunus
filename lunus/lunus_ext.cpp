@@ -21,17 +21,17 @@ namespace lunus {
     std::cout<<"HELLO foo2"<<std::endl;
   }
 
-  class LunusIMAd {
+  class LunusDIFFIMAGE {
   protected:
     DIFFIMAGE *imdiff;
 
   public:
-    inline  LunusIMAd() {
+    inline  LunusDIFFIMAGE() {
       printf("in default XXX constr.\n");
       imdiff = linitim();
     }
 
-    inline ~LunusIMAd() {
+    inline ~LunusDIFFIMAGE() {
       lfreeim(imdiff);
     }
 
@@ -146,21 +146,21 @@ namespace boost_python { namespace {
     typedef return_value_policy<return_by_value> rbv;
     typedef default_call_policies dcp;
 
-    class_<lunus::LunusIMAd>("LunusIMAd",init<>())
-      .def("get_image_data_type_size",&lunus::LunusIMAd::get_image_data_type_size)
-      .def("set_punchim_lower",&lunus::LunusIMAd::set_punchim_lower)
-      .def("set_punchim_upper",&lunus::LunusIMAd::set_punchim_upper)
-      .def("set_windim_lower",&lunus::LunusIMAd::set_windim_lower)
-      .def("set_windim_upper",&lunus::LunusIMAd::set_windim_upper)
-      .def("set_thresholds",&lunus::LunusIMAd::set_thresholds)
-      .def("set_modeim_width",&lunus::LunusIMAd::set_modeim_width)
-      .def("get_modeim_width",&lunus::LunusIMAd::get_modeim_width)
-      .def("set_raw_data",&lunus::LunusIMAd::set_raw_data)
-      .def("get_lunus_data",&lunus::LunusIMAd::get_lunus_data)
-      .def("LunusPunchim",&lunus::LunusIMAd::LunusPunchim)
-      .def("LunusWindim",&lunus::LunusIMAd::LunusWindim)
-      .def("LunusThrshim",&lunus::LunusIMAd::LunusThrshim)
-      .def("LunusModeim",&lunus::LunusIMAd::LunusModeim)
+    class_<lunus::LunusDIFFIMAGE>("LunusDIFFIMAGE",init<>())
+      .def("get_image_data_type_size",&lunus::LunusDIFFIMAGE::get_image_data_type_size)
+      .def("set_punchim_lower",&lunus::LunusDIFFIMAGE::set_punchim_lower)
+      .def("set_punchim_upper",&lunus::LunusDIFFIMAGE::set_punchim_upper)
+      .def("set_windim_lower",&lunus::LunusDIFFIMAGE::set_windim_lower)
+      .def("set_windim_upper",&lunus::LunusDIFFIMAGE::set_windim_upper)
+      .def("set_thresholds",&lunus::LunusDIFFIMAGE::set_thresholds)
+      .def("set_modeim_width",&lunus::LunusDIFFIMAGE::set_modeim_width)
+      .def("get_modeim_width",&lunus::LunusDIFFIMAGE::get_modeim_width)
+      .def("set_raw_data",&lunus::LunusDIFFIMAGE::set_raw_data)
+      .def("get_lunus_data",&lunus::LunusDIFFIMAGE::get_lunus_data)
+      .def("LunusPunchim",&lunus::LunusDIFFIMAGE::LunusPunchim)
+      .def("LunusWindim",&lunus::LunusDIFFIMAGE::LunusWindim)
+      .def("LunusThrshim",&lunus::LunusDIFFIMAGE::LunusThrshim)
+      .def("LunusModeim",&lunus::LunusDIFFIMAGE::LunusModeim)
     ;
 
     def("foo2",&lunus::foo2);
