@@ -35,27 +35,37 @@ namespace lunus {
       lfreeim(imdiff);
     }
 
-    inline void LunusModeim() {
-      printf("LunusModeim\n");
-      lmodeim(imdiff);
-    }
-
-    inline void LunusWindim() {
+    inline void LunusWindim(short cl, short rl, short cu, short ru) {
       printf("LunusWindim\n");
+      imdiff->window_lower.c = cl;
+      imdiff->window_lower.r = rl;
+      imdiff->window_upper.c = cu;
+      imdiff->window_upper.r = ru;
       lwindim(imdiff);
     }
 
-    inline void LunusPunchim() {
+    inline void LunusPunchim(short cl, short rl, short cu, short ru) {
       printf("LunusPunchim\n");
+      imdiff->punchim_lower.c = cl;
+      imdiff->punchim_lower.r = rl;
+      imdiff->punchim_upper.c = cu;
+      imdiff->punchim_upper.r = ru;
       lpunchim(imdiff);
     }
 
-    inline void LunusThrshim() {
+    inline void LunusThrshim(int lower, int upper) {
       printf("LunusThrshim\n");
+      imdiff->lower_threshold = (IMAGE_DATA_TYPE)lower;
+      imdiff->upper_threshold = (IMAGE_DATA_TYPE)upper;
       lthrshim(imdiff);
     }
 
-    inline void set_raw_data(scitbx::af::flex_int data) {
+    inline void LunusModeim(std::size_t w) {
+      imdiff->mode_width = w;
+      lmodeim(imdiff);
+    }
+
+    inline void set_image(scitbx::af::flex_int data) {
       int* begin=data.begin();
       std::size_t size=data.size();
       std::size_t slow=data.accessor().focus()[0];
@@ -76,12 +86,11 @@ namespace lunus {
       printf("Converted image size %ld,%ld with %ld negative pixel values.\n",fast,slow,ct);
     }
 
-    inline scitbx::af::flex_int get_lunus_data() {
+    inline scitbx::af::flex_int get_image() {
       std::size_t fast = imdiff->hpixels;
       std::size_t slow = imdiff->vpixels;
       scitbx::af::flex_int data(scitbx::af::flex_grid<>(slow,fast));
       int* begin=data.begin();
-      std::size_t size=data.size();
       std::size_t ct=0;
       for (int i = 0;i<imdiff->image_length;i++) {
 	if (imdiff->image[i] == imdiff->ignore_tag) {
@@ -99,39 +108,6 @@ namespace lunus {
       return sizeof(IMAGE_DATA_TYPE);
     }
 
-    inline void set_windim_lower(short c, short r) {
-      imdiff->window_lower.c = c;
-      imdiff->window_lower.r = r;
-    }
-
-    inline void set_windim_upper(short c, short r) {
-      imdiff->window_upper.c = c;
-      imdiff->window_upper.r = r;
-    }
-
-    inline void set_punchim_lower(short c, short r) {
-      imdiff->punchim_lower.c = c;
-      imdiff->punchim_lower.r = r;
-    }
-
-    inline void set_punchim_upper(short c, short r) {
-      imdiff->punchim_upper.c = c;
-      imdiff->punchim_upper.r = r;
-    }
-
-    inline void set_modeim_width(std::size_t w) {
-      imdiff->mode_width = w;
-    }
-
-    inline int get_modeim_width() {
-      //      return std::reinterpret_cast<int>(imdiff->mode_width);
-      return (int)(imdiff->mode_width);
-    }
-
-    inline void set_thresholds(int lower, int upper) {
-      imdiff->lower_threshold = (IMAGE_DATA_TYPE)lower;
-      imdiff->upper_threshold = (IMAGE_DATA_TYPE)upper;
-    }
   };
 
 }
@@ -148,15 +124,8 @@ namespace boost_python { namespace {
 
     class_<lunus::LunusDIFFIMAGE>("LunusDIFFIMAGE",init<>())
       .def("get_image_data_type_size",&lunus::LunusDIFFIMAGE::get_image_data_type_size)
-      .def("set_punchim_lower",&lunus::LunusDIFFIMAGE::set_punchim_lower)
-      .def("set_punchim_upper",&lunus::LunusDIFFIMAGE::set_punchim_upper)
-      .def("set_windim_lower",&lunus::LunusDIFFIMAGE::set_windim_lower)
-      .def("set_windim_upper",&lunus::LunusDIFFIMAGE::set_windim_upper)
-      .def("set_thresholds",&lunus::LunusDIFFIMAGE::set_thresholds)
-      .def("set_modeim_width",&lunus::LunusDIFFIMAGE::set_modeim_width)
-      .def("get_modeim_width",&lunus::LunusDIFFIMAGE::get_modeim_width)
-      .def("set_raw_data",&lunus::LunusDIFFIMAGE::set_raw_data)
-      .def("get_lunus_data",&lunus::LunusDIFFIMAGE::get_lunus_data)
+      .def("set_image",&lunus::LunusDIFFIMAGE::set_image)
+      .def("get_image",&lunus::LunusDIFFIMAGE::get_image)
       .def("LunusPunchim",&lunus::LunusDIFFIMAGE::LunusPunchim)
       .def("LunusWindim",&lunus::LunusDIFFIMAGE::LunusWindim)
       .def("LunusThrshim",&lunus::LunusDIFFIMAGE::LunusThrshim)

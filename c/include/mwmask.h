@@ -28,10 +28,10 @@
  * Data set selection:
  */
 
-/*#define SNCPS                           /* sncps data set */
-/*#define SNAB                            /* snab data set */
-/*#define SNC                             /* snc data set */
-/*#define LYS                             /* lys data set */
+//#define SNCPS                           /* sncps data set */
+//#define SNAB                            /* snab data set */
+//#define SNC                             /* snc data set */
+//#define LYS                             /* lys data set */
 #define SNaseWT
 /*
  * I/O specifications:
@@ -53,10 +53,10 @@
 #define DEFAULT_HEADER_LENGTH 4096	/* TV6 TIFF image header length */
 #define DEFAULT_IMAGELENGTH 1048576	/* TV6 TIFF image #pixels */
 #define DEFAULT_OVERLOAD_TAG 0x7fff	/* 32766 */
-/*#define DEFAULT_OVERLOAD_TAG 0x7ffe	/* 32766 */
+//#define DEFAULT_OVERLOAD_TAG 0x7ffe	/* 32766 */
 #define DEFAULT_IGNORE_TAG 0x7fff	/* 32767 */
-/* #define DEFAULT_OVERLOAD_TAG 0xffff     /* 65535 */
-/* #define DEFAULT_IGNORE_TAG 0xffff       /* 65535 */
+// #define DEFAULT_OVERLOAD_TAG 0xffff     /* 65535 */
+// #define DEFAULT_IGNORE_TAG 0xffff       /* 65535 */
 #define DEFAULT_VALUE_OFFSET 0          /* Default offset. 0 for TV6, PILATUS, 40 for ADXV .img */
 #define MAX_OVERLOADS 10000		/* Max # of overloads in an image */
 #define MAX_PEAKS 20000			/* Max # of peaks in an image */
@@ -79,7 +79,7 @@
 #define DEFAULT_LAT_OUTER_RADIUS 30     /* Outer radius of lattice */
 #define DEFAULT_LATTICE_MASK_TAG -32768	/* Mask tag for lattice object */
 #define DEFAULT_SAMPLE_PITCH 5		/* Sample image every Nth */
-					/* pixel in x and y for voxel 
+					/* pixel in x and y for voxel */
 					/* generation */
 #define DEFAULT_MINRANGE 0.15            /* Minimum valid dist. to */
 					/*   Bragg peak */
