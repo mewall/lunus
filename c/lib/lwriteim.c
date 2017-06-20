@@ -61,7 +61,7 @@ int lwriteim(DIFFIMAGE *imdiff)
     }
     
   } else {
-    if (strstr(imdiff->header,"###CBF")!=NULL) {
+    if (strcmp(imdiff->format,"CBF") == 0) {
       // Convert image to int type
       //      printf("Writing .cbf image\n");
       int *image_cbf;
