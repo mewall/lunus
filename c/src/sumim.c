@@ -131,7 +131,9 @@ int main(int argc, char *argv[])
 
   sprintf(osc_range_tag,"%07.3f",imdiff1->osc_range+imdiff2->osc_range);
 
-  lsettag(imdiff1->header,"OSC_RANGE",osc_range_tag);
+  if (strcmp(imdiff1->format,"SMV")==0) {
+    lsettag(imdiff1->header,"OSC_RANGE",osc_range_tag);
+  }
 
 /*
  * Write the output image:

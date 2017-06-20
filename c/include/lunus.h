@@ -414,8 +414,11 @@ typedef struct
   char *filename;
   FILE *infile;
   FILE *outfile;
-  char *header;		        /* Image header (typically TIFF) */
-  size_t header_length;	        /* Length of image header (4096) */
+  char format[10];              /* Image format */
+  char *header;		        /* Image header */
+  size_t header_length;	        /* Length of image header (4096 default) */
+  char *footer;		        /* Image footer (e.g. CBF) */
+  size_t footer_length;	        /* Length of image footer */
   IMAGE_DATA_TYPE *image;	/* Pointer to image */
   char big_endian;              /* byte order, 1 = big_endian, 0 = other */
   size_t image_length;	        /* Total number of pixels in image */
@@ -709,6 +712,8 @@ int lavgsqim(DIFFIMAGE *imdiff);
 int lavsqrim(DIFFIMAGE *imdiff);
 int lavsqrlt(LAT3D *lat);
 int lbeamim(DIFFIMAGE *imdiff);
+size_t lbufcompress(const int* values, const size_t sz, char *packed);
+void lbufuncompress(const char* packed, const size_t packed_sz, int* values, size_t values_sz);
 int lbuttim(DIFFIMAGE *imdiff);
 struct fom lcalcrsf(char *hklfname, LAT3D *lat1,LAT3D *lat2);
 int lccrlt(LAT3D *lat1, LAT3D *lat2);
@@ -742,6 +747,7 @@ int lfreelt(LAT3D *lat);
 int lgausslt(LAT3D *lat);
 int lgensv(DIFFIMAGE *imdiff);
 int lgetanls(DIFFIMAGE *imdiff);
+const char * lgetcbftag(const char *target,const char *tag);
 int lgetmat(DIFFIMAGE *imdiff);
 int lgetovld(DIFFIMAGE *imdiff);
 int lgetpks(DIFFIMAGE *imdiff);
@@ -809,6 +815,7 @@ int lscaleim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lscalerfim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lscalelt(LAT3D *lat1, LAT3D *lat2);
 struct xyzcoords lsFromIndex(LAT3D *lat);
+int lsetcbftag(char **t,size_t *target_length, const char *tag,const char *val);
 int lsettag(char *target,const char *tag,const char *val);
 int lshiftlt(LAT3D *lat,struct ijkcoords t);
 int lshiftsflt(LAT3D *lat1,LAT3D *lat2);
