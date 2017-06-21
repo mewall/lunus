@@ -208,7 +208,7 @@ int lreadim(DIFFIMAGE *imdiff)
 	  // Polarization defaults
 	  imdiff->polarization = 1.0;
 	  imdiff->polarization_offset = 0.0;
-	  	  printf("osc_start,osc_range,distance_mm,pixel_size_mm,beam_mm.x,beam_mm.y,wavelength=%f,%f,%f,%f,%f,%f,%f\n",imdiff->osc_start,imdiff->osc_range,imdiff->distance_mm,imdiff->pixel_size_mm,imdiff->beam_mm.x,imdiff->beam_mm.y,imdiff->wavelength);
+	  //	  	  printf("osc_start,osc_range,distance_mm,pixel_size_mm,beam_mm.x,beam_mm.y,wavelength=%f,%f,%f,%f,%f,%f,%f\n",imdiff->osc_start,imdiff->osc_range,imdiff->distance_mm,imdiff->pixel_size_mm,imdiff->beam_mm.x,imdiff->beam_mm.y,imdiff->wavelength);
 	  size_t buf_length, padding;
 	  buf_length = atol(lgetcbftag(imdiff->header,"X-Binary-Size:"));
 	  padding = atol(lgetcbftag(imdiff->header,"X-Binary-Size-Padding:"));
