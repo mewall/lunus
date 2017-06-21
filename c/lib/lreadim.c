@@ -196,11 +196,19 @@ int lreadim(DIFFIMAGE *imdiff)
 	    imdiff->beam_mm.x *= imdiff->pixel_size_mm;
 	    imdiff->beam_mm.y *= imdiff->pixel_size_mm;
 	  }
+	  // origin in pixels
+	  imdiff->origin.c = imdiff->beam_mm.x/imdiff->pixel_size_mm+.5;
+	  imdiff->origin.r = imdiff->beam_mm.y/imdiff->pixel_size_mm+.5;
 	  sscanf(lgetcbftag(imdiff->header,"Wavelength"),"%g %s",&imdiff->wavelength,units);
 	  if (strcmp(units,"nm")==0) {
 	    imdiff->wavelength /= 10.;
 	  }
-	  //	  printf("osc_start,osc_range,distance_mm,pixel_size_mm,beam_mm.x,beam_mm.y,wavelength=%f,%f,%f,%f,%f,%f,%f\n",imdiff->osc_start,imdiff->osc_range,imdiff->distance_mm,imdiff->pixel_size_mm,imdiff->beam_mm.x,imdiff->beam_mm.y,imdiff->wavelength);
+	  // Make pedestal = 0 for CBF
+	  imdiff->value_offset = 0;
+	  // Polarization defaults
+	  imdiff->polarization = 1.0;
+	  imdiff->polarization_offset = 0.0;
+	  	  printf("osc_start,osc_range,distance_mm,pixel_size_mm,beam_mm.x,beam_mm.y,wavelength=%f,%f,%f,%f,%f,%f,%f\n",imdiff->osc_start,imdiff->osc_range,imdiff->distance_mm,imdiff->pixel_size_mm,imdiff->beam_mm.x,imdiff->beam_mm.y,imdiff->wavelength);
 	  size_t buf_length, padding;
 	  buf_length = atol(lgetcbftag(imdiff->header,"X-Binary-Size:"));
 	  padding = atol(lgetcbftag(imdiff->header,"X-Binary-Size-Padding:"));
