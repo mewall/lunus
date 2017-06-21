@@ -54,6 +54,7 @@
 #define DEFAULT_IMAGELENGTH 1048576	/* TV6 TIFF image #pixels */
 #define DEFAULT_OVERLOAD_TAG 0x7fff	/* 32766 */
 //#define DEFAULT_OVERLOAD_TAG 0x7ffe	/* 32766 */
+//#define DEFAULT_IGNORE_TAG 2147483647	/* 2^32 - 1 */
 #define DEFAULT_IGNORE_TAG 0x7fff	/* 32767 */
 // #define DEFAULT_OVERLOAD_TAG 0xffff     /* 65535 */
 // #define DEFAULT_IGNORE_TAG 0xffff       /* 65535 */
@@ -293,7 +294,8 @@ typedef float RFILE_DATA_TYPE;
 typedef float LATTICE_DATA_TYPE;
 typedef float MAP_DATA_TYPE;
 typedef short SHIM_DATA_TYPE;
-typedef short IMAGE_DATA_TYPE;
+typedef int IMAGE_DATA_TYPE;
+//typedef short IMAGE_DATA_TYPE;
 typedef float WEIGHTS_DATA_TYPE;
 
 // MPI

@@ -69,10 +69,8 @@ int main(int argc, char *argv[])
 			}
 			break;
 		default:
-			printf("\n Usage: mulim <input image 1> "
-				"<x origin 1> <y origin 1> <input image 2> "
-				"<x origin 2> <y origin 2> "
-				"<output image>\n\n");
+			printf("\n Usage: mulcfim <input correction factor>"
+			       "<input image> <output image>\n\n");
 			exit(0);
 	}
 /*
