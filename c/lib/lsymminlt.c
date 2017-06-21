@@ -59,19 +59,19 @@ int lsymminlt(LAT3D *lat)
 	rvec[0] = lijksub(index[0],lat->origin);
 	switch(lat->symop_index) {
 	case 0:
-	  lP1(lat);
+	  lLaue1(lat);
 	  break;
 	case 1:
-	  lP41(lat);
+	  lLaue2(lat);
 	  break;
 	case 2:
-	  lP222(lat);
+	  lLaue3(lat);
 	  break;
 	case 3:
-	  lPm_minus_3(lat);
+	  lLaue4(lat);
 	  break;
 	case 4:
-	  lsg10(lat);
+	  lLaue5(lat);
 	  break;
 	}
 	op_count = lat->symop_count;
