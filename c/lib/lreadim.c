@@ -169,7 +169,6 @@ int lreadim(DIFFIMAGE *imdiff)
 	  //	  printf("Wavelength = %s\n",lgetcbftag(imdiff->header,"Wavelength"));
 	  /*	  printf("Detector_distance = %s\n",lgetcbftag(imdiff->header,"Detector_distance"));
 	  printf("Start_angle = %s\n",lgetcbftag(imdiff->header,"Start_angle"));
-	  printf("Angle_increment = %s\n",lgetcbftag(imdiff->header,"Angle_increment"));
 	  printf("Beam_xy = %s\n",lgetcbftag(imdiff->header,"Beam_xy"));
 	  printf("X-Binary-Element-Byte-Order = %s\n",lgetcbftag(imdiff->header,"X-Binary-Element-Byte-Order:"));
 	  printf("X-Binary-Number-of-Elements = %s\n",lgetcbftag(imdiff->header,"X-Binary-Number-of-Elements:"));
@@ -178,10 +177,30 @@ int lreadim(DIFFIMAGE *imdiff)
 	  printf("X-Binary-Size = %s\n",lgetcbftag(imdiff->header,"X-Binary-Size:"));
 	  printf("X-Binary-Size-Padding = %s\n",lgetcbftag(imdiff->header,"X-Binary-Size-Padding:"));
 	  */
+	  char units[256];
 	  imdiff->hpixels = atoi(lgetcbftag(imdiff->header,"X-Binary-Size-Fastest-Dimension:"));
 	  imdiff->vpixels = atoi(lgetcbftag(imdiff->header,"X-Binary-Size-Second-Dimension:"));
 	  imdiff->image_length = imdiff->hpixels * imdiff->vpixels;
-	  //	  printf("Image length = %ld\n",imdiff->image_length);
+	  sscanf(lgetcbftag(imdiff->header,"Start_angle"),"%f %s",&imdiff->osc_start,units);
+	  sscanf(lgetcbftag(imdiff->header,"Angle_increment"),"%f %s",&imdiff->osc_range,units);
+	  sscanf(lgetcbftag(imdiff->header,"Detector_distance"),"%f %s",&imdiff->distance_mm,units);
+	  if (strcmp(units,"m")==0) {
+	    imdiff->distance_mm *= 1000.;
+	  }
+	  sscanf(lgetcbftag(imdiff->header,"Pixel_size"),"%g %s",&imdiff->pixel_size_mm,units);
+	  if (strcmp(units,"m")==0) {
+	    imdiff->pixel_size_mm *= 1000.;
+	  }
+	  sscanf(lgetcbftag(imdiff->header,"Beam_xy"),"%*c%f, %f%*c %s",&imdiff->beam_mm.x,&imdiff->beam_mm.y,units);
+	  if (strcmp(units,"pixels")==0) {
+	    imdiff->beam_mm.x *= imdiff->pixel_size_mm;
+	    imdiff->beam_mm.y *= imdiff->pixel_size_mm;
+	  }
+	  sscanf(lgetcbftag(imdiff->header,"Wavelength"),"%g %s",&imdiff->wavelength,units);
+	  if (strcmp(units,"nm")==0) {
+	    imdiff->wavelength /= 10.;
+	  }
+	  printf("osc_start,osc_range,distance_mm,pixel_size_mm,beam_mm.x,beam_mm.y,wavelength=%f,%f,%f,%f,%f,%f,%f\n",imdiff->osc_start,imdiff->osc_range,imdiff->distance_mm,imdiff->pixel_size_mm,imdiff->beam_mm.x,imdiff->beam_mm.y,imdiff->wavelength);
 	  size_t buf_length, padding;
 	  buf_length = atol(lgetcbftag(imdiff->header,"X-Binary-Size:"));
 	  padding = atol(lgetcbftag(imdiff->header,"X-Binary-Size-Padding:"));

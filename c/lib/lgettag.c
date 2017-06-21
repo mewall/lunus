@@ -49,6 +49,7 @@ const char * lgettag(const char *target,const char *tag)
   int len = pos_end-pos_begin-1;
   val = (char *)calloc(sizeof(char),len+1);
   memcpy(val,pos_begin+1,len);
+  val[len]=0;
   return(val);
 }
 
@@ -83,12 +84,13 @@ const char * lgetcbftag(const char *target,const char *tag)
     perror("\nImage header tag syntax not recognized\n\n");
     exit(6);
   }
-  if ((pos_end = strchr(pos_begin,'\r\n'))==NULL) {
+  if ((pos_end = strstr(pos_begin,"\r\n"))==NULL) {
     perror("\nImage header tag syntax not recognized\n\n");
     exit(6);
   }
   int len = pos_end-pos_begin-1;
   val = (char *)calloc(sizeof(char),len+1);
   memcpy(val,pos_begin+1,len);
+  val[len]=0;
   return(val);
 }
