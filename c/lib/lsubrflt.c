@@ -77,7 +77,7 @@ int lsubrflt(LAT3D *lat)
 	if ((r < lat->rfile_length) && 
 	    (lat->lattice[index] != lat->mask_tag)) {
 	  //    lat->lattice[index] -= lat->rfile[r];
-	  l = (int)r;
+	  l = (int)r + 1;
 	  if (rf>= tau[0] && rf <= tau[n-1]) {
 	    lat->lattice[index] -= lspleval(tau,c,&l,&kk,&rf,&jd);
 	  } else {
