@@ -56,9 +56,9 @@ int lminrlt(LAT3D *lat)
 	rfloat.z = lat->zscale * rvec.k;
 	r = (size_t)(sqrtf((rfloat.x*rfloat.x + rfloat.y*rfloat.y + 
 		       rfloat.z*rfloat.z) / rscale)+.5);
-	if (r > lat->rfile_length) lat->rfile_length = r;
 	if (lat->lattice[index] != lat->mask_tag) {
 	  //	  if (lat->lattice[index]<0) printf("%d,%f\n",(int)index,lat->lattice[index]);
+	  if (r >= lat->rfile_length) lat->rfile_length = r;
 	  if (ct[r] == 0) {
 	    lat->rfile[r] = lat->lattice[index];
 	    ct[r] = 1;
@@ -72,6 +72,14 @@ int lminrlt(LAT3D *lat)
       }
     }
   }
+  // If there are no counts at a given radius, mask the value
+
+  for (r=0;r<lat->rfile_length;r++) {
+    if (ct[r]==0) {
+      lat->rfile[r]=lat->mask_tag;
+    }
+  }
+
   free((size_t *)ct);
   CloseShop:
   return(return_value);

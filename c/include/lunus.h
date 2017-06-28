@@ -825,10 +825,15 @@ int lshim4lt(LAT3D *lat);
 int lshimlt(LAT3D *lat);
 int lsmthim(DIFFIMAGE *imdiff);
 int lsolidlt(LAT3D *lat);
+float lspleval(float *break__, float *coef, int *l, int *k, float *x,
+	       int *jderiv);
+int lspline(float *tau, float *c__, int *n, int *
+	    ibcbeg, int *ibcend);
 float lssqrFromIndex(LAT3D *lat);
 int lsubenvlt(LAT3D *lat1, LAT3D *lat2);
 int lsubim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lsublt(LAT3D *lat1, LAT3D *lat2);
+void lsubminlt(LAT3D *lat);
 int lsubrf(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lsubrfim(DIFFIMAGE *imdiff);
 int lsubrflt(LAT3D *lat);
