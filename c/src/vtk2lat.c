@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
 	  }
 	  break;
 	  default:
-	  printf("\n Usage: lat2vtk <input lattice> <output lattice>\n\n");
+	  printf("\n Usage: vtk2lat <input lattice> <output lattice>\n\n");
 	  exit(0);
 	}
   

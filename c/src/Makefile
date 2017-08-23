@@ -1,3 +1,4 @@
+C_HOME := /ando/HIV_RT_4C/lunus/c
 VPATH=${C_HOME}/src:${C_HOME}/lib:${C_HOME}/bin:${C_HOME}/include
 #CC=gcc-mp-4.8
 CC=gcc
@@ -21,6 +22,7 @@ all: \
 	avgpolim \
 	avgrf \
 	avgrim \
+	avgrim_aniso \
 	avgrlt \
 	avgsqim \
 	avsqrim \
@@ -43,7 +45,9 @@ all: \
 	culllt \
 	cutim \
 	dat2vtk \
+	debraggim \
 	decimap \
+	detectormask \
 	df2im \
 	dfrflt \
 	dfsqrlt \
@@ -52,6 +56,7 @@ all: \
 	divrf \
 	explt \
 	fftim \
+	fillim \
 	fillpixim \
 	fftlt \
 	fftwlt \
@@ -122,6 +127,7 @@ all: \
 	see \
 	seecat \
 	seesh \
+	setped \
 	settag \
 	shiftlt \
 	shiftsflt \
@@ -129,6 +135,7 @@ all: \
 	shimlt \
 	smoothim \
 	solidlt \
+	sqrtrf \
 	subenvlt \
 	subim \
 	sublt \
@@ -136,6 +143,7 @@ all: \
 	subrfim \
 	subrflt \
 	sumim \
+	sumrim \
 	sumlt \
 	sumresim \
 	sumrf \
@@ -182,6 +190,8 @@ avgrf:avgrf.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 avgrim:avgrim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+avgrim_aniso:avgrim_aniso.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 avgrlt:avgrlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 avgsqim:avgsqim.c ${DEPENDS}
@@ -226,7 +236,11 @@ cutim:cutim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 dat2vtk:dat2vtk.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+debraggim:debraggim.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 decimap:decimap.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+detectormask:detectormask.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 df2im:df2im.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -243,6 +257,8 @@ divrf:divrf.c ${DEPENDS}
 explt:explt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 fftim:fftim.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+fillim:fillim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 fillpixim:fillpixim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -384,6 +400,8 @@ seecat:seecat.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 seesh:seesh.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+setped:setped.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 settag:settag.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 shiftlt:shiftlt.c ${DEPENDS}
@@ -398,6 +416,8 @@ smoothim:smoothim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 solidlt:solidlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+sqrtrf:sqrtrf.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 subenvlt:subenvlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 subim:subim.c ${DEPENDS}
@@ -411,6 +431,8 @@ subrfim:subrfim.c ${DEPENDS}
 subrflt:subrflt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 sumim:sumim.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+sumrim:sumrim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 sumlt:sumlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -469,6 +491,7 @@ lavgim.o:lavgim.c mwmask.h
 lavgpolim.o:lavgpolim.c mwmask.h
 lavgrf.o:lavgrf.c mwmask.h
 lavgrim.o:lavgrim.c mwmask.h
+lavgrim_aniso.o:lavgrim_aniso.c mwmask.h
 lavgrlt.o:lavgrlt.c mwmask.h
 lavgsqim.o:lavgsqim.c mwmask.h
 lavsqrim.o:lavsqrim.c mwmask.h
@@ -487,6 +510,7 @@ lcpltmap.o:lcpltmap.c mwmask.h
 lcpmaplt.o:lcpmaplt.c mwmask.h
 lculllt.o:lculllt.c mwmask.h
 lcutim.o:lcutim.c mwmask.h
+ldebraggim.o:ldebraggim.c mwmask.h
 ldecimap.o:ldecimap.c mwmask.h
 ldf2im.o:ldf2im.c mwmask.h
 ldfrflt.o:ldfrflt.c mwmask.h
@@ -496,6 +520,7 @@ ldivlt.o:ldivlt.c mwmask.h
 ldivrf.o:ldivrf.c mwmask.h
 lexplt.o:lexplt.c mwmask.h
 lfft.o:lfft.c mwmask.h
+lfillim.o:lfillim.c mwmask.h
 lfillpixim.o:lfillpixim.c mwmask.h
 lfreeim.o:lfreeim.c mwmask.h
 lfreelt.o:lfreelt.c mwmask.h
@@ -534,6 +559,7 @@ lnign.o:lnign.c mwmask.h
 lnoiseim.o:lnoiseim.c mwmask.h
 lnormim.o:lnormim.c mwmask.h
 lnormlt.o:lnormlt.c mwmask.h
+lp6mmask.o:lp6mmask.c mwmask.h
 lpeakim.o:lpeakim.c mwmask.h
 lpolarim.o:lpolarim.c mwmask.h
 lpunch.o:lpunch.c mwmask.h
@@ -561,6 +587,7 @@ lrsccmap.o:lrsccmap.c mwmask.h
 lrsrlt.o:lrsrlt.c mwmask.h
 lscaleim.o:lscaleim.c mwmask.h
 lscalelt.o:lscalelt.c mwmask.h
+lsetped.o:lsetped.c mwmask.h
 lsettag.o:lsettag.c mwmask.h
 lshiftlt.o:lshiftlt.c mwmask.h
 lshiftsflt.o:lshiftsflt.c mwmask.h
@@ -569,6 +596,8 @@ lshimlt.o:lshimlt.c mwmask.h
 lsmoothrf.o:lsmoothrf.c mwmask.h
 lsmoothim.o:lsmoothim.c mwmask.h
 lsolidlt.o:lsolidlt.c mwmask.h
+lsqrtrf.o:lsqrtrf.c mwmask.h
+lsqsubim.o:lsqsubim.c mwmask.h
 lsubenvlt.o:lsubenvlt.c mwmask.h
 lsubim.o:lsubim.c mwmask.h
 lsublt.o:lsublt.c mwmask.h
@@ -576,6 +605,7 @@ lsubrf.o:lsubrf.c mwmask.h
 lsubrfim.o:lsubrfim.c mwmask.h
 lsubrflt.o:lsubrflt.c mwmask.h
 lsumim.o:lsumim.c mwmask.h
+lsumrim.o:lsumrim.c mwmask.h
 lsumlt.o:lsumlt.c mwmask.h
 lsumresim.o:lsumresim.c mwmask.h
 lsumrf.o:lsumrf.c mwmask.h
@@ -615,6 +645,7 @@ libmw.a: \
 	lavgpolim.o \
 	lavgrf.o \
 	lavgrim.o \
+	lavgrim_aniso.o \
 	lavgrlt.o \
 	lavgsqim.o \
 	lavsqrim.o \
@@ -633,6 +664,7 @@ libmw.a: \
 	lcpmaplt.o \
 	lculllt.o \
 	lcutim.o \
+	ldebraggim.o \
 	ldecimap.o \
 	ldf2im.o \
 	ldfrflt.o \
@@ -642,6 +674,7 @@ libmw.a: \
 	ldivrf.o \
 	lexplt.o \
 	lfft.o \
+	lfillim.o \
 	lfillpixim.o \
 	lfreeim.o \
 	lfreelt.o \
@@ -680,6 +713,7 @@ libmw.a: \
 	lnoiseim.o \
 	lnormim.o \
 	lnormlt.o \
+	lp6mmask.o \
 	lpeakim.o \
 	lpolarim.o \
 	lpunch.o \
@@ -707,6 +741,7 @@ libmw.a: \
 	lrsrlt.o \
 	lscaleim.o \
 	lscalelt.o \
+	lsetped.o \
 	lsettag.o \
 	lshiftlt.o \
 	lshiftsflt.o \
@@ -715,6 +750,8 @@ libmw.a: \
 	lsmoothim.o \
 	lsmoothrf.o \
 	lsolidlt.o \
+	lsqrtrf.o \
+	lsqsubim.o \
 	lsubenvlt.o \
 	lsubim.o \
 	lsublt.o \
@@ -722,6 +759,7 @@ libmw.a: \
 	lsubrfim.o \
 	lsubrflt.o \
 	lsumim.o \
+	lsumrim.o \
 	lsumlt.o \
 	lsumresim.o \
 	lsumrf.o \

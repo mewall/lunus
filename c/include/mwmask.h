@@ -8,6 +8,7 @@
 			65535
 	7/3/14		Change all tags to 1048577
 	sometime before 2/24/15: Change all tags to 65535
+    5/2/16: Changing ignore, overload, and punch tags to 65535, 65534, 65533 respectively.
 */
 
 
@@ -32,7 +33,7 @@
 
 /*#define EIGER				  /* for all Feb 2014 CHESS F1 data */
 /*#define P200K				  /* Pilatus 200k; CHESS June 2014 */
-#define P6M				  /* Pilatus 6M, lysozyme, CHESS Nov 2014 */
+#define P6M				  /* Pilatus 6M, lysozyme, CHESS July 2015 */
 
 /*
  * I/O specifications:
@@ -55,7 +56,7 @@
 #define DEFAULT_IMAGELENGTH 1048576	/* TV6 TIFF image #pixels */
 #define DEFAULT_VALUE_OFFSET 0          /* Default offset. 0 for TV6, PILATUS, 40 for ADXV .img */
 #define MAX_OVERLOADS 10000		/* Max # of overloads in an image */
-#define MAX_PEAKS 900000			/* Max # of peaks in an image */
+#define MAX_PEAKS 2000000			/* Max # of peaks in an image */
 #define DEFAULT_IMAGE_ORIGIN 512	/* Default x and y for image origin */
 
 /*
@@ -209,15 +210,15 @@ typedef short IMAGE_DATA_TYPE;
 #define DEFAULT_CASSETTE_ROTX -0.22         /* temp */
 #define DEFAULT_CASSETTE_ROTY -1.38         /* temp */
 #define DEFAULT_CASSETTE_ROTZ 0         /* temp */
-#define DEFAULT_OVERLOAD_TAG 0xffff	/* 65535 */
+#define DEFAULT_OVERLOAD_TAG 0xfffe	/* 65534 */
 #define DEFAULT_IGNORE_TAG 0xffff	/* 65535 */
-#define PUNCH_TAG 0xffff		/* 65535 */
+#define PUNCH_TAG 0xfffd		/* 65533 */
 #define MAX_IMAGE_DATA_VALUE 65535	/* not 1048577 due to img conversion */
 typedef unsigned short IMAGE_DATA_TYPE;
 #else
 #ifdef P6M
-#define DEFAULT_WAVELENGTH 0.6309       /* Wavelength for sncps */
-#define DEFAULT_DISTANCE_MM 400.0	/* Sample-detector distance in mm*/
+#define DEFAULT_WAVELENGTH 0.9774       /* Wavelength for sncps */
+#define DEFAULT_DISTANCE_MM 250.0	/* Sample-detector distance in mm*/
 #define DEFAULT_X_BEAM 41.72		/* Beam position in x (denzo) */
 #define DEFAULT_Y_BEAM 41.74		/* Beam position in y (denzo) */
 #define DEFAULT_CELL_A 79.2           /* A */
@@ -229,9 +230,9 @@ typedef unsigned short IMAGE_DATA_TYPE;
 #define DEFAULT_CASSETTE_ROTX -0.22         /* temp */
 #define DEFAULT_CASSETTE_ROTY -1.38         /* temp */
 #define DEFAULT_CASSETTE_ROTZ 0         /* temp */
-#define DEFAULT_OVERLOAD_TAG 0xffff	/* 65535 */
+#define DEFAULT_OVERLOAD_TAG 0xfffe	/* 65534 */
 #define DEFAULT_IGNORE_TAG 0xffff	/* 65535 */
-#define PUNCH_TAG 0xfffe		/* 65534 */
+#define PUNCH_TAG 0xfffd		/* 65533 */
 #define MAX_IMAGE_DATA_VALUE 65535	/* not 1048577 due to img conversion */
 typedef unsigned short IMAGE_DATA_TYPE;
 #endif
@@ -390,6 +391,7 @@ typedef struct
   float amplitude;              /* Amplitude of noise or fluctuation */
   float pitch;                  /* Pitch of fluctuation */
   struct xyzcoords q;
+  size_t tag;			/* Option tag for mathim, etc. */
 } DIFFIMAGE;
 
 /*

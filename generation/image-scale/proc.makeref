@@ -1,7 +1,7 @@
-#!/bin/csh -f -x
-tail +$2 $1 > tail.asc
+#!/bin/csh -f 
+tail -n +$2 $1 > tail.asc
 head -$3 tail.asc > tail.head.asc
-binasc 3 < tail.head.asc > tail.head.rf
+binasc 1 < tail.head.asc > tail.head.rf
 mv tail.head.rf reference.rf
 mulrf reference.rf reference.rf xx.rf
 avgrf xx.rf > xx.avg

@@ -42,6 +42,8 @@ int main(int argc, char *argv[])
 	
 	imagein = stdin;
 	imageout = stdout;
+	i = 0;
+	ii = 0;
 
 /*
  * Read information from input line:

@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
   if (strstr(buf,tag)==NULL) {
     char *tagstr;
     tagstr = (char *)malloc(1000);
-    sprintf(tagstr,"%s=%f;%c}  ",tag,tagval,0x0a);
+    sprintf(tagstr,"%s=%s;%c}  ",tag,tagval,0x0a);
     tagstr[strlen(tagstr)-2]=0x0c;
     tagstr[strlen(tagstr)-1]=0x0a;
     if (strchr(buf,0x7d)==NULL) {

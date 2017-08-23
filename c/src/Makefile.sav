@@ -1,3 +1,4 @@
+C_HOME := /ando/HIV_RT_4C/lunus/c
 VPATH=${C_HOME}/src:${C_HOME}/lib:${C_HOME}/bin:${C_HOME}/include
 #CC=gcc-mp-4.8
 CC=gcc
@@ -21,6 +22,7 @@ all: \
 	avgpolim \
 	avgrf \
 	avgrim \
+	avgrim_aniso \
 	avgrlt \
 	avgsqim \
 	avsqrim \
@@ -31,11 +33,9 @@ all: \
 	calcrmap \
 	calcrsf \
 	calcu \
-<<<<<<< HEAD
 	ccrim \
-=======
+	ccrim_full \
 	ccp4map2lat \
->>>>>>> v0.1a
 	ccrlt \
 	constim \
 	constlt \
@@ -45,7 +45,9 @@ all: \
 	culllt \
 	cutim \
 	dat2vtk \
+	debraggim \
 	decimap \
+	detectormask \
 	df2im \
 	dfrflt \
 	dfsqrlt \
@@ -76,12 +78,9 @@ all: \
 	lat2hkl \
 	lat2map \
 	lat2vtk \
-<<<<<<< HEAD
 	lowrim \
-=======
 	liquidcorrlt \
 	liquidfaclt \
->>>>>>> v0.1a
 	map2lat \
 	mapbound \
 	maskimg \
@@ -109,6 +108,7 @@ all: \
 	rad2s \
 	ratioim \
 	rbminrim \
+	resizelt \
 	revbytelt \
 	revyim \
 	rf2char \
@@ -117,21 +117,16 @@ all: \
 	rfaclt \
 	rmpixim \
 	rmpkim \
-<<<<<<< HEAD
 	rmsdim \
-=======
 	rotlt \
-<<<<<<< HEAD
->>>>>>> v0.1a
-=======
 	rsccmap \
->>>>>>> v0.1a
 	scaleim \
 	scalelt \
 	scalerf \
 	see \
 	seecat \
 	seesh \
+	setped \
 	settag \
 	shiftlt \
 	shiftsflt \
@@ -139,6 +134,7 @@ all: \
 	shimlt \
 	smoothim \
 	solidlt \
+	sqrtrf \
 	subenvlt \
 	subim \
 	sublt \
@@ -146,6 +142,7 @@ all: \
 	subrfim \
 	subrflt \
 	sumim \
+	sumrim \
 	sumlt \
 	sumresim \
 	sumrf \
@@ -192,6 +189,8 @@ avgrf:avgrf.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 avgrim:avgrim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+avgrim_aniso:avgrim_aniso.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 avgrlt:avgrlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 avgsqim:avgsqim.c ${DEPENDS}
@@ -212,11 +211,11 @@ calcrsf:calcrsf.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 calcu:calcu.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-<<<<<<< HEAD
 ccrim:ccrim.c ${DEPENDS}
-=======
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+ccrim_full:ccrim_full.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 ccp4map2lat:ccp4map2lat.c ${DEPENDS}
->>>>>>> v0.1a
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 ccrlt:ccrlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -236,7 +235,11 @@ cutim:cutim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 dat2vtk:dat2vtk.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+debraggim:debraggim.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 decimap:decimap.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+detectormask:detectormask.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 df2im:df2im.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -298,13 +301,11 @@ lat2map:lat2map.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 lat2vtk:lat2vtk.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-<<<<<<< HEAD
 lowrim:lowrim.c ${DEPENDS}
-=======
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 liquidcorrlt:liquidcorrlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 liquidfaclt:liquidfaclt.c ${DEPENDS}
->>>>>>> v0.1a
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 map2lat:map2lat.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -360,15 +361,15 @@ ratioim:ratioim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 rbminrim:rbminrim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+resizelt:resizelt.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 revbytelt:revbytelt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-<<<<<<< HEAD
 rf2char2:rf2char2.c ${DEPENDS}
-=======
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 revyim:revyim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 rf2char:rf2char.c ${DEPENDS}
->>>>>>> v0.1a
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 rf2lt:rf2lt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -378,11 +379,9 @@ rmpixim:rmpixim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 rmpkim:rmpkim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-<<<<<<< HEAD
 rmsdim:rmsdim.c ${DEPENDS}
-=======
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 rotlt:rotlt.c ${DEPENDS}
->>>>>>> v0.1a
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 rsccmap:rsccmap.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -398,6 +397,8 @@ seecat:seecat.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 seesh:seesh.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+setped:setped.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 settag:settag.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 shiftlt:shiftlt.c ${DEPENDS}
@@ -412,6 +413,8 @@ smoothim:smoothim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 solidlt:solidlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+sqrtrf:sqrtrf.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 subenvlt:subenvlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 subim:subim.c ${DEPENDS}
@@ -425,6 +428,8 @@ subrfim:subrfim.c ${DEPENDS}
 subrflt:subrflt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 sumim:sumim.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+sumrim:sumrim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 sumlt:sumlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -483,6 +488,7 @@ lavgim.o:lavgim.c mwmask.h
 lavgpolim.o:lavgpolim.c mwmask.h
 lavgrf.o:lavgrf.c mwmask.h
 lavgrim.o:lavgrim.c mwmask.h
+lavgrim_aniso.o:lavgrim_aniso.c mwmask.h
 lavgrlt.o:lavgrlt.c mwmask.h
 lavgsqim.o:lavgsqim.c mwmask.h
 lavsqrim.o:lavsqrim.c mwmask.h
@@ -490,6 +496,7 @@ lavsqrlt.o:lavsqrlt.c mwmask.h
 lbeamim.o:lbeamim.c mwmask.h
 lbuttim.o:lbuttim.c mwmask.h
 lccrim.o:lccrim.c mwmask.h
+lccrim_helper.o:lccrim_helper.c mwmask.h
 lccrlt.o:lccrlt.c mwmask.h
 lchbyte.o:lchbyte.c mwmask.h
 lconstim.o:lconstim.c mwmask.h
@@ -500,6 +507,7 @@ lcpltmap.o:lcpltmap.c mwmask.h
 lcpmaplt.o:lcpmaplt.c mwmask.h
 lculllt.o:lculllt.c mwmask.h
 lcutim.o:lcutim.c mwmask.h
+ldebraggim.o:ldebraggim.c mwmask.h
 ldecimap.o:ldecimap.c mwmask.h
 ldf2im.o:ldf2im.c mwmask.h
 ldfrflt.o:ldfrflt.c mwmask.h
@@ -526,13 +534,10 @@ linitim.o:linitim.c mwmask.h
 linitlt.o:linitlt.c mwmask.h
 linitmap.o:linitmap.c mwmask.h
 lintdfim.o:lintdfim.c mwmask.h
-<<<<<<< HEAD
 llowrim.o:llowrim.c mwmask.h
 lmathim.o:lmathim.c mwmask.h
-=======
 lliquidcorrlt.o:lliquidcorrlt.c mwmask.h
 lliquidfaclt.o:lliquidfaclt.c mwmask.h
->>>>>>> v0.1a
 lmattools.o:lmattools.c mwmask.h
 lmedim.o:lmedim.c mwmask.h
 lmin.o:lmin.c mwmask.h
@@ -550,17 +555,15 @@ lnign.o:lnign.c mwmask.h
 lnoiseim.o:lnoiseim.c mwmask.h
 lnormim.o:lnormim.c mwmask.h
 lnormlt.o:lnormlt.c mwmask.h
+lp6mmask.o:lp6mmask.c mwmask.h
 lpeakim.o:lpeakim.c mwmask.h
 lpolarim.o:lpolarim.c mwmask.h
 lpunch.o:lpunch.c mwmask.h
 lpunchim.o:lpunchim.c mwmask.h
 lratioim.o:lratioim.c mwmask.h
-<<<<<<< HEAD
 lrbminrim.o:lrbminrim.c mwmask.h
 lreadcbf.o:lreadcbf.c mwmask.h
-=======
 lreadcube.o:lreadcube.c mwmask.h
->>>>>>> v0.1a
 lreaddf.o:lreaddf.c mwmask.h
 lreadhkl.o:lreadhkl.c mwmask.h
 lreadim.o:lreadim.c mwmask.h
@@ -569,22 +572,18 @@ lreadlt.o:lreadlt.c mwmask.h
 lreadmap.o:lreadmap.c mwmask.h
 lreadrf.o:lreadrf.c mwmask.h
 lreadvtk.o:lreadvtk.c mwmask.h
+lresizelt.o:lresizelt.c mwmask.h
 lrevyim.o:lrevyim.c mwmask.h
 lrf2lt.o:lrf2lt.c mwmask.h
 lrfaclt.o:lrfaclt.c mwmask.h
 lrmpkim.o:lrmpkim.c mwmask.h
-<<<<<<< HEAD
 lrmsdim.o:lrmsdim.c mwmask.h
-=======
 lrotlt.o:lrotlt.c mwmask.h
-<<<<<<< HEAD
->>>>>>> v0.1a
-=======
 lrsccmap.o:lrsccmap.c mwmask.h
 lrsrlt.o:lrsrlt.c mwmask.h
->>>>>>> v0.1a
 lscaleim.o:lscaleim.c mwmask.h
 lscalelt.o:lscalelt.c mwmask.h
+lsetped.o:lsetped.c mwmask.h
 lsettag.o:lsettag.c mwmask.h
 lshiftlt.o:lshiftlt.c mwmask.h
 lshiftsflt.o:lshiftsflt.c mwmask.h
@@ -593,6 +592,8 @@ lshimlt.o:lshimlt.c mwmask.h
 lsmoothrf.o:lsmoothrf.c mwmask.h
 lsmoothim.o:lsmoothim.c mwmask.h
 lsolidlt.o:lsolidlt.c mwmask.h
+lsqrtrf.o:lsqrtrf.c mwmask.h
+lsqsubim.o:lsqsubim.c mwmask.h
 lsubenvlt.o:lsubenvlt.c mwmask.h
 lsubim.o:lsubim.c mwmask.h
 lsublt.o:lsublt.c mwmask.h
@@ -600,6 +601,7 @@ lsubrf.o:lsubrf.c mwmask.h
 lsubrfim.o:lsubrfim.c mwmask.h
 lsubrflt.o:lsubrflt.c mwmask.h
 lsumim.o:lsumim.c mwmask.h
+lsumrim.o:lsumrim.c mwmask.h
 lsumlt.o:lsumlt.c mwmask.h
 lsumresim.o:lsumresim.c mwmask.h
 lsumrf.o:lsumrf.c mwmask.h
@@ -639,6 +641,7 @@ libmw.a: \
 	lavgpolim.o \
 	lavgrf.o \
 	lavgrim.o \
+	lavgrim_aniso.o \
 	lavgrlt.o \
 	lavgsqim.o \
 	lavsqrim.o \
@@ -646,6 +649,7 @@ libmw.a: \
 	lbeamim.o \
 	lbuttim.o \
 	lccrim.o \
+	lccrim_helper.o \
 	lccrlt.o \
 	lchbyte.o \
 	lconstim.o \
@@ -656,6 +660,7 @@ libmw.a: \
 	lcpmaplt.o \
 	lculllt.o \
 	lcutim.o \
+	ldebraggim.o \
 	ldecimap.o \
 	ldf2im.o \
 	ldfrflt.o \
@@ -682,12 +687,9 @@ libmw.a: \
 	linitlt.o \
 	linitmap.o \
 	lintdfim.o \
-<<<<<<< HEAD
 	llowrim.o \
-=======
 	lliquidcorrlt.o \
 	lliquidfaclt.o \
->>>>>>> v0.1a
 	lmattools.o \
 	lmathim.o \
 	lmedim.o \
@@ -706,17 +708,15 @@ libmw.a: \
 	lnoiseim.o \
 	lnormim.o \
 	lnormlt.o \
+	lp6mmask.o \
 	lpeakim.o \
 	lpolarim.o \
 	lpunch.o \
 	lpunchim.o \
 	lratioim.o \
-<<<<<<< HEAD
 	lrbminrim.o \
 	lreadcbf.o \
-=======
 	lreadcube.o \
->>>>>>> v0.1a
 	lreaddf.o \
 	lreadhkl.o \
 	lreadim.o \
@@ -725,22 +725,18 @@ libmw.a: \
 	lreadmap.o \
 	lreadrf.o \
 	lreadvtk.o \
+	lresizelt.o \
 	lrevyim.o \
 	lrf2lt.o \
 	lrfaclt.o \
 	lrmpkim.o \
-<<<<<<< HEAD
 	lrmsdim.o \
-=======
 	lrotlt.o \
-<<<<<<< HEAD
->>>>>>> v0.1a
-=======
 	lrsccmap.o \
 	lrsrlt.o \
->>>>>>> v0.1a
 	lscaleim.o \
 	lscalelt.o \
+	lsetped.o \
 	lsettag.o \
 	lshiftlt.o \
 	lshiftsflt.o \
@@ -749,6 +745,8 @@ libmw.a: \
 	lsmoothim.o \
 	lsmoothrf.o \
 	lsolidlt.o \
+	lsqrtrf.o \
+	lsqsubim.o \
 	lsubenvlt.o \
 	lsubim.o \
 	lsublt.o \
@@ -756,6 +754,7 @@ libmw.a: \
 	lsubrfim.o \
 	lsubrflt.o \
 	lsumim.o \
+	lsumrim.o \
 	lsumlt.o \
 	lsumresim.o \
 	lsumrf.o \
