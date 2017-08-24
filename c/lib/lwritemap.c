@@ -45,7 +45,7 @@ int lwritemap(CCP4MAP *map)
   /*
    * Write map header info:
    */
-  if (map->header) {free(map->header);}
+  //  if (map->header) {free(map->header);}
   map->header = (void *)calloc(1024,sizeof(void)); // 256 4-byte words
   header_float = (float *)map->header;
   header_int = (int32_t *)map->header;

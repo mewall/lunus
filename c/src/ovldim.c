@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
   
   lgetovld(imdiff);
   
-  printf("Overload count: %d\n",imdiff->overload_count);
+  printf("Overload count: %ld\n",imdiff->overload_count);
 
   /*
    *  Step through the peak table and punch out holes in the image.

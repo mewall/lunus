@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
  */
 	upper_bound.r = DEFAULT_WINDOW_UPPER;
 	upper_bound.c = DEFAULT_WINDOW_UPPER;
-	lower_bound.c = DEFAULT_WINDOW_LOWER;
+	lower_bound.r = DEFAULT_WINDOW_LOWER;
 	lower_bound.c = DEFAULT_WINDOW_LOWER;
 	imagein = stdin;
 	imageout = stdout;
@@ -105,11 +105,11 @@ int main(int argc, char *argv[])
   }
 
 /*
- * Set window parameters:
+ * Set wpunchim parameters:
  */
 
-  imdiff->window_upper = upper_bound;
-  imdiff->window_lower = lower_bound;
+  imdiff->punchim_upper = upper_bound;
+  imdiff->punchim_lower = lower_bound;
 
 /*
  * Mark pixels outside window as ignored:

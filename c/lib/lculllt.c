@@ -38,14 +38,18 @@ int lculllt(LAT3D *lat)
   for(k = 0; k < lat->zvoxels; k++) {
     for(j = 0; j < lat->yvoxels; j++) {
       for (i = 0; i < lat->xvoxels; i++) {
-	rvec.i = i - lat->origin.i;
-	rvec.j = j - lat->origin.j;
-	rvec.k = k - lat->origin.k;
-	rfloat.x = lat->xscale * rvec.i;
-	rfloat.y = lat->yscale * rvec.j;
-	rfloat.z = lat->zscale * rvec.k;
-	r = (size_t)(sqrtf((rfloat.x*rfloat.x + rfloat.y*rfloat.y + 
-		       rfloat.z*rfloat.z) / rscale)+.5);
+	lat->index.i = i;
+	lat->index.j = j;
+	lat->index.k = k;
+	/* rvec.i = i - lat->origin.i; */
+	/* rvec.j = j - lat->origin.j; */
+	/* rvec.k = k - lat->origin.k; */
+	/* rfloat.x = lat->xscale * rvec.i; */
+	/* rfloat.y = lat->yscale * rvec.j; */
+	/* rfloat.z = lat->zscale * rvec.k; */
+	/* r = (size_t)(sqrtf((rfloat.x*rfloat.x + rfloat.y*rfloat.y +  */
+	/* 	       rfloat.z*rfloat.z) / rscale)+.5); */
+	r = (size_t)(sqrtf(lssqrFromIndex(lat)/rscale)+0.5);
 	if ((r < lat->inner_radius) || (r > lat->outer_radius)) {
 	  lat->lattice[index] = lat->mask_tag;
 	}

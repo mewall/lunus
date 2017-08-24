@@ -88,6 +88,8 @@ int main(int argc, char *argv[])
     exit(0);
   }
 
+  printf("Read the cube file\n");
+
 /*
  * Write lattice to output file:
  */

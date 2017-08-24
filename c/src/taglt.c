@@ -37,12 +37,13 @@ int main(int argc, char *argv[])
     *rfile;
   
   float
-    target_value;
+    target_value,tag_value;
 
 /*
  * Set input line defaults:
  */
 	target_value = 1.;
+	tag_value=lat->mask_tag;
 	latticein = stdin;
 	latticeout = stdout;
 
@@ -50,6 +51,8 @@ int main(int argc, char *argv[])
  * Read information from input line:
  */
 	switch(argc) {
+	case 5:
+	  tag_value = atof(argv[4]);
 	  case 4:
 	  target_value = atof(argv[3]);
 	  case 3:
@@ -103,6 +106,7 @@ int main(int argc, char *argv[])
  */
 
   lat->rfile[0] = target_value;
+  lat->rfile[1] = tag_value;
   ltaglt(lat);
 
 /*

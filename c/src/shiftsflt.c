@@ -107,11 +107,17 @@ int main(int argc, char *argv[])
    * Copy shift vector to lattice
    */
 
-  lat1->shift.x = shift.x*(float)lat1->xvoxels;
-  lat1->shift.y = shift.y*(float)lat1->yvoxels;
-  lat1->shift.x = shift.z*(float)lat1->zvoxels;
+  // The input shift units are fraction of unit cell. Change to number of grid points.
 
-  //  memcpy(&lat1->shift,&shift,sizeof(struct xyzcoords));
+  //MEW 12/15/2015 move change to grid points into lshiftsflt
+ 
+ //  lat1->shift.x = shift.x*(float)lat1->xvoxels;
+  //  lat1->shift.y = shift.y*(float)lat1->yvoxels;
+  //  lat1->shift.x = shift.z*(float)lat1->zvoxels;
+
+  lat1->shift = shift;
+
+  // memcpy(&lat1->shift,&shift,sizeof(struct xyzcoords));
 
   //  printf("lat->anisoU.xx = %f\n",lat->anisoU.xx);
 

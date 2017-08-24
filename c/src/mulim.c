@@ -1,4 +1,4 @@
-/* MULIM.C - Multiply two images pixel-by-pixel.
+/* MULCFIM.C - Multiply two images pixel-by-pixel.
    
    Author: Mike Wall
    Date: 4/27/94

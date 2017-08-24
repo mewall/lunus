@@ -36,7 +36,7 @@ echo "#" >> ${C_HOME}/src/$1
 echo "# Library functions:" >> ${C_HOME}/src/$1
 echo "#" >> ${C_HOME}/src/$1
 cd ${C_HOME}/lib
-ls -1 *.c | awk '{print substr($0,0,length()-2)".o:"$1" mwmask.h"}' >> ${C_HOME}/src/$1
+ls -1 *.c | awk '{print substr($0,0,length()-2)".o:"$1" lunus.h"}' >> ${C_HOME}/src/$1
 echo '.c.o:' >> ${C_HOME}/src/$1
 echo '$(CC) -c -o ${L}/$*.o $(CFLAGS) ${L}/$*.c' | awk '{print "\t"$0}' >> ${C_HOME}/src/$1
 #

@@ -22,8 +22,8 @@ int lpunchim(DIFFIMAGE *imdiff)
 
   for(r=0; r < imdiff->vpixels; r++) {
     for(c=0; c < imdiff->hpixels; c++) {
-      if ((r > imdiff->window_lower.r) && (r < imdiff->window_upper.r) && 
-	  (c > imdiff->window_lower.c) && (c < imdiff->window_upper.c)) {
+      if ((r > imdiff->punchim_lower.r) && (r < imdiff->punchim_upper.r) && 
+	  (c > imdiff->punchim_lower.c) && (c < imdiff->punchim_upper.c)) {
         imdiff->image[index] = imdiff->ignore_tag;
       }
       index++;

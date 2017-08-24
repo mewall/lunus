@@ -34,6 +34,5 @@ int lfreeim(DIFFIMAGE *imdiff)
     }
   }
   free((RDATA_DATA_TYPE *)imdiff->rdata);
-  free((DIFFUSE_FEATURE *)imdiff->feature);
   free((DIFFIMAGE *)imdiff);
 }

@@ -91,6 +91,7 @@ int lreadcube(CCP4MAP *map)
       dc = lmulscvec(BOHR,dc);
     }
   }
+  printf("...done\n");
   // Next read and discard atomic structure info
   for (index = 0;index<natoms;index++) {
       if ((fgets_status=fgets(inl,len_inl-1,map->infile)) == NULL) {
@@ -101,11 +102,23 @@ int lreadcube(CCP4MAP *map)
   }
   // Now read the data
 
+
   map->map_length = mapsz.i*mapsz.j*mapsz.k;
-  map->data_buf = (void *)realloc(map->data_buf,map->map_length*
+  printf("Allocating map of length %ld\n",map->map_length*sizeof(MAP_DATA_TYPE));
+  void *new_data_buf;
+  new_data_buf = (void *)malloc(map->map_length*
 					     sizeof(MAP_DATA_TYPE));
+  printf("Made it past malloc()\n");
+  if (new_data_buf != NULL) {
+    //    free(map->data_buf);
+    map->data_buf = new_data_buf;
+  } else {
+    printf("Failed to allocate map\n");
+    exit(0);
+  }
   map->data = (MAP_DATA_TYPE *)map->data_buf;
   index = 0;
+  printf("Reading the cube file...\n");
   while (index < map->map_length) {
     if ((fgets_status=fgets(inl,len_inl-1,map->infile)) != NULL) {      
       if ((token = strtok(inl," \n")) == NULL) {
@@ -130,7 +143,7 @@ int lreadcube(CCP4MAP *map)
 	goto CloseShop;
     }
   }
-  //  printf("...done\n");
+  printf("...done\n");
 
   float amin = map->data[0], amax = map->data[0], amean = 0.0, arms = 0.9;
 
@@ -192,7 +205,17 @@ int lreadcube(CCP4MAP *map)
   //  map->ispg = 4; // 23
   //  map->nsymbt = 160; // 24. Two lines of symmetry info
   map->machst = DEFAULT_MACHST;
-  map->symrec_buf = (void *)realloc(map->symrec_buf,(map->nsymbt+1)*sizeof(void));
+  void *new_symrec_buf;
+  printf("Allocating new symrec\n");
+  new_symrec_buf = (void *)malloc((map->nsymbt+1)*sizeof(void));
+  if (new_symrec_buf != NULL) {
+    //    free(map->symrec_buf);
+    map->symrec_buf = new_symrec_buf;
+  } else {
+    printf("Failed to allocate map\n");
+    exit(0);
+  }
+  printf("...done\n");
   map->symrec = (char *)map->symrec_buf;
   // Space group 1
   sprintf(&map->symrec[0],"X,Y,Z");

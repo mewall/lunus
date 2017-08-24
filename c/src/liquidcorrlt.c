@@ -1,4 +1,4 @@
-/* LIQUIDCORRLT.C - Generate a liquid-like motions prefactor lattice.
+/* LIQUIDCORRLT.C - Generate a liquid-like motions reciprocal-space smearing lattice.
    
    Author: Mike Wall
    Date: 2/28/95

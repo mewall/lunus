@@ -134,7 +134,7 @@ int main(int argc, char *argv[])
 		printf("Can't allocate image arrays.  Exiting.\n");
 		exit(0);
 	}
-/*	num_read = fread(header,sizeof(char),header_length,f_in);/***/
+	//	num_read = fread(header,sizeof(char),header_length,f_in);/***/
 
 	num_read = fread(instream,sizeof(short),imagelength,f_in);
 	if (ferror(f_in)) {
@@ -153,6 +153,7 @@ int main(int argc, char *argv[])
 		pix_value = (short)pix.one_byte.high_byte * 256 + 
 			(short)pix.one_byte.low_byte;
 		if ((pix_value < lower_threshold) || (pix_value >= 32766)) {
+		  printf("%d,",pix_value);
 			outstream[i] = 0;
 		}
 		else if (pix_value > upper_threshold) {
@@ -170,7 +171,7 @@ int main(int argc, char *argv[])
  * Write TIFF header:
  */
 
-/*	num_wrote = fwrite(header, sizeof(char), header_length, f_out);/***/
+	//	num_wrote = fwrite(header, sizeof(char), header_length, f_out);/***/
 
 	/*
  * Write the output image:

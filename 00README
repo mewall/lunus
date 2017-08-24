@@ -1,5 +1,6 @@
 LUNUS software for diffuse scattering from protein crystals
 Version 0.1a
+LA-CC-15-112
 
 Revised October 2012 to compile under Mac OS X 10.6.8 using gcc
 Support added for ADSC .img files

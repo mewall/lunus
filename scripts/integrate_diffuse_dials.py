@@ -17,17 +17,17 @@ def pixmap(Isize1,Isize2,this_frame_phi_deg,pixel_size,size1,size2,spot_conventi
   SXYC = spot_xy_convention(pixel_size*size1,pixel_size*size2)
   from spotfinder.math_support import pixels_to_mmPos
   # for parallel running; calculate the range that will be worked on by this process
-  chunksize = int(Isize1/nproc)
-  if (Isize1 % nproc !=  0):
+  chunksize = int(Isize2/nproc)
+  if (Isize2 % nproc !=  0):
     chunksize += 1
-  x1 = procid*chunksize
-  x2 = x1 + chunksize
-  if (x2>Isize1):
-    x2=Isize1
+  y1 = procid*chunksize
+  y2 = y1 + chunksize
+  if (y2>Isize2):
+    y2=Isize2
   # now walk through the pixels and create the list of data points
   raw_spot_input = flex.vec3_double()
-  for x in xrange(x1,x2): # slow dimension
-    for y in xrange(Isize2): # fast dimension
+  for y in xrange(y1,y2): # slow dimension
+    for x in xrange(Isize1): # fast dimension
       mmPos = pixels_to_mmPos(x,y,pixel_size)
       rawspot = (mmPos[0],mmPos[1],this_frame_phi_deg)
       transpot = SXYC.select(rawspot,spot_convention)
@@ -58,45 +58,72 @@ def procimg(Isize1,Isize2,scale,mask_tag,A_matrix,rvec,DATA,latxdim,latydim,latz
   if (y2>Isize2):
     y2=Isize2
   # walk through the data points and accumulate the integrated data in the lattice
-  for x in xrange(Isize1): # slow dimension
-    for y in xrange(y1,y2): # fast dimension
+  At = np.asarray(A_matrix.transpose()).reshape((3,3))
+#  print A_matrix
+#  print At
+#  print np.dot(np.asarray(rvec),At)[0]
+#  print A_matrix*col(rvec[0])
+  rvec_size = rvec.size()
+  for y in xrange(y1,y2): # fast dimension
+    Hlist = np.dot(np.asarray(rvec[y:rvec_size:Isize2]),At)
+    Hintlist = np.rint(Hlist)
+    dHlist = np.abs(Hlist - Hintlist)
+    vallist = np.asarray(DATA[y*Isize1:(y+1)*Isize1])
+    ilist = Hintlist[:,0] + i0
+    jlist = Hintlist[:,1] + j0
+    klist = Hintlist[:,2] + k0
+    maskrightvals = np.logical_and((vallist>0),(vallist != mask_tag))
+    masknotnearhkl = np.logical_or(np.logical_or((dHlist[:,0] >= 0.25),(dHlist[:,1] >= 0.25)),(dHlist[:,2] >= 0.25))
+    maskinbounds = np.logical_and(np.logical_and(np.logical_and(np.logical_and(np.logical_and(ilist>=0,jlist>=0),klist>=0),ilist<latxdim),jlist<latydim),klist<latzdim)
+    maskall = np.logical_and(np.logical_and(maskrightvals,masknotnearhkl),maskinbounds)
+#    indexlist = klist*latxdim*latydim + jlist*latxdim + ilist
+    indexlist = klist[maskall]*latxdim*latydim + jlist[maskall]*latxdim + ilist[maskall]
+#    print len(indexlist2)
+#    indexlist[maskall] = 0
+    valscalelist = vallist[maskall]*scale
+    for x in range(len(indexlist)): # slow dimension
+#        if maskall[x]:
+            lat[0][indexlist[x]] += valscalelist[x]
+            lat[1][indexlist[x]] += 1
       # calculate index into the data points
-      z = x*Isize2 + y
-      tmid = clock()
+#      z = x*Isize2 + y
+#      z = y*Isize1 + x
+#      tmid = time()
       # calculate h,k,l for this data point
-      H = A_matrix * col(rvec[z])
-      if (H[0]<0):
-        hh = int(H[0]-.5)
-      else:
-        hh = int(H[0]+.5)
-      if (H[1]<0):
-        kk = int(H[1]-.5)
-      else:
-        kk = int(H[1]+.5)
-      if (H[2]<0):
-        ll = int(H[2]-.5)
-      else:
-        ll = int(H[2]+.5)
+#      H = A_matrix * col(rvec[z])
+#      H = np.dot(np.asarray(rvec_list[x]),At)
+#      print H
+#      print A_matrix * col(rvec[z])
+#      hh = Hintlist[x][0]
+#      kk = Hintlist[x][1]
+#      ll = Hintlist[x][2]
       # calculate the displacement of this data point from the nearest Miller index
-      dh = abs(H[0]-hh)
-      dk = abs(H[1]-kk)
-      dl = abs(H[2]-ll)
+#      dh = dHlist[x][0]
+#      dk = dHlist[x][1]
+#      dl = dHlist[x][2]
 # labelit values
 #      val = int(DATA[(x,y)])
 #dials values
-      val = int(DATA[(y,x)])
+#      val = int(DATA[(y,x)])
+#      val = int(DATA[y*Isize1+x])
+#      val = vallist[x]
       # integrate the data only if it's not in the immediate neighborhood of a Bragg peak
-      if ((val != mask_tag) and (val != 0) and not((dh < .25) and (dk < .25) and (dl < .25))):
+#      if ((val != mask_tag) and (val != 0) and not((dh < .25) and (dk < .25) and (dl < .25))):
         # i, j, and k are indices into the lattice
-        i = hh+i0
-        j = kk+j0
-        k = ll+k0
-        if ((i>=0) and (j>=0) and (k>=0) and (i<latxdim) and (j<latydim) and (k<latzdim)):
-          index = k*latxdim*latydim + j*latxdim + i
-          if ((val>0)  and (val < 32767)):
+#      if (not maskwrongvals[x] and not masknearhkl[x]):
+#        i = ilist[x]
+#        j = jlist[x]
+#        k = klist[x]
+#        if ((i>=0) and (j>=0) and (k>=0) and (i<latxdim) and (j<latydim) and (k<latzdim)):
+#        if maskbounds[x]:
+#        index = indexlist[x]
+#          index = k*latxdim*latydim + j*latxdim + i
+#          if ((val>0)  and (val < 32767)):
             # accumulate the data for this lattice point. keep track of count for averaging
-            lat[0][index] += val*scale
-            lat[1][index] += 1
+#        lat[0][index] += val*scale
+#        lat[1][index] += 1
+#  lat[0][0] = 0
+#  lat[1][0] = 0
   return lat
 
 def procimgstar(args):
@@ -278,18 +305,26 @@ if __name__=="__main__":
   print target_cell,target_sg
 
   phil_scope_str='''
-     include scope dials.algorithms.peak_finding.spotfinder_factory.phil_scope
-     include scope dials.algorithms.indexing.indexer.index_only_phil_scope
-     include scope dials.algorithms.refinement.refiner.phil_scope
-     indexing.known_symmetry.unit_cell={0}
-       .type = unit_cell
-     indexing.known_symmetry.space_group={1}
-       .type = space_group
-     indexing.method=real_space_grid_search
-   '''
+    output {{
+      shoeboxes = True
+	.type = bool
+	.help = Save the raw pixel values inside the reflection shoeboxes.
+    }}
+    include scope dials.algorithms.spot_finding.factory.phil_scope
+    include scope dials.algorithms.indexing.indexer.index_only_phil_scope
+    include scope dials.algorithms.refinement.refiner.phil_scope
+    indexing.known_symmetry.unit_cell={0}
+      .type = unit_cell
+    indexing.known_symmetry.space_group={1}
+      .type = space_group
+  '''
   phil_scope = parse(phil_scope_str.format(target_cell,target_sg), process_includes=True)
-  params = phil_scope.extract()
-  params.refinement.parameterisation.crystal.scan_varying = False
+  from dials.util.options import OptionParser
+  parser = OptionParser(phil=phil_scope)
+  params, options = parser.parse_args(args=[], show_diff_phil=True)
+  params.refinement.parameterisation.scan_varying = False
+  params.indexing.method='real_space_grid_search'
+#  params.indexing.max_cell=800
 #  params.spotfinder.filter.min_spot_size=3
   
   filenames = []
@@ -317,14 +352,19 @@ if __name__=="__main__":
 #  from spotfinder.applications.xfel import cxi_phil
 #  horizons_phil = cxi_phil.cxi_versioned_extract(args)
 
+  print imagesets[0].get_beam()
+  print imagesets[2].get_beam()
+  print imagesets[0].get_beam() == imagesets[0].get_beam()
+  print imagesets[1].get_beam() == imagesets[0].get_beam()
+  print imagesets[2].get_beam() == imagesets[0].get_beam()
 
   print "indexing..."
-  t0 = clock()
+  t0 = time()
 # new dials
   idxr = indexer(observed, imagesets, params=working_params)
 # old labelit
 #  results = run_one_index_core(horizons_phil)
-  tel = clock()-t0
+  tel = time()-t0
   print "done indexing (",tel," sec)"
 
 # new dials
@@ -337,10 +377,10 @@ if __name__=="__main__":
   #horizons_phil = cxi_phil.cxi_versioned_extract(args)
 
   #print "indexing..."
-  #t0 = clock()
+  #t0 = time()
   # indexing can be slow. would be good to save indexing info and read it back in
   #results = run_one_index_core(horizons_phil)
-  #tel = clock()-t0
+  #tel = time()-t0
   #print "done indexing (",tel," sec)"
 
 
@@ -390,7 +430,7 @@ if __name__=="__main__":
 #    this_frame_phi_deg = I.deltaphi/2.0+I.osc_start
 
     print "Creating pixel map..."
-    t0 = clock()
+    t0 = time()
     """
     raw_spot_input_all = flex.vec3_double()
     Isize1 = I.size1
@@ -422,7 +462,7 @@ if __name__=="__main__":
     x_vectors = s1_vectors - beam.get_s0()
 
     print "there are ",x_vectors.size()," elements in x_vectors"
-    tel = clock()-t0
+    tel = time()-t0
     print "done creating pixel map (",tel," sec)"
     
 
@@ -443,7 +483,7 @@ if __name__=="__main__":
 
     print "Integrating diffuse scattering in parallel using ",nproc," processors..."
     telmatmul=0
-    t0 = clock()
+    t0 = time()
     latit = None
     for panel_id, panel in enumerate(detector):
       #    z = 0
@@ -453,9 +493,9 @@ if __name__=="__main__":
       print "Isize1 = ",Isize1,", Isize2 = ",Isize2
       print "there are ",Isize1*Isize2," pixels in this diffraction image"
       if len(detector) > 1:
-        DATA = img.get_raw_data(panel_id)
+        DATA = np.asarray(img.get_raw_data(panel_id))
       else:
-        DATA = img.get_raw_data()
+        DATA = np.asarray(img.get_raw_data())
       # prepare list of arguments to run procimg in parallel
       #tasks = [(Isize2,Isize2,scale,mask_tag,A_matrix,rvec,DATA,latxdim,latydim,latzdim,procid) for procid in range(nproc)]
       tasks = [(Isize1,Isize2,scale,mask_tag,A_matrix,x_vectors,DATA,latxdim,latydim,latzdim,procid) for procid in range(nproc)]
@@ -466,14 +506,14 @@ if __name__=="__main__":
         latit = tmp_latit
       else:
         latit += tmp_latit
-    tel = clock()-t0
+    tel = time()-t0
     print "done integrating diffuse scattering (",tel," sec wall clock time)"
-    t0 = clock()
+    t0 = time()
     # accumulate integration data into a single lattice
     for l in latit:
       lat = np.add(lat,l[0])
       ct = np.add(ct,l[1])
-    tel = clock()-t0
+    tel = time()-t0
     print "Took ",tel," secs to update the lattice"
 
   if (lattype == "mean"):
@@ -492,7 +532,7 @@ if __name__=="__main__":
   c_recip = 1./cellc
 
   print >>vtkfile,"# vtk DataFile Version 2.0"
-  print >>vtkfile,"Generated using labelit tools"
+  print >>vtkfile,"lattice_type=PR;unit_cell={0};space_group={1};".format(target_cell,target_sg)
   print >>vtkfile,"ASCII"
   print >>vtkfile,"DATASET STRUCTURED_POINTS"
   print >>vtkfile,"DIMENSIONS %d %d %d"%(latxdim,latydim,latzdim)
@@ -521,7 +561,7 @@ if __name__=="__main__":
       c_recip = 1./cellc
 
       print >>vtkfile,"# vtk DataFile Version 2.0"
-      print >>vtkfile,"Generated using labelit tools"
+      print >>vtkfile,"lattice_type=PR;unit_cell={0};space_group={1};".format(target_cell,target_sg)
       print >>vtkfile,"ASCII"
       print >>vtkfile,"DATASET STRUCTURED_POINTS"
       print >>vtkfile,"DIMENSIONS %d %d %d"%(latxdim,latydim,latzdim)

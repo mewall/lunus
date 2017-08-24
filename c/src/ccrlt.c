@@ -7,7 +7,7 @@
    
    Usage:
    		"ccrlt <input lattice 1> <input lattice 2> <output
-		rfile>"
+		rfile> <cell_str>"
 
 		Input is two 3D lattices.  Output is an rfile.  
    */
@@ -35,7 +35,9 @@ int main(int argc, char *argv[])
     *lat2;
   
   RFILE_DATA_TYPE *rfile;
-  
+
+  char cell_str[256];
+
   struct ijkcoords
     origin;
 
@@ -46,11 +48,13 @@ int main(int argc, char *argv[])
   latticein1 = stdin;
   latticein2 = stdin;
   outfile = stdout;
-  
+  strcpy(cell_str, "default");
   /*
    * Read information from input line:
    */
   switch(argc) {
+    case 5:
+      strcpy(cell_str,argv[4]);
     case 4:
     if ((outfile = fopen(argv[3],"wb")) == NULL) {
       printf("\nCan't open %s.\n\n",argv[3]);
@@ -79,7 +83,7 @@ int main(int argc, char *argv[])
     break;
     default:
     printf("\n Usage: ccrlt <input lattice 1> <input lattice 2>"
-	   "<output rfile>\n\n");
+	   "<output rfile> <cell_str>\n\n");
     exit(0);
   }
   
@@ -112,6 +116,8 @@ int main(int argc, char *argv[])
  * Generate the difference squared:
  */
 
+  strcpy(lat1->cell_str,cell_str);
+  lparsecelllt(lat1);
   lccrlt(lat1,lat2);
 
 /*

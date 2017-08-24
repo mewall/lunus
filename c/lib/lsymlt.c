@@ -3,6 +3,7 @@
    Author: Mike Wall
    Date: 2/28/95
          revised 5/10/2013 (add P222 group for PSII)
+   Modified by Alex Wolff to generalize to all Laue classes. Added 6/16/2017 MEW
    Version: 1.
    
    */
@@ -56,17 +57,38 @@ int lsymlt(LAT3D *lat)
 	rvec[0] = lijksub(index[0],lat->origin);
 	switch(lat->symop_index) {
 	case 0:
-	  lP1(lat);
+	  lLaue1(lat);
 	  break;
 	case 1:
-	  lP41(lat);
+	  lLaue2(lat);
 	  break;
 	case 2:
-	  lP222(lat);
+	  lLaue3(lat);
 	  break;
 	case 3:
-	  lPm_minus_3(lat);
+	  lLaue4(lat);
 	  break;
+	case 4:
+	  lLaue5(lat);
+	  break;
+  case 5:
+    lLaue6(lat);
+    break;
+  case 6:
+    lLaue7(lat);
+    break;
+  case 7:
+    lLaue8(lat);
+    break;
+  case 8:
+    lLaue9(lat);
+    break;
+  case 9:
+    lLaue10(lat);
+    break;
+  case 10:
+    lLaue11(lat);
+    break;
 	}
 	op_count = lat->symop_count;
 	ct = 0;

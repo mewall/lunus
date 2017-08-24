@@ -86,13 +86,15 @@ int lshimlt(LAT3D *lat)
 	    (kk >= 0) && (kk < lat->zvoxels)) {
 	  lattice_index = kk*lat->xyvoxels + jj*lat->xvoxels + ii;
 	  /*printf("%d,%d,%d -- %d\n",ii,jj,kk,(SHIM_DATA_TYPE)lat->lattice[lattice_index]);/***/
-	  if (ct == 0) {
-	    lat->shim[index] = (SHIM_DATA_TYPE)lat->lattice[lattice_index];
-	    ct = 1;
-	  } else {
-	    lat->shim[index] = (SHIM_DATA_TYPE)((ct*(float)lat->shim[index] +
-						 lat->lattice[lattice_index])/(float)(ct+1));
-	    ct++;
+	  if (lat->lattice[lattice_index]!= lat->mask_tag) {
+	    if (ct == 0) {
+	      lat->shim[index] = (SHIM_DATA_TYPE)lat->lattice[lattice_index];
+	      ct = 1;
+	    } else {
+	      lat->shim[index] = (SHIM_DATA_TYPE)((ct*(float)lat->shim[index] +
+						   lat->lattice[lattice_index])/(float)(ct+1));
+	      ct++;
+	    }
 	  }
 	}
       }

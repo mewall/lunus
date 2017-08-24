@@ -30,8 +30,10 @@ int lavgpolim(DIFFIMAGE *imdiff)
 	      rvec.x = c*imdiff->pixel_size_mm - imdiff->beam_mm.x;
 	      radius = (size_t)(sqrtf(rvec.x*rvec.x + rvec.y*rvec.y)/imdiff->pixel_size_mm+.5);
 	      if (radius >= imdiff->mask_inner_radius && radius <= imdiff->mask_outer_radius) {
-	      angle = (short)(acosf(((float)rvec.x)/((float)radius*imdiff->pixel_size_mm))*180./PI);
-	      if (rvec.y<0) angle += 180;
+		angle = (short)(atan2((float)rvec.y,(float)rvec.x)*180./PI+0.5);
+		//	      angle = (short)(acosf(((float)rvec.x)/((float)radius*imdiff->pixel_size_mm))*180./PI);
+		if (angle<0) angle = angle + 360;
+		//	      if (rvec.y<0) angle += 180;
 	      if ((imdiff->image[index] != imdiff->overload_tag) &&
 		  (imdiff->image[index] != imdiff->ignore_tag)) {
 		imdiff->rfile[angle] = (RFILE_DATA_TYPE)
