@@ -1,28 +1,39 @@
-C_HOME := /ando/HIV_RT_4C/lunus/c
 VPATH=${C_HOME}/src:${C_HOME}/lib:${C_HOME}/bin:${C_HOME}/include
 #CC=gcc-mp-4.8
+#CC=gcc-mp-5
 CC=gcc
-CFLAGS= -g -fopenmp -DUSE_OPENMP -L${C_HOME}/lib -I${C_HOME}/include
+#CC=cc
+FFTWROOT=/Users/mewall/packages/fftw-3.3.4/inst_dir
+FFTW_DIR=${FFTWROOT}/lib
+FFTW_INC=${FFTWROOT}/include
+#CFLAGS= -g -fopenmp -DUSE_FFTW -DUSE_OPENMP -L${FFTW_DIR} -I${FFTW_INC} -L${C_HOME}/lib -I${C_HOME}/include
+CFLAGS= -g -DUSE_FFTW -L${FFTW_DIR} -I${FFTW_INC} -L${C_HOME}/lib -I${C_HOME}/include
+#CFLAGS= -g -O2 -axcore-avx2,mic-avx512 -DUSE_MPI -qopenmp -DUSE_OPENMP -L${C_HOME}/lib -I${C_HOME}/include
+#CFLAGS= -g -O2 -axcore-avx2,mic-avx512 -L${C_HOME}/lib -I${C_HOME}/include
 #CFLAGS= -g -w -L${C_HOME}/lib -I${C_HOME}/include
 AR=ar
 ARFLAGS=-r
 SHELL=/bin/csh
 LIBS=-lmw -lm
-DEPENDS=mwmask.h libmw.a
+#LIBS=-lmw -lfftw3f -lm
+#LIBS=-lmw -Wl,--eh-frame-hdr -dynamic
+DEPENDS=lunus.h libmw.a
 S=${C_HOME}/src
 B=${C_HOME}/bin
 L=${C_HOME}/lib
 all: \
+	absim \
 	abslt \
 	addbeam \
 	addosc \
 	addtag \
+	anisolt \
 	anisoult \
 	avgim \
 	avgpolim \
 	avgrf \
-	avgrim \
 	avgrim_aniso \
+	avgrim \
 	avgrlt \
 	avgsqim \
 	avsqrim \
@@ -33,22 +44,24 @@ all: \
 	calcrmap \
 	calcrsf \
 	calcu \
+	ccp4map2lat \
 	ccrim \
 	ccrim_full \
-	ccp4map2lat \
 	ccrlt \
+	cfim \
 	constim \
 	constlt \
 	constrf \
 	corrlt \
 	cube2map \
+	cullconelt \
+	cullim \
 	culllt \
+	cullreslt \
 	cutim \
 	dat2vtk \
 	debraggim \
-	decimap \
 	detectormask \
-	df2im \
 	dfrflt \
 	dfsqrlt \
 	diffim \
@@ -56,32 +69,33 @@ all: \
 	divrf \
 	explt \
 	fftim \
-	fillim \
-	fillpixim \
 	fftlt \
 	fftwlt \
+	fillim \
+	fillpixim \
 	filter \
 	fobsmap \
 	ftfltim \
 	gausslt \
 	gencmd \
-	genlat \
 	genmap \
 	getrim \
-	gmparse \
+	harsf \
 	hdrlt \
 	headc \
 	histim \
 	histlt \
+	hkl2lat \
 	hkl2vtk \
-	intdfim \
-	intimdf \
+	intxdslt \
 	lat2hkl \
 	lat2map \
 	lat2vtk \
-	lowrim \
 	liquidcorrlt \
 	liquidfaclt \
+	lowrim \
+	lunus \
+	makelt \
 	map2lat \
 	mapbound \
 	maskimg \
@@ -91,11 +105,13 @@ all: \
 	minrlt \
 	mirrorlt \
 	modeim \
+	mulcfim \
 	muldwflt \
 	mulim \
 	mullt \
 	mulrf \
 	mulrfim \
+	mulscim \
 	mulsclt \
 	nign \
 	noiseim \
@@ -108,12 +124,13 @@ all: \
 	punchim \
 	rad2s \
 	ratioim \
+	raw2img \
 	rbminrim \
 	resizelt \
 	revbytelt \
 	revyim \
-	rf2char \
 	rf2char2 \
+	rf2char \
 	rf2lt \
 	rfaclt \
 	rmpixim \
@@ -121,9 +138,11 @@ all: \
 	rmsdim \
 	rotlt \
 	rsccmap \
+	samplt \
 	scaleim \
 	scalelt \
 	scalerf \
+	scalerfim \
 	see \
 	seecat \
 	seesh \
@@ -134,21 +153,26 @@ all: \
 	shim4lt \
 	shimlt \
 	smoothim \
+	smthim \
 	solidlt \
+	splintrf \
 	sqrtrf \
 	subenvlt \
 	subim \
 	sublt \
+	subminlt \
 	subrf \
 	subrfim \
 	subrflt \
 	sumim \
-	sumrim \
 	sumlt \
 	sumresim \
 	sumrf \
+	sumrim \
+	sumscim \
 	swapmw \
 	symlt \
+	symminlt \
 	tagim \
 	taglt \
 	tagneg \
@@ -161,17 +185,19 @@ all: \
 	transmap \
 	tst3d \
 	vasp2xtal \
+	vtk2cube \
 	vtk2lat \
 	waveim \
 	windim \
 	writehdr \
 	xflt \
 	xfmask \
-	xpl2mw \
 	libmw.a
 #
 # Executables:
 #
+absim:absim.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 abslt:abslt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 addbeam:addbeam.c ${DEPENDS}
@@ -179,6 +205,8 @@ addbeam:addbeam.c ${DEPENDS}
 addosc:addosc.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 addtag:addtag.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+anisolt:anisolt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 anisoult:anisoult.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -188,9 +216,9 @@ avgpolim:avgpolim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 avgrf:avgrf.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-avgrim:avgrim.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 avgrim_aniso:avgrim_aniso.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+avgrim:avgrim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 avgrlt:avgrlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -212,13 +240,15 @@ calcrsf:calcrsf.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 calcu:calcu.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+ccp4map2lat:ccp4map2lat.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 ccrim:ccrim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 ccrim_full:ccrim_full.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-ccp4map2lat:ccp4map2lat.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 ccrlt:ccrlt.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+cfim:cfim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 constim:constim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -230,7 +260,13 @@ corrlt:corrlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 cube2map:cube2map.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+cullconelt:cullconelt.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+cullim:cullim.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 culllt:culllt.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+cullreslt:cullreslt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 cutim:cutim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -238,11 +274,7 @@ dat2vtk:dat2vtk.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 debraggim:debraggim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-decimap:decimap.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 detectormask:detectormask.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-df2im:df2im.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 dfrflt:dfrflt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -258,13 +290,13 @@ explt:explt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 fftim:fftim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-fillim:fillim.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-fillpixim:fillpixim.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 fftlt:fftlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 fftwlt:fftwlt.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+fillim:fillim.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+fillpixim:fillpixim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 filter:filter.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -276,13 +308,11 @@ gausslt:gausslt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 gencmd:gencmd.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-genlat:genlat.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 genmap:genmap.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 getrim:getrim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-gmparse:gmparse.c ${DEPENDS}
+harsf:harsf.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 hdrlt:hdrlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -292,11 +322,11 @@ histim:histim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 histlt:histlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+hkl2lat:hkl2lat.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 hkl2vtk:hkl2vtk.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-intdfim:intdfim.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-intimdf:intimdf.c ${DEPENDS}
+intxdslt:intxdslt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 lat2hkl:lat2hkl.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -304,11 +334,15 @@ lat2map:lat2map.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 lat2vtk:lat2vtk.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-lowrim:lowrim.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 liquidcorrlt:liquidcorrlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 liquidfaclt:liquidfaclt.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+lowrim:lowrim.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+lunus:lunus.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+makelt:makelt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 map2lat:map2lat.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -328,6 +362,8 @@ mirrorlt:mirrorlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 modeim:modeim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+mulcfim:mulcfim.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 muldwflt:muldwflt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 mulim:mulim.c ${DEPENDS}
@@ -337,6 +373,8 @@ mullt:mullt.c ${DEPENDS}
 mulrf:mulrf.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 mulrfim:mulrfim.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+mulscim:mulscim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 mulsclt:mulsclt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -362,15 +400,17 @@ rad2s:rad2s.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 ratioim:ratioim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+raw2img:raw2img.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 rbminrim:rbminrim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 resizelt:resizelt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 revbytelt:revbytelt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-rf2char2:rf2char2.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 revyim:revyim.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+rf2char2:rf2char2.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 rf2char:rf2char.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -388,11 +428,15 @@ rotlt:rotlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 rsccmap:rsccmap.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+samplt:samplt.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 scaleim:scaleim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 scalelt:scalelt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 scalerf:scalerf.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+scalerfim:scalerfim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 see:see.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -414,7 +458,11 @@ shimlt:shimlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 smoothim:smoothim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+smthim:smthim.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 solidlt:solidlt.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+splintrf:splintrf.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 sqrtrf:sqrtrf.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -424,6 +472,8 @@ subim:subim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 sublt:sublt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+subminlt:subminlt.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 subrf:subrf.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 subrfim:subrfim.c ${DEPENDS}
@@ -432,25 +482,29 @@ subrflt:subrflt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 sumim:sumim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-sumrim:sumrim.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 sumlt:sumlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 sumresim:sumresim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 sumrf:sumrf.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+sumrim:sumrim.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+sumscim:sumscim.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 swapmw:swapmw.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 symlt:symlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-tag_overloads:tag_overloads.c ${DEPENDS}
+symminlt:symminlt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 tagim:tagim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 taglt:taglt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 tagneg:tagneg.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+tag_overloads:tag_overloads.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 tailc:tailc.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
@@ -468,6 +522,8 @@ tst3d:tst3d.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 vasp2xtal:vasp2xtal.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+vtk2cube:vtk2cube.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 vtk2lat:vtk2lat.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 waveim:waveim.c ${DEPENDS}
@@ -480,181 +536,203 @@ xflt:xflt.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 xfmask:xfmask.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
-xpl2mw:xpl2mw.c ${DEPENDS}
-	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 #
 # Library functions:
 #
-labslt.o:labslt.c mwmask.h
-lanisoult.o:lanisoult.c mwmask.h
-lavgim.o:lavgim.c mwmask.h
-lavgpolim.o:lavgpolim.c mwmask.h
-lavgrf.o:lavgrf.c mwmask.h
-lavgrim.o:lavgrim.c mwmask.h
-lavgrim_aniso.o:lavgrim_aniso.c mwmask.h
-lavgrlt.o:lavgrlt.c mwmask.h
-lavgsqim.o:lavgsqim.c mwmask.h
-lavsqrim.o:lavsqrim.c mwmask.h
-lavsqrlt.o:lavsqrlt.c mwmask.h
-lbeamim.o:lbeamim.c mwmask.h
-lbuttim.o:lbuttim.c mwmask.h
-lccrim.o:lccrim.c mwmask.h
-lccrim_helper.o:lccrim_helper.c mwmask.h
-lccrlt.o:lccrlt.c mwmask.h
-lchbyte.o:lchbyte.c mwmask.h
-lconstim.o:lconstim.c mwmask.h
-lconstlt.o:lconstlt.c mwmask.h
-lconstrf.o:lconstrf.c mwmask.h
-lcorrlt.o:lcorrlt.c mwmask.h
-lcpltmap.o:lcpltmap.c mwmask.h
-lcpmaplt.o:lcpmaplt.c mwmask.h
-lculllt.o:lculllt.c mwmask.h
-lcutim.o:lcutim.c mwmask.h
-ldebraggim.o:ldebraggim.c mwmask.h
-ldecimap.o:ldecimap.c mwmask.h
-ldf2im.o:ldf2im.c mwmask.h
-ldfrflt.o:ldfrflt.c mwmask.h
-ldfsqrlt.o:ldfsqrlt.c mwmask.h
-ldiffim.o:ldiffim.c mwmask.h
-ldivlt.o:ldivlt.c mwmask.h
-ldivrf.o:ldivrf.c mwmask.h
-lexplt.o:lexplt.c mwmask.h
-lfft.o:lfft.c mwmask.h
-lfillim.o:lfillim.c mwmask.h
-lfillpixim.o:lfillpixim.c mwmask.h
-lfreeim.o:lfreeim.c mwmask.h
-lfreelt.o:lfreelt.c mwmask.h
-lfrmsdim.o:lfrmsdim.c mwmask.h
-lgausslt.o:lgausslt.c mwmask.h
-lgensv.o:lgensv.c mwmask.h
-lgetanls.o:lgetanls.c mwmask.h
-lgetmat.o:lgetmat.c mwmask.h
-lgetovld.o:lgetovld.c mwmask.h
-lgetpix.o:lgetpix.c mwmask.h
-lgetpks.o:lgetpks.c mwmask.h
-lgetrim.o:lgetrim.c mwmask.h
-lgettag.o:lgettag.c mwmask.h
-linitim.o:linitim.c mwmask.h
-linitlt.o:linitlt.c mwmask.h
-linitmap.o:linitmap.c mwmask.h
-lintdfim.o:lintdfim.c mwmask.h
-llowrim.o:llowrim.c mwmask.h
-lmathim.o:lmathim.c mwmask.h
-lliquidcorrlt.o:lliquidcorrlt.c mwmask.h
-lliquidfaclt.o:lliquidfaclt.c mwmask.h
-lmattools.o:lmattools.c mwmask.h
-lmedim.o:lmedim.c mwmask.h
-lmin.o:lmin.c mwmask.h
-lminrim.o:lminrim.c mwmask.h
-lminrlt.o:lminrlt.c mwmask.h
-lmirrorlt.o:lmirrorlt.c mwmask.h
-lmodeim.o:lmodeim.c mwmask.h
-lmuldwflt.o:lmuldwflt.c mwmask.h
-lmulim.o:lmulim.c mwmask.h
-lmullt.o:lmullt.c mwmask.h
-lmulrf.o:lmulrf.c mwmask.h
-lmulrfim.o:lmulrfim.c mwmask.h
-lmulsclt.o:lmulsclt.c mwmask.h
-lnign.o:lnign.c mwmask.h
-lnoiseim.o:lnoiseim.c mwmask.h
-lnormim.o:lnormim.c mwmask.h
-lnormlt.o:lnormlt.c mwmask.h
-lp6mmask.o:lp6mmask.c mwmask.h
-lpeakim.o:lpeakim.c mwmask.h
-lpolarim.o:lpolarim.c mwmask.h
-lpunch.o:lpunch.c mwmask.h
-lpunchim.o:lpunchim.c mwmask.h
-lratioim.o:lratioim.c mwmask.h
-lrbminrim.o:lrbminrim.c mwmask.h
-lreadcbf.o:lreadcbf.c mwmask.h
-lreadcube.o:lreadcube.c mwmask.h
-lreaddf.o:lreaddf.c mwmask.h
-lreadhkl.o:lreadhkl.c mwmask.h
-lreadim.o:lreadim.c mwmask.h
-lreadim_orig.o:lreadim_orig.c mwmask.h
-lreadlt.o:lreadlt.c mwmask.h
-lreadmap.o:lreadmap.c mwmask.h
-lreadrf.o:lreadrf.c mwmask.h
-lreadvtk.o:lreadvtk.c mwmask.h
-lresizelt.o:lresizelt.c mwmask.h
-lrevyim.o:lrevyim.c mwmask.h
-lrf2lt.o:lrf2lt.c mwmask.h
-lrfaclt.o:lrfaclt.c mwmask.h
-lrmpkim.o:lrmpkim.c mwmask.h
-lrmsdim.o:lrmsdim.c mwmask.h
-lrotlt.o:lrotlt.c mwmask.h
-lrsccmap.o:lrsccmap.c mwmask.h
-lrsrlt.o:lrsrlt.c mwmask.h
-lscaleim.o:lscaleim.c mwmask.h
-lscalelt.o:lscalelt.c mwmask.h
-lsetped.o:lsetped.c mwmask.h
-lsettag.o:lsettag.c mwmask.h
-lshiftlt.o:lshiftlt.c mwmask.h
-lshiftsflt.o:lshiftsflt.c mwmask.h
-lshim4lt.o:lshim4lt.c mwmask.h
-lshimlt.o:lshimlt.c mwmask.h
-lsmoothrf.o:lsmoothrf.c mwmask.h
-lsmoothim.o:lsmoothim.c mwmask.h
-lsolidlt.o:lsolidlt.c mwmask.h
-lsqrtrf.o:lsqrtrf.c mwmask.h
-lsqsubim.o:lsqsubim.c mwmask.h
-lsubenvlt.o:lsubenvlt.c mwmask.h
-lsubim.o:lsubim.c mwmask.h
-lsublt.o:lsublt.c mwmask.h
-lsubrf.o:lsubrf.c mwmask.h
-lsubrfim.o:lsubrfim.c mwmask.h
-lsubrflt.o:lsubrflt.c mwmask.h
-lsumim.o:lsumim.c mwmask.h
-lsumrim.o:lsumrim.c mwmask.h
-lsumlt.o:lsumlt.c mwmask.h
-lsumresim.o:lsumresim.c mwmask.h
-lsumrf.o:lsumrf.c mwmask.h
-lsymlib.o:lsymlib.c mwmask.h
-lsymlt.o:lsymlt.c mwmask.h
-ltagim.o:ltagim.c mwmask.h
-ltaglt.o:ltaglt.c mwmask.h
-lthrshim.o:lthrshim.c mwmask.h
-lthrshlt.o:lthrshlt.c mwmask.h
-ltordata.o:ltordata.c mwmask.h
-ltranslt.o:ltranslt.c mwmask.h
-ltransmap.o:ltransmap.c mwmask.h
-lupdbd.o:lupdbd.c mwmask.h
-lwaveim.o:lwaveim.c mwmask.h
-lwindim.o:lwindim.c mwmask.h
-lwritedf.o:lwritedf.c mwmask.h
-lwritehkl.o:lwritehkl.c mwmask.h
-lwriteim.o:lwriteim.c mwmask.h
-lwritelt.o:lwritelt.c mwmask.h
-lwritemap.o:lwritemap.c mwmask.h
-lwriterf.o:lwriterf.c mwmask.h
-lwritesh.o:lwritesh.c mwmask.h
-lwritevtk.o:lwritevtk.c mwmask.h
-lxavgr.o:lxavgr.c mwmask.h
-lxavgrim.o:lxavgrim.c mwmask.h
-lxflt.o:lxflt.c mwmask.h
-lxfmask.o:lxfmask.c mwmask.h
+labsim.o:labsim.c lunus.h
+labslt.o:labslt.c lunus.h
+lanisolt.o:lanisolt.c lunus.h
+lanisoult.o:lanisoult.c lunus.h
+lavgim.o:lavgim.c lunus.h
+lavgpolim.o:lavgpolim.c lunus.h
+lavgrf.o:lavgrf.c lunus.h
+lavgrim_aniso.o:lavgrim_aniso.c lunus.h
+lavgrim.o:lavgrim.c lunus.h
+lavgrlt.o:lavgrlt.c lunus.h
+lavgsqim.o:lavgsqim.c lunus.h
+lavsqrim.o:lavsqrim.c lunus.h
+lavsqrlt.o:lavsqrlt.c lunus.h
+lbeamim.o:lbeamim.c lunus.h
+lbuttim.o:lbuttim.c lunus.h
+lcalcrsf.o:lcalcrsf.c lunus.h
+lcbftool.o:lcbftool.c lunus.h
+lccrim.o:lccrim.c lunus.h
+lccrim_helper.o:lccrim_helper.c lunus.h
+lccrlt.o:lccrlt.c lunus.h
+lcfim.o:lcfim.c lunus.h
+lchbyte.o:lchbyte.c lunus.h
+lconstim.o:lconstim.c lunus.h
+lconstlt.o:lconstlt.c lunus.h
+lconstrf.o:lconstrf.c lunus.h
+lcorrlt.o:lcorrlt.c lunus.h
+lcpltmap.o:lcpltmap.c lunus.h
+lcpmaplt.o:lcpmaplt.c lunus.h
+lcullconelt.o:lcullconelt.c lunus.h
+lcullim.o:lcullim.c lunus.h
+lculllt.o:lculllt.c lunus.h
+lcullreslt.o:lcullreslt.c lunus.h
+lcutim.o:lcutim.c lunus.h
+ldebraggim.o:ldebraggim.c lunus.h
+ldfrflt.o:ldfrflt.c lunus.h
+ldfsqrlt.o:ldfsqrlt.c lunus.h
+ldiffim.o:ldiffim.c lunus.h
+ldivlt.o:ldivlt.c lunus.h
+ldivrf.o:ldivrf.c lunus.h
+lexplt.o:lexplt.c lunus.h
+lfft.o:lfft.c lunus.h
+lfillim.o:lfillim.c lunus.h
+lfillpixim.o:lfillpixim.c lunus.h
+lfreeim.o:lfreeim.c lunus.h
+lfreelt.o:lfreelt.c lunus.h
+lfrmsdim.o:lfrmsdim.c lunus.h
+lgausslt.o:lgausslt.c lunus.h
+lgensv.o:lgensv.c lunus.h
+lgetanls.o:lgetanls.c lunus.h
+lgetmat.o:lgetmat.c lunus.h
+lgetovld.o:lgetovld.c lunus.h
+lgetpix.o:lgetpix.c lunus.h
+lgetpks.o:lgetpks.c lunus.h
+lgetrim.o:lgetrim.c lunus.h
+lgettag.o:lgettag.c lunus.h
+linitim.o:linitim.c lunus.h
+linitlt.o:linitlt.c lunus.h
+linitmap.o:linitmap.c lunus.h
+linitxs.o:linitxs.c lunus.h
+lintxdslt.o:lintxdslt.c lunus.h
+lliquidcorrlt.o:lliquidcorrlt.c lunus.h
+lliquidfaclt.o:lliquidfaclt.c lunus.h
+llowrim.o:llowrim.c lunus.h
+lmathim.o:lmathim.c lunus.h
+lmattools.o:lmattools.c lunus.h
+lmedim.o:lmedim.c lunus.h
+lmin.o:lmin.c lunus.h
+lminrim.o:lminrim.c lunus.h
+lminrlt.o:lminrlt.c lunus.h
+lmirrorlt.o:lmirrorlt.c lunus.h
+lmodeim.o:lmodeim.c lunus.h
+lmulcfim.o:lmulcfim.c lunus.h
+lmuldwflt.o:lmuldwflt.c lunus.h
+lmulim.o:lmulim.c lunus.h
+lmullt.o:lmullt.c lunus.h
+lmulrf.o:lmulrf.c lunus.h
+lmulrfim.o:lmulrfim.c lunus.h
+lmulscim.o:lmulscim.c lunus.h
+lmulsclt.o:lmulsclt.c lunus.h
+lnign.o:lnign.c lunus.h
+lnoiseim.o:lnoiseim.c lunus.h
+lnormim.o:lnormim.c lunus.h
+lnormlt.o:lnormlt.c lunus.h
+lp6mmask.o:lp6mmask.c lunus.h
+lparallel.o:lparallel.c lunus.h
+lparsecelllt.o:lparsecelllt.c lunus.h
+lpeakim.o:lpeakim.c lunus.h
+lpolarim.o:lpolarim.c lunus.h
+lpunch.o:lpunch.c lunus.h
+lpunchim.o:lpunchim.c lunus.h
+lratioim.o:lratioim.c lunus.h
+lrbminrim.o:lrbminrim.c lunus.h
+lreadcbf.o:lreadcbf.c lunus.h
+lreadcube.o:lreadcube.c lunus.h
+lreadhkl.o:lreadhkl.c lunus.h
+lreadim.o:lreadim.c lunus.h
+lreadim_orig.o:lreadim_orig.c lunus.h
+lreadlt.o:lreadlt.c lunus.h
+lreadmap.o:lreadmap.c lunus.h
+lreadrf.o:lreadrf.c lunus.h
+lreadvtk.o:lreadvtk.c lunus.h
+lreadxs.o:lreadxs.c lunus.h
+lresizelt.o:lresizelt.c lunus.h
+lrevyim.o:lrevyim.c lunus.h
+lrf2lt.o:lrf2lt.c lunus.h
+lrfaclt.o:lrfaclt.c lunus.h
+lrmpkim.o:lrmpkim.c lunus.h
+lrmsdim.o:lrmsdim.c lunus.h
+lrotlt.o:lrotlt.c lunus.h
+lrsccmap.o:lrsccmap.c lunus.h
+lrsrlt.o:lrsrlt.c lunus.h
+lsamplt.o:lsamplt.c lunus.h
+lscaleim.o:lscaleim.c lunus.h
+lscalelt.o:lscalelt.c lunus.h
+lscalerfim.o:lscalerfim.c lunus.h
+lsetped.o:lsetped.c lunus.h
+lsettag.o:lsettag.c lunus.h
+lshiftlt.o:lshiftlt.c lunus.h
+lshiftsflt.o:lshiftsflt.c lunus.h
+lshim4lt.o:lshim4lt.c lunus.h
+lshimlt.o:lshimlt.c lunus.h
+lsmoothim.o:lsmoothim.c lunus.h
+lsmoothrf.o:lsmoothrf.c lunus.h
+lsmthim.o:lsmthim.c lunus.h
+lsolidlt.o:lsolidlt.c lunus.h
+lspline.o:lspline.c lunus.h
+lsqrtrf.o:lsqrtrf.c lunus.h
+lsqsubim.o:lsqsubim.c lunus.h
+lsubenvlt.o:lsubenvlt.c lunus.h
+lsubim.o:lsubim.c lunus.h
+lsublt.o:lsublt.c lunus.h
+lsubminlt.o:lsubminlt.c lunus.h
+lsubrf.o:lsubrf.c lunus.h
+lsubrfim.o:lsubrfim.c lunus.h
+lsubrflt.o:lsubrflt.c lunus.h
+lsumim.o:lsumim.c lunus.h
+lsumlt.o:lsumlt.c lunus.h
+lsumresim.o:lsumresim.c lunus.h
+lsumrf.o:lsumrf.c lunus.h
+lsumrim.o:lsumrim.c lunus.h
+lsumscim.o:lsumscim.c lunus.h
+lsvtools.o:lsvtools.c lunus.h
+lsymlib.o:lsymlib.c lunus.h
+lsymlt.o:lsymlt.c lunus.h
+lsymminlt.o:lsymminlt.c lunus.h
+ltagim.o:ltagim.c lunus.h
+ltaglt.o:ltaglt.c lunus.h
+lthrshim.o:lthrshim.c lunus.h
+lthrshlt.o:lthrshlt.c lunus.h
+ltordata.o:ltordata.c lunus.h
+ltranslt.o:ltranslt.c lunus.h
+ltransmap.o:ltransmap.c lunus.h
+lupdbd.o:lupdbd.c lunus.h
+lwaveim.o:lwaveim.c lunus.h
+lwindim.o:lwindim.c lunus.h
+lwritecube.o:lwritecube.c lunus.h
+lwritehkl.o:lwritehkl.c lunus.h
+lwriteim.o:lwriteim.c lunus.h
+lwritelt.o:lwritelt.c lunus.h
+lwritemap.o:lwritemap.c lunus.h
+lwriterf.o:lwriterf.c lunus.h
+lwritesh.o:lwritesh.c lunus.h
+lwritevtk.o:lwritevtk.c lunus.h
+lxavgr.o:lxavgr.c lunus.h
+lxavgrim.o:lxavgrim.c lunus.h
+lxflt.o:lxflt.c lunus.h
+lxfmask.o:lxfmask.c lunus.h
 .c.o:
 	$(CC) -c -o ${L}/$*.o $(CFLAGS) ${L}/$*.c
 #
-# Libraries: 
+# Libraries:
 #
 libmw.a: \
+	labsim.o \
 	labslt.o \
+	lanisolt.o \
 	lanisoult.o \
 	lavgim.o \
 	lavgpolim.o \
 	lavgrf.o \
-	lavgrim.o \
 	lavgrim_aniso.o \
+	lavgrim.o \
 	lavgrlt.o \
 	lavgsqim.o \
 	lavsqrim.o \
 	lavsqrlt.o \
 	lbeamim.o \
 	lbuttim.o \
+	lcalcrsf.o \
+	lcbftool.o \
 	lccrim.o \
 	lccrim_helper.o \
 	lccrlt.o \
+	lcfim.o \
 	lchbyte.o \
 	lconstim.o \
 	lconstlt.o \
@@ -662,11 +740,12 @@ libmw.a: \
 	lcorrlt.o \
 	lcpltmap.o \
 	lcpmaplt.o \
+	lcullconelt.o \
+	lcullim.o \
 	lculllt.o \
+	lcullreslt.o \
 	lcutim.o \
 	ldebraggim.o \
-	ldecimap.o \
-	ldf2im.o \
 	ldfrflt.o \
 	ldfsqrlt.o \
 	ldiffim.o \
@@ -691,29 +770,34 @@ libmw.a: \
 	linitim.o \
 	linitlt.o \
 	linitmap.o \
-	lintdfim.o \
-	llowrim.o \
+	linitxs.o \
+	lintxdslt.o \
 	lliquidcorrlt.o \
 	lliquidfaclt.o \
-	lmattools.o \
+	llowrim.o \
 	lmathim.o \
+	lmattools.o \
 	lmedim.o \
 	lmin.o \
 	lminrim.o \
 	lminrlt.o \
 	lmirrorlt.o \
 	lmodeim.o \
+	lmulcfim.o \
 	lmuldwflt.o \
 	lmulim.o \
 	lmullt.o \
 	lmulrf.o \
 	lmulrfim.o \
+	lmulscim.o \
 	lmulsclt.o \
 	lnign.o \
 	lnoiseim.o \
 	lnormim.o \
 	lnormlt.o \
 	lp6mmask.o \
+	lparallel.o \
+	lparsecelllt.o \
 	lpeakim.o \
 	lpolarim.o \
 	lpunch.o \
@@ -722,7 +806,6 @@ libmw.a: \
 	lrbminrim.o \
 	lreadcbf.o \
 	lreadcube.o \
-	lreaddf.o \
 	lreadhkl.o \
 	lreadim.o \
 	lreadim_orig.o \
@@ -730,6 +813,7 @@ libmw.a: \
 	lreadmap.o \
 	lreadrf.o \
 	lreadvtk.o \
+	lreadxs.o \
 	lresizelt.o \
 	lrevyim.o \
 	lrf2lt.o \
@@ -739,8 +823,10 @@ libmw.a: \
 	lrotlt.o \
 	lrsccmap.o \
 	lrsrlt.o \
+	lsamplt.o \
 	lscaleim.o \
 	lscalelt.o \
+	lscalerfim.o \
 	lsetped.o \
 	lsettag.o \
 	lshiftlt.o \
@@ -749,22 +835,28 @@ libmw.a: \
 	lshimlt.o \
 	lsmoothim.o \
 	lsmoothrf.o \
+	lsmthim.o \
 	lsolidlt.o \
+	lspline.o \
 	lsqrtrf.o \
 	lsqsubim.o \
 	lsubenvlt.o \
 	lsubim.o \
 	lsublt.o \
+	lsubminlt.o \
 	lsubrf.o \
 	lsubrfim.o \
 	lsubrflt.o \
 	lsumim.o \
-	lsumrim.o \
 	lsumlt.o \
 	lsumresim.o \
 	lsumrf.o \
+	lsumrim.o \
+	lsumscim.o \
+	lsvtools.o \
 	lsymlib.o \
 	lsymlt.o \
+	lsymminlt.o \
 	ltagim.o \
 	ltaglt.o \
 	lthrshim.o \
@@ -775,7 +867,7 @@ libmw.a: \
 	lupdbd.o \
 	lwaveim.o \
 	lwindim.o \
-	lwritedf.o \
+	lwritecube.o \
 	lwritehkl.o \
 	lwriteim.o \
 	lwritelt.o \
