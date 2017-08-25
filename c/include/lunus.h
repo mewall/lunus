@@ -486,6 +486,7 @@ typedef struct
   struct xyzcoords q;
   struct irange rfirange;       /* Range of rfile index values */
   float *correction;             /* Correction factor, pixel by pixel */
+  size_t tag;                   /* option tag for certain functions */
 } DIFFIMAGE;
 
 /*
@@ -835,7 +836,7 @@ int lsubim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lsublt(LAT3D *lat1, LAT3D *lat2);
 void lsubminlt(LAT3D *lat);
 int lsubrf(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
-int lsubrfim(DIFFIMAGE *imdiff);
+int lsubrfim(DIFFIMAGE *imdiff, float scale);
 int lsubrflt(LAT3D *lat);
 int lsumscim(DIFFIMAGE *imdiff);
 int lsumim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
