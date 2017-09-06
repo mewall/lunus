@@ -30,7 +30,7 @@ int lsettag(char *target,const char *tag,const char *val)
   int len_val = strlen(val);
   int len_tail = strlen(pos_end);
   int len_targ = strlen(target);
-  tail = (char *)malloc(len_tail);
+  tail = (char *)malloc(len_tail+1);
   strcpy(tail,pos_end);
   memcpy(pos_begin+1,val,len_val);
   memcpy(pos_begin+len_val+1,tail,len_tail);

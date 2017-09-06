@@ -59,7 +59,7 @@ int lreadim(DIFFIMAGE *imdiff)
       if (lgettag(imdiff->header,"IMAGE_PEDESTAL")!=NULL) {
 	imdiff->value_offset = (IMAGE_DATA_TYPE)atoi(lgettag(imdiff->header,"IMAGE_PEDESTAL"));
       } else {
-	imdiff->value_offset = DEFAULT_VALUE_OFFSET;
+	    imdiff->value_offset = DEFAULT_VALUE_OFFSET;
       }
       imdiff->rfile_length = (size_t)(imdiff->hpixels < imdiff->vpixels ? imdiff->hpixels : imdiff->vpixels);
       imdiff->rfile = (RFILE_DATA_TYPE *)realloc(imdiff->rfile,
