@@ -35,7 +35,7 @@ int lsettag(char *target,const char *tag,const char *val)
   memcpy(pos_begin+1,val,len_val);
   memcpy(pos_begin+len_val+1,tail,len_tail);
   for (i = len_val;i<len;i++) {
-    target[len_targ-i+1]=0;
+    target[len_targ-len+i]=0;
   }
   return(0);
 }
