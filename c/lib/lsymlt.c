@@ -17,17 +17,24 @@ int lsymlt(LAT3D *lat)
     op_count,
     op_index,
     ct,
+    li0;
+
+  long
     *lat_index;
   
   int
     return_value = 0;
 
   struct ijkcoords 
+    i0,
     *index,
     *rvec;
 
   LATTICE_DATA_TYPE
     *lattice;
+
+  double
+    lattice_tmp;
 
   /*
    * Allocate lattice:
@@ -35,7 +42,7 @@ int lsymlt(LAT3D *lat)
 
   lattice = (LATTICE_DATA_TYPE *)calloc(lat->lattice_length,
 					sizeof(LATTICE_DATA_TYPE));
-  lat_index = (size_t *)calloc(max_op_count, sizeof(size_t));
+  lat_index = (long *)calloc(max_op_count, sizeof(size_t));
   index = (struct ijkcoords *)malloc(max_op_count*sizeof(struct
 						     ijkcoords));
   rvec = (struct ijkcoords *)malloc(max_op_count*sizeof(struct
@@ -50,11 +57,11 @@ int lsymlt(LAT3D *lat)
   }
 
   lat->symvec = rvec;
-  lat_index[0] = 0;
-  for(index[0].k = 0; index[0].k < lat->zvoxels; index[0].k++) {
-    for(index[0].j = 0; index[0].j < lat->yvoxels; index[0].j++) {
-      for (index[0].i = 0; index[0].i < lat->xvoxels; index[0].i++) {
-	rvec[0] = lijksub(index[0],lat->origin);
+  li0 = 0;
+  for(i0.k = 0; i0.k < lat->zvoxels; i0.k++) {
+    for(i0.j = 0; i0.j < lat->yvoxels; i0.j++) {
+      for (i0.i = 0; i0.i < lat->xvoxels; i0.i++) {
+	rvec[0] = lijksub(i0,lat->origin);
 	switch(lat->symop_index) {
 	case 0:
 	  lLaue1(lat);
@@ -91,6 +98,7 @@ int lsymlt(LAT3D *lat)
     break;
 	}
 	op_count = lat->symop_count;
+	lattice_tmp=0.0;
 	ct = 0;
 	for(op_index = 0;op_index < op_count; op_index++) {
 	  index[op_index] = lijksum(rvec[op_index],lat->origin);
@@ -99,14 +107,22 @@ int lsymlt(LAT3D *lat)
 	  if ((lat_index[op_index] >= 0) && 
 	      (lat_index[op_index] < lat->lattice_length) &&
 	      (lat->lattice[lat_index[op_index]] != lat->mask_tag)) {
-	    lattice[lat_index[0]] = ((float)ct*lattice[lat_index[0]] +
-				   lat->lattice[lat_index[op_index]])/
-				     (float)(ct + 1);
+	    //	    lattice[lat_index[0]] = ((float)ct*lattice[lat_index[0]] +
+	    //				   lat->lattice[lat_index[op_index]])/
+	    //				     (float)(ct + 1);	    
 	    ct++;
+	    lattice_tmp += lat->lattice[lat_index[op_index]];
+	    if ((rvec[0].i==10 && rvec[0].j==10 && rvec[0].k==0) ||
+		(rvec[0].i==-10 && rvec[0].j==10 && rvec[0].k==0) ) 
+	      printf("%d,%f,%lf\n",ct,lat->lattice[lat_index[op_index]],lattice_tmp);
 	  }
 	}
-	if (ct == 0) lattice[lat_index[0]] = lat->mask_tag;
-	lat_index[0]++;
+	if (ct == 0) {
+	  lattice[li0] = lat->mask_tag;
+	} else {
+	  lattice[li0] = (float)(lattice_tmp/(double)ct);
+	}
+	li0++;
       }
     }
   }
