@@ -1,14 +1,14 @@
-/* LANISOLT.C - Extract the anisotropic component of a lattice.
+/* LSUBMINLT.C - Subtract the minimum at each radius from a lattice.
    
    Author: Mike Wall
-   Date: 9/27/2016
+   Date: 6/28/2017
    Version: 1.
    
    */
 
 #include<mwmask.h>
 
-void lanisolt(LAT3D *lat)
+void lsubminlt(LAT3D *lat)
 {
 
   size_t *ct,r,lat_index;
@@ -42,14 +42,14 @@ void lanisolt(LAT3D *lat)
 	r = (size_t)(sqrtf(lssqrFromIndex(lat) / rscale)+.5);
 	if (lat->lattice[lat_index] != lat->mask_tag) {
 	  //	  if (lat->lattice[index]<0) printf("%d,%f\n",(int)index,lat->lattice[index]);
-	  if (r > lat->rfile_length) lat->rfile_length = r + 1;
+	  if (r >= lat->rfile_length) lat->rfile_length = r + 1;
 	  if (ct[r] == 0) {
 	    lat->rfile[r] = lat->lattice[lat_index];
 	    ct[r] = 1;
 	  } else {
-	    lat->rfile[r] = ((float)ct[r]*lat->rfile[r] +
-			     lat->lattice[lat_index])/(float)(ct[r]+1);
-	    ct[r]++;
+	    if (lat->rfile[r] > lat->lattice[lat_index]) {
+	      lat->rfile[r] = lat->lattice[lat_index];
+	    }
 	  }
 	}
 	lat_index++;

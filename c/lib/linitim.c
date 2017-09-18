@@ -57,7 +57,6 @@ DIFFIMAGE *linitim(void)
   imdiff->window_lower.c = DEFAULT_WINDOW_LOWER;
   imdiff->polarization = DEFAULT_POLARIZATION;
   imdiff->polarization_offset = DEFAULT_POLARIZATION_OFFSET;
-  imdiff->feature_count = 0;
   imdiff->cell.a = DEFAULT_CELL_A;
   imdiff->cell.b = DEFAULT_CELL_B;
   imdiff->cell.c = DEFAULT_CELL_C;
@@ -94,12 +93,10 @@ DIFFIMAGE *linitim(void)
 						 MAX_WEIGHTS_DIMENSION + 1));
   imdiff->rdata = (RDATA_DATA_TYPE *)
     malloc(sizeof(RDATA_DATA_TYPE) * MAX_RFILE_LENGTH);
-  imdiff->feature = (DIFFUSE_FEATURE *) malloc(sizeof(DIFFUSE_FEATURE) * 
-					       MAX_DIFFUSE_FEATURES);
   if (!imdiff->rfile || !imdiff->imscaler || !imdiff->imoffsetr || 
       !imdiff->mask || !imdiff->image || !imdiff->header || 
       !imdiff->overload || !imdiff->peak || !imdiff->weights ||
-      !imdiff->rdata || !imdiff->feature) {
+      !imdiff->rdata) {
     printf("\nLINITIM:  Unable to allocate all memory.\n");
     imdiff = NULL;
     goto CloseShop;

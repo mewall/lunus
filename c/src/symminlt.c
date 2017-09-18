@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
   char
     error_msg[LINESIZE];
 
-  size_t
+  int
     symop;
 
   LAT3D 
@@ -109,7 +109,29 @@ int main(int argc, char *argv[])
    * Perform symmetry operation:
    */
 
-  lat->symop_index = symop;
+  if (symop <= 0) {    
+    lat->symop_index = -symop;
+  } else {
+    switch (symop) {
+    case 1:
+      lat->symop_index = 3;
+      break;
+    case 2:
+      lat->symop_index = 2;
+      break;
+    case 3:
+      lat->symop_index = 9;
+      break;
+    case 4:
+      lat->symop_index = 1;
+      break;
+    default:
+      printf("Use positive value for legacy symmetry operations, negative value 0-10 for ordered Laue groups.\n");
+      exit(1);
+    }
+  }
+
+    //  lat->symop_index = symop;
   if (argc==7) {
     lat->origin.i=origin.i; lat->origin.j=origin.j; lat->origin.k=origin.k;
   }
