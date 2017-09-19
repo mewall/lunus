@@ -112,9 +112,9 @@ int lsymlt(LAT3D *lat)
 	    //				     (float)(ct + 1);	    
 	    ct++;
 	    lattice_tmp += lat->lattice[lat_index[op_index]];
-	    if ((rvec[0].i==10 && rvec[0].j==10 && rvec[0].k==0) ||
+/*	    if ((rvec[0].i==10 && rvec[0].j==10 && rvec[0].k==0) ||
 		(rvec[0].i==-10 && rvec[0].j==10 && rvec[0].k==0) ) 
-	      printf("%d,%f,%lf\n",ct,lat->lattice[lat_index[op_index]],lattice_tmp);
+	      printf("%d,%f,%lf\n",ct,lat->lattice[lat_index[op_index]],lattice_tmp);*/
 	  }
 	}
 	if (ct == 0) {
