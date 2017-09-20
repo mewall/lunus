@@ -7,17 +7,16 @@ FFTWROOT=/Users/mewall/packages/fftw-3.3.4/inst_dir
 FFTW_DIR=${FFTWROOT}/lib
 FFTW_INC=${FFTWROOT}/include
 #CFLAGS= -g -fopenmp -DUSE_FFTW -DUSE_OPENMP -L${FFTW_DIR} -I${FFTW_INC} -L${C_HOME}/lib -I${C_HOME}/include
-CFLAGS= -g -DUSE_FFTW -L${FFTW_DIR} -I${FFTW_INC} -L${C_HOME}/lib -I${C_HOME}/include
-#CFLAGS= -g -O2 -axcore-avx2,mic-avx512 -DUSE_MPI -qopenmp -DUSE_OPENMP -L${C_HOME}/lib -I${C_HOME}/include
+#CFLAGS= -g -DUSE_FFTW -L${FFTW_DIR} -I${FFTW_INC} -L${C_HOME}/lib -I${C_HOME}/include
+#CFLAGS= -g -O2 -axcore-avx2,mic-avx512 -DUSE_OPENMP -L${C_HOME}/lib -I${C_HOME}/include
+CFLAGS= -g -O2 -DUSE_OPENMP -L${C_HOME}/lib -I${C_HOME}/include
 #CFLAGS= -g -O2 -axcore-avx2,mic-avx512 -L${C_HOME}/lib -I${C_HOME}/include
 #CFLAGS= -g -w -L${C_HOME}/lib -I${C_HOME}/include
 AR=ar
 ARFLAGS=-r
 SHELL=/bin/csh
-LIBS=-lmw -lm
-#LIBS=-lmw -lfftw3f -lm
-#LIBS=-lmw -Wl,--eh-frame-hdr -dynamic
-DEPENDS=lunus.h libmw.a
+LIBS=-lmw -lm -lgomp
+DEPENDS=mwmask.h libmw.a
 S=${C_HOME}/src
 B=${C_HOME}/bin
 L=${C_HOME}/lib
@@ -101,6 +100,7 @@ all: \
 	maskimg \
 	mathim \
 	medim \
+	minim \
 	minrim \
 	minrlt \
 	mirrorlt \
@@ -354,6 +354,8 @@ mathim:mathim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 medim:medim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
+minim:minim.c ${DEPENDS}
+	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 minrim:minrim.c ${DEPENDS}
 	${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}
 minrlt:minrlt.c ${DEPENDS}
@@ -606,6 +608,7 @@ lmathim.o:lmathim.c lunus.h
 lmattools.o:lmattools.c lunus.h
 lmedim.o:lmedim.c lunus.h
 lmin.o:lmin.c lunus.h
+lminim.o:lminim.c lunus.h
 lminrim.o:lminrim.c lunus.h
 lminrlt.o:lminrlt.c lunus.h
 lmirrorlt.o:lmirrorlt.c lunus.h
@@ -779,6 +782,7 @@ libmw.a: \
 	lmattools.o \
 	lmedim.o \
 	lmin.o \
+	lminim.o \
 	lminrim.o \
 	lminrlt.o \
 	lmirrorlt.o \
