@@ -32,7 +32,7 @@ int lreadim(DIFFIMAGE *imdiff)
                 imdiff->infile);
   if (num_read != DEFAULT_HEADER_LENGTH) {
 	sprintf(imdiff->error_msg,"\nCouldn't read all of header.\n\n");
-	return(1);
+	//return(1);
   }
 
   if (strstr(buf,"TV6 TIFF")==NULL) {

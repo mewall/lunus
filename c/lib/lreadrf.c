@@ -26,8 +26,8 @@ int lreadrf(DIFFIMAGE *imdiff)
         if (i == imdiff->rfile_length) {
             if ((num_read = fread(&basket,sizeof(RFILE_DATA_TYPE),1, 
             imdiff->infile)) == 1) {
-                printf("Warning: rfile is too long for this image. Only %zu "
-                    "elements were read.\n",i); 
+               // printf("Warning: rfile is too long for this image. Only %zu "
+                 //   "elements were read.\n",i); 
             }
             break;
         }

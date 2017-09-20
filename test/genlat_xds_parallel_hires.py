@@ -79,16 +79,10 @@ def pixmapstar(args):
 
 # FUNCTION: procimg
 # will be called nproc times per image; each time it's called it will run on 1/nproc of an image (e.g. if nproc = 4, it will run though 1/4 of one image).
-def procimg(Isize1,Isize2,scale,mask_tag,A_matrix_rot,qvec,DATA,latxdim,latydim,latzdim,pedestal,beamx,beamy,maxpix,prad,procid,logfile): # this task list is getting out of control
+def procimg(Isize1,Isize2,scale,mask_tag,A_matrix_rot,qvec,DATA,latxdim,latydim,latzdim,origin,pedestal,beamx,beamy,maxpix,prad,voxper,procid,logfile): # this task list is getting out of control
 
     from scitbx.matrix import col
-    i0 = latxdim/2-1
-    j0 = latydim/2-1
-    k0 = latzdim/2-1
     
-    #latsize = latxdim*latydim*latzdim #again, this is too big as is
-    #lat = np.zeros(latsize*2, dtype=np.float32).reshape((2,latsize)) # initializing
-
     # we only want to bother with the points that are going to be in the resolution range
     ymin = max(0,int(beamy-maxpix))
     ymax = min(Isize2-1,int(beamy+maxpix))
@@ -115,34 +109,33 @@ def procimg(Isize1,Isize2,scale,mask_tag,A_matrix_rot,qvec,DATA,latxdim,latydim,
                 H = A_matrix_rot.dot(col(qvec[z])) # computing hkl
                 # H is a triplet of #s for the particular pixel called
 
-                # this is where we start editing for the 1/16 voxel edges
-                H = H*4
+                H = H*voxper
 
                 if (H[0]<0):
                     hh = int(H[0]-.5) # find nearest H index in the higher-res lattice
-                    hp = int(H[0]/4-.5) # find nearest integral H value
+                    hp = int(H[0]/voxper-.5) # find nearest integral H value
                 else:
                     hh = int(H[0]+.5)
-                    hp = int(H[0]/4+.5)
+                    hp = int(H[0]/voxper+.5)
                 if (H[1]<0):
                     kk = int(H[1]-.5)
-                    kp = int(H[1]/4-.5)
+                    kp = int(H[1]/voxper-.5)
                 else:
                     kk = int(H[1]+.5)
-                    kp = int(H[1]/4+.5)
+                    kp = int(H[1]/voxper+.5)
                 if (H[2]<0):
                     ll = int(H[2]-.5)
-                    lp = int(H[2]/4-.5)
+                    lp = int(H[2]/voxper-.5)
                 else:
                     ll = int(H[2]+.5)
-                    lp = int(H[2]/4+.5)
+                    lp = int(H[2]/voxper+.5)
                 # calculate the displacement of this data point from the nearest Miller index
                 # dh = abs(H[0]-hh)
                 # dk = abs(H[1]-kk)
                 # dl = abs(H[2]-ll)
-                dhp = abs(H[0]/4-hp)
-                dkp = abs(H[1]/4-kp)
-                dlp = abs(H[2]/4-lp)
+                dhp = abs(H[0]/voxper-hp)
+                dkp = abs(H[1]/voxper-kp)
+                dlp = abs(H[2]/voxper-lp)
                 val = int(DATA[y*Isize1+x]) #the actual value of this pixel, taken from original image
                 # integrate the data only if it's not in the immediate neighborhood of a Bragg peak
             except:
@@ -155,9 +148,9 @@ def procimg(Isize1,Isize2,scale,mask_tag,A_matrix_rot,qvec,DATA,latxdim,latydim,
                 # now we have the index in the lattice where this pixel goes, but what if we stored it in a list?
                 # we have 10 times as many voxels as pixels
                 # the list will be of 2tuples: index & val (minus pedestal already for consistency)
-                    i = hh+i0 # these will be in terms of the large (x4) indices
-                    j = kk+j0
-                    k = ll+k0
+                    i = hh+origin[0] # these will be in terms of the 3D data structure indices, not actual hkl values of the crystal
+                    j = kk+origin[1]
+                    k = ll+origin[2]
                     if ((i>=0) and (j>=0) and (k>=0) and (i<latxdim) and (j<latydim) and (k<latzdim)):
                         index = k*latxdim*latydim + j*latxdim + i
                         val = scale*(val - pedestal)
@@ -174,6 +167,8 @@ def procimgstar(args):
 # MAIN METHOD
 if __name__=="__main__":
     import sys
+
+    t_init = time.time()
 
     args = sys.argv[1:] # normally the user puts these things on command line, not in quotes, no commas
 
@@ -242,6 +237,16 @@ if __name__=="__main__":
         raise ValueError,"Lattice constant cell.c must be specified"
     else:
         cellc = float(args.pop(cellcidx).split("=")[1])
+
+    # voxel edges per unit h, k, or l (in one dimension; same factor is used
+    # for all three dimensions)
+    try:
+        voxperidx = [a.find("linear.voxel.factor")==0 for a in args].index(True)
+    except ValueError:
+        voxper = 1
+    else:
+        voxper = int(args.pop(voxperidx).split("=")[1])
+
     # maximum resolution of diffuse lattice
     try:
         residx = [a.find("diffuse.lattice.resolution")==0 for a in args].index(True)
@@ -250,9 +255,9 @@ if __name__=="__main__":
         residx = -1
     else:
         res = float(args.pop(residx).split("=")[1])
-        latxdim = (int(cella/res)+1)*2
-        latydim = (int(cellb/res)+1)*2
-        latzdim = (int(cellc/res)+1)*2
+        latxdim = (int(cella/res)+1)*2*voxper+1 # should be odd
+        latydim = (int(cellb/res)+1)*2*voxper+1
+        latzdim = (int(cellc/res)+1)*2*voxper+1
 
     # size of diffuse lattice in x direction
     try:
@@ -296,9 +301,9 @@ if __name__=="__main__":
 
     # Calculate the resolution if it wasn't given
     if (residx == -1):
-        resx = cella/((latxdim/2)-1)
-        resy = cellb/((latydim/2)-1)
-        resz = cellc/((latzdim/2)-1)
+        resx = cella/((latxdim/(2*voxper))-1)
+        resy = cellb/((latydim/(2*voxper))-1)
+        resz = cellc/((latzdim/(2*voxper))-1)
         res = min(resx,resy,resz) # min bc smaller numbers --> further away from beam, obvs
 
     # For simplicity, we'll still interpret input as number of hkls.
@@ -316,23 +321,17 @@ if __name__=="__main__":
     # open logfile
     logfile = open(logname,"w")
 
-    # But we're going to do 1/4 of an hkl per voxel side
-    latxdim = latxdim*4
-    latydim = latydim*4
-    latzdim = latzdim*4
-
     # For simplicity, we'll still interpret input as number of hkls.
     print "Setting up lattice with dimensions",latxdim,"x",latydim,"x",latzdim
 
     latsize = latxdim*latydim*latzdim 
     lat = np.zeros(latsize, dtype=np.float32)
     ct = np.zeros(latsize, dtype=np.float32)
-    i0 = latxdim/2-1
-    j0 = latydim/2-1
-    k0 = latzdim/2-1
+    origin = np.array([latxdim/2,latydim/2,latzdim/2], dtype=int)
+    print "hkl = (0,0,0) is at",origin
     mask_tag = 65535 #check this value against lunus values
 
-       #Create parallel processing pool
+    #Create parallel processing pool
     pool = Pool(processes=nproc)
 
     prevxdsname = 'init' # will store xdsname here in case it's the same file to file
@@ -462,7 +461,7 @@ if __name__=="__main__":
         A_matrix_rot = np.transpose(R_matrix.dot(np.transpose(A_matrix)))
 
         # prepare list of arguments to run procimg in parallel
-        tasks = [(Isize1,Isize2,scale,mask_tag,A_matrix_rot,qvec_all,DATA,latxdim,latydim,latzdim,pedestal,Ibeamx,Ibeamy,maxpix,prad,procid,logfile) for procid in range(nproc)]
+        tasks = [(Isize1,Isize2,scale,mask_tag,A_matrix_rot,qvec_all,DATA,latxdim,latydim,latzdim,origin,pedestal,Ibeamx,Ibeamy,maxpix,prad,voxper,procid,logfile) for procid in range(nproc)]
         # run procimg in parallel and collect results
         vvec_it = pool.map(procimgstar,tasks)
         #lat_it = procimg(Isize1,Isize2,scale,mask_tag,A_matrix_rot,qvec_all,DATA,latxdim,latydim,latzdim,pedestal,Ibeamx,Ibeamy,maxpix,1)
@@ -473,7 +472,7 @@ if __name__=="__main__":
         
         for vvec in vvec_it:
             for v in vvec:
-                index = v[0]
+                index = v[0]  
                 val = v[1]
                 lat[index] += val 
                 ct[index] += 1
@@ -494,9 +493,13 @@ if __name__=="__main__":
     vtkfile = open(ofname,"w")
     ctfile = open(ctname,"w")
 
-    a_recip = 1./cella
-    b_recip = 1./cellb
-    c_recip = 1./cellc
+    a_space = 1./(cella*voxper)
+    b_space = 1./(cellb*voxper)
+    c_space = 1./(cellc*voxper)
+
+    a_orig = -origin[0]*a_space
+    b_orig = -origin[1]*b_space
+    c_orig = -origin[2]*c_space
 
     print >>vtkfile,"# vtk DataFile Version 2.0" #standard comment
     print >>ctfile,"# vtk DataFile Version 2.0" #standard comment
@@ -508,12 +511,12 @@ if __name__=="__main__":
     print >>ctfile,"DATASET STRUCTURED_POINTS" #tells it to expect everything on regular grid
     print >>vtkfile,"DIMENSIONS %d %d %d"%(latxdim,latydim,latzdim)
     print >>ctfile,"DIMENSIONS %d %d %d"%(latxdim,latydim,latzdim)
-    print >>vtkfile,"SPACING %f %f %f"%(a_recip,b_recip,c_recip) # tells size of each grid point
-    print >>ctfile,"SPACING %f %f %f"%(a_recip,b_recip,c_recip) # tells size of each grid point
-    print >>vtkfile,"ORIGIN %f %f %f"%(-i0*a_recip,-j0*b_recip,-k0*c_recip) #at grid point 0,0,0, what is the position within the actual data structure (not specifying pos on grid of origin)
-    print >>ctfile,"ORIGIN %f %f %f"%(-i0*a_recip,-j0*b_recip,-k0*c_recip) #at grid point 0,0,0, what is the position within the actual data structure (not specifying pos on grid of origin)
-    print >>vtkfile,"POINT_DATA %d"%(latsize) #how many data point are going to follow
-    print >>ctfile,"POINT_DATA %d"%(latsize) #how many data point are going to follow
+    print >>vtkfile,"SPACING %f %f %f"%(a_space,b_space,c_space) # tells size of each grid point
+    print >>ctfile,"SPACING %f %f %f"%(a_space,b_space,c_space) # tells size of each grid point
+    print >>vtkfile,"ORIGIN %f %f %f"%(a_orig,b_orig,c_orig) #at grid point 0,0,0, what is the position within the actual data structure (not specifying pos on grid of origin)
+    print >>ctfile,"ORIGIN %f %f %f"%(a_orig,b_orig,c_orig) #which is to say, at index 0,0,0 in this 3D structure, where are we in the data set in terms of inverse Angstroms?
+    print >>vtkfile,"POINT_DATA %d"%(latsize) #how many data points are going to follow
+    print >>ctfile,"POINT_DATA %d"%(latsize) #how many data points are going to follow
     print >>vtkfile,"SCALARS volume_scalars float 1" #each lat point will contain a scalar; forget what float 1 means. tells whatever is reading the format what format each data point will have (i.e. one float)
     print >>ctfile,"SCALARS volume_scalars float 1" #each lat point will contain a scalar; forget what float 1 means. tells whatever is reading the format what format each data point will have (i.e. one float)
     print >>vtkfile,"LOOKUP_TABLE default\n" #x fast, y medium, z slow
@@ -532,6 +535,9 @@ if __name__=="__main__":
       # raw spot data sgould be in correct raster order
       # if you modify proc_img, you could just have it output what pixels to ignore. 
 
+
+    t_final = (time.time() - t_init)/60
+    print "Took",t_final,"minutes total"
 
     # close your files
     logfile.close()

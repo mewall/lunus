@@ -31,7 +31,6 @@ int lmodeim(DIFFIMAGE *imdiff)
 
     size_t
         avg_max_count_count = 0,
-        num_max_count_1 = 0,
         index = 0; 
 
     float
@@ -65,7 +64,7 @@ int lmodeim(DIFFIMAGE *imdiff)
 
 #ifdef USE_OPENMP
     nt = omp_get_max_threads();
-    printf("Using OpenMP with %d threads\n",nt);
+//    printf("Using OpenMP with %d threads\n",nt);
     {
 #pragma omp parallel for shared(imdiff,image,half_height,half_width) private(j)
 #endif
@@ -110,7 +109,7 @@ int lmodeim(DIFFIMAGE *imdiff)
                         image[index]=imdiff->ignore_tag;
                     }
                     else {
-                        for(k=0;k<=l-1;k++) {
+                        for(k=0;k<l;k++) {
                             if (count[count_pointer[k]] == max_count) {
                                 mode_value = (float)((float)(mode_ct*mode_value +
                                             (float)count_pointer[k])/ 
@@ -123,11 +122,10 @@ int lmodeim(DIFFIMAGE *imdiff)
                                 mode_ct = 1;
                             }
                         }
-                        for(k=0;k<=l-1;k++) count[count_pointer[k]] = 0;
+                        for(k=0;k<l;k++) count[count_pointer[k]] = 0;
                         image[index] = (IMAGE_DATA_TYPE)mode_value;
                         avg_max_count = (avg_max_count*avg_max_count_count +
                                 max_count) / (float)(avg_max_count_count + 1);
-                        if (max_count == 1) {num_max_count_1++;}
                         avg_max_count_count++;
 
                     }
@@ -145,7 +143,7 @@ int lmodeim(DIFFIMAGE *imdiff)
     for(index=0;index<imdiff->image_length; index++) {
         imdiff->image[index] = image[index];
     }
-    printf("avg_max_count,num_max_count_1 = %f,%d\n\n",avg_max_count,num_max_count_1);/***/
+    printf("avg_max_count = %f\n\n",avg_max_count);/***/
     free((IMAGE_DATA_TYPE *)image);/***/
 CloseShop:
     return(return_value);
