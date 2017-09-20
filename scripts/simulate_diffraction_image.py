@@ -97,7 +97,7 @@ def procimg_single(Isize1,Isize2,scale,lattice_mask_tag,A_matrix,rvec,D):
   # returns a 3D lattice with integrated data from a chunk of data points
   from scitbx.matrix import col
   # define the lattice indices at which h,k,l = 0,0,0
-  global image_mask_tag
+  global image_mask_tag,pphkl
   imp=np.zeros((Isize2,Isize1))
   for x in xrange(Isize1): # slow dimension
     for y in xrange(Isize2): # fast dimension
@@ -105,7 +105,7 @@ def procimg_single(Isize1,Isize2,scale,lattice_mask_tag,A_matrix,rvec,D):
       z = x*Isize2 + y
       tmid = clock()
       # calculate h,k,l for this data point
-      H = A_matrix * col(rvec[z])
+      H = A_matrix * col(rvec[z]) * pphkl
       # Calculate fractional index into diffuse intensity
       isz = len(D)
       jsz = len(D[0])
@@ -179,6 +179,10 @@ if __name__=="__main__":
       raise ValueError,"Target cell target_cell must be specified"
   else:
       target_cell = args.pop(targetcellidx).split("=")[1]
+      celllist = target_cell.split(",")
+      cella=float(celllist[0])
+      cellb=float(celllist[1])
+      cellc=float(celllist[2])
   # spacegroup for indexing
   try:
       targetsgidx = [a.find("target_sg")==0 for a in args].index(True)
@@ -257,6 +261,12 @@ if __name__=="__main__":
   else:
     scale = float(args.pop(scaleidx).split("=")[1])
   try:
+    pphklidx = [a.find("pphkl")==0 for a in args].index(True)
+  except ValueError:
+    pphkl = 1.
+  else:
+    pphkl = float(args.pop(pphklidx).split("=")[1])
+  try:
     hklidx = [a.find("input.hkl")==0 for a in args].index(True)
   except ValueError:
     diffusein = "diffuse.hkl"
@@ -275,6 +285,7 @@ if __name__=="__main__":
   else:
     imgname = (args.pop(imgidx).split("=")[1])
 
+  lattice_mask_tag=-32768
 
   import os
 
@@ -383,6 +394,7 @@ if __name__=="__main__":
   for i in range(3):
       mx[i]=int(max(abs(DhklI[:,i])))
   D = np.zeros((mx[0]*2,mx[1]*2,mx[2]*2))
+  D[:,:,:] = lattice_mask_tag
   for i in range(len(DhklI)):
       hh,kk,ll=DhklI[i][:3]
       D[int(hh)+mx[0]-1][int(kk)+mx[1]-1][int(ll)+mx[2]-1]=float(DhklI[i][3])
@@ -471,7 +483,6 @@ if __name__=="__main__":
     A_matrix = crystal.get_A().inverse()
 
 #    print "Integrating diffuse scattering in parallel using ",nproc," processors..."
-    lattice_mask_tag=-32768
     telmatmul=0
     t0 = clock()
     latit = None

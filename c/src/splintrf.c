@@ -130,9 +130,9 @@ int main(int argc, char *argv[])
 	rfile_int = (RFILE_DATA_TYPE *)malloc(sizeof(RFILE_DATA_TYPE)*rfile_int_length);
 
 	for (i=0;i<rfile_int_length;i++) {
-	  x = (float)i/(float)(rfile_length);
+	  x = (float)i/(float)(nx);
 	  l = (int)x+1;
-	  if (x>= tau[0] && x <= tau[n-1]) {
+	  if (x>= tau[0] && x <= tau[n-2]) {
 	    rfile_int[i] = lspleval(tau,c,&l,&kk,&x,&jd);
 	  } else {
 	    rfile_int[i] = mask_tag;

@@ -123,7 +123,7 @@ void lanisolt(LAT3D *lat)
 	  //    lat->lattice[index] -= lat->rfile[r];
 	  //	  if (r <= maxr) {
 	  l = (int)r + 1;
-	  if (rf>= tau[0] && rf <= tau[n-1]) {
+	  if (rf>= tau[0] && rf <= tau[n-2]) {
 	    lat->lattice[lat_index] -= lspleval(tau,c,&l,&k,&rf,&jd);
 	  } else {
 	    lat->lattice[lat_index] = lat->mask_tag;
