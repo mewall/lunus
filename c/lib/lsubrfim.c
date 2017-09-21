@@ -8,7 +8,7 @@ Version: 1.
 
 #include<mwmask.h>
 
-int lsubrfim(DIFFIMAGE *imdiff, float scale)
+int lsubrfim(DIFFIMAGE *imdiff)
 {
     size_t
         r,
@@ -19,7 +19,7 @@ int lsubrfim(DIFFIMAGE *imdiff, float scale)
     struct xycoords rvec;
 
     int
-        i;
+        i,
         return_value;
 
   // First, compute the spline from the rfile

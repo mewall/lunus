@@ -775,7 +775,7 @@ int lsubenvlt(LAT3D *lat1, LAT3D *lat2);
 int lsubim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lsublt(LAT3D *lat1, LAT3D *lat2);
 int lsubrf(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
-int lsubrfim(DIFFIMAGE *imdiff, float scale);
+int lsubrfim(DIFFIMAGE *imdiff);
 int lsubrflt(LAT3D *lat);
 int lsumim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lsumlt(LAT3D *lat1, LAT3D *lat2);
