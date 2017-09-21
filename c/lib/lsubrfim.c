@@ -19,7 +19,9 @@ int lsubrfim(DIFFIMAGE *imdiff, float scale)
     struct xycoords rvec;
 
     int
+        i;
         return_value;
+
   // First, compute the spline from the rfile
 
   float *tau, *cv;
