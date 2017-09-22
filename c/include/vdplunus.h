@@ -106,7 +106,7 @@
 
 #define DEFAULT_RFILE_MASK_TAG 0	/* Mask tag for rfiles */
 #define DEFAULT_RFILE_LENGTH 724	/* Default rfile length for writing */
-#define MAX_RFILE_LENGTH 2500		/* Maximum length of rfile */
+#define MAX_RFILE_LENGTH 25000		/* Maximum length of rfile */
 
 /*
  * Old Bragg peak and overflow "masking" specifications:
@@ -243,7 +243,7 @@ typedef unsigned short IMAGE_DATA_TYPE;
 #define DEFAULT_IGNORE_TAG 0xffff	/* 65535 */
 #define PUNCH_TAG 0xfffd		/* 65533 */
 #define MAX_IMAGE_DATA_VALUE 65535	/* not 1048577 due to img conversion */
-typedef unsigned short IMAGE_DATA_TYPE;
+typedef short IMAGE_DATA_TYPE;
 #endif
 #endif
 #endif
@@ -259,6 +259,7 @@ typedef float RFILE_DATA_TYPE;
 typedef float LATTICE_DATA_TYPE;
 typedef float MAP_DATA_TYPE;
 typedef short SHIM_DATA_TYPE;
+//typedef short IMAGE_DATA_TYPE;
 typedef float WEIGHTS_DATA_TYPE;
 
 // MPI
@@ -423,6 +424,7 @@ typedef struct
   size_t rfile_length;	        /* Length of rfile */
   RFILE_DATA_TYPE rfile_mask_tag;/* Tag for masked rfile value */
   RFILE_DATA_TYPE avg_pixel_value;/* Single average value */
+  IMAGE_DATA_TYPE min_pixel_value;/* Minimum pixel value */
   struct rccoords origin;       /* Origin of image */
   char error_msg[LINESIZE];     /*Error message string */
   WEIGHTS_DATA_TYPE *weights;   /* Smoothing weights matrix */
@@ -442,6 +444,7 @@ typedef struct
   IMAGE_DATA_TYPE upper_threshold;
   DIFFUSE_FEATURE *feature;     /* List of diffuse features */
   size_t feature_count;
+  char *cell_str                /* Unit cell string a,b,c,alpha,beta,gamma */
   struct unit_cell cell;        /* Unit cell data type */
   float wavelength;
   struct xyzmatrix u;
@@ -664,8 +667,10 @@ typedef struct {
  * Subroutines:
  */
 
+int labsim(DIFFIMAGE *imdiff);
 int labslt(LAT3D *lat);
 int lanisoult(LAT3D *lat);
+void lanisolt(LAT3D *lat);
 int lavgim(DIFFIMAGE *imdiff);
 int lavgr(LAT3D *lat);
 int lavgrf(DIFFIMAGE *imdiff1);
@@ -676,6 +681,8 @@ int lavgsqim(DIFFIMAGE *imdiff);
 int lavsqrim(DIFFIMAGE *imdiff);
 int lavsqrlt(LAT3D *lat);
 int lbeamim(DIFFIMAGE *imdiff);
+size_t lbufcompress(const int* values, const size_t sz, char *packed);
+void lbufuncompress(const char* packed, const size_t packed_sz, int* values, size_t values_sz);
 int lbuttim(DIFFIMAGE *imdiff);
 struct fom lcalcrsf(char *hklfname, LAT3D *lat1,LAT3D *lat2);
 int lccrlt(LAT3D *lat1, LAT3D *lat2);
@@ -687,7 +694,9 @@ float lcorrlt(LAT3D *lat1, LAT3D *lat2);
 int lcpltmap(LAT3D *lat,CCP4MAP *map);
 int lcpmaplt(CCP4MAP *map, LAT3D *lat);
 struct xyzcoords lcrossvec(struct xyzcoords a,struct xyzcoords b);
+void lcullconelt(LAT3D *lat);
 int lculllt(LAT3D *lat);
+int lcullreslt(LAT3D *lat);
 int lcutim(DIFFIMAGE *imdiff);
 int ldecimap(CCP4MAP *map);
 int ldf2im(DIFFIMAGE *imdiff);
@@ -719,6 +728,7 @@ struct xyzmatrix lmatinv(struct xyzmatrix a);
 struct xyzmatrix lmatmul(struct xyzmatrix a, struct xyzmatrix b);
 int lmedim(DIFFIMAGE *imdiff);
 size_t lmin(size_t arg1, size_t arg2);
+int lminim(DIFFIMAGE *imdiff);
 int lminr(LAT3D *lat);
 int lminrim(DIFFIMAGE *imdiff);
 int lmirrorlt(LAT3D *lat,int axis);
@@ -772,7 +782,7 @@ int lsubenvlt(LAT3D *lat1, LAT3D *lat2);
 int lsubim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lsublt(LAT3D *lat1, LAT3D *lat2);
 int lsubrf(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
-int lsubrfim(DIFFIMAGE *imdiff, float scale);
+int lsubrfim(DIFFIMAGE *imdiff);
 int lsubrflt(LAT3D *lat);
 int lsumim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lsumlt(LAT3D *lat1, LAT3D *lat2);

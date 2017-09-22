@@ -444,6 +444,7 @@ typedef struct
   IMAGE_DATA_TYPE upper_threshold;
   DIFFUSE_FEATURE *feature;     /* List of diffuse features */
   size_t feature_count;
+  char *cell_str                /* Unit cell string a,b,c,alpha,beta,gamma */
   struct unit_cell cell;        /* Unit cell data type */
   float wavelength;
   struct xyzmatrix u;
@@ -666,8 +667,10 @@ typedef struct {
  * Subroutines:
  */
 
+int labsim(DIFFIMAGE *imdiff);
 int labslt(LAT3D *lat);
 int lanisoult(LAT3D *lat);
+void lanisolt(LAT3D *lat);
 int lavgim(DIFFIMAGE *imdiff);
 int lavgr(LAT3D *lat);
 int lavgrf(DIFFIMAGE *imdiff1);
@@ -678,6 +681,8 @@ int lavgsqim(DIFFIMAGE *imdiff);
 int lavsqrim(DIFFIMAGE *imdiff);
 int lavsqrlt(LAT3D *lat);
 int lbeamim(DIFFIMAGE *imdiff);
+size_t lbufcompress(const int* values, const size_t sz, char *packed);
+void lbufuncompress(const char* packed, const size_t packed_sz, int* values, size_t values_sz);
 int lbuttim(DIFFIMAGE *imdiff);
 struct fom lcalcrsf(char *hklfname, LAT3D *lat1,LAT3D *lat2);
 int lccrlt(LAT3D *lat1, LAT3D *lat2);
@@ -689,7 +694,9 @@ float lcorrlt(LAT3D *lat1, LAT3D *lat2);
 int lcpltmap(LAT3D *lat,CCP4MAP *map);
 int lcpmaplt(CCP4MAP *map, LAT3D *lat);
 struct xyzcoords lcrossvec(struct xyzcoords a,struct xyzcoords b);
+void lcullconelt(LAT3D *lat);
 int lculllt(LAT3D *lat);
+int lcullreslt(LAT3D *lat);
 int lcutim(DIFFIMAGE *imdiff);
 int ldecimap(CCP4MAP *map);
 int ldf2im(DIFFIMAGE *imdiff);
