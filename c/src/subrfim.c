@@ -114,7 +114,7 @@ int main(int argc, char *argv[])
  * Subtract rfile from image:
  */
 
-   lsubrfim(imdiff, scale);
+   lsubrfim(imdiff);
 
 /*
  * Write the output image:

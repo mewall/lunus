@@ -91,6 +91,10 @@ int lsubrfim(DIFFIMAGE *imdiff)
             index++;
         }
     }
+
+    free(tau);
+    free(cv);
+
     return(return_value);
 }
 

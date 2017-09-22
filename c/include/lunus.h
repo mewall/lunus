@@ -106,7 +106,7 @@
 
 #define DEFAULT_RFILE_MASK_TAG 0	/* Mask tag for rfiles */
 #define DEFAULT_RFILE_LENGTH 724	/* Default rfile length for writing */
-#define MAX_RFILE_LENGTH 2500		/* Maximum length of rfile */
+#define MAX_RFILE_LENGTH 25000		/* Maximum length of rfile */
 
 /*
  * Old Bragg peak and overflow "masking" specifications:
@@ -243,7 +243,7 @@ typedef unsigned short IMAGE_DATA_TYPE;
 #define DEFAULT_IGNORE_TAG 0xffff	/* 65535 */
 #define PUNCH_TAG 0xfffd		/* 65533 */
 #define MAX_IMAGE_DATA_VALUE 65535	/* not 1048577 due to img conversion */
-typedef unsigned short IMAGE_DATA_TYPE;
+typedef short IMAGE_DATA_TYPE;
 #endif
 #endif
 #endif
