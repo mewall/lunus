@@ -60,6 +60,26 @@ namespace lunus {
       lthrshim(imdiff);
     }
 
+    inline void LunusPolarim(float bxp, float byp, float dist, float polar, float offset, float px) {
+      printf("LunusPolarim\n");
+      imdiff->origin.c = bxp;
+      imdiff->origin.r = byp;
+      imdiff->distance_mm = dist;
+      imdiff->polarization = polar;
+      imdiff->polarization_offset = offset;
+      imdiff->pixel_size_mm = px;
+      lpolarim(imdiff);
+    }
+
+    inline void LunusNormim(float bx, float by, float dist, float px) {
+      printf("LunusNormim\n");
+      imdiff->beam_mm.x = bx;
+      imdiff->beam_mm.y = by;
+      imdiff->distance_mm = dist;
+      imdiff->pixel_size_mm = px;
+      lnormim(imdiff);
+    }
+
     inline void LunusModeim(std::size_t w) {
       imdiff->mode_width = w;
       lmodeim(imdiff);
@@ -86,6 +106,28 @@ namespace lunus {
       printf("Converted image size %ld,%ld with %ld negative pixel values.\n",fast,slow,ct);
     }
 
+    inline scitbx::af::flex_double LunusRadialAvgim(float bx, float by, float px) {
+      imdiff->beam_mm.x = bx;
+      imdiff->beam_mm.y = by;
+      imdiff->pixel_size_mm = px;
+      lavgrim(imdiff);
+      std::size_t rs = imdiff->rfile_length;
+      scitbx::af::flex_double data(rs);
+      double* begin=data.begin();
+      std::size_t ct=0;
+      imdiff->rfile = (RFILE_DATA_TYPE *)realloc(imdiff->rfile,imdiff->rfile_length*sizeof(RFILE_DATA_TYPE));
+      for (int i = 0;i<imdiff->rfile_length;i++) {
+  if (imdiff->rfile[i] == imdiff->ignore_tag) {
+    begin[i] = -1;
+    ct++;
+  } else {
+    begin[i] = imdiff->rfile[i];
+  }
+      }
+      printf("Calculated radial average for %ld bins, with %ld empty bins.\n",rs,ct);
+      return data;
+    }
+
     inline scitbx::af::flex_int get_image() {
       std::size_t fast = imdiff->hpixels;
       std::size_t slow = imdiff->vpixels;
@@ -110,6 +152,125 @@ namespace lunus {
 
   };
 
+  class LunusLAT3D {
+  protected:
+    LAT3D *lat;
+
+  public:
+    inline  LunusLAT3D() {
+      printf("in default XXX constr.\n");
+      lat = linitlt();
+    }
+
+    inline ~LunusLAT3D() {
+      lfreelt(lat);
+    }
+
+    inline void LunusReadlt(char f[]) {
+      printf("Reading in file:\n%s\n",f);
+      lat->filename = f;
+      lat->infile = fopen(f,"rb");
+      lreadlt(lat);
+      fclose(lat->infile);
+    }
+
+    inline void LunusReadvtk(char f[]) {
+      printf("Reading in file:\n%s\n",f);
+      lat->filename = f;
+      lat->infile = fopen(f,"rb");
+      lreadvtk(lat);
+      fclose(lat->infile);
+    }
+
+    inline void LunusWritelt(char f[]) {
+      printf("Writing lattice to file:\n%s\n",f);
+      lat->filename = f;
+      lat->outfile = fopen(f,"wb");
+      lwritelt(lat);
+      fclose(lat->outfile);
+    }
+
+    inline void LunusWritevtk(char f[]) {
+      printf("Writing lattice to file:\n%s\n",f);
+      lat->filename = f;
+      lat->outfile = fopen(f,"wb");
+      lwritevtk(lat);
+      fclose(lat->outfile);
+    }
+
+    inline void LunusWritehkl(char f[]) {
+      printf("Writing lattice to file:\n%s\n",f);
+      lat->filename = f;
+      lat->outfile = fopen(f,"wb");
+      lwritehkl(lat);
+      fclose(lat->outfile);
+    }
+
+    inline void LunusSymlt(int sym) {
+      printf("LunusSymlt\n");
+      lat->symop_index = sym;
+      lsymlt(lat);
+    }
+
+    inline void LunusAnisolt(float a, float b, float c, float alpha, float beta, float gamma) {
+      printf("LunusAnisolt\n");
+      lat->cell.a = a;
+      lat->cell.b = b;
+      lat->cell.c = c;
+      lat->cell.alpha = alpha;
+      lat->cell.beta = beta;
+      lat->cell.gamma = gamma;
+      lparsecelllt(lat);
+      lanisolt(lat);
+    }
+
+    inline void set_lattice(scitbx::af::flex_int data) {
+      int* begin=data.begin();
+      std::size_t size=data.size();
+      std::size_t xvox=data.accessor().focus()[0];
+      std::size_t yvox=data.accessor().focus()[1];
+      std::size_t zvox=data.accessor().focus()[2];
+      lat->lattice_length = size;
+      lat->xvoxels = xvox;
+      lat->yvoxels = yvox;
+      lat->zvoxels = zvox;
+      lat->lattice = (LATTICE_DATA_TYPE *)realloc(lat->lattice,lat->lattice_length*sizeof(LATTICE_DATA_TYPE));
+      std::size_t ct=0;
+      for (int i = 0;i<lat->lattice_length;i++) {
+  if (begin[i]<0) {
+    lat->lattice[i] = lat->mask_tag;
+    ct++;
+  } else {
+    lat->lattice[i] = (LATTICE_DATA_TYPE)begin[i];
+  }
+      }
+      printf("Converted lattice of size (%ld,%ld,%ld) with %ld negative pixel values.\n",xvox,yvox,zvox,ct);
+    }
+
+    inline scitbx::af::flex_int get_lattice() {
+      std::size_t xvox = lat->xvoxels;
+      std::size_t yvox = lat->yvoxels;
+      std::size_t zvox = lat->zvoxels;
+      scitbx::af::flex_int data(scitbx::af::flex_grid<>(xvox,yvox,zvox));
+      int* begin=data.begin();
+      std::size_t ct=0;
+      for (int i = 0;i<lat->lattice_length;i++) {
+  if (lat->lattice[i] == lat->mask_tag) {
+    begin[i] = -1;
+    ct++;
+  } else {
+    begin[i] = lat->lattice[i];
+  }
+      }
+      printf("Converted lattice of size (%ld,%ld,%ld) with %ld negative pixel values.\n",xvox,yvox,zvox,ct);
+      return data;
+    }
+
+    inline std::size_t get_lattice_data_type_size() {
+      return sizeof(LATTICE_DATA_TYPE);
+    }
+  };
+
 }
 
 using namespace boost::python;
@@ -129,7 +290,23 @@ namespace boost_python { namespace {
       .def("LunusPunchim",&lunus::LunusDIFFIMAGE::LunusPunchim)
       .def("LunusWindim",&lunus::LunusDIFFIMAGE::LunusWindim)
       .def("LunusThrshim",&lunus::LunusDIFFIMAGE::LunusThrshim)
+      .def("LunusPolarim",&lunus::LunusDIFFIMAGE::LunusPolarim)
+      .def("LunusNormim",&lunus::LunusDIFFIMAGE::LunusNormim)
       .def("LunusModeim",&lunus::LunusDIFFIMAGE::LunusModeim)
+      .def("LunusRadialAvgim",&lunus::LunusDIFFIMAGE::LunusRadialAvgim)
+    ;
+
+    class_<lunus::LunusLAT3D>("LunusLAT3D",init<>())
+      .def("get_lattice_data_type_size",&lunus::LunusLAT3D::get_lattice_data_type_size)
+      .def("get_lattice",&lunus::LunusLAT3D::get_lattice)
+      .def("set_lattice",&lunus::LunusLAT3D::set_lattice)
+      .def("LunusReadlt",&lunus::LunusLAT3D::LunusReadlt)
+      .def("LunusReadvtk",&lunus::LunusLAT3D::LunusReadvtk)
+      .def("LunusWritelt",&lunus::LunusLAT3D::LunusWritelt)
+      .def("LunusWritevtk",&lunus::LunusLAT3D::LunusWritevtk)
+      .def("LunusWritehkl",&lunus::LunusLAT3D::LunusWritehkl)
+      .def("LunusSymlt",&lunus::LunusLAT3D::LunusSymlt)
+      .def("LunusAnisolt",&lunus::LunusLAT3D::LunusAnisolt)
     ;
 
     def("foo2",&lunus::foo2);
