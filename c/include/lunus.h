@@ -109,7 +109,7 @@
 
 #define DEFAULT_RFILE_MASK_TAG 0	/* Mask tag for rfiles */
 #define DEFAULT_RFILE_LENGTH 724	/* Default rfile length for writing */
-#define MAX_RFILE_LENGTH 2000		/* Maximum length of rfile */
+#define MAX_RFILE_LENGTH 100000		/* Maximum length of rfile */
 
 /*
  * Old Bragg peak and overflow "masking" specifications:
@@ -294,8 +294,8 @@ typedef float RFILE_DATA_TYPE;
 typedef float LATTICE_DATA_TYPE;
 typedef float MAP_DATA_TYPE;
 typedef short SHIM_DATA_TYPE;
-typedef int IMAGE_DATA_TYPE;
-//typedef short IMAGE_DATA_TYPE;
+//typedef int IMAGE_DATA_TYPE;
+typedef short IMAGE_DATA_TYPE;
 typedef float WEIGHTS_DATA_TYPE;
 
 // MPI
@@ -457,6 +457,7 @@ typedef struct
   size_t rfile_length;	        /* Length of rfile */
   RFILE_DATA_TYPE rfile_mask_tag;/* Tag for masked rfile value */
   RFILE_DATA_TYPE avg_pixel_value;/* Single average value */
+  IMAGE_DATA_TYPE min_pixel_value;/* Minimum pixel value */
   struct rccoords origin;       /* Origin of image */
   char error_msg[LINESIZE];     /*Error message string */
   WEIGHTS_DATA_TYPE *weights;   /* Smoothing weights matrix */
@@ -769,6 +770,7 @@ struct xyzmatrix lmatinv(struct xyzmatrix a);
 struct xyzmatrix lmatmul(struct xyzmatrix a, struct xyzmatrix b);
 int lmedim(DIFFIMAGE *imdiff);
 size_t lmin(size_t arg1, size_t arg2);
+int lminim(DIFFIMAGE *imdiff);
 int lminr(LAT3D *lat);
 int lminrim(DIFFIMAGE *imdiff);
 int lmirrorlt(LAT3D *lat,int axis);
@@ -825,10 +827,15 @@ int lshim4lt(LAT3D *lat);
 int lshimlt(LAT3D *lat);
 int lsmthim(DIFFIMAGE *imdiff);
 int lsolidlt(LAT3D *lat);
+float lspleval(float *break__, float *coef, int *l, int *k, float *x,
+	       int *jderiv);
+int lspline(float *tau, float *c__, int *n, int *
+	    ibcbeg, int *ibcend);
 float lssqrFromIndex(LAT3D *lat);
 int lsubenvlt(LAT3D *lat1, LAT3D *lat2);
 int lsubim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lsublt(LAT3D *lat1, LAT3D *lat2);
+void lsubminlt(LAT3D *lat);
 int lsubrf(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lsubrfim(DIFFIMAGE *imdiff);
 int lsubrflt(LAT3D *lat);
