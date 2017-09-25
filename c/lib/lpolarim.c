@@ -51,12 +51,12 @@ int lpolarim(DIFFIMAGE *imdiff)
 	  cos_two_theta = cosf(two_theta);
 	  sin_two_theta = sinf(two_theta);
 	  cos_two_rho = cos(2*acosf(rvec.x / radius) - two_rho_offset);
-	  // imdiff->image[index] -= imdiff->value_offset;
+	  imdiff->image[index] -= imdiff->value_offset;
 	  imdiff->image[index]=(IMAGE_DATA_TYPE)((float)imdiff->image[index] *
 			       2. / (1. + cos_two_theta*cos_two_theta -
 			       imdiff->polarization*cos_two_rho*
 			         sin_two_theta*sin_two_theta));
-	  // imdiff->image[index] += imdiff->value_offset;
+	  imdiff->image[index] += imdiff->value_offset;
 	}
       }
       index++;

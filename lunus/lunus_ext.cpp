@@ -1,3 +1,9 @@
+    // Authors: Mike Wall & Nick Sauter
+    // Date: 6/15/2017
+    // Lat3D class, RadialAvgim, Normim, & Polarim methods wrapped by Alex Wolff (9/22/2017).
+
+
+
 #include <cctbx/boost_python/flex_fwd.h>
 #include <boost/python/module.hpp>
 #include <boost/python/class.hpp>
@@ -71,11 +77,13 @@ namespace lunus {
       lpolarim(imdiff);
     }
 
-    inline void LunusNormim(float bx, float by, float dist, float px) {
+    inline void LunusNormim(float bx, float by, float dist, float cx, float cy, float px) {
       printf("LunusNormim\n");
       imdiff->beam_mm.x = bx;
       imdiff->beam_mm.y = by;
       imdiff->distance_mm = dist;
+      imdiff->cassette.x = cx;
+      imdiff->cassette.y = cy;
       imdiff->pixel_size_mm = px;
       lnormim(imdiff);
     }
