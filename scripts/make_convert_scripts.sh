@@ -20,7 +20,7 @@ for (( i=1; i <= $num_images ; i++ ))
 
 do
 
-integration_image_name=`printf %s_%05d.img $integration_image_prefix $i`
+integration_image_name=`printf %s_%05d.cbf $integration_image_prefix $i`
 
 integration_image_path=`printf %s/%s $lunus_image_dir $integration_image_name`
 
