@@ -17,16 +17,16 @@ fi
 #
 # Get the header:
 #
-if [ ! -e $1.head ]; then
+if [ ! -e $1.head.tt ]; then
   echo "Please provide $1.head file"
   exit 1
 fi
-cat $1.head > $1
+cat $1.head.tt > $1
 #
 # Executable list:
 #
 echo "all: \\" >> $1
-ls -1 *.c | awk '{print "\t"substr($0,0,length()-2)" \\"}' >> ${C_HOME}/src/$1
+ls -1 *.c | awk '{print "\t"substr($0,0,length()-1)" \\"}' >> ${C_HOME}/src/$1
 echo "libmw.a" | awk '{print "\t"$0}'>> ${C_HOME}/src/$1
 #
 # Build executables:
