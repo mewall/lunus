@@ -1,11 +1,11 @@
 #!/bin/bash
 
 . $1
-
 if [ -z ${work_dir+x} ]; then echo "work_dir is unset"; else echo "work_dir is set to '$work_dir'"; fi
 if [ -z ${raw_image_dir+x} ]; then echo "raw_image_dir is unset"; else echo "raw_image_dir is set to 'raw_$image_dir'"; fi
 if [ -z ${image_prefix+x} ]; then echo "image_prefix is unset"; else echo "image_prefix is set to '$image_prefix'"; fi
 if [ -z ${num_images+x} ]; then echo "num_images is unset"; else echo "num_images is set to '$num_images'"; fi
+if [ -z ${image_suffix+x} ]; then echo "image_suffix will be set to cbf";image_suffix=cbf; else echo "image_suffix is set to '$image_suffix'"; fi
 
 if [ ! -d $work_dir ]; then
 	mkdir $work_dir
@@ -27,15 +27,15 @@ do
 
 # some file names
 
-this_image_name=`printf %s_%05d.img $image_prefix $i`
+this_image_name=`printf %s_%05d.%s $image_prefix $i $image_suffix`
 
 this_image_path=`printf %s/%s $raw_image_dir $this_image_name`
 
-scale_image_name=`printf %s_%05d.img $scale_image_prefix $i`
+scale_image_name=`printf %s_%05d.%s $scale_image_prefix $i $image_suffix`
 
 scale_image_path=`printf %s/%s $lunus_image_dir $scale_image_name`
 
-lunus_image_name=`printf %s_%05d.img $lunus_image_prefix $i`
+lunus_image_name=`printf %s_%05d.%s $lunus_image_prefix $i $image_suffix`
 
 lunus_image_path=`printf %s/%s $lunus_image_dir $lunus_image_name`
 
@@ -84,8 +84,8 @@ cat > $script_path<<EOF
 #tasks=(0 1bac 2xyz 3ijk 4abc 5def 6ghi 7jkl 8mno 9pqr 1stu )
 #input="${tasks[$SGE_TASK_ID]}"
 
-date
-hostname
+#date
+#hostname
 
 #qstat -j $JOB_ID                                  # This is useful for debugging and usage purposes,
 							# e.g. "did my job exceed its memory request?"
@@ -99,8 +99,10 @@ cd "tmpdir_"$i
 punchim $this_image_path $punchim_xmin $punchim_xmax $punchim_ymin $punchim_ymax tmp.img
 windim tmp.img $windim_xmin $windim_xmax $windim_ymin $windim_ymax tmp000.img
 thrshim tmp000.img $thrshim_min $thrshim_max tmp00.img
-polarim tmp00.img tmp0.img $polarim_dist $polarim_polarization $polarim_offset
-normim tmp0.img tmp1.img $normim_tilt_x $normim_tilt_y
+#polarim tmp00.img tmp0.img $polarim_dist $polarim_polarization $polarim_offset
+#normim tmp0.img tmp1.img $normim_tilt_x $normim_tilt_y
+cfim tmp00.img tmp0.imf $polarim_dist $polarim_polarization $polarim_offset $correction_factor_scale
+mulcfim tmp0.imf tmp00.img tmp1.img
 modeim tmp1.img tmp2.img $modeim_kernel_width $modeim_bin_size
 
 # copy results to processed image name

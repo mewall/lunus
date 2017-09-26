@@ -2,6 +2,7 @@ from time import clock, time
 import numpy as np
 import re
 from multiprocessing import Pool
+#from scipy.sparse import csr_matrix
 try:
     import cPickle as pickle
 except:
@@ -17,6 +18,7 @@ def procimg(Isize1,Isize2,scale,mask_tag,A_matrix,rvec,DATA,latxdim,latydim,latz
   # total number of voxels in the lattice
   latsize = latxdim*latydim*latzdim
   lat = np.zeros(latsize*2, dtype=np.float32).reshape((2,latsize))
+#  lat = csr_matrix((2,latsize),dtype=np.float32)
 
   # calculate the range of data points to be integrated in this process
   chunksize = int(Isize2/nproc)
@@ -232,6 +234,16 @@ if __name__=="__main__":
         filterhkl = False
     else:
         filterhkl = True
+  # apply correction factor
+  try:
+    apply_correctionidx = [a.find("apply_correction")==0 for a in args].index(True)
+  except ValueError:
+    apply_correction = True
+  else:
+    if (args.pop(apply_correctionidx).split("=")[1] == "False"):
+        apply_correction = False
+    else:
+        apply_correction = True
   # size of diffuse lattice in x direction
   try:
     latxdimidx = [a.find("latxdim")==0 for a in args].index(True)
@@ -256,6 +268,13 @@ if __name__=="__main__":
         latzdim = -1
   else:
     latzdim = int(args.pop(latzdimidx).split("=")[1])
+  # image mask tag
+  try:
+    image_mask_tagidx = [a.find("image.mask.tag")==0 for a in args].index(True)
+  except ValueError:
+    mask_tag = 32767
+  else:
+    mask_tag = int(args.pop(image_mask_tagidx).split("=")[1])
   # specify path to proc directory
   try:
     procpathidx = [a.find("path.to.proc")==0 for a in args].index(True)
@@ -300,7 +319,7 @@ if __name__=="__main__":
   i0=latxdim/2-1
   j0=latydim/2-1
   k0=latzdim/2-1
-  mask_tag = 32767.
+#  mask_tag = 32767.
 
 #  fileidx = 0
 
@@ -327,11 +346,14 @@ if __name__=="__main__":
   # Read image data values
   DATAimg = np.load("DATA.npy")
   # Read correction file
-  correction = np.fromfile(open("../tmpdir_common/correction.imf","rb"),dtype=np.float32)
-#  print "Mean of correction,DATAimg is {0},{1}".format(np.mean(correction),DATAimg.astype(np.float32))
-  correction[DATAimg==32767]=1.
-  # apply correction (normim, polarim steps using floating point arithmetic)
-  DATA = np.multiply(correction,DATAimg.astype(np.float32))
+  if (apply_correction):
+      correction = np.fromfile(open("../tmpdir_common/correction.imf","rb"),dtype=np.float32)
+      #  print "Mean of correction,DATAimg is {0},{1}".format(np.mean(correction),DATAimg.astype(np.float32))
+      correction[DATAimg==mask_tag]=1.
+      # apply correction (normim, polarim steps using floating point arithmetic)
+      DATA = np.multiply(correction,DATAimg.astype(np.float32))
+  else:
+      DATA = DATAimg.astype(np.float32)
   tasks = [(Isize1,Isize2,scale,mask_tag,A_matrix,x_vectors,DATA,latxdim,latydim,latzdim,procid) for procid in range(nproc)]
   # run procimg in parallel and collect results
   tmp_latit = pool.map(procimgstar,tasks)
@@ -344,6 +366,8 @@ if __name__=="__main__":
   t0 = time()
   # accumulate integration data into a single lattice
   for l in latit:
+#      lat = np.add(lat,l.toarray()[0])
+#      ct = np.add(ct,l.toarray()[1])
       lat = np.add(lat,l[0])
       ct = np.add(ct,l[1])
   tel = time()-t0

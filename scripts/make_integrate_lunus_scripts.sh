@@ -2,6 +2,12 @@
 
 . $1
 
+if [ -z ${image_suffix+x} ]; then echo "image_suffix will be set to cbf";image_suffix=cbf; else echo "image_suffix is set to '$image_suffix'"; fi
+
+if [ -z ${image_mask_tag+x} ]; then 
+    image_mask_tag=32767
+fi
+
 if [ ! -d $work_dir ]; then
 	mkdir $work_dir
 fi
@@ -18,7 +24,7 @@ fi
 
 # Reference file
 
-reference_image_path=`printf %s/%s_%05d.img $lunus_image_dir $scale_image_prefix $reference_image_number`
+reference_image_path=`printf %s/%s_%05d.%s $lunus_image_dir $scale_image_prefix $reference_image_number $image_suffix`
 
 for (( i=1; i <= $num_images ; i=$i+1 ))
 
@@ -32,11 +38,11 @@ this_diffuse_file=`printf "%s_diffuse_%05d.npz" $diffuse_lattice_prefix $i`
 
 this_counts_file=`printf "%s_counts_%05d.npz" $diffuse_lattice_prefix $i`
 
-scale_image_name=`printf %s_%05d.img $scale_image_prefix $i`
+scale_image_name=`printf %s_%05d.%s $scale_image_prefix $i $image_suffix`
 
 scale_image_path=`printf %s/%s $lunus_image_dir $scale_image_name`
 
-integration_image_name=`printf %s_%05d.img $integration_image_prefix $i`
+integration_image_name=`printf %s_%05d.%s $integration_image_prefix $i $image_suffix`
 
 integration_image_path=`printf %s/%s $lunus_image_dir $integration_image_name`
 
@@ -75,7 +81,8 @@ cat > $script_path<<EOF
 date
 hostname
 
-module load python/2.7-anaconda-4.1.1
+module load python
+#module load python/2.7-anaconda-4.1.1
 
 . $cctbx_dir/setpaths_all.sh
 
@@ -122,7 +129,7 @@ cat >>$script_path<<EOF
 
 #python $lunus_dir/scripts/integrate_lunus.py cell.a=$cella cell.b=$cellb cell.c=$cellc inputlist.fname=$scales_input_file framenum=$i diffuse.lattice.resolution=$resolution diffuse.lattice.type=npz diffuse.lattice.fname=$this_diffuse_file counts.lattice.fname=$this_counts_file np=$nproc codecamp.maxcell=$maxcell target_cell=$cella,$cellb,$cellc,$alpha,$beta,$gamma target_sg=$spacegroup pphkl=$pphkl filterhkl=$filterhkl
 
-python $lunus_dir/scripts/integrate_lunus.py libtbx.modules.path=$cctbx_dir/modules cell.a=$cella cell.b=$cellb cell.c=$cellc scale.fname=scale_output.txt diffimg.fname=$lunus_image_path diffuse.lattice.resolution=$resolution diffuse.lattice.type=npz diffuse.lattice.fname=$this_diffuse_file counts.lattice.fname=$this_counts_file np=$nproc codecamp.maxcell=$maxcell target_cell=$cella,$cellb,$cellc,$alpha,$beta,$gamma target_sg=$spacegroup pphkl=$pphkl filterhkl=$filterhkl
+python $lunus_dir/scripts/integrate_lunus.py libtbx.modules.path=$cctbx_dir/modules cell.a=$cella cell.b=$cellb cell.c=$cellc scale.fname=scale_output.txt diffimg.fname=$lunus_image_path diffuse.lattice.resolution=$resolution diffuse.lattice.type=npz diffuse.lattice.fname=$this_diffuse_file counts.lattice.fname=$this_counts_file np=$nproc codecamp.maxcell=$maxcell target_cell=$cella,$cellb,$cellc,$alpha,$beta,$gamma target_sg=$spacegroup pphkl=$pphkl filterhkl=$filterhkl apply_correction=$apply_correction image.mask.tag=$image_mask_tag
 
 EOF
 

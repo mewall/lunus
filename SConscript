@@ -1,3 +1,10 @@
+   # Authors: Mike Wall & Nick Sauter
+   # Date: 6/15/2017
+   # Lattice methods wrapped by Alex Wolff (9/22/2017).
+
+
+
+
 import libtbx.load_env
 import os
 op = os.path
@@ -30,8 +37,25 @@ env_base.StaticLibrary(target='#lib/lunus',
             os.path.join(env_etc.lunus_dist,"c","lib","lfreeim.c"),
             os.path.join(env_etc.lunus_dist,"c","lib","lmodeim.c"),
 	    os.path.join(env_etc.lunus_dist,"c","lib","lpunchim.c"),
+      os.path.join(env_etc.lunus_dist,"c","lib","lnormim.c"),
+      os.path.join(env_etc.lunus_dist,"c","lib","lpolarim.c"),
+      os.path.join(env_etc.lunus_dist,"c","lib","lavgrim.c"),
 	    os.path.join(env_etc.lunus_dist,"c","lib","lwindim.c"),
-	    os.path.join(env_etc.lunus_dist,"c","lib","lthrshim.c")],
+	    os.path.join(env_etc.lunus_dist,"c","lib","lthrshim.c"),
+      os.path.join(env_etc.lunus_dist,"c","lib","linitlt.c"),
+      os.path.join(env_etc.lunus_dist,"c","lib","lfreelt.c"),
+      os.path.join(env_etc.lunus_dist,"c","lib","lreadlt.c"),
+      os.path.join(env_etc.lunus_dist,"c","lib","lreadvtk.c"),
+      os.path.join(env_etc.lunus_dist,"c","lib","lgettag.c"),
+      os.path.join(env_etc.lunus_dist,"c","lib","lparsecelllt.c"),
+      os.path.join(env_etc.lunus_dist,"c","lib","lmattools.c"),
+      os.path.join(env_etc.lunus_dist,"c","lib","lwritevtk.c"),
+      os.path.join(env_etc.lunus_dist,"c","lib","lwritehkl.c"),
+      os.path.join(env_etc.lunus_dist,"c","lib","lwritelt.c"),
+      os.path.join(env_etc.lunus_dist,"c","lib","lsymlt.c"),
+      os.path.join(env_etc.lunus_dist,"c","lib","lsymlib.c"),
+      os.path.join(env_etc.lunus_dist,"c","lib","lanisolt.c"),
+      os.path.join(env_etc.lunus_dist,"c","lib","lsvtools.c")],
   CPPPATH=[CPPP] )
 print "LIBRARY OK"
 

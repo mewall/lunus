@@ -54,6 +54,13 @@ if __name__=="__main__":
       raise ValueError,"Target space group target_sg must be specified"
   else:
       target_sg = args.pop(targetsgidx).split("=")[1]
+  # maxcell parameter
+  try:
+      maxcellidx = [a.find("maxcell")==0 for a in args].index(True)
+  except ValueError:
+      maxcell=-1
+  else:
+      maxcell = int(args.pop(maxcellidx).split("=")[1])
   try:
     procpathidx = [a.find("path.to.proc")==0 for a in args].index(True)
   except ValueError:
@@ -121,9 +128,12 @@ if __name__=="__main__":
   params, options = parser.parse_args(args=[], show_diff_phil=True)
   
   params.refinement.parameterisation.scan_varying = False
-#  params.indexing.method='real_space_grid_search'
-  params.indexing.method='fft3d'
-#  params.indexing.max_cell=800
+  params.refinement.reflections.outlier.algorithm = 'sauter_poon'
+  params.indexing.method='real_space_grid_search'
+#  params.indexing.method='fft3d'
+  if (maxcell != -1):
+    params.indexing.max_cell=maxcell
+#  params.indexing.disable_unit_cell_volume_sanity_check=True
 #  params.spotfinder.filter.min_spot_size=3
   
   filenames = []
@@ -141,6 +151,7 @@ if __name__=="__main__":
   datablock = DataBlockFactory.from_filenames(filenames)[0]
  
   observed = flex.reflection_table.from_observations(datablock, params)
+#  observed = flex.reflection_table.from_pickle("/lustre/ttscratch1/mewall/exafel/YSP_CSB08_13_PY-EVN/raw/strong.pickle")
   observed.as_pickle("strong.pickle")
   print "Number of observed reflections:", len(observed)
  

@@ -1,4 +1,4 @@
-#!/bin/csh -f
+#!/bin/bash
 #
 # MAKEMAKE - Make the master Makefile for a c-code package
 # Author: Mike Wall
@@ -11,16 +11,22 @@
 #
 # Save the old one:
 #
-cp $1 $1.sav
+if [ -e $1 ]; then
+  cp $1 $1.sav
+fi
 #
 # Get the header:
 #
+if [ ! -e $1.head ]; then
+  echo "Please provide $1.head file"
+  exit 1
+fi
 cat $1.head > $1
 #
 # Executable list:
 #
-echo "all: \" >> $1
-ls -1 *.c | awk '{print "\t"substr($0,0,length()-1)" \\"}' >> ${C_HOME}/src/$1
+echo "all: \\" >> $1
+ls -1 *.c | awk '{print "\t"substr($0,0,length()-2)" \\"}' >> ${C_HOME}/src/$1
 echo "libmw.a" | awk '{print "\t"$0}'>> ${C_HOME}/src/$1
 #
 # Build executables:
@@ -38,7 +44,7 @@ echo "#" >> ${C_HOME}/src/$1
 cd ${C_HOME}/lib
 ls -1 *.c | awk '{print substr($0,0,length()-1)".o:"$1" lunus.h"}' >> ${C_HOME}/src/$1
 echo '.c.o:' >> ${C_HOME}/src/$1
-echo '$(CC) -c -o ${L}/$*.o $(CFLAGS) ${L}/$*.c' | awk '{print "\t"$0}' >> ${C_HOME}/src/$1
+echo '$(CC) -c -o ${L}/$*.o $(CFLAGS) ${L}/$*.c' | awk '{print "\t" $0}' >> ${C_HOME}/src/$1
 #
 # Build libraries:
 #
@@ -48,7 +54,7 @@ echo "#" >> ${C_HOME}/src/$1
 /bin/echo -n "libmw.a: " >> ${C_HOME}/src/$1
 ls -1 *.c | awk '{printf "\\\n\t"substr($0,0,length()-1)".o "}' >> ${C_HOME}/src/$1
 echo "" >> ${C_HOME}/src/$1
-echo 'cd ${L}; rm libmw.a; $(AR) $(ARFLAGS) libmw.a *.o' | awk '{print "\t"$0}' >> ${C_HOME}/src/$1
+echo 'cd ${L}; rm libmw.a; $(AR) $(ARFLAGS) libmw.a *.o' | awk '{print "\t" $0}' >> ${C_HOME}/src/$1
 
 
 
