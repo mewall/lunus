@@ -1,5 +1,5 @@
 /*
-  MWMASK.H - Header for diffraction image manipulation routines.
+  LUNUS.H - Header for diffraction image manipulation routines.
 
 
   Modifications:
@@ -185,46 +185,6 @@
 /* 
  * Data-set dependent defines
  */
-#ifdef EIGER
-#define DEFAULT_WAVELENGTH 0.9179       /* Wavelength for sncps */
-#define DEFAULT_DISTANCE_MM 71.7	/* Sample-detector distance in mm*/
-#define DEFAULT_X_BEAM 48.6		/* Beam position in x (denzo) */
-#define DEFAULT_Y_BEAM 41.7		/* Beam position in y (denzo) */
-#define DEFAULT_CELL_A 78.9           /* A */
-#define DEFAULT_CELL_B 78.9           /* B */
-#define DEFAULT_CELL_C 37.66           /* C */
-#define DEFAULT_CELL_ALPHA 90.0         /* B-C angle */
-#define DEFAULT_CELL_BETA 90.0          /* C-A angle */
-#define DEFAULT_CELL_GAMMA 90.0         /* A-B angle */
-#define DEFAULT_CASSETTE_ROTX 0         /* temp */
-#define DEFAULT_CASSETTE_ROTY 0         /* temp */
-#define DEFAULT_CASSETTE_ROTZ 0         /* temp */
-#define DEFAULT_OVERLOAD_TAG 0x7ffe	/* 32766 */
-#define DEFAULT_IGNORE_TAG 0x7ffe	/* 32766 */
-#define PUNCH_TAG 0x7ffe		/* 32766 */
-#define MAX_IMAGE_DATA_VALUE 32767	/* Maximum value of pixel in image */
-typedef short IMAGE_DATA_TYPE;
-#else
-#ifdef P200K
-#define DEFAULT_WAVELENGTH 0.9179       /* Wavelength for sncps */
-#define DEFAULT_DISTANCE_MM 71.7	/* Sample-detector distance in mm*/
-#define DEFAULT_X_BEAM 41.72		/* Beam position in x (denzo) */
-#define DEFAULT_Y_BEAM 41.74		/* Beam position in y (denzo) */
-#define DEFAULT_CELL_A 78.9           /* A */
-#define DEFAULT_CELL_B 78.9           /* B */
-#define DEFAULT_CELL_C 37.66           /* C */
-#define DEFAULT_CELL_ALPHA 90.0         /* B-C angle */
-#define DEFAULT_CELL_BETA 90.0          /* C-A angle */
-#define DEFAULT_CELL_GAMMA 90.0         /* A-B angle */
-#define DEFAULT_CASSETTE_ROTX -0.22         /* temp */
-#define DEFAULT_CASSETTE_ROTY -1.38         /* temp */
-#define DEFAULT_CASSETTE_ROTZ 0         /* temp */
-#define DEFAULT_OVERLOAD_TAG 0xfffe	/* 65534 */
-#define DEFAULT_IGNORE_TAG 0xffff	/* 65535 */
-#define PUNCH_TAG 0xfffd		/* 65533 */
-#define MAX_IMAGE_DATA_VALUE 65535	/* not 1048577 due to img conversion */
-typedef unsigned short IMAGE_DATA_TYPE;
-#else
 #ifdef P6M
 #define DEFAULT_WAVELENGTH 0.9774       /* Wavelength for sncps */
 #define DEFAULT_DISTANCE_MM 250.0	/* Sample-detector distance in mm*/
@@ -239,13 +199,10 @@ typedef unsigned short IMAGE_DATA_TYPE;
 #define DEFAULT_CASSETTE_ROTX -0.22         /* temp */
 #define DEFAULT_CASSETTE_ROTY -1.38         /* temp */
 #define DEFAULT_CASSETTE_ROTZ 0         /* temp */
-#define DEFAULT_OVERLOAD_TAG 0xfffe	/* 65534 */
-#define DEFAULT_IGNORE_TAG 0xffff	/* 65535 */
-#define PUNCH_TAG 0xfffd		/* 65533 */
+#define DEFAULT_OVERLOAD_TAG 0x7fff
+#define DEFAULT_IGNORE_TAG 0x7fff	
+#define PUNCH_TAG 0x7ffe		
 #define MAX_IMAGE_DATA_VALUE 65535	/* not 1048577 due to img conversion */
-typedef short IMAGE_DATA_TYPE;
-#endif
-#endif
 #endif
 
 /*
@@ -259,7 +216,7 @@ typedef float RFILE_DATA_TYPE;
 typedef float LATTICE_DATA_TYPE;
 typedef float MAP_DATA_TYPE;
 typedef short SHIM_DATA_TYPE;
-//typedef short IMAGE_DATA_TYPE;
+typedef short IMAGE_DATA_TYPE;
 typedef float WEIGHTS_DATA_TYPE;
 
 // MPI
@@ -444,7 +401,7 @@ typedef struct
   IMAGE_DATA_TYPE upper_threshold;
   DIFFUSE_FEATURE *feature;     /* List of diffuse features */
   size_t feature_count;
-  char *cell_str                /* Unit cell string a,b,c,alpha,beta,gamma */
+  char *cell_str;               /* Unit cell string a,b,c,alpha,beta,gamma */
   struct unit_cell cell;        /* Unit cell data type */
   float wavelength;
   struct xyzmatrix u;
@@ -454,7 +411,7 @@ typedef struct
   struct xyzcoords q;
   struct irange rfirange;       /* Range of rfile index values */
   float *correction;             /* Correction factor, pixel by pixel */
-  size_t tag;			/* Option tag for mathim, etc. */
+  //size_t tag;			/* Option tag for mathim, etc. */
 } DIFFIMAGE;
 
 /*
@@ -690,16 +647,17 @@ int lchbyte(void *ptr, size_t packet_size, size_t list_length);
 int lconstim(DIFFIMAGE *imdiff);
 int lconstlt(LAT3D *lat);
 int lconstrf(DIFFIMAGE *imdiff);
+int lcfim(DIFFIMAGE *imdiff);
 float lcorrlt(LAT3D *lat1, LAT3D *lat2);
 int lcpltmap(LAT3D *lat,CCP4MAP *map);
 int lcpmaplt(CCP4MAP *map, LAT3D *lat);
 struct xyzcoords lcrossvec(struct xyzcoords a,struct xyzcoords b);
 void lcullconelt(LAT3D *lat);
+int cullim(DIFFIMAGE *imdiff);
 int lculllt(LAT3D *lat);
 int lcullreslt(LAT3D *lat);
 int lcutim(DIFFIMAGE *imdiff);
 int ldecimap(CCP4MAP *map);
-int ldf2im(DIFFIMAGE *imdiff);
 int ldfrflt(LAT3D *lat1, LAT3D *lat2);
 int ldfsqrlt(LAT3D *lat1, LAT3D *lat2);
 size_t ldiffim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
@@ -721,9 +679,14 @@ const char * lgettag(const char *target,const char *tag);
 DIFFIMAGE *linitim(void);
 LAT3D *linitlt(void);
 CCP4MAP *linitmap(void);
-int lintdfim(DIFFIMAGE *imdiff);
+void linitMPI(MPIVARS *mpiv);
+XTALSTRUCT *linitxs(void);
+int lintxdslt(DIFFIMAGE *imdiff, LAT3D *lat);
 int lliquidcorrlt(LAT3D *lat);
 int lliquidfaclt(LAT3D *lat);
+int lllmhyblt(LAT3D *lat1, LAT3D *lat2);
+int lllmdclt(LAT3D *lat);
+int lllmlt(LAT3D *lat);
 struct xyzmatrix lmatinv(struct xyzmatrix a);
 struct xyzmatrix lmatmul(struct xyzmatrix a, struct xyzmatrix b);
 int lmedim(DIFFIMAGE *imdiff);
@@ -733,11 +696,13 @@ int lminr(LAT3D *lat);
 int lminrim(DIFFIMAGE *imdiff);
 int lmirrorlt(LAT3D *lat,int axis);
 int lmodeim(DIFFIMAGE *imdiff);
+int lmulcfim(DIFFIMAGE *imdiff);
 int lmuldwflt(LAT3D *lat);
 int lmulim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lmullt(LAT3D *lat1, LAT3D *lat2);
 int lmulrf(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lmulrfim(DIFFIMAGE *imdiff);
+int lmulscim(DIFFIMAGE *imdiff);
 int lmulsclt(LAT3D *lat);
 int lmulscmap(CCP4MAP *map);
 int lnign(DIFFIMAGE *imdiff);
@@ -745,19 +710,21 @@ int lnoiseim(DIFFIMAGE *imdiff);
 int lnormim(DIFFIMAGE *imdiff);
 int lnormlt(LAT3D *lat);
 int lpadlt(LAT3D *lat);
+int lparsecelllt(LAT3D *lat);
 int lpeakim(DIFFIMAGE *imdiff);
 int lpolarim(DIFFIMAGE *imdiff);
 int lpunch(DIFFIMAGE *imdiff);
 int lpunchim(DIFFIMAGE *imdiff);
 int lratioim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
+int lrbtlt(LAT3D *lat);
 int lreadcube(CCP4MAP *map);
-int lreaddf(DIFFIMAGE *imdiff);
 int lreadhkl(LAT3D *lat,LAT3D *tmpl);
 int lreadim(DIFFIMAGE *imdiff);
 int lreadlt(LAT3D *lat);
 int lreadmap(CCP4MAP *map);
 int lreadrf(DIFFIMAGE *imdiff);
 int lreadvtk(LAT3D *lat);
+int lreadxs(XTALSTRUCT *xs);
 int lresizelt(LAT3D *lat1, LAT3D *lat2);
 int lrevyim(DIFFIMAGE *imdiff);
 int lrf2lt(LAT3D *lat);
@@ -768,9 +735,12 @@ struct xyzmatrix lrotmat(float rotx, float roty, float rotz);
 struct xyzcoords lrotvecz(struct xyzcoords a, float cos_theta,float sin_theta);
 int lrsccmap(CCP4MAP *map1, CCP4MAP *map2);
 float lrsrlt(LAT3D *lat1, LAT3D *lat2);
+int lsamplt(LAT3D *lat);
 int lscaleim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
+int lscalerfim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lscalelt(LAT3D *lat1, LAT3D *lat2);
 struct xyzcoords lsFromIndex(LAT3D *lat);
+int lsetcbftag(char **t, size_t *target_length, const char *tag, const char *val);
 int lsettag(char *target,const char *tag,const char *val);
 int lshiftlt(LAT3D *lat,struct ijkcoords t);
 int lshiftsflt(LAT3D *lat1,LAT3D *lat2);
@@ -778,17 +748,23 @@ int lshim4lt(LAT3D *lat);
 int lshimlt(LAT3D *lat);
 int lsmthim(DIFFIMAGE *imdiff);
 int lsolidlt(LAT3D *lat);
+float lspleval(float *break__, float *coef, int *l, int *k, float *x, int *jderiv);
+int lspline(float *tau, float *c__, int *n, int *ibcbeg, int *ibcend);
+float lssqrFromIndex(LAT3D *lat);
 int lsubenvlt(LAT3D *lat1, LAT3D *lat2);
 int lsubim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lsublt(LAT3D *lat1, LAT3D *lat2);
+void lsubminlt(LAT3D *lat);
 int lsubrf(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lsubrfim(DIFFIMAGE *imdiff);
 int lsubrflt(LAT3D *lat);
+int lsumscim(DIFFIMAGE *imdiff);
 int lsumim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lsumlt(LAT3D *lat1, LAT3D *lat2);
 int lsummap(CCP4MAP *map1, CCP4MAP *map2);
 int lsumrf(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lsymlt(LAT3D *lat);
+int lsymminlt(LAT3D *lat);
 int ltagim(DIFFIMAGE *imdiff);
 int ltaglt(LAT3D *lat);
 int lthrshim(DIFFIMAGE *imdiff);
@@ -799,7 +775,7 @@ int ltransmap(CCP4MAP *map);
 int lupdbd(LAT3D *lat);
 int lwaveim(DIFFIMAGE *imdiff);
 int lwindim(DIFFIMAGE *imdiff);
-int lwritedf(DIFFIMAGE *imdiff);
+int lwritecube(LAT3D *lat);
 int lwriteim(DIFFIMAGE *imdiff);
 int lwritehkl(LAT3D *lat);
 int lwritelt(LAT3D *lat);
@@ -828,6 +804,14 @@ struct ijkcoords lijkinv(struct ijkcoords vec);
 struct ijkcoords lijkmij(struct ijkcoords vec);
 struct ijkcoords lijkmjk(struct ijkcoords vec);
 struct ijkcoords lijkmki(struct ijkcoords vec);
-int lP1(LAT3D *lat);
-int lP41(LAT3D *lat);
-int lP222(LAT3D *lat);
+int lLaue1(LAT3D *lat);
+int lLaue2(LAT3D *lat);
+int lLaue3(LAT3D *lat);
+int lLaue4(LAT3D *lat);
+int lLaue5(LAT3D *lat);
+int lLaue6(LAT3D *lat);
+int lLaue7(LAT3D *lat);
+int lLaue8(LAT3D *lat);
+int lLaue9(LAT3D *lat);
+int lLaue10(LAT3D *lat);
+int lLaue11(LAT3D *lat);
