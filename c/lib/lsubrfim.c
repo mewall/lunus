@@ -56,7 +56,6 @@ int lsubrfim(DIFFIMAGE *imdiff)
         rvec.y = r*imdiff->pixel_size_mm - imdiff->beam_mm.y;
         for(c = 0; c < imdiff->hpixels; c++) {
             rvec.x = c*imdiff->pixel_size_mm - imdiff->beam_mm.x;
-            //	      radius = (size_t)(sqrtf(rvec.x*rvec.x + rvec.y*rvec.y)/imdiff->pixel_size_mm+.5);
             radiusf = (sqrtf(rvec.x*rvec.x + rvec.y*rvec.y)/imdiff->pixel_size_mm);
             radius = (size_t)radiusf;
             l = (int)radius + 1;
@@ -75,26 +74,12 @@ int lsubrfim(DIFFIMAGE *imdiff)
                 imdiff->image[index] = imdiff->ignore_tag;
             }		  
 
-            /*	      if (radius < imdiff->rfile_length) {
-                      index = r*imdiff->hpixels+c;
-                      if ((imdiff->image[index] != imdiff->overload_tag) &&
-                      (imdiff->image[index] != imdiff->ignore_tag) &&
-                      (imdiff->image[index] != imdiff->mask_tag)) {
-                      imdiff->image[index] -= (IMAGE_DATA_TYPE)imdiff->rfile[radius];
-                      }
-                      }
-                      else {
-                      return_value = 1;
-                      sprintf(imdiff->error_msg,"\nAttempt to read past end "
-                      "of rfile.\n\n");
-                      }*/
             index++;
         }
     }
 
     free(tau);
     free(cv);
-
     return(return_value);
 }
 

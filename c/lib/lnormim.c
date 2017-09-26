@@ -44,8 +44,8 @@ int lnormim(DIFFIMAGE *imdiff)
 	  (imdiff->image[index] != imdiff->ignore_tag)) {
 	rvec.x = (float)(c*imdiff->pixel_size_mm-imdiff->beam_mm.x);
 	radius_squared = ((rvec.x*rvec.x) + (rvec.y*rvec.y));
-	correction_factor = 1. + radius_squared/distance_squared - 
-	  2*PI/180.*(rvec.x*imdiff->cassette.y -
+	correction_factor = 1. + radius_squared/distance_squared
+	  - 2*PI/180.*(rvec.x*imdiff->cassette.y -
 	     rvec.y*imdiff->cassette.x)/imdiff->distance_mm;
 	value = imdiff->image[index];
 	value -= imdiff->value_offset;

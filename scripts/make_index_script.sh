@@ -2,6 +2,12 @@
 
 . $1
 
+if [ -z ${image_suffix+x} ]; then echo "image_suffix will be set to cbf";image_suffix=cbf; else echo "image_suffix is set to '$image_suffix'"; fi
+
+if [ -z ${maxcell+x} ]; then 
+    maxcell=-1
+fi
+
 if [ ! -d $work_dir ]; then
 	mkdir $work_dir
 fi
@@ -20,7 +26,7 @@ for (( i=1; i <= $num_images ; i++ ))
 
 do
 
-integration_image_name=`printf %s_%05d.img $integration_image_prefix $i`
+integration_image_name=`printf %s_%05d.%s $integration_image_prefix $i $image_suffix`
 
 integration_image_path=`printf %s/%s $lunus_image_dir $integration_image_name`
 
@@ -89,7 +95,7 @@ EOF
 
 cat >>$script_path<<EOF
 
-time libtbx.python $lunus_dir/scripts/index_cctbx.py libtbx.modules.path=$cctbx_dir/modules indexing.data=$indexing_data_file_one indexing.data=$indexing_data_file_two indexing.data=$indexing_data_file_three inputlist.fname=$scales_input_file np=1 framenum=-1 codecamp.maxcell=$maxcell target_cell=$cella,$cellb,$cellc,$alpha,$beta,$gamma target_sg=$spacegroup 
+time libtbx.python $lunus_dir/scripts/index_cctbx.py libtbx.modules.path=$cctbx_dir/modules indexing.data=$indexing_data_file_one indexing.data=$indexing_data_file_two indexing.data=$indexing_data_file_three inputlist.fname=$scales_input_file np=1 framenum=-1 maxcell=$maxcell target_cell=$cella,$cellb,$cellc,$alpha,$beta,$gamma target_sg=$spacegroup 
 
 #time libtbx.python -m cProfile $lunus_dir/scripts/index_cctbx.py indexing.data=$indexing_data_file_one indexing.data=$indexing_data_file_two indexing.data=$indexing_data_file_three inputlist.fname=$scales_input_file np=1 framenum=-1 codecamp.maxcell=$maxcell target_cell=$cella,$cellb,$cellc,$alpha,$beta,$gamma target_sg=$spacegroup 
 
