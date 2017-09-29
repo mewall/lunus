@@ -1,1 +1,0 @@
-libtbx.python genlat_labelit_parallel_punch.py indexing.data=snc_reindex_001.img indexing.data=snc_reindex_043.img codecamp.maxcell=800 index_only=True analyze.image=45 cell.a=48.3566 cell.b=48.3566 cell.c=63.2069 inputlist.fname=genlat_punch.input np=8 autoindex_override_beam=39.91,43.42 beam_search_scope=0.1
