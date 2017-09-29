@@ -14,7 +14,8 @@ int lavsqrim(DIFFIMAGE *imdiff)
 	RCCOORDS_DATA
 		r,
 		c;
-	size_t
+
+    size_t
 		*n,
 		radius,
 		index = 0;
@@ -24,13 +25,10 @@ int lavsqrim(DIFFIMAGE *imdiff)
 	n = (size_t *)calloc(MAX_RFILE_LENGTH, sizeof(size_t));
 	imdiff->rfile_length = 0;
 	for(r = 0; r < imdiff->vpixels; r++) {
-	  rvec.y = (XYZCOORDS_DATA)(r - imdiff->origin.r);
-          //rvec.y = r*imdiff->pixel_size_mm - imdiff->beam_mm.y;
+      rvec.y = r*imdiff->pixel_size_mm - imdiff->beam_mm.y;
 	  for(c = 0; c < imdiff->hpixels; c++) {
-	      //rvec.x = c*imdiff->pixel_size_mm - imdiff->beam_mm.x;
-	      rvec.x = (XYZCOORDS_DATA)(c - imdiff->origin.c);
-	      //radius = (size_t)(sqrtf(rvec.x*rvec.x + rvec.y*rvec.y)/imdiff->pixel_size_mm+.5);
-	      radius = (size_t)sqrtf(rvec.y*rvec.y + rvec.x*rvec.x);
+	      rvec.x = c*imdiff->pixel_size_mm - imdiff->beam_mm.x;
+	      radius = (size_t)(sqrtf(rvec.x*rvec.x + rvec.y*rvec.y)/imdiff->pixel_size_mm+.5);
 	      if ((imdiff->image[index] != imdiff->overload_tag) &&
 		  (imdiff->image[index] != imdiff->ignore_tag)) {
 	        if (radius > imdiff->rfile_length) 

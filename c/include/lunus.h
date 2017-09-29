@@ -199,10 +199,10 @@
 #define DEFAULT_CASSETTE_ROTX -0.22         /* temp */
 #define DEFAULT_CASSETTE_ROTY -1.38         /* temp */
 #define DEFAULT_CASSETTE_ROTZ 0         /* temp */
-#define DEFAULT_OVERLOAD_TAG 0x7fff
-#define DEFAULT_IGNORE_TAG 0x7fff	
-#define PUNCH_TAG 0x7ffe		
-#define MAX_IMAGE_DATA_VALUE 65535	/* not 1048577 due to img conversion */
+#define DEFAULT_OVERLOAD_TAG 0xffff
+#define DEFAULT_IGNORE_TAG 0xfffe	
+#define PUNCH_TAG 0xfffd		
+#define MAX_IMAGE_DATA_VALUE 65535	
 #endif
 
 /*
@@ -590,6 +590,9 @@ typedef struct {
   struct bounds resolution;     /* resolution range */
   float peak;                   /* Gaussian peak value */
   float width;                  /* Gaussian width */
+  float chi;                    /* LLM chi */
+  float sigma;                  /* LLM sigma */
+  float gamma;                  /* LLM gamma */
   SHIM_DATA_TYPE *shim;         /* Shell image */
   size_t shim_length;           /* Total number of pixels in shell image */
   size_t shim_hsize;            /* Number of horizontal pixels in */

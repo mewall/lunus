@@ -16,6 +16,8 @@ Version: 2.
 int lavgrim(DIFFIMAGE *imdiff)
 {
     size_t
+        r,
+        c,
         *n,
         radius,
         index = 0;
@@ -29,10 +31,10 @@ int lavgrim(DIFFIMAGE *imdiff)
     n = (size_t *)calloc(MAX_RFILE_LENGTH, sizeof(size_t));
     imdiff->rfile_length = 0;
     for(r = 0; r < imdiff->vpixels; r++) {
-        rvec.y = (XYZCOORDS_DATA)(r - imdiff->origin.r);
+        rvec.y = r.imdiff->pixel_size_mm - imdiff->beam_mm.y;
         for(c = 0; c < imdiff->hpixels; c++) {
-            rvec.x = (XYZCOORDS_DATA)(c - imdiff->origin.c);
-            radius = (size_t)sqrtf(rvec.y*rvec.y + rvec.x*rvec.x);
+            rvec.x = c.imdiff->pixel_size_mm - imdiff->beam_mm.x;
+            radius = (size_t)(sqrtf(rvec.y*rvec.y + rvec.x*rvec.x)/imdiff->pixel_size_mm+.5);
             if (radius > imdiff->rfile_length) 
                 imdiff->rfile_length = radius;
             if (radius > MAX_RFILE_LENGTH)

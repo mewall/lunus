@@ -25,7 +25,7 @@ int lsetped(DIFFIMAGE *imdiff)
     for(index=0; index < imdiff->image_length; index++) {
 	if((imdiff->image[index] != imdiff->overload_tag) &&
 		(imdiff->image[index] != imdiff->ignore_tag) &&
-		(imdiff->image[index] != imdiff->ignore_tag)) {
+		(imdiff->image[index] != imdiff->punch_tag)) {
 	    imdiff->image[index] = imdiff->image[index] - old_ped + new_ped;
 	}
     }
