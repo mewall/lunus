@@ -36,10 +36,11 @@ int lavgrim(DIFFIMAGE *imdiff)
             if (radius > imdiff->rfile_length) 
                 imdiff->rfile_length = radius;
             if (radius > MAX_RFILE_LENGTH)
-                printf("alert! alert!\n");
+                printf("Warning: MAX_RFILE_LENGTH is too small to store all the data from this image. Please edit MAX_RFILE_LENGTH in the header file and recompile.\n");
 
             if ((imdiff->image[index] != imdiff->overload_tag) &&
-                    (imdiff->image[index] != imdiff->ignore_tag)) {
+                    (imdiff->image[index] != imdiff->ignore_tag) &&
+                    (imdiff->image[index] != imdiff->punch_tag)) {
                 imdiff->rfile[radius] = (RFILE_DATA_TYPE)
                     ((float)(imdiff->image[index]-imdiff->value_offset)+ 
                      (float)n[radius]*(float)imdiff->rfile[radius]) /

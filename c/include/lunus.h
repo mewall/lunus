@@ -737,6 +737,7 @@ int lrsccmap(CCP4MAP *map1, CCP4MAP *map2);
 float lrsrlt(LAT3D *lat1, LAT3D *lat2);
 int lsamplt(LAT3D *lat);
 int lscaleim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
+int lscalerf(DIFFIMAGE *imdiff, float scale);
 int lscalerfim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lscalelt(LAT3D *lat1, LAT3D *lat2);
 struct xyzcoords lsFromIndex(LAT3D *lat);

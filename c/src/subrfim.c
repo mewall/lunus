@@ -109,6 +109,12 @@ int main(int argc, char *argv[])
     goto CloseShop;
   }
 
+/*
+ * Scale rfile:
+ */
+
+   lscalerf(imdiff, scale);
+
 
 /*
  * Subtract rfile from image:

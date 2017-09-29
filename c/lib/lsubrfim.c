@@ -64,7 +64,7 @@ int lsubrfim(DIFFIMAGE *imdiff)
 
             if ((imdiff->image[index] != imdiff->overload_tag) &&
                     (imdiff->image[index] != imdiff->ignore_tag) &&
-                    (imdiff->image[index] != imdiff->mask_tag)) {
+                    (imdiff->image[index] != imdiff->punch_tag)) {
                 if (radiusf>= tau[0] && radiusf <= tau[n-2]) {
                     imdiff->image[index] -= (IMAGE_DATA_TYPE)lspleval(tau,cv,&l,&kk,&radiusf,&jd);
                 } else {

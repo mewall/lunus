@@ -9,9 +9,6 @@
 
 		Input is an ascii rfile.  
 		Output is an 8-bit list of densitometry values.
-
-
-   Somewhat butchered by Veronica Pillar 4/14/14; I recommend not using this.
 */
 
 #define DEFAULT_LOWER_THRESHOLD 0
@@ -35,7 +32,7 @@ int main(int argc, char *argv[])
 
 	char 
 		output_value,
-		inl[sizeof(RFILE_DATA_TYPE)];
+		inl[LINESIZE];
 
 	switch(argc) {
 		case 3:
@@ -49,11 +46,8 @@ int main(int argc, char *argv[])
 			exit(0);
 	}
 	scale = 255./(float)(upper_threshold - lower_threshold);
-	while (fgets(inl,sizeof(RFILE_DATA_TYPE),stdin) != NULL) {
-		//sscanf(inl,"%d %g", &index, &value);
-		sscanf(inl,"%g", &value);
-		printf(" value = %g\n", value);
-		fflush(stdout);
+	while (fgets(inl,LINESIZE,stdin) != NULL) {
+		sscanf(inl,"%d %g", &index, &value);
 		if (value < (float)lower_threshold) {
 			output_value = 0;
 		}
@@ -64,6 +58,6 @@ int main(int argc, char *argv[])
 			output_value = (char)((scale * (value - 
 				(float)lower_threshold)));
 		}
-		fwrite(&output_value, sizeof(RFILE_DATA_TYPE), 1, stdout);
+		fwrite(&output_value, sizeof(char), 1, stdout);
 	}
 }

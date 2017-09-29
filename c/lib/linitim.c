@@ -69,7 +69,6 @@ DIFFIMAGE *linitim(void)
     imdiff->cassette.z = DEFAULT_CASSETTE_ROTZ;
     imdiff->amplitude = DEFAULT_AMPLITUDE;
     imdiff->pitch = DEFAULT_PITCH;
-    //imdiff->tag = 0;
 
     /*
      * Allocate memory for arrays:
@@ -107,12 +106,8 @@ DIFFIMAGE *linitim(void)
         imdiff->weights[i] = 1.;
     }
     for(i=0; i<MAX_RFILE_LENGTH; i++) {
-        imdiff->rfile[i] = 0;
         imdiff->rdata[i].count = 0;
         imdiff->rdata[i].allocate_flag = !VALUE_ALLOCATED;
-    }
-    for(i=0; i<imdiff->image_length; i++) {
-        imdiff->image[i] = 0;
     }
 
 CloseShop:
