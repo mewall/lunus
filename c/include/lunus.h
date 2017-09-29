@@ -75,7 +75,7 @@
 #define DEFAULT_LAT_OUTER_RADIUS 30     /* Outer radius of lattice */
 #define DEFAULT_LATTICE_MASK_TAG -32768	/* Mask tag for lattice object */
 #define DEFAULT_SAMPLE_PITCH 5		/* Sample image every Nth */
-					/* pixel in x and y for voxel 
+					/* pixel in x and y for voxel*/ 
 					/* generation */
 #define DEFAULT_MINRANGE 0.15            /* Minimum valid dist. to */
 					/*   Bragg peak */

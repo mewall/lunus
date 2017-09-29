@@ -41,7 +41,7 @@ int lsubrfim(DIFFIMAGE *imdiff)
     n=0;
 
     for (i=0;i<imdiff->rfile_length;i++) {
-        if (imdiff->rfile[i] != imdiff->overload_tag && imdiff->rfile[i] != imdiff->ignore_tag && imdiff->rfile[i] != imdiff->mask_tag) {
+        if (imdiff->rfile[i] != imdiff->overload_tag && imdiff->rfile[i] != imdiff->ignore_tag && imdiff->rfile[i] != imdiff->punch_tag) {
             tau[n]=(float)i;
             cv[4*n] = imdiff->rfile[i];
             n++;
