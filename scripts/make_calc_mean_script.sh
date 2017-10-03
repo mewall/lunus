@@ -20,8 +20,8 @@ script_name=script_mean.sh
 
 script_path=`printf scripts/%s $script_name`
 
-diffuse_glob=`printf "%s/%s_diffuse_*.npz" $lattice_dir $diffuse_lattice_prefix`
-counts_glob=`printf "%s/%s_counts_*.npz" $lattice_dir $diffuse_lattice_prefix`
+diffuse_glob=`printf "%s/%s_sum_diffuse_*.npz" $lattice_dir $diffuse_lattice_prefix`
+counts_glob=`printf "%s/%s_sum_counts_*.npz" $lattice_dir $diffuse_lattice_prefix`
 mean_lattice_file=`printf "%s/%s_mean.vtk" $lattice_dir $diffuse_lattice_prefix`
 
 cat > $script_path<<EOF
@@ -91,6 +91,15 @@ python $lunus_dir/scripts/calc_mean_lattice_npz.py cell.a=$cella cell.b=$cellb c
 EOF
 
 fi
+
+cat >>$script_path<<EOF
+
+rm $diffuse_glob
+rm $counts_glob
+EOF
+
+diffuse_glob=`printf "%s/%s_diffuse_*.npz" $lattice_dir $diffuse_lattice_prefix`
+counts_glob=`printf "%s/%s_counts_*.npz" $lattice_dir $diffuse_lattice_prefix`
 
 cat >>$script_path<<EOF
 

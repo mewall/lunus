@@ -26,6 +26,7 @@ int main(int argc, char *argv[])
     *scaleoutpath,
     *deck,
     *image_prefix,
+    *image_suffix,
     *lunus_image_prefix,
     *scale_image_prefix,
     *lunus_image_dir,
@@ -41,7 +42,8 @@ int main(int argc, char *argv[])
     normim_tilt_y=0.0,
     polarim_dist=-1.,
     polarim_offset=0.0,
-    polarim_polarization=1.0;
+    polarim_polarization=1.0,
+    correction_factor_scale=1.0;
 
   int
     modeim_bin_size=1,
@@ -113,39 +115,59 @@ int main(int argc, char *argv[])
 
 	//	printf("Length of input deck = %ld\n",num_read);
 
-	str_length = strlen(lgettag(deck,"\nraw_image_dir"));
-
-	if (str_length != 0) {
+	if (lgettag(deck,"\nraw_image_dir") != NULL) {
+	  str_length = strlen(lgettag(deck,"\nraw_image_dir"));
 	  raw_image_dir = (char *)malloc(str_length+1);
 	  strcpy(raw_image_dir,lgettag(deck,"\nraw_image_dir"));
+	} else {
+	  perror("LUNUS: Must provide raw_image_dir\n");
+	  exit(1);
 	}
 
-	str_length = strlen(lgettag(deck,"\nlunus_image_dir"));
-
-	if (str_length != 0) {
+	if (lgettag(deck,"\nlunus_image_dir") != NULL) {
+	  str_length = strlen(lgettag(deck,"\nlunus_image_dir"));
 	  lunus_image_dir = (char *)malloc(str_length+1);
 	  strcpy(lunus_image_dir,lgettag(deck,"\nlunus_image_dir"));
+	} else {
+	  perror("LUNUS: Must provide lunus_image_dir\n");
+	  exit(1);
 	}
 
-	str_length = strlen(lgettag(deck,"\nimage_prefix"));
-
-	if (str_length != 0) {
+	if (lgettag(deck,"\nimage_prefix") != NULL) {
+	  str_length = strlen(lgettag(deck,"\nimage_prefix"));
 	  image_prefix = (char *)malloc(str_length+1);
 	  strcpy(image_prefix,lgettag(deck,"\nimage_prefix"));
+	} else {
+	  perror("LUNUS: Must provide image_prefix\n");
+	  exit(1);
 	}
 
-	str_length = strlen(lgettag(deck,"\nlunus_image_prefix"));
+	if (lgettag(deck,"\nimage_suffix") != NULL) {
+	  str_length = strlen(lgettag(deck,"\nimage_suffix"));
+	  image_suffix = (char *)malloc(str_length+1);
+	  strcpy(image_suffix,lgettag(deck,"\nimage_suffix"));
+	} else {
+	  image_suffix = (char *)malloc(strlen("img"+1));
+	  strcpy(image_suffix,"img");
+	}
+	  
 
-	if (str_length != 0) {
+	if (lgettag(deck,"\nlunus_image_prefix") != NULL) {
+	  str_length = strlen(lgettag(deck,"\nlunus_image_prefix"));
 	  lunus_image_prefix = (char *)malloc(str_length+1);
 	  strcpy(lunus_image_prefix,lgettag(deck,"\nlunus_image_prefix"));
+	} else {
+	  perror("Must provide lunus_image_prefix\n");
+	  exit(1);
 	}
 
-	str_length = strlen(lgettag(deck,"\nscale_image_prefix"));
-
-	if (str_length != 0) {
+	if (lgettag(deck,"\nscale_image_prefix") != NULL) {
+	  str_length = strlen(lgettag(deck,"\nscale_image_prefix"));
 	  scale_image_prefix = (char *)malloc(str_length+1);
 	  strcpy(scale_image_prefix,lgettag(deck,"\nscale_image_prefix"));
+	} else {
+	  perror("Must provide scale_image_prefix\n");
+	  exit(1);
 	}
 
 	str_length = strlen(lgettag(deck,"\npunchim_xmax"));
@@ -247,12 +269,20 @@ int main(int argc, char *argv[])
 	  polarim_polarization = atof(lgettag(deck,"\npolarim_polarization"));
 	}
 
+	str_length = strlen(lgettag(deck,"\ncorrection_factor_scale"));
+	
+	if (str_length != 0) {
+	  correction_factor_scale = atof(lgettag(deck,"\ncorrection_factor_scale"));
+	}
+
 	if (mpiv->my_id == 0) {
 	  printf("raw_image_dir=%s\n",raw_image_dir);
 	  
 	  printf("lunus_image_dir=%s\n",lunus_image_dir);
 	  
 	  printf("image_prefix=%s\n",image_prefix);
+	  
+	  printf("image_suffix=%s\n",image_suffix);
 	  
 	  printf("lunus_image_prefix=%s\n",lunus_image_prefix);
 	  
@@ -287,6 +317,8 @@ int main(int argc, char *argv[])
 	  printf("polarim_offset=%f\n",polarim_offset);
 	
 	  printf("polarim_polarization=%f\n",polarim_polarization);
+
+	  printf("correction_factor_scale=%f\n",correction_factor_scale);
 
 	}
 	/*
@@ -339,11 +371,11 @@ int main(int argc, char *argv[])
 
 	for (i=i0;i<=i1&&i<=num_images;i++) {
 
-	  str_length = snprintf(NULL,0,"%s/%s_%05d.img",raw_image_dir,image_prefix,i);
+	  str_length = snprintf(NULL,0,"%s/%s_%05d.%s",raw_image_dir,image_prefix,i,image_suffix);
 
 	  imageinpath = (char *)malloc(str_length+1);
 
-	  sprintf(imageinpath,"%s/%s_%05d.img",raw_image_dir,image_prefix,i);
+	  sprintf(imageinpath,"%s/%s_%05d.%s",raw_image_dir,image_prefix,i,image_suffix);
 
 	  //	  printf("imageinpath = %s\n",imageinpath);
 
@@ -370,14 +402,24 @@ int main(int argc, char *argv[])
 	  lwindim(imdiff);
 	  lthrshim(imdiff);
 
+	  // Apply correction factor
 
-	  // Write masked image
+	  imdiff->correction = (float *)malloc(imdiff->image_length*sizeof(float));
+	  imdiff->correction[0]=correction_factor_scale;
+	  lcfim(imdiff);
+	  if (lmulcfim(imdiff) != 0) {
+	    perror(imdiff->error_msg);
+	    exit(1);
+	  }
+	  
 
-	  str_length = snprintf(NULL,0,"%s/%s_%05d.img",lunus_image_dir,lunus_image_prefix,i);
+	  // Write masked and corrected image
+
+	  str_length = snprintf(NULL,0,"%s/%s_%05d.%s",lunus_image_dir,lunus_image_prefix,i,image_suffix);
 
 	  lunusoutpath = (char *)malloc(str_length+1);
 
-	  sprintf(lunusoutpath,"%s/%s_%05d.img",lunus_image_dir,lunus_image_prefix,i);
+	  sprintf(lunusoutpath,"%s/%s_%05d.%s",lunus_image_dir,lunus_image_prefix,i,image_suffix);
 
 	  if ( (lunusout = fopen(lunusoutpath,"wb")) == NULL ) {
 	    printf("Can't open %s.",lunusoutpath);
@@ -392,15 +434,17 @@ int main(int argc, char *argv[])
 
 	  fclose(lunusout);
 
+	  // Mode filter to create image to be used for scaling
+
 	  lmodeim(imdiff);
 
 	  // Write mode filtered image
 
-	  str_length = snprintf(NULL,0,"%s/%s_%05d.img",lunus_image_dir,scale_image_prefix,i);
+	  str_length = snprintf(NULL,0,"%s/%s_%05d.%s",lunus_image_dir,scale_image_prefix,i,image_suffix);
 
 	  scaleoutpath = (char *)malloc(str_length+1);
 
-	  sprintf(scaleoutpath,"%s/%s_%05d.img",lunus_image_dir,scale_image_prefix,i);
+	  sprintf(scaleoutpath,"%s/%s_%05d.%s",lunus_image_dir,scale_image_prefix,i,image_suffix);
 
 	  if ( (scaleout = fopen(scaleoutpath,"wb")) == NULL ) {
 	    printf("Can't open %s.",scaleoutpath);

@@ -188,11 +188,13 @@ if __name__=="__main__":
   latlist = glob.glob(latglob)
   ctlist = glob.glob(ctglob)
 
-  for i in range(len(latlist)):
-      lat += np.load(latlist[i])['lat']
-      ct += np.load(ctlist[i])['ct']
-
   mask_tag = 32767
+
+  for i in range(len(latlist)):
+      thislat=np.load(latlist[i])['lat']
+      select_indices = np.where(thislat != mask_tag)
+      lat[select_indices] += thislat[select_indices]
+      ct += np.load(ctlist[i])['ct']
 
   for index in range(0,latsize):
       if ((ct[index] > 0) and (lat[index] != mask_tag)):
