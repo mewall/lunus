@@ -82,6 +82,9 @@ int lparsecelllt(LAT3D *lat)
   lat->bstar = lmulscvec(fac,cross);
   lat->cellstardiag = laddvec(lat->astar,laddvec(lat->bstar,lat->cstar));
   //  printf("%f,%f,%f,%f,%f,%f\n",lat->cell.a,lat->cell.b,lat->cell.c,lat->cell.alpha,lat->cell.beta,lat->cell.gamma);
+  /*  printf("a*: %f,%f,%f\n",lat->astar.x,lat->astar.y,lat->astar.z);  
+  printf("b*: %f,%f,%f\n",lat->bstar.x,lat->bstar.y,lat->bstar.z);  
+  printf("c*: %f,%f,%f\n",lat->cstar.x,lat->cstar.y,lat->cstar.z);  */
   CloseShop:
   return(return_value);
 }
