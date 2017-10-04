@@ -119,7 +119,7 @@ if [ -z ${resolution+x} ]; then
 
 cat >>$script_path<<EOF
 
-python $lunus_dir/scripts/integrate_lunus.py cell.a=$cella cell.b=$cellb cell.c=$cellc inputlist.fname=$scales_input_file framenum=$i latxdim=$latxdim latydim=$latydim latzdim=$latzdim diffuse.lattice.type=npz diffuse.lattice.fname=$this_diffuse_file counts.lattice.fname=$this_counts_file np=$nproc codecamp.maxcell=$maxcell target_cell=$cella,$cellb,$cellc,$alpha,$beta,$gamma target_sg=$spacegroup pphkl=$pphkl filterhkl=$filterhkl 
+python $lunus_dir/scripts/integrate_lunus.py cell.a=$cella cell.b=$cellb cell.c=$cellc inputlist.fname=$scales_input_file framenum=$i latxdim=$latxdim latydim=$latydim latzdim=$latzdim diffuse.lattice.type=npz diffuse.lattice.fname=$this_diffuse_file counts.lattice.fname=$this_counts_file np=\$OMP_NUM_THREADS codecamp.maxcell=$maxcell target_cell=$cella,$cellb,$cellc,$alpha,$beta,$gamma target_sg=$spacegroup pphkl=$pphkl filterhkl=$filterhkl 
 
 EOF
 
@@ -127,9 +127,9 @@ else
 
 cat >>$script_path<<EOF
 
-#python $lunus_dir/scripts/integrate_lunus.py cell.a=$cella cell.b=$cellb cell.c=$cellc inputlist.fname=$scales_input_file framenum=$i diffuse.lattice.resolution=$resolution diffuse.lattice.type=npz diffuse.lattice.fname=$this_diffuse_file counts.lattice.fname=$this_counts_file np=$nproc codecamp.maxcell=$maxcell target_cell=$cella,$cellb,$cellc,$alpha,$beta,$gamma target_sg=$spacegroup pphkl=$pphkl filterhkl=$filterhkl
+#python $lunus_dir/scripts/integrate_lunus.py cell.a=$cella cell.b=$cellb cell.c=$cellc inputlist.fname=$scales_input_file framenum=$i diffuse.lattice.resolution=$resolution diffuse.lattice.type=npz diffuse.lattice.fname=$this_diffuse_file counts.lattice.fname=$this_counts_file np=\$OMP_NUM_THREADS codecamp.maxcell=$maxcell target_cell=$cella,$cellb,$cellc,$alpha,$beta,$gamma target_sg=$spacegroup pphkl=$pphkl filterhkl=$filterhkl
 
-python $lunus_dir/scripts/integrate_lunus.py libtbx.modules.path=$cctbx_dir/modules cell.a=$cella cell.b=$cellb cell.c=$cellc scale.fname=scale_output.txt diffimg.fname=$lunus_image_path diffuse.lattice.resolution=$resolution diffuse.lattice.type=npz diffuse.lattice.fname=$this_diffuse_file counts.lattice.fname=$this_counts_file np=$nproc codecamp.maxcell=$maxcell target_cell=$cella,$cellb,$cellc,$alpha,$beta,$gamma target_sg=$spacegroup pphkl=$pphkl filterhkl=$filterhkl apply_correction=$apply_correction image.mask.tag=$image_mask_tag
+python $lunus_dir/scripts/integrate_lunus.py libtbx.modules.path=$cctbx_dir/modules cell.a=$cella cell.b=$cellb cell.c=$cellc scale.fname=scale_output.txt diffimg.fname=$lunus_image_path diffuse.lattice.resolution=$resolution diffuse.lattice.type=npz diffuse.lattice.fname=$this_diffuse_file counts.lattice.fname=$this_counts_file np=\$OMP_NUM_THREADS codecamp.maxcell=$maxcell target_cell=$cella,$cellb,$cellc,$alpha,$beta,$gamma target_sg=$spacegroup pphkl=$pphkl filterhkl=$filterhkl apply_correction=$apply_correction image.mask.tag=$image_mask_tag
 
 EOF
 
