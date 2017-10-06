@@ -47,14 +47,8 @@ def pixmap(Isize1,Isize2,pixel_size,beamx,beamy,beam_axis,distance,wavelength,ma
     xmin = max(0,int(beamx-maxpix))
     xmax = min(Isize1-1,int(beamx+maxpix))
 
-    # for parallel running; calculate the range that will be worked on by this process
-    chunksize = int((ymax-ymin+1)/nproc)
-    if ((ymax-ymin+1) % nproc !=  0):
-        chunksize += 1
-    y1 = ymin + procid*chunksize
-    y2 = y1 + chunksize
-    if (y2>(ymax+1)):
-        y2=(ymax+1)
+    y1 = ymin 
+    y2 = ymax+1
 
     # now walk through the pixels and create the list of data points
     qvec = flex.vec3_double()
@@ -70,15 +64,7 @@ def pixmap(Isize1,Isize2,pixel_size,beamx,beamy,beam_axis,distance,wavelength,ma
 
     return qvec
 
-
-# FUNCTION: pixmapstar
-def pixmapstar(args):
-    # wrapper that can be called for parallel processing using pool
-    return pixmap(*args)
-
-
 # FUNCTION: procimg
-# will be called nproc times per image; each time it's called it will run on 1/nproc of an image (e.g. if nproc = 4, it will run though 1/4 of one image).
 def procimg(Isize1,Isize2,scale,mask_tag,A_matrix_rot,qvec,DATA,latxdim,latydim,latzdim,origin,pedestal,beamx,beamy,maxpix,prad,voxper,procid,logfile): # this task list is getting out of control
 
     from scitbx.matrix import col
@@ -89,14 +75,8 @@ def procimg(Isize1,Isize2,scale,mask_tag,A_matrix_rot,qvec,DATA,latxdim,latydim,
     xmin = max(0,int(beamx-maxpix))
     xmax = min(Isize1-1,int(beamx+maxpix))
 
-    # calculate the range of data points to be integrated in this process
-    chunksize = int((xmax-xmin+1)/nproc) 
-    if ((xmax-xmin+1) % nproc !=  0):
-        chunksize += 1
-    x1 = xmin + procid*chunksize
-    x2 = x1 + chunksize
-    if (x2>(xmax+1)):
-        x2=(xmax+1)
+    x1 = xmin 
+    x2 = xmax+1
 
     # walk through the data points and accumulate the integrated data in the lattice
     vvec = flex.vec2_double();
@@ -157,11 +137,163 @@ def procimg(Isize1,Isize2,scale,mask_tag,A_matrix_rot,qvec,DATA,latxdim,latydim,
                         vvec.append([index,val]);
     return vvec
 
+# FUNCTION: proclinesstar
+def proclinesstar(args):
+    # wrapper that can be called for parallel processing using pool
+    return proclines(*args)
 
-# FUNCTION: procimgstar
-def procimgstar(args):
-    # wrapper for procimg to be used for parallel processing using pool
-    return procimg(*args)
+# FUNCTION: proclines
+def proclines(lines,res,nproc,procid):
+    
+    # initialize lat (lat[0] = values; lat[1] = counts)
+    lat = np.zeros(latsize*2, dtype=np.float32).reshape((2,latsize))
+
+    prevxdsname = 'init' # will store xdsname here in case it's the same file to file
+
+    # select which lines this process needs to deal with
+    chunksize = int(nlines/nproc)
+    if (nlines % nproc != 0):
+        chunksize += 1
+    linemin = procid*chunksize
+    linemax = linemin + chunksize
+    if (linemax > nlines):
+        linemax = nlines
+    lines_these = lines[linemin:linemax]
+
+    for line in lines_these:
+        # parse the input file line into a diffuse image file name and scale factor
+        words = line.split()
+
+        imgname = words[0] # these indices are if genlat.input has 3 columns
+        xdsname = words[1]
+        scale = float(words[2])
+
+        print "proc %d: Processing file %s with scale factor %f"%(procid,imgname,scale)
+        I = QuickImage(imgname)
+        I.read()
+        DATA = I.linearintdata
+
+        this_frame_phi_deg = I.deltaphi/2.0+I.osc_start # info from image header
+
+        if xdsname != prevxdsname: # if we need to read a new xds file
+            print "proc %d: Creating pixel map in parallel..."%(procid)
+            t0 = time.time()
+
+            # reading info from image
+            # we are assuming this is the same if XDS file is the same
+            Isize1 = I.size2
+            Isize2 = I.size1
+            print "Isize1 = ",Isize1
+            print "Isize2 = ",Isize2
+            Ipixelsize = I.pixel_size
+
+            prevxdsname = xdsname
+
+            # reading in xds header
+            xdsfile = open(xdsname,'r')
+            xdslines = []
+            for line in xdsfile:
+                if 'END_OF_HEADER' in line:
+                    break
+                else:
+                    xdslines.append(line)
+            xdsfile.close()
+
+            # reading info from xds header
+            A_matrix = np.zeros((3,3))
+            rot_axis = np.zeros(3)
+            beam_axis = np.zeros(3)
+            for line in xdslines:
+                left,sep,right = line.partition('ORGX=')
+                if sep:
+                    left2,sep2,right2 = right.partition('ORGY=')
+                    Ibeamx = float(left2)
+                    Ibeamy = float(right2)
+                    continue
+                left,sep,right = line.partition('DETECTOR_DISTANCE=')
+                if sep:
+                    Idistance = float(right)
+                    continue
+                left,sep,right = line.partition('WAVELENGTH=')
+                if sep:
+                    Iwavelength = float(right)
+                    continue
+                left,sep,right = line.partition('UNIT_CELL_A-AXIS=')
+                if sep:
+                    numbersA = right.split()
+                    continue
+                left,sep,right = line.partition('UNIT_CELL_B-AXIS=')
+                if sep:
+                    numbersB = right.split()
+                    continue
+                left,sep,right = line.partition('UNIT_CELL_C-AXIS=')
+                if sep:
+                    numbersC = right.split()
+                    continue
+                left,sep,right = line.partition('ROTATION_AXIS=')
+                if sep:
+                    numbersR = right.split()
+                    continue
+                left,sep,right = line.partition('INCIDENT_BEAM_DIRECTION=')
+                if sep:
+                    numbers_beam = right.split()
+                    continue
+            for i in range(0,3):
+                A_matrix[0][i] = float(numbersA[i])
+                A_matrix[1][i] = float(numbersB[i])
+                A_matrix[2][i] = float(numbersC[i])
+                rot_axis[i] = float(numbersR[i])
+                beam_axis[i] = float(numbers_beam[i])
+                
+            # Figure out what pixel range in the images to use, given the resolution
+            # doing this here only bc this is where we read the wavelength, currently
+            qstar = Iwavelength/res #  not dealing with factors of 2pi
+            max_mmPos = qstar*Idistance/math.sqrt(1-(qstar ** 2))
+            maxpix = 1.15*max_mmPos/Ipixelsize # add 15% in case of errors
+
+            # normalize beam_axis 
+            beam_axis = beam_axis/math.sqrt(np.dot(beam_axis, beam_axis)) 
+
+            # run pixmap not in parallel
+            qvec_all = pixmap(Isize1,Isize2,Ipixelsize,Ibeamx,Ibeamy,beam_axis,Idistance,Iwavelength,maxpix,procid)
+
+            print "proc ",procid,": qvec_all.size() = ",qvec_all.size()
+            tel = time.time()-t0
+            print "proc ",procid,": done creating pixel map (",tel," sec)"
+
+        # back to the code that runs for every image regardless of XDS input    
+     
+        from scitbx.matrix import sqr,col
+
+        print "proc ",procid,": Integrating diffuse scattering in parallel..."
+        t0 = time.time()
+        Isize1 = I.size1
+        Isize2 = I.size2
+
+        # rotate A_matrix according to phi and beam
+        # A_matrix_rot = A_matrix rotated by phi around rot axis
+        phi = math.radians(this_frame_phi_deg)
+        R_matrix = rotation_matrix(rot_axis, phi)
+        A_matrix_rot = np.transpose(R_matrix.dot(np.transpose(A_matrix)))
+
+        # run procimg in singular
+        vvec = procimg(Isize1,Isize2,scale,mask_tag,A_matrix_rot,qvec_all,DATA,latxdim,latydim,latzdim,origin,pedestal,Ibeamx,Ibeamy,maxpix,prad,voxper,procid,logfile)
+        tel = time.time()-t0
+        print "proc ",procid,": done integrating diffuse scattering (",tel," sec wall clock time)"
+        t0 = time.time()
+        
+        # put procimg results into the lattice    
+        for v in vvec:
+            index = v[0]  
+            val = v[1]
+            lat[0][index] += val 
+            lat[1][index] += 1
+
+        tel = time.time()-t0
+        print "proc ",procid,": Took ",tel," secs to update the lattice"
+
+    # now we're out of the image loop
+    return lat
 
 
 # MAIN METHOD
@@ -313,9 +445,11 @@ if __name__=="__main__":
     # read input file with list of diffraction images and scale factors (genlat.input)
     f = open(ifname,"r")
     lines = []
+    nlines = 0
     for line in f:
         if ((line.strip()!="") and (line[0] != '.')):
             lines.append(line)
+            nlines += 1
     f.close()
 
     # open logfile
@@ -327,167 +461,35 @@ if __name__=="__main__":
     latsize = latxdim*latydim*latzdim 
     lat = np.zeros(latsize, dtype=np.float32)
     ct = np.zeros(latsize, dtype=np.float32)
+
     origin = np.array([latxdim/2,latydim/2,latzdim/2], dtype=int)
     print "hkl = (0,0,0) is at",origin
     mask_tag = 65535 #check this value against lunus values
 
-    #Create parallel processing pool
+    # Create parallel processing pool
     pool = Pool(processes=nproc)
 
-    prevxdsname = 'init' # will store xdsname here in case it's the same file to file
+    # Do the main work
+    proclines_tasks = [(lines,res,nproc,procid) for procid in range(nproc)]
+    lat_it = pool.map(proclinesstar, proclines_tasks)
 
-    for line in lines: #in genlat.input; i.e. this part is looping over images
-
-        print "-----"
-
-        # parse the input file line into a diffuse image file name and scale factor
-        words = line.split()
-
-        imgname = words[0] # these indices are if genlat.input has 3 columns
-        xdsname = words[1]
-        scale = float(words[2])
-
-        print "Processing file %s with scale factor %f"%(imgname,scale)
-        I = QuickImage(imgname)
-        I.read()
-        DATA = I.linearintdata
-
-        this_frame_phi_deg = I.deltaphi/2.0+I.osc_start # info from image header
-
-        if xdsname != prevxdsname: # if we need to read a new xds file
-            print "Creating pixel map in parallel..."
-            t0 = time.time()
-            qvec_all = flex.vec3_double()
-
-            # reading info from image
-            # we are assuming this is the same if XDS file is the same
-            Isize1 = I.size2
-            Isize2 = I.size1
-            print "Isize1 = ",Isize1
-            print "Isize2 = ",Isize2
-            Ipixelsize = I.pixel_size
-
-            prevxdsname = xdsname
-
-            # reading in xds header
-            xdsfile = open(xdsname,'r')
-            xdslines = []
-            for line in xdsfile:
-                if 'END_OF_HEADER' in line:
-                    break
-                else:
-                    xdslines.append(line)
-            xdsfile.close()
-
-            # reading info from xds header
-            A_matrix = np.zeros((3,3))
-            rot_axis = np.zeros(3)
-            beam_axis = np.zeros(3)
-            for line in xdslines:
-                left,sep,right = line.partition('ORGX=')
-                if sep:
-                    left2,sep2,right2 = right.partition('ORGY=')
-                    Ibeamx = float(left2)
-                    Ibeamy = float(right2)
-                    continue
-                left,sep,right = line.partition('DETECTOR_DISTANCE=')
-                if sep:
-                    Idistance = float(right)
-                    continue
-                left,sep,right = line.partition('WAVELENGTH=')
-                if sep:
-                    Iwavelength = float(right)
-                    continue
-                left,sep,right = line.partition('UNIT_CELL_A-AXIS=')
-                if sep:
-                    numbersA = right.split()
-                    continue
-                left,sep,right = line.partition('UNIT_CELL_B-AXIS=')
-                if sep:
-                    numbersB = right.split()
-                    continue
-                left,sep,right = line.partition('UNIT_CELL_C-AXIS=')
-                if sep:
-                    numbersC = right.split()
-                    continue
-                left,sep,right = line.partition('ROTATION_AXIS=')
-                if sep:
-                    numbersR = right.split()
-                    continue
-                left,sep,right = line.partition('INCIDENT_BEAM_DIRECTION=')
-                if sep:
-                    numbers_beam = right.split()
-                    continue
-            for i in range(0,3):
-                A_matrix[0][i] = float(numbersA[i])
-                A_matrix[1][i] = float(numbersB[i])
-                A_matrix[2][i] = float(numbersC[i])
-                rot_axis[i] = float(numbersR[i])
-                beam_axis[i] = float(numbers_beam[i])
-            
-            # Figure out what pixel range in the images to use, given the resolution
-            # doing this here only bc this is where we read the wavelength, currently
-            qstar = Iwavelength/res #  not dealing with factors of 2pi
-            max_mmPos = qstar*Idistance/math.sqrt(1-(qstar ** 2))
-            maxpix = 1.15*max_mmPos/Ipixelsize # add 15% in case of errors
-
-            # normalize beam_axis 
-            beam_axis = beam_axis/math.sqrt(np.dot(beam_axis, beam_axis)) 
-
-            # prepare the list of arguments to run pixmap in parallel
-            pixmap_tasks = [(Isize1,Isize2,Ipixelsize,Ibeamx,Ibeamy,beam_axis,Idistance,Iwavelength,maxpix,procid) for procid in range(nproc)]
-            # run pixmap in parallel and collect results
-            qvec_it = pool.map(pixmapstar,pixmap_tasks)
-            # gather pixmap results into a single collection of data points
-            for qvec_this in qvec_it:
-                qvec_all.extend(qvec_this)
-            print "qvec_all.size() = ",qvec_all.size()
-            tel = time.time()-t0
-            print "done creating pixel map (",tel," sec)"
-
-        # back to the code that runs for every image regardless of XDS input    
-
-        from scitbx.matrix import sqr,col
-
-        print "Integrating diffuse scattering in parallel..."
-        t0 = time.time()
-        Isize1 = I.size1
-        Isize2 = I.size2
-
-        # rotate A_matrix according to phi and beam
-        # A_matrix_rot = A_matrix rotated by phi around rot axis
-        phi = math.radians(this_frame_phi_deg)
-        R_matrix = rotation_matrix(rot_axis, phi)
-        A_matrix_rot = np.transpose(R_matrix.dot(np.transpose(A_matrix)))
-
-        # prepare list of arguments to run procimg in parallel
-        tasks = [(Isize1,Isize2,scale,mask_tag,A_matrix_rot,qvec_all,DATA,latxdim,latydim,latzdim,origin,pedestal,Ibeamx,Ibeamy,maxpix,prad,voxper,procid,logfile) for procid in range(nproc)]
-        # run procimg in parallel and collect results
-        vvec_it = pool.map(procimgstar,tasks)
-        #lat_it = procimg(Isize1,Isize2,scale,mask_tag,A_matrix_rot,qvec_all,DATA,latxdim,latydim,latzdim,pedestal,Ibeamx,Ibeamy,maxpix,1)
-        tel = time.time()-t0
-        print "done integrating diffuse scattering (",tel," sec wall clock time)"
-        t0 = time.time()
-        # gather procimg results into a single lattice
-        
-        for vvec in vvec_it:
-            for v in vvec:
-                index = v[0]  
-                val = v[1]
-                lat[index] += val 
-                ct[index] += 1
-
-        tel = time.time()-t0
-        print "Took ",tel," secs to update the lattice"
-
-    # now we're out of the image loop
+    # gather lattices into one
+    t0 = time.time()
+    for l in lat_it:
+        lat = np.add(lat, l[0])
+        ct = np.add(ct, l[1])
+    tel = time.time()-t0
+    print "Took ",tel," secs to gather lattices into one"
 
     # compute the mean intensity at each lattice point
+    t0 = time.time()
     for index in range(0,latsize):
         if ((ct[index] > 0) and (lat[index] != mask_tag)):
             lat[index] /= ct[index]
         else:
             lat[index] = -32768
+    tel = time.time()-t0
+    print "Took ",tel," secs to compute the mean lattice intensities"
 
     # write results to output file
     vtkfile = open(ofname,"w")
