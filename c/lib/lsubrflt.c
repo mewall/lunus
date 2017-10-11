@@ -16,7 +16,7 @@ int lsubrflt(LAT3D *lat)
     j,
     k,
     r,
-    index = 0;
+    lat_index = 0;
   
   float
     rf,
@@ -25,7 +25,7 @@ int lsubrflt(LAT3D *lat)
   struct xyzcoords
     rfloat;
   
-  struct ijkcoords rvec;
+  struct ijkcoords index,rvec;
   
 
   // First, compute the spline from the rfile
@@ -59,38 +59,41 @@ int lsubrflt(LAT3D *lat)
 
   lspline(tau,c,&n,&ibcbeg,&ibcend);
 
-  rscale = (lat->xscale*lat->xscale + lat->yscale*lat->yscale +
-		 lat->zscale*lat->zscale);
-  for(k = 0; k < lat->zvoxels; k++) {
-    for(j = 0; j < lat->yvoxels; j++) {
-      for (i = 0; i < lat->xvoxels; i++) {
-	rvec.i = i - lat->origin.i;
-	rvec.j = j - lat->origin.j;
-	rvec.k = k - lat->origin.k;
-	rfloat.x = lat->xscale * rvec.i;
-	rfloat.y = lat->yscale * rvec.j;
-	rfloat.z = lat->zscale * rvec.k;
-	rf = sqrtf((rfloat.x*rfloat.x + rfloat.y*rfloat.y + 
-		       rfloat.z*rfloat.z) / rscale);
-	//	r = (size_t)(rf+.5);
-	r = (size_t)(rf);
+  lat->index.i=lat->origin.i+1;
+  lat->index.j=lat->origin.j+1;
+  lat->index.k=lat->origin.k+1;
+  rscale=lssqrFromIndex(lat);
+
+  lat_index = 0;
+  for(index.k = 0; index.k < lat->zvoxels; index.k++) {
+    for(index.j = 0; index.j < lat->yvoxels; index.j++) {
+      for (index.i = 0; index.i < lat->xvoxels; index.i++) {
+	lat->index = index;
+	rf = sqrtf(lssqrFromIndex(lat) / rscale);
+	r = (size_t)rf;
 	if ((r < lat->rfile_length) && 
-	    (lat->lattice[index] != lat->mask_tag)) {
+	    (lat->lattice[lat_index] != lat->mask_tag)) {
 	  //    lat->lattice[index] -= lat->rfile[r];
+	  //	  if (r <= maxr) {
 	  l = (int)r + 1;
 	  if (rf>= tau[0] && rf <= tau[n-2]) {
-	    lat->lattice[index] -= lspleval(tau,c,&l,&kk,&rf,&jd);
+	    lat->lattice[lat_index] -= lspleval(tau,c,&l,&k,&rf,&jd);
 	  } else {
-	    lat->lattice[index] = lat->mask_tag;
+	    lat->lattice[lat_index] = lat->mask_tag;
 	  }
-	  //	  lat->lattice[index] -= (lat->rfile[r] + 
+	  //	    lat->lattice[lat_index] -= (lat->rfile[r] + 
 	  //				  (rf - (float)r)*(lat->rfile[r+1] - 
 	  //						   lat->rfile[r]));
+	    //	  } else {
+	    //	    lat->lattice[lat_index] = lat->mask_tag;
+	    //	  }
 	}
-	index++;
+
+	lat_index++;
       }
     }
   }
+
 }
 
 

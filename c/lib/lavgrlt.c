@@ -42,8 +42,6 @@ int lavgrlt(LAT3D *lat)
     goto CloseShop;
   }
 
-  rscale = (lat->xscale*lat->xscale + lat->yscale*lat->yscale +
-		 lat->zscale*lat->zscale);
   lat->rfile_length = 0;
   lat->index.i=lat->origin.i+1;
   lat->index.j=lat->origin.j+1;

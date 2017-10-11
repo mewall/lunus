@@ -43,6 +43,8 @@ int main(int argc, char *argv[])
   latticein = stdin;
   outfile = stdout;
   
+  strcpy(cell_str,"None");
+
   /*
    * Read information from input line:
    */
