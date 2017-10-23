@@ -5,7 +5,7 @@
    Version: 1.
    
    "polarim <image in> <image out> 
-      <distance[mm]> <polarization> <offset angle>" 
+      <polarization> <offset angle>" 
 
    Input is diffraction image.  Output is polarization corrected image.
 
@@ -28,13 +28,11 @@ int main(int argc, char *argv[])
 
   float 
     polarization_offset,
-    polarization,
-    distance_mm;
+    polarization;
 
 /*
  * Set input line defaults:
  */
-  distance_mm = DEFAULT_DISTANCE_MM;
   polarization = DEFAULT_POLARIZATION;
   imagein = stdin;
   imageout = stdout;
@@ -43,12 +41,10 @@ int main(int argc, char *argv[])
  * Read information from input line:
  */
 	switch(argc) {
-	  case 6:
-	  polarization_offset = atof(argv[5]);
 	  case 5:
-	  polarization = atof(argv[4]);
+	  polarization_offset = atof(argv[5]);
 	  case 4:
-	  distance_mm = atof(argv[3]);
+	  polarization = atof(argv[4]);
 	  case 3:
 	  if (strcmp(argv[2], "-") == 0) {
 	    imageout = stdout;
@@ -72,7 +68,7 @@ int main(int argc, char *argv[])
 	  break;
 	  default:
 	  printf("\n Usage: polarim <image in> <image out> "
-		 "<distance [mm]> <polarization> <offset angle>\n\n");
+		 "<polarization> <offset angle>\n\n");
 	  exit(0);
 	}
   
@@ -84,12 +80,6 @@ int main(int argc, char *argv[])
     perror("\nCouldn't initialize diffraction image.\n\n");
     exit(0);
   }
-  
-  /*
-   * Set sample-to-detector distance for the image
-   */
-
-  imdiff->distance_mm = distance_mm;
   
   /* 
    * Set the polarization of the beam:

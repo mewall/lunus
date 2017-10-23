@@ -712,6 +712,7 @@ int lnign(DIFFIMAGE *imdiff);
 int lnoiseim(DIFFIMAGE *imdiff);
 int lnormim(DIFFIMAGE *imdiff);
 int lnormlt(LAT3D *lat);
+int lp6mmask(DIFFIMAGE *imdiff);
 int lpadlt(LAT3D *lat);
 int lparsecelllt(LAT3D *lat);
 int lpeakim(DIFFIMAGE *imdiff);

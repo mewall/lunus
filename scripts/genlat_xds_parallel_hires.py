@@ -47,6 +47,8 @@ def pixmap(Isize1,Isize2,pixel_size,beamx,beamy,beam_axis,distance,wavelength,ma
     xmin = max(0,int(beamx-maxpix))
     xmax = min(Isize1-1,int(beamx+maxpix))
 
+    print "mapping pixels in [ymin, ymax] =",ymin,ymax,"and [xmin, xmax] =",xmin,xmax
+
     y1 = ymin 
     y2 = ymax+1
 
@@ -110,9 +112,6 @@ def procimg(Isize1,Isize2,scale,mask_tag,A_matrix_rot,qvec,DATA,latxdim,latydim,
                     ll = int(H[2]+.5)
                     lp = int(H[2]/voxper+.5)
                 # calculate the displacement of this data point from the nearest Miller index
-                # dh = abs(H[0]-hh)
-                # dk = abs(H[1]-kk)
-                # dl = abs(H[2]-ll)
                 dhp = abs(H[0]/voxper-hp)
                 dkp = abs(H[1]/voxper-kp)
                 dlp = abs(H[2]/voxper-lp)
@@ -123,8 +122,8 @@ def procimg(Isize1,Isize2,scale,mask_tag,A_matrix_rot,qvec,DATA,latxdim,latydim,
                 print >>logfile, message
                 print message
             else:
-                #if ((val != mask_tag) and (dhp*dhp + dkp*dkp + dlp*dlp > prad*prad)):
-                if (val != mask_tag): # NOT punching
+                #if ((dhp*dhp + dkp*dkp + dlp*dlp > prad*prad)):
+                if (val < mask_tag): # NOT punching
                 # now we have the index in the lattice where this pixel goes, but what if we stored it in a list?
                 # we have 10 times as many voxels as pixels
                 # the list will be of 2tuples: index & val (minus pedestal already for consistency)
@@ -174,17 +173,18 @@ def proclines(lines,res,nproc,procid):
         DATA = I.linearintdata
 
         this_frame_phi_deg = I.deltaphi/2.0+I.osc_start # info from image header
-
+        
+        Isize1 = I.size2 
+        Isize2 = I.size1
+        print "Isize1 = ",Isize1
+        print "Isize2 = ",Isize2
+         
         if xdsname != prevxdsname: # if we need to read a new xds file
             print "proc %d: Creating pixel map in parallel..."%(procid)
             t0 = time.time()
 
             # reading info from image
             # we are assuming this is the same if XDS file is the same
-            Isize1 = I.size2
-            Isize2 = I.size1
-            print "Isize1 = ",Isize1
-            print "Isize2 = ",Isize2
             Ipixelsize = I.pixel_size
 
             prevxdsname = xdsname
@@ -267,8 +267,6 @@ def proclines(lines,res,nproc,procid):
 
         print "proc ",procid,": Integrating diffuse scattering in parallel..."
         t0 = time.time()
-        Isize1 = I.size1
-        Isize2 = I.size2
 
         # rotate A_matrix according to phi and beam
         # A_matrix_rot = A_matrix rotated by phi around rot axis
@@ -443,14 +441,16 @@ if __name__=="__main__":
     import os
 
     # read input file with list of diffraction images and scale factors (genlat.input)
+    print "opening ",ifname," as input file"
     f = open(ifname,"r")
     lines = []
     nlines = 0
     for line in f:
-        if ((line.strip()!="") and (line[0] != '.')):
+        if ((line.strip()!="")): # note: deleted "and (line[0] != '.')" here
             lines.append(line)
             nlines += 1
     f.close()
+    print nlines
 
     # open logfile
     logfile = open(logname,"w")
@@ -464,7 +464,7 @@ if __name__=="__main__":
 
     origin = np.array([latxdim/2,latydim/2,latzdim/2], dtype=int)
     print "hkl = (0,0,0) is at",origin
-    mask_tag = 65535 #check this value against lunus values
+    mask_tag = 65533 #this is the MINIMUM mask tag--any values at or above will be thrown right out
 
     # Create parallel processing pool
     pool = Pool(processes=nproc)
@@ -473,23 +473,20 @@ if __name__=="__main__":
     proclines_tasks = [(lines,res,nproc,procid) for procid in range(nproc)]
     lat_it = pool.map(proclinesstar, proclines_tasks)
 
-    # gather lattices into one
-    t0 = time.time()
+    # gather lattices into one--this runs quickly
     for l in lat_it:
         lat = np.add(lat, l[0])
         ct = np.add(ct, l[1])
-    tel = time.time()-t0
-    print "Took ",tel," secs to gather lattices into one"
 
     # compute the mean intensity at each lattice point
     t0 = time.time()
     for index in range(0,latsize):
-        if ((ct[index] > 0) and (lat[index] != mask_tag)):
+        if ((ct[index] > 0) and (lat[index] < mask_tag)):
             lat[index] /= ct[index]
         else:
             lat[index] = -32768
     tel = time.time()-t0
-    print "Took ",tel," secs to compute the mean lattice intensities"
+    print "Took",tel,"secs to compute the mean lattice intensities"
 
     # write results to output file
     vtkfile = open(ofname,"w")
@@ -539,7 +536,7 @@ if __name__=="__main__":
 
 
     t_final = (time.time() - t_init)/60
-    print "Took",t_final,"minutes total"
+    print "Took",t_final,"minutes total to generate and write",ofname
 
     # close your files
     logfile.close()
