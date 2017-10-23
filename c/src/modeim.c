@@ -10,6 +10,8 @@
    Input is ascii coordinates file.  Output is 16-bit 
    image of specified size (1024 x 1024 default).
 
+
+
    */
 
 #include<mwmask.h>
@@ -102,6 +104,7 @@ int main(int argc, char *argv[])
  */
 
   lmodeim(imdiff);
+
 
 /*
  * Write the output image:

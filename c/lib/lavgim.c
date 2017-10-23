@@ -24,7 +24,8 @@ int lavgim(DIFFIMAGE *imdiff)
 	for(r = 0; r < imdiff->vpixels; r++) {
 	  for(c = 0; c < imdiff->hpixels; c++) {
 	      if ((imdiff->image[index] != imdiff->overload_tag) &&
-		  (imdiff->image[index] != imdiff->ignore_tag)) {
+		  (imdiff->image[index] != imdiff->ignore_tag) &&
+		  (imdiff->image[index] != imdiff->punch_tag)) {
 		avg_pixel_value = (n*avg_pixel_value + 
 		  (float)imdiff->image[index])/(float)(n+1.);
 		n++;

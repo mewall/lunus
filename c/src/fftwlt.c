@@ -14,9 +14,9 @@
    */
 
 #include<mwmask.h>
-#ifdef USE_FFTW
-#include<fftw3.h>
-#endif
+//#ifdef USE_FFTW
+//#include<fftw3.h>
+//#endif
 
 int main(int argc, char *argv[])
 {

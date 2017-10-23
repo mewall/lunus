@@ -104,7 +104,6 @@ int main(int argc, char *argv[])
 /*
  * Multiply rfiles:
  */
-
    lmulrf(imdiff1,imdiff2);
 
 /*
@@ -118,7 +117,7 @@ int main(int argc, char *argv[])
    }
    
  CloseShop:
-  
+
 /*
  * Free allocated memory:
  */

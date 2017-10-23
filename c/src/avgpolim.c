@@ -7,7 +7,7 @@
    
    "avgpolim <input image> <output rfile> <inner radius> <outer radius>"
 
-   Input is image and inner and outer radius of an annulus of interest.  Output is a list of average pixel values vs. polar angle.
+   Input is image and inner and outer radius of an annulus of interest, in pixels.  Output is a list of average pixel values vs. polar angle.
 
    */
 
@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
 			}
 			break;
 		default:
-			printf("\n Usage: avgrim <input image> "
+			printf("\n Usage: avgpolim <input image> "
 				"<output rfile> <inner radius> <outer radius>\n\n");
 			exit(0);
 	}
@@ -99,6 +99,7 @@ int main(int argc, char *argv[])
 	imdiff->mask_outer_radius = outer_radius;
 	lavgpolim(imdiff);  
 
+	//lsmoothrf(imdiff, 1);
 /*
  * Write the output rfile:
  */

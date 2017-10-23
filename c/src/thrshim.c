@@ -8,7 +8,7 @@
    "thrshim <image in> <lower> <upper> <image out>" 
 
    Input is image and upper and lower thresholds.  Output is input image 
-   with all pixel values outside of thresholds converted to an ingore_tag.
+   with all pixel values outside of thresholds converted to an ignore_tag.
 
    */
 
@@ -80,7 +80,6 @@ int main(int argc, char *argv[])
     perror("\nCouldn't initialize diffraction image.\n\n");
     exit(0);
   }
-
 
  /*
   * Read diffraction image:

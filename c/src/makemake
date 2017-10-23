@@ -17,16 +17,16 @@ fi
 #
 # Get the header:
 #
-if [ ! -e $1.head ]; then
+if [ ! -e $1.head.tt ]; then
   echo "Please provide $1.head file"
   exit 1
 fi
-cat $1.head > $1
+cat $1.head.tt > $1
 #
 # Executable list:
 #
 echo "all: \\" >> $1
-ls -1 *.c | awk '{print "\t"substr($0,0,length()-2)" \\"}' >> ${C_HOME}/src/$1
+ls -1 *.c | awk '{print "\t"substr($0,0,length()-1)" \\"}' >> ${C_HOME}/src/$1
 echo "libmw.a" | awk '{print "\t"$0}'>> ${C_HOME}/src/$1
 #
 # Build executables:
@@ -34,7 +34,7 @@ echo "libmw.a" | awk '{print "\t"$0}'>> ${C_HOME}/src/$1
 echo "#" >> ${C_HOME}/src/$1
 echo "# Executables:" >> ${C_HOME}/src/$1
 echo "#" >> ${C_HOME}/src/$1
-ls -1 *.c | awk '{print substr($0,0,length()-2)":"$1" ${DEPENDS}\n\t${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}"}' >> ${C_HOME}/src/$1
+ls -1 *.c | awk '{print substr($0,0,length()-1)":"$1" ${DEPENDS}\n\t${CC} ${CFLAGS} -o ${B}/$@ ${S}/$@.c ${LIBS}"}' >> ${C_HOME}/src/$1
 #
 # Build library functions:
 #
@@ -42,7 +42,7 @@ echo "#" >> ${C_HOME}/src/$1
 echo "# Library functions:" >> ${C_HOME}/src/$1
 echo "#" >> ${C_HOME}/src/$1
 cd ${C_HOME}/lib
-ls -1 *.c | awk '{print substr($0,0,length()-2)".o:"$1" lunus.h"}' >> ${C_HOME}/src/$1
+ls -1 *.c | awk '{print substr($0,0,length()-1)".o:"$1" lunus.h"}' >> ${C_HOME}/src/$1
 echo '.c.o:' >> ${C_HOME}/src/$1
 echo '$(CC) -c -o ${L}/$*.o $(CFLAGS) ${L}/$*.c' | awk '{print "\t" $0}' >> ${C_HOME}/src/$1
 #
@@ -52,7 +52,7 @@ echo "#" >> ${C_HOME}/src/$1
 echo "# Libraries:" >> ${C_HOME}/src/$1
 echo "#" >> ${C_HOME}/src/$1
 /bin/echo -n "libmw.a: " >> ${C_HOME}/src/$1
-ls -1 *.c | awk '{printf "\\\n\t"substr($0,0,length()-2)".o "}' >> ${C_HOME}/src/$1
+ls -1 *.c | awk '{printf "\\\n\t"substr($0,0,length()-1)".o "}' >> ${C_HOME}/src/$1
 echo "" >> ${C_HOME}/src/$1
 echo 'cd ${L}; rm libmw.a; $(AR) $(ARFLAGS) libmw.a *.o' | awk '{print "\t" $0}' >> ${C_HOME}/src/$1
 

@@ -1,17 +1,16 @@
 /* MASKIMG.C - Create a pixel mask based on input file coordinates.
    
-   Author: Mike Wall   Modified by:Fredrik Osterberg
+   Author: Mike Wall   Modified by:Fredrik Osterberg, Veronica Pillar
    Date: 1/11/93
    Version: 1.
    
-   "maskimg <input file> <image in> <image out> <hsize> <vsize>"
+   "maskimg <input file> <image in> <image out> <inner radius> <outer radius>"
 
    Input is ascii coordinates file.  Output is 16-bit 
-   image of specified size (1024 x 1024 default).
+   image of specified size (1024 x 1024 default). You may specify the inner and outer radii (inclusive) of the annular mask on the command line.
 
-   Date: 3/15/94
-   Version: 2.
-		Port to SGI.  Try to modularize the procedures.  
+   Date: 3/12/14
+   Version: 3.
    */
 
 #include<mwmask.h>
@@ -43,11 +42,17 @@ int main(int argc, char *argv[])
 	
 	imagein = stdin;
 	imageout = stdout;
+	i = 0;
+	ii = 0;
 
 /*
  * Read information from input line:
  */
 	switch(argc) {
+		case 6:
+			i = atol(argv[4]);
+			ii = atol(argv[5]);
+
 		case 4:
 			if (strcmp(argv[3], "-") == 0) {
 				imageout = stdout;
@@ -103,13 +108,13 @@ int main(int argc, char *argv[])
   /*
    * Generate mask:
    */
-  
+	imdiff->mask_inner_radius = i;
+	imdiff->mask_outer_radius = ii;
 	lgetanls(imdiff);  
 	if (imdiff->mask_count == 0) {
 		printf("\nNo points in mask generated.\n");
 		goto CloseShop;
 	}
-
 /*
  * Read in peaks from input file:
  */
@@ -118,23 +123,21 @@ int main(int argc, char *argv[])
 /*
  * Generate overload list:
  */
-
-	lgetovld(imdiff);
-  
+	//lgetovld(imdiff);
   /*
    *  Step through the peak table and punch out holes in the image.
    */
-printf("\nNumber of peaks: %ld\n\n",(long)imdiff->peak_count); 
+//printf("\nNumber of peaks: %ld\n\n",(long)imdiff->peak_count); 
 	for(i=0;i<imdiff->peak_count;i++) {
 		imdiff->pos.c = (short)imdiff->peak[i].y;
 		imdiff->pos.r = (short)imdiff->peak[i].x;
 		lpunch(imdiff);
 	}
-	for(i=0;i<imdiff->overload_count;i++) {
+/*	for(i=0;i<imdiff->overload_count;i++) {
 		imdiff->pos = imdiff->overload[i];
 		lpunch(imdiff);
 	}
-
+*/
 /*
  * Write the output image:
  */

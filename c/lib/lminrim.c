@@ -1,36 +1,33 @@
 /* LMINRIM.C - Calculate the minimum intensity as a function of radius for an
-		input image.
-   
-   Author: Mike Wall   
-   Date: 4/4/93
-   Version: 1.
-   
-   */
+   input image.
+
+Author: Mike Wall   
+Date: 4/4/93
+Version: 1.
+
+ */
 
 #include<mwmask.h>
 
 int lminrim(DIFFIMAGE *imdiff)
 {
-	size_t
-		radius,
-		index = 0;
+    size_t
+        radius,
+        index = 0;
+
+    RCCOORDS_DATA
+        r,
+        c;
+
+    struct xycoords rvec;
 
 	size_t i;
 
-	RCCOORDS_DATA
-		r,
-		c;
-
-	struct xycoords rvec;
-
-	//	printf("Starting lminrim\n");
 	if (imdiff->rfile != NULL) {
 	  free(imdiff->rfile);
 	}
 	imdiff->rfile = (RFILE_DATA_TYPE *)malloc(MAX_RFILE_LENGTH*sizeof(RFILE_DATA_TYPE));
-	//	printf("Allocated\n");
 	for (i=0;i<MAX_RFILE_LENGTH;i++) imdiff->rfile[i]=imdiff->ignore_tag;
-	//	printf("Initialized\n");
 	imdiff->rfile_length = 0;
 	for(r = 0; r < imdiff->vpixels; r++) {
 	  rvec.y = r*imdiff->pixel_size_mm - imdiff->beam_mm.y;
@@ -52,5 +49,4 @@ int lminrim(DIFFIMAGE *imdiff)
 	  index++;
 	  }
 	}
-	//	printf("Finished lminrim\n");
 }

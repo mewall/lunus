@@ -1,11 +1,14 @@
 /*
-  MWMASK.H - Header for diffraction image manipulation routines.
+  LUNUS.H - Header for diffraction image manipulation routines.
 
 
   Modifications:
 
 	5/23/94 	Change the ignore tag and overload tag to 32767 from 
 			65535
+	7/3/14		Change all tags to 1048577
+	sometime before 2/24/15: Change all tags to 65535
+    5/2/16: Changing ignore, overload, and punch tags to 65535, 65534, 65533 respectively.
 */
 
 
@@ -28,11 +31,10 @@
  * Data set selection:
  */
 
-//#define SNCPS                           /* sncps data set */
-//#define SNAB                            /* snab data set */
-//#define SNC                             /* snc data set */
-//#define LYS                             /* lys data set */
-#define SNaseWT
+/*#define EIGER				  /* for all Feb 2014 CHESS F1 data */
+/*#define P200K				  /* Pilatus 200k; CHESS June 2014 */
+#define P6M				  /* Pilatus 6M, lysozyme, CHESS July 2015 */
+
 /*
  * I/O specifications:
  */
@@ -52,16 +54,9 @@
 #define DEFAULT_HSIZE 1024		/* # Horizontal pixels */
 #define DEFAULT_HEADER_LENGTH 4096	/* TV6 TIFF image header length */
 #define DEFAULT_IMAGELENGTH 1048576	/* TV6 TIFF image #pixels */
-#define DEFAULT_OVERLOAD_TAG 0x7fff	/* 32766 */
-//#define DEFAULT_OVERLOAD_TAG 0x7ffe	/* 32766 */
-//#define DEFAULT_IGNORE_TAG 2147483647	/* 2^32 - 1 */
-#define DEFAULT_IGNORE_TAG 0x7fff	/* 32767 */
-// #define DEFAULT_OVERLOAD_TAG 0xffff     /* 65535 */
-// #define DEFAULT_IGNORE_TAG 0xffff       /* 65535 */
 #define DEFAULT_VALUE_OFFSET 0          /* Default offset. 0 for TV6, PILATUS, 40 for ADXV .img */
 #define MAX_OVERLOADS 10000		/* Max # of overloads in an image */
-#define MAX_PEAKS 20000			/* Max # of peaks in an image */
-#define MAX_IMAGE_DATA_VALUE 32767	/* Maximum value of pixel in image */
+#define MAX_PEAKS 2000000			/* Max # of peaks in an image */
 #define DEFAULT_IMAGE_ORIGIN 512	/* Default x and y for image origin */
 
 /*
@@ -80,7 +75,7 @@
 #define DEFAULT_LAT_OUTER_RADIUS 30     /* Outer radius of lattice */
 #define DEFAULT_LATTICE_MASK_TAG -32768	/* Mask tag for lattice object */
 #define DEFAULT_SAMPLE_PITCH 5		/* Sample image every Nth */
-					/* pixel in x and y for voxel */
+					/* pixel in x and y for voxel*/ 
 					/* generation */
 #define DEFAULT_MINRANGE 0.15            /* Minimum valid dist. to */
 					/*   Bragg peak */
@@ -92,9 +87,11 @@
 #define DEFAULT_CELL_STR_LEN 1024       /* Default unit cell string length */
 #define DEFAULT_LATTICE_TYPE_STR_LEN 8  /* Default lattice type string length */
 
+
 // Crystal structure specifications:
 
 #define DEFAULT_NATOMS 100000           /* Number of atoms */
+
 
 /* 
  * Shell image specifications:
@@ -109,13 +106,12 @@
 
 #define DEFAULT_RFILE_MASK_TAG 0	/* Mask tag for rfiles */
 #define DEFAULT_RFILE_LENGTH 724	/* Default rfile length for writing */
-#define MAX_RFILE_LENGTH 100000		/* Maximum length of rfile */
+#define MAX_RFILE_LENGTH 25000		/* Maximum length of rfile */
 
 /*
  * Old Bragg peak and overflow "masking" specifications:
  */
 
-#define PUNCH_TAG 0x7ffe		/* 32766 */
 #define MAX_MASK_PIXELS 10000		/* Max # of pixels in a mask */
 #define DEFAULT_INNER_RADIUS 0		/* Inner radius of annular mask */
 #define DEFAULT_OUTER_RADIUS 2		/* Outer radius of annular mask */
@@ -189,98 +185,24 @@
 /* 
  * Data-set dependent defines
  */
-
-#ifdef SNCPS
-#define DEFAULT_WAVELENGTH 0.92       /* Wavelength for sncps */
-#define DEFAULT_DISTANCE_MM 58.0	/* Sample-detector distance in */
-					/* mm for sncps*/
-#define DEFAULT_X_BEAM 42.550		/* Beam position in x (denzo) */
-					/* for sncps*/
-#define DEFAULT_Y_BEAM 46.2		/* Beam position in y (denzo) */
-					/* for sncps */
-#define DEFAULT_CASSETTE_ROTX 0.18      /* Cassette rotx for sncps */
-#define DEFAULT_CASSETTE_ROTY -.67      /* Cassette roty for sncps */
-#define DEFAULT_CASSETTE_ROTZ -.5       /* Cassette rotz for sncps */
-#define DEFAULT_CELL_A 48.154           /* A for sncps */
-#define DEFAULT_CELL_B 48.154           /* B for sncps */
-#define DEFAULT_CELL_C 63.880           /* C for sncps */
-#define DEFAULT_CELL_ALPHA 90.0         /* B-C angle for sncps */
-#define DEFAULT_CELL_BETA 90.0          /* C-A angle for sncps */
-#define DEFAULT_CELL_GAMMA 90.0         /* A-B angle for sncps */
-#else
-#ifdef SNAB
-#define DEFAULT_WAVELENGTH 0.908      /* Wavelength for snab, snc, */
-                                        /*lys*/
-#define DEFAULT_DISTANCE_MM 67.44	/* Sample-detector distance in */
-					/* mm for snb*/
-#define DEFAULT_X_BEAM 39.728		/* Beam position in x (denzo) */
-					/* for snb*/
-#define DEFAULT_Y_BEAM 42.540		/* Beam position in y (denzo) */
-					/* for snb */
-#define DEFAULT_CASSETTE_ROTX -.24    /* Cassette rotx for snb(MEW10P100)*/
-#define DEFAULT_CASSETTE_ROTY -.27    /* Cassette roty for snb(MEW10P100)*/
-#define DEFAULT_CASSETTE_ROTZ .95     /* Cassette rotz for snb(MEW10P100)*/
-#define DEFAULT_CELL_A 48.333           /* A for snb */
-#define DEFAULT_CELL_B 48.333           /* B for snb */
-#define DEFAULT_CELL_C 63.353           /* C for snb */
-#define DEFAULT_CELL_ALPHA 90.0         /* B-C angle for snb */
-#define DEFAULT_CELL_BETA 90.0          /* C-A angle for snb */
-#define DEFAULT_CELL_GAMMA 90.0         /* A-B angle for snb */
-#else
-#ifdef SNC
-#define DEFAULT_WAVELENGTH 0.908      /* Wavelength for snab, snc, */
-                                        /*lys*/
-#define DEFAULT_CASSETTE_ROTX -2.8    /* Cassette rotx for snc */
-#define DEFAULT_CASSETTE_ROTY -.49    /* Cassette roty for snc */
-#define DEFAULT_CASSETTE_ROTZ .8      /* Cassette rotz for snc */
-#define DEFAULT_DISTANCE_MM 57.40	/* Sample-detector distance in */
-					/* mm for snc*/
-#define DEFAULT_X_BEAM 40.04		/* Beam position in x (denzo) */
-					/* for snc*/
-#define DEFAULT_Y_BEAM 42.60		/* Beam position in y (denzo) */
-					/* for snc */
-#define DEFAULT_CELL_A 48.458           /* A for snc */
-#define DEFAULT_CELL_B 48.458           /* B for snc */
-#define DEFAULT_CELL_C 63.398           /* C for snc */
-#define DEFAULT_CELL_ALPHA 90.0         /* B-C angle for snc */
-#define DEFAULT_CELL_BETA 90.0          /* C-A angle for snc */
-#define DEFAULT_CELL_GAMMA 90.0         /* A-B angle for snc */
-#else
-#ifdef LYS
-#define DEFAULT_WAVELENGTH 0.908      /* Wavelength for snab, snc, */
-                                        /*lys*/
-#define DEFAULT_DISTANCE_MM 57.26	/* Sample-detector distance in */
-                                        /* mm  for lys*/
-#define DEFAULT_X_BEAM 39.637		/* Beam position in x (denzo) */
-					/* for lys*/
-#define DEFAULT_Y_BEAM 42.516		/* Beam position in y (denzo) */
-					/* for lys */
-#define DEFAULT_CELL_A 79.120           /* A for lys */
-#define DEFAULT_CELL_B 79.120           /* B for lys */
-#define DEFAULT_CELL_C 38.058           /* C for lys */
-#define DEFAULT_CELL_ALPHA 90.0         /* B-C angle for lys */
-#define DEFAULT_CELL_BETA 90.0          /* C-A angle for lys */
-#define DEFAULT_CELL_GAMMA 90.0         /* A-B angle for lys */
-/* NOTE NO CASSETTE ANGLES */
-#else // SNaseWT
-#ifdef SNaseWT
-#define DEFAULT_WAVELENGTH 1.11         /* Wavelength */
-#define DEFAULT_DISTANCE_MM 200.05	/* Sample-detector distance in mm*/
-#define DEFAULT_X_BEAM 156.44		/* Beam position in x (.img) */
-#define DEFAULT_Y_BEAM 158.21		/* Beam position in y (.img) */
-#define DEFAULT_CASSETTE_ROTX 0.05      /* Cassette rotx */
-#define DEFAULT_CASSETTE_ROTY 0.12      /* Cassette roty */
-#define DEFAULT_CASSETTE_ROTZ -1.70     /* Cassette rotz */
-#define DEFAULT_CELL_A 47.773           /* A for sncps */
-#define DEFAULT_CELL_B 47.773           /* B for sncps */
-#define DEFAULT_CELL_C 63.378           /* C for sncps */
+#ifdef P6M
+#define DEFAULT_WAVELENGTH 0.9774       /* Wavelength for sncps */
+#define DEFAULT_DISTANCE_MM 250.0	/* Sample-detector distance in mm*/
+#define DEFAULT_X_BEAM 41.72		/* Beam position in x (denzo) */
+#define DEFAULT_Y_BEAM 41.74		/* Beam position in y (denzo) */
+#define DEFAULT_CELL_A 79.2           /* A */
+#define DEFAULT_CELL_B 79.2           /* B */
+#define DEFAULT_CELL_C 38.1           /* C */
 #define DEFAULT_CELL_ALPHA 90.0         /* B-C angle */
 #define DEFAULT_CELL_BETA 90.0          /* C-A angle */
 #define DEFAULT_CELL_GAMMA 90.0         /* A-B angle */
-#endif
-#endif
-#endif
-#endif
+#define DEFAULT_CASSETTE_ROTX -0.22         /* temp */
+#define DEFAULT_CASSETTE_ROTY -1.38         /* temp */
+#define DEFAULT_CASSETTE_ROTZ 0         /* temp */
+#define DEFAULT_OVERLOAD_TAG 0xffff
+#define DEFAULT_IGNORE_TAG 0xfffe	
+#define PUNCH_TAG 0xfffd		
+#define MAX_IMAGE_DATA_VALUE 65535	
 #endif
 
 /*
@@ -294,7 +216,6 @@ typedef float RFILE_DATA_TYPE;
 typedef float LATTICE_DATA_TYPE;
 typedef float MAP_DATA_TYPE;
 typedef short SHIM_DATA_TYPE;
-//typedef int IMAGE_DATA_TYPE;
 typedef short IMAGE_DATA_TYPE;
 typedef float WEIGHTS_DATA_TYPE;
 
@@ -307,6 +228,7 @@ typedef struct {
   int num_procs;
   int ierr;
 } MPIVARS;
+
 
 typedef struct {
   IMAGE_DATA_TYPE *value;	/* Pixel value */
@@ -358,6 +280,7 @@ struct hklI
   IJKCOORDS_DATA l;
   LATTICE_DATA_TYPE I;
 };
+
 struct xyzmatrix
 {
   XYZCOORDS_DATA xx;
@@ -395,6 +318,7 @@ struct irange /* range of integers */
   int u;
 };
 
+
 /*
  * Diffuse feature data type:
  */
@@ -417,10 +341,10 @@ typedef struct
   FILE *infile;
   FILE *outfile;
   char format[10];              /* Image format */
-  char *header;		        /* Image header */
-  size_t header_length;	        /* Length of image header (4096 default) */
+  char *header;		        /* Image header (typically TIFF) */
+  size_t header_length;	        /* Length of image header (4096) */
   char *footer;		        /* Image footer (e.g. CBF) */
-  size_t footer_length;	        /* Length of image footer */
+  size_t footer_length;	        /* Length of image footer */ 
   IMAGE_DATA_TYPE *image;	/* Pointer to image */
   char big_endian;              /* byte order, 1 = big_endian, 0 = other */
   size_t image_length;	        /* Total number of pixels in image */
@@ -487,6 +411,7 @@ typedef struct
   struct xyzcoords q;
   struct irange rfirange;       /* Range of rfile index values */
   float *correction;             /* Correction factor, pixel by pixel */
+  //size_t tag;			/* Option tag for mathim, etc. */
 } DIFFIMAGE;
 
 /*
@@ -624,7 +549,7 @@ typedef struct {
   FILE *infile;
   FILE *outfile;
   char error_msg[LINESIZE];      /*Error message string */
-  char *lattice_type_str;       /* Lattice type string = (P1,AU) */ 
+  char *lattice_type_str;       /* Lattice type string = (P1,AU) */
   struct voxel *map3D;	        /* Pointer to list of voxels */
   LATTICE_DATA_TYPE *lattice;   /* Pointer to lattice */
   uint32_t xvoxels;		/* Number of x-voxels */
@@ -697,6 +622,7 @@ typedef struct {
   struct adps *u;
 } XTALSTRUCT;
 
+
 /*
  * Subroutines:
  */
@@ -730,7 +656,7 @@ int lcpltmap(LAT3D *lat,CCP4MAP *map);
 int lcpmaplt(CCP4MAP *map, LAT3D *lat);
 struct xyzcoords lcrossvec(struct xyzcoords a,struct xyzcoords b);
 void lcullconelt(LAT3D *lat);
-int lcullim(DIFFIMAGE *imdiff);
+int cullim(DIFFIMAGE *imdiff);
 int lculllt(LAT3D *lat);
 int lcullreslt(LAT3D *lat);
 int lcutim(DIFFIMAGE *imdiff);
@@ -743,14 +669,12 @@ int ldivrf(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lexplt(LAT3D *lat);
 void lfft(float *data,int *nn,int ndim,int isign);
 int lfilltaglt(LAT3D *lat);
-void lfinalMPI(MPIVARS *mpiv);
 int lfmtlt(LAT3D *lat);
 int lfreeim(DIFFIMAGE *imdiff);
 int lfreelt(LAT3D *lat);
 int lgausslt(LAT3D *lat);
 int lgensv(DIFFIMAGE *imdiff);
 int lgetanls(DIFFIMAGE *imdiff);
-const char * lgetcbftag(const char *target,const char *tag);
 int lgetmat(DIFFIMAGE *imdiff);
 int lgetovld(DIFFIMAGE *imdiff);
 int lgetpks(DIFFIMAGE *imdiff);
@@ -760,7 +684,7 @@ LAT3D *linitlt(void);
 CCP4MAP *linitmap(void);
 void linitMPI(MPIVARS *mpiv);
 XTALSTRUCT *linitxs(void);
-int lintxdslt(DIFFIMAGE *imdiff,LAT3D *lat);
+int lintxdslt(DIFFIMAGE *imdiff, LAT3D *lat);
 int lliquidcorrlt(LAT3D *lat);
 int lliquidfaclt(LAT3D *lat);
 int lllmhyblt(LAT3D *lat1, LAT3D *lat2);
@@ -788,6 +712,7 @@ int lnign(DIFFIMAGE *imdiff);
 int lnoiseim(DIFFIMAGE *imdiff);
 int lnormim(DIFFIMAGE *imdiff);
 int lnormlt(LAT3D *lat);
+int lp6mmask(DIFFIMAGE *imdiff);
 int lpadlt(LAT3D *lat);
 int lparsecelllt(LAT3D *lat);
 int lpeakim(DIFFIMAGE *imdiff);
@@ -816,10 +741,11 @@ int lrsccmap(CCP4MAP *map1, CCP4MAP *map2);
 float lrsrlt(LAT3D *lat1, LAT3D *lat2);
 int lsamplt(LAT3D *lat);
 int lscaleim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
+int lscalerf(DIFFIMAGE *imdiff, float scale);
 int lscalerfim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lscalelt(LAT3D *lat1, LAT3D *lat2);
 struct xyzcoords lsFromIndex(LAT3D *lat);
-int lsetcbftag(char **t,size_t *target_length, const char *tag,const char *val);
+int lsetcbftag(char **t, size_t *target_length, const char *tag, const char *val);
 int lsettag(char *target,const char *tag,const char *val);
 int lshiftlt(LAT3D *lat,struct ijkcoords t);
 int lshiftsflt(LAT3D *lat1,LAT3D *lat2);
@@ -827,10 +753,8 @@ int lshim4lt(LAT3D *lat);
 int lshimlt(LAT3D *lat);
 int lsmthim(DIFFIMAGE *imdiff);
 int lsolidlt(LAT3D *lat);
-float lspleval(float *break__, float *coef, int *l, int *k, float *x,
-	       int *jderiv);
-int lspline(float *tau, float *c__, int *n, int *
-	    ibcbeg, int *ibcend);
+float lspleval(float *break__, float *coef, int *l, int *k, float *x, int *jderiv);
+int lspline(float *tau, float *c__, int *n, int *ibcbeg, int *ibcend);
 float lssqrFromIndex(LAT3D *lat);
 int lsubenvlt(LAT3D *lat1, LAT3D *lat2);
 int lsubim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
