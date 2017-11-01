@@ -37,6 +37,11 @@ int lp6mmask(DIFFIMAGE *imdiff)
                 imdiff->image[index] = imdiff->ignore_tag;
             }
 
+            // Block out that one chip that's always too light on CHESS's P6M
+            if ((r < 96) && (c > 1787) && (c < 1846)) {
+                imdiff->image[index] = imdiff->ignore_tag;
+            }
+
             index++;
         }
     }
