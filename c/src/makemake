@@ -54,8 +54,8 @@ echo 'cd ${L}; rm libmw.a; $(AR) $(ARFLAGS) libmw.a *.o' | awk '{print "\t" $0}'
 echo "#" >> ${C_HOME}/src/$1
 echo "# Library functions:" >> ${C_HOME}/src/$1
 echo "#" >> ${C_HOME}/src/$1
-ls -1 *.c | awk '{print substr($0,0,length()-2)".o:"$1" lunus.h"}' >> ${C_HOME}/src/$1
-echo '%.o: %.c' >> ${C_HOME}/src/$1
+#ls -1 *.c | awk '{print substr($0,0,length()-2)".o:"$1" lunus.h"}' >> ${C_HOME}/src/$1
+echo '%.o: %.c lunus.h' >> ${C_HOME}/src/$1
 echo '$(CC) -c -o ${L}/$*.o $(CFLAGS) ${L}/$*.c' | awk '{print "\t" $0}' >> ${C_HOME}/src/$1
 
 
