@@ -11,7 +11,7 @@
 #
 # Save the old one:
 #
-export C_HOME=$PWD
+export C_HOME=${PWD}/..
 
 if [ -e $1 ]; then
   cp $1 $1.sav
