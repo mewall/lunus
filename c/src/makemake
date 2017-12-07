@@ -44,7 +44,7 @@ echo "#" >> ${C_HOME}/src/$1
 echo "# Libraries:" >> ${C_HOME}/src/$1
 echo "#" >> ${C_HOME}/src/$1
 cd ${C_HOME}/lib
-/bin/echo -n "${L}/libmw.a: " >> ${C_HOME}/src/$1
+echo -n '${L}/libmw.a: ' >> ${C_HOME}/src/$1
 ls -1 *.c | awk '{printf "\\\n\t${L}/"substr($0,0,length()-2)".o "}' >> ${C_HOME}/src/$1
 echo "" >> ${C_HOME}/src/$1
 echo 'cd ${L}; rm libmw.a; $(AR) $(ARFLAGS) libmw.a *.o' | awk '{print "\t" $0}' >> ${C_HOME}/src/$1
