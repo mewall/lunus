@@ -1,5 +1,5 @@
 before_script:
-  - gcc -v
+  - echo "before_script"
   - which gcc
 
 test:
