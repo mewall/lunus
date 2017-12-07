@@ -308,8 +308,8 @@ typedef float RFILE_DATA_TYPE;
 typedef float LATTICE_DATA_TYPE;
 typedef float MAP_DATA_TYPE;
 typedef short SHIM_DATA_TYPE;
-typedef int IMAGE_DATA_TYPE;
-//typedef short IMAGE_DATA_TYPE;
+//typedef int IMAGE_DATA_TYPE;
+typedef short IMAGE_DATA_TYPE;
 typedef float WEIGHTS_DATA_TYPE;
 
 // MPI
