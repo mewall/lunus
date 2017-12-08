@@ -1,0 +1,8 @@
+before_script:
+  - gcc -v
+  - which gcc
+
+test:
+  script:
+    - echo "test"
+
