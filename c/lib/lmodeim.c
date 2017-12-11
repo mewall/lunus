@@ -95,8 +95,8 @@ int lmodeim(DIFFIMAGE *imdiff)
 	  r = j + n;
 	  for(m=-half_width; m<=half_width; m++) {
 	    c = i + m;
-	    if (!((r < 0) || (r >= imdiff->vpixels) || (c < 0) ||       
-		  (c >= imdiff->hpixels))) {
+	    if (!((r < 0) || (r > imdiff->vpixels) || (c < 0) ||       
+		  (c > imdiff->hpixels))) {
 	      size_t imd_index;
 	      imd_index = index + n*imdiff->hpixels + m;
 	      if ((imdiff->image[imd_index] != imdiff->overload_tag) &&
