@@ -1,11 +1,10 @@
 before_script:
-  - gcc -v
-  - which gcc
-  - apt list --installed
-  - cd lunus/c/src
+  - export LUNUS_HOME=${PWD};export PATH=${PATH}:${LUNUS_HOME}/c/bin
+  - echo ${LUNUS_HOME}
+  - cd c/src
   - cp Makefile.head.docker Makefile.head
-  - export LUNUS_HOME=${PWD}/lunus;export PATH=${PATH}:${PWD}/lunus/c/bin
   - ./makemake Makefile
+  - cat Makefile
   - make
   - cd -
 
