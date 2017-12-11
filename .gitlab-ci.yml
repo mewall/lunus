@@ -4,6 +4,7 @@ before_script:
   - apt list --installed
   - cd c/src
   - cp Makefile.head.docker Makefile.head
+  - export LUNUS_HOME=${PWD}/lunus;export PATH=${PATH}:${PWD}/lunus/c/bin
   - ./makemake Makefile
   - make
   - cd -
