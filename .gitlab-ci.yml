@@ -10,7 +10,8 @@ before_script:
 
 lunus_test:
   script:
-    - export LUNUS_HOME=${PWD}/lunus;export PATH=${PATH}:${PWD}/lunus/c/bin
-    - cd lunus/test
+    - echo ${LUNUS_HOME}
+    - export LUNUS_HOME=${PWD};export PATH=${PATH}:${LUNUS_HOME}/c/bin
+    - cd test
     - bash run_tests.sh
 
