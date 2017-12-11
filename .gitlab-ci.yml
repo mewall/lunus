@@ -1,6 +1,7 @@
 before_script:
   - gcc -v
   - which gcc
+  - apt list --installed
 
 test:
   script:
