@@ -1,4 +1,4 @@
-C_HOME=/usr/src/myapp/lunus/c
+C_HOME=${LUNUS_HOME}/c
 VPATH=${C_HOME}/src:${C_HOME}/lib:${C_HOME}/bin:${C_HOME}/include
 #CC=gcc-mp-4.8
 #CC=gcc-mp-5
