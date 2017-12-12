@@ -63,6 +63,7 @@ int lmodeim(DIFFIMAGE *imdiff)
   index = 0;
 
   size_t j;
+  size_t monect=0;
 
 #ifdef USE_OPENMP
   //  omp_set_num_threads(16);
@@ -95,16 +96,16 @@ int lmodeim(DIFFIMAGE *imdiff)
 	  r = j + n;
 	  for(m=-half_width; m<=half_width; m++) {
 	    c = i + m;
-	    if (!((r < 0) || (r > imdiff->vpixels) || (c < 0) ||       
-		  (c > imdiff->hpixels))) {
+	    if ((r >= 0) && (r < imdiff->vpixels) && (c >= 0) &&       
+		  (c < imdiff->hpixels)) {
 	      size_t imd_index;
 	      imd_index = index + n*imdiff->hpixels + m;
 	      if ((imdiff->image[imd_index] != imdiff->overload_tag) &&
 		  (imdiff->image[imd_index] != imdiff->ignore_tag)) {
 		//		count_pointer[l]=(imdiff->image[imd_index] - 
 		//				    (imdiff->image[imd_index] % 
-		//				     imdiff->mode_binsize) + 32768);
-		count_pointer[l]=imdiff->image[imd_index];
+		//				     imdiff->mode_binsize) + 32768);		
+		count_pointer[l]=(unsigned int)imdiff->image[imd_index];
 		//		l++;
 		count[count_pointer[l]]++;
 		l++;
