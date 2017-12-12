@@ -67,7 +67,7 @@ int lmodeim(DIFFIMAGE *imdiff)
 #ifdef USE_OPENMP
   //  omp_set_num_threads(16);
   nt = omp_get_max_threads();
-  //  printf("Using OpenMP with %d threads\n",nt);
+  //    printf("Using OpenMP with %d threads\n",nt);
   {
     //    #pragma omp for schedule(dynamic,1)
     //#pragma omp parallel for shared(imdiff,image,half_height,half_width) private(j) reduction(+:avg_max_count,avg_max_count_count,num_max_count_1)
@@ -76,7 +76,7 @@ int lmodeim(DIFFIMAGE *imdiff)
   for (j=0; j<imdiff->vpixels; j++) {
     size_t i;
     size_t *count;
-    count = (size_t *)calloc(65537,sizeof(size_t));
+    count = (size_t *)calloc(UINT_MAX,sizeof(size_t));
     unsigned int *count_pointer;
     count_pointer = (unsigned int *)calloc((imdiff->mode_height+1) *
 				     (imdiff->mode_width+1), 
@@ -106,7 +106,8 @@ int lmodeim(DIFFIMAGE *imdiff)
 		//				     imdiff->mode_binsize) + 32768);
 		count_pointer[l]=imdiff->image[imd_index];
 		//		l++;
-		count[count_pointer[l++]]++;
+		count[count_pointer[l]]++;
+		l++;
 	      }
 	    }
 	  }
