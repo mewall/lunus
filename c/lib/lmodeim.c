@@ -83,7 +83,7 @@ int lmodeim(DIFFIMAGE *imdiff)
 				     (imdiff->mode_width+1), 
 					   sizeof(unsigned int));
     for (i=0; i<imdiff->hpixels; i++) {
-      float mode_value=0.0;
+      long mode_value=0;
       size_t max_count=0;
       size_t mode_ct=1;
       size_t l=0;
@@ -123,19 +123,17 @@ int lmodeim(DIFFIMAGE *imdiff)
 	  //	  }
 	  for(k=0;k<l;k++) {
 	    if (count[count_pointer[k]] == max_count) {
-	      mode_value = ((float)((float)mode_ct*mode_value +
-				    (float)count_pointer[k])/ 
-				    (float)(mode_ct+1));
+	      mode_value += count_pointer[k];
 	      mode_ct++;
 	    }
 	    else if (count[count_pointer[k]] > max_count) {
-	      mode_value = (float)count_pointer[k];
+	      mode_value = count_pointer[k];
 	      max_count = count[count_pointer[k]];
 	      mode_ct = 1;
 	    }
 	  }
 	  for(k=0;k<l;k++) count[count_pointer[k]] = 0;
-	  image[index] = (IMAGE_DATA_TYPE)mode_value;
+	  image[index] = (IMAGE_DATA_TYPE)((float)mode_value/(float)mode_ct);
 	  //	  avg_max_count += max_count;
 	  //	  avg_max_count = (avg_max_count*avg_max_count_count +
 	  // max_count) / (float)(avg_max_count_count + 1);
