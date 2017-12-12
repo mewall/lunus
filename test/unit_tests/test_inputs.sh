@@ -4,14 +4,14 @@ cctbx_dir=/lustre/ttscratch1/mewall/cori_cctbx/build
 lunus_dir=/Users/mewall/packages/lunus/test/proc
 image_prefix=snc_newhead
 image_suffix=img
-test_line=/Users/mewall/packages/lunus/test
+test_line=/test
 lunus_image_prefix=snc_newhead_lunus
 scale_image_prefix=snc_newhead_scale
 integration_image_prefix=$scale_image_prefix
 apply_correction=False
 correction_factor_scale=1.0
 #integrate_using_norm=0
-lunus_image_dir=/Users/mewall/packages/lunus/test/proc
+lunus_image_dir=/test/proc
 # indexing
 cella=48.521
 cellb=48.521
@@ -51,7 +51,7 @@ punchim_xmax=556
 punchim_xmin=510
 punchim_ymax=473
 punchim_ymin=517
-raw_image_dir=/Users/mewall/packages/lunus/test/data
+raw_image_dir=/test/data
 image_suffix=img
 #reduce params
 reference_image_number=1
