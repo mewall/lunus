@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
 	  }
 	  else {
 	    if ( (tmplin = fopen(argv[3],"r")) == NULL ) {
-	      printf("\nCan't open %s.\n\n",argv[1]);
+	      printf("\nCan't open %s.\n\n",argv[3]);
 	      exit(0);
 	    }
 	  }

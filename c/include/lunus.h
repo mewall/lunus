@@ -19,6 +19,7 @@
 #include<math.h>
 #include<string.h>
 #include<errno.h>
+#include<limits.h>
 
 /*
  * Defines:
