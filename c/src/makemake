@@ -24,10 +24,11 @@ if [ ! -e $1.head ]; then
   exit 1
 fi
 cat $1.head > $1
+echo "default: all" >> $1
 #
 # Executable list:
 #
-echo "all: \\" >> $1
+printf "all: " >> $1
 for f in *.c; do
   printf '\\\n\t%s' "${f%.c}" >> ${C_HOME}/src/$1
 done
@@ -67,5 +68,8 @@ echo "#" >> ${C_HOME}/src/$1
 echo '${L}/%.o: ${L}/%.c lunus.h' >> ${C_HOME}/src/$1
 echo '$(CC) -c -o $@ $(CFLAGS) $<' | awk '{print "\t" $0}' >> ${C_HOME}/src/$1
 
-
+#
+# Clean:
+#
+printf 'clean: \n\trm ${B}/* ${L}/*.o* ${L}/*.a\n' >> ${C_HOME}/src/$1
 
