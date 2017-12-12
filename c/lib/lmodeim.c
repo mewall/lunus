@@ -63,6 +63,7 @@ int lmodeim(DIFFIMAGE *imdiff)
   index = 0;
 
   size_t j;
+  size_t monect=0;
 
 #ifdef USE_OPENMP
   //  omp_set_num_threads(16);
@@ -82,7 +83,7 @@ int lmodeim(DIFFIMAGE *imdiff)
 				     (imdiff->mode_width+1), 
 					   sizeof(unsigned int));
     for (i=0; i<imdiff->hpixels; i++) {
-      float mode_value=0.0;
+      long mode_value=0;
       size_t max_count=0;
       size_t mode_ct=1;
       size_t l=0;
@@ -95,16 +96,16 @@ int lmodeim(DIFFIMAGE *imdiff)
 	  r = j + n;
 	  for(m=-half_width; m<=half_width; m++) {
 	    c = i + m;
-	    if (!((r < 0) || (r > imdiff->vpixels) || (c < 0) ||       
-		  (c > imdiff->hpixels))) {
+	    if ((r >= 0) && (r < imdiff->vpixels) && (c >= 0) &&       
+		  (c < imdiff->hpixels)) {
 	      size_t imd_index;
 	      imd_index = index + n*imdiff->hpixels + m;
 	      if ((imdiff->image[imd_index] != imdiff->overload_tag) &&
 		  (imdiff->image[imd_index] != imdiff->ignore_tag)) {
 		//		count_pointer[l]=(imdiff->image[imd_index] - 
 		//				    (imdiff->image[imd_index] % 
-		//				     imdiff->mode_binsize) + 32768);
-		count_pointer[l]=imdiff->image[imd_index];
+		//				     imdiff->mode_binsize) + 32768);		
+		count_pointer[l]=(unsigned int)imdiff->image[imd_index];
 		//		l++;
 		count[count_pointer[l]]++;
 		l++;
@@ -122,19 +123,17 @@ int lmodeim(DIFFIMAGE *imdiff)
 	  //	  }
 	  for(k=0;k<l;k++) {
 	    if (count[count_pointer[k]] == max_count) {
-	      mode_value = ((float)((float)mode_ct*mode_value +
-				    (float)count_pointer[k])/ 
-				    (float)(mode_ct+1));
+	      mode_value += count_pointer[k];
 	      mode_ct++;
 	    }
 	    else if (count[count_pointer[k]] > max_count) {
-	      mode_value = (float)count_pointer[k];
+	      mode_value = count_pointer[k];
 	      max_count = count[count_pointer[k]];
 	      mode_ct = 1;
 	    }
 	  }
 	  for(k=0;k<l;k++) count[count_pointer[k]] = 0;
-	  image[index] = (IMAGE_DATA_TYPE)mode_value;
+	  image[index] = (IMAGE_DATA_TYPE)((float)mode_value/(float)mode_ct);
 	  //	  avg_max_count += max_count;
 	  //	  avg_max_count = (avg_max_count*avg_max_count_count +
 	  // max_count) / (float)(avg_max_count_count + 1);
