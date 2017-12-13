@@ -50,7 +50,7 @@ int lcfim(DIFFIMAGE *imdiff)
 	  two_theta = atanf(arctan_argument);
 	  cos_two_theta = cosf(two_theta);
 	  sin_two_theta = sinf(two_theta);
-	  cos_two_rho = cos(2*acosf(rvec.x / radius) - two_rho_offset);
+	  cos_two_rho = cosf(2*acosf(rvec.x / radius) - two_rho_offset);
           // solid angle normalization
 	  imdiff->correction[index] = scale*powf((1. + arctan_argument*arctan_argument),3./2.);
           // polarization
