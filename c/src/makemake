@@ -34,6 +34,7 @@ for f in *.c; do
 done
 #ls -1 *.c | awk '{print "\t${B}/"substr($0,0,length()-2)" \\"}' >> ${C_HOME}/src/$1
 echo "libmw.a" | awk '{print "\\\n\t${L}/"$0}'>> ${C_HOME}/src/$1
+
 #
 # Build executables:
 #
@@ -69,7 +70,20 @@ echo '${L}/%.o: ${L}/%.c lunus.h' >> ${C_HOME}/src/$1
 echo '$(CC) -c -o $@ $(CFLAGS) $<' | awk '{print "\t" $0}' >> ${C_HOME}/src/$1
 
 #
+# Build mpi methods:
+#
+if [ "$MPI_BUILD" == "YES" ]; then
+    echo "#" >> ${C_HOME}/src/$1
+    echo "# MPI methods:" >> ${C_HOME}/src/$1
+    echo "#" >> ${C_HOME}/src/$1
+    echo '${B}/lunus: ${S}/lunus.c lunus.h' >> ${C_HOME}/src/$1
+    printf '\t${MPICC} ${CFLAGS} ${MPICFLAGS} -o $@ $< ${LIBS} ${MPILIBS}\n' "${f%.c}" "$f" >> ${C_HOME}/src/$1
+    echo '${L}/lparallel.o: ${L}/lparallel.c lunus.h' >> ${C_HOME}/src/$1
+    echo '$(MPICC) -c -o $@ $(CFLAGS) $(MPICFLAGS) $<' | awk '{print "\t" $0}' >> ${C_HOME}/src/$1
+fi
+
+#
 # Clean:
 #
-printf 'clean: \n\trm ${B}/* ${L}/*.o* ${L}/*.a\n' >> ${C_HOME}/src/$1
+printf 'clean: \n\trm -r ${B}/* ${L}/*.o* ${L}/*.a\n' >> ${C_HOME}/src/$1
 
