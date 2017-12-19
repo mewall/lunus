@@ -39,7 +39,7 @@ int lreadim(DIFFIMAGE *imdiff)
     // Not TV6 image format
     if (strstr(buf,"HEADER_BYTES=")!=NULL &&
 	strstr(buf,"PIXEL_SIZE=")!=NULL) {
-      // assume ADSC .img format
+      // assume ADSC .img SMV format
       //      printf("ADSC .img image\n");
       strcpy(imdiff->format,"SMV");
       imdiff->header_length = (size_t)atoi(lgettag(buf, "HEADER_BYTES"));
@@ -99,8 +99,9 @@ int lreadim(DIFFIMAGE *imdiff)
   /*
    * Read image:
    */
-      
-      num_read = fread(imdiff->image, sizeof(IMAGE_DATA_TYPE),
+      SMV_DATA_TYPE *imbuf;
+      imbuf = (SMV_DATA_TYPE *)malloc(imdiff->image_length*sizeof(SMV_DATA_TYPE));
+      num_read = fread(imbuf, sizeof(SMV_DATA_TYPE),
 		       imdiff->image_length, imdiff->infile);
       if (num_read != imdiff->image_length) {
 	sprintf(imdiff->error_msg,"\nCouldn't read all of image.\n\n");
@@ -110,13 +111,16 @@ int lreadim(DIFFIMAGE *imdiff)
 	sprintf(imdiff->error_msg,"\nError while reading image\n\n");
 	return(4);
       }
-      
 /*
  * Reverse byte order if neccessary:
  */
 
       if (imdiff->big_endian!=0) {
-        lchbyte(imdiff->image, sizeof(IMAGE_DATA_TYPE), imdiff->image_length);
+        lchbyte(imdiff->image, sizeof(SMV_DATA_TYPE), imdiff->image_length);
+      }
+      // Copy image to imdiff, with possible change in type
+      for (i=0;i<imdiff->image_length;i++) {
+	imdiff->image[i]=(IMAGE_DATA_TYPE)imbuf[i];
       }
     } else {
       if (strstr(buf,"###CBF")!=NULL) {
@@ -254,15 +258,15 @@ int lreadim(DIFFIMAGE *imdiff)
 	  }
 	  */
 	  //	  printf("buf[0], buf[1], buf[2], buf[3] = %d,%d,%d,%d\n",(char)buf[0],(char)buf[1],(char)buf[2],(char)buf[3]);
-	  int *image_cbf;
-	  image_cbf = (int *)malloc(imdiff->image_length*sizeof(int));
+	  CBF_DATA_TYPE *image_cbf;
+	  image_cbf = (CBF_DATA_TYPE *)malloc(imdiff->image_length*sizeof(CBF_DATA_TYPE));
 	  //	  printf("Uncompress, buf_length = %ld\n",buf_length);
 	  lbufuncompress(buf,buf_length,image_cbf,imdiff->image_length);
 	  // Convert image to imdiff format
 	  free(imdiff->image);
 	  imdiff->image = (IMAGE_DATA_TYPE *)malloc(sizeof(IMAGE_DATA_TYPE)*imdiff->image_length);
 	  for (i=0;i<imdiff->image_length;i++) {
-	    if (image_cbf[i] < 0 || image_cbf[i] > 32767) {
+	    if (image_cbf[i] < 0 || image_cbf[i] > IMAGE_MAX) {
 	      imdiff->image[i]=imdiff->ignore_tag;
 	    } else {
 	      imdiff->image[i] = (IMAGE_DATA_TYPE)image_cbf[i];

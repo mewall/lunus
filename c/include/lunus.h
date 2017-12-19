@@ -57,6 +57,7 @@
 //#define DEFAULT_OVERLOAD_TAG 0x7ffe	/* 32766 */
 //#define DEFAULT_IGNORE_TAG 2147483647	/* 2^32 - 1 */
 #define DEFAULT_IGNORE_TAG 0x7fff	/* 32767 */
+#define SMV_IGNORE_TAG 32767
 // #define DEFAULT_OVERLOAD_TAG 0xffff     /* 65535 */
 // #define DEFAULT_IGNORE_TAG 0xffff       /* 65535 */
 #define DEFAULT_VALUE_OFFSET 0          /* Default offset. 0 for TV6, PILATUS, 40 for ADXV .img */
@@ -311,6 +312,12 @@ typedef float MAP_DATA_TYPE;
 typedef short SHIM_DATA_TYPE;
 //typedef int IMAGE_DATA_TYPE;
 typedef short IMAGE_DATA_TYPE;
+#define IMAGE_MAX SHRT_MAX
+#define SMV_MAX SHRT_MAX
+#define SMV_MIN SHRT_MIN
+#define CBF_MAX INT_MAX
+typedef int CBF_DATA_TYPE;
+typedef short SMV_DATA_TYPE;
 typedef float WEIGHTS_DATA_TYPE;
 
 // MPI
