@@ -281,12 +281,12 @@ int lLaue6(LAT3D *lat)
    * Generate rotations:
    */
 
-  lat->symvec[1].i = -lat->symvec[0].j;
-  lat->symvec[1].j = +lat->symvec[0].i-lat->symvec[0].j;
+  lat->symvec[1].i = lat->symvec[0].j;
+  lat->symvec[1].j = -lat->symvec[0].i-lat->symvec[0].j;
   lat->symvec[1].k = +lat->symvec[0].k;
 
-  lat->symvec[2].i = -lat->symvec[0].i+lat->symvec[0].j;
-  lat->symvec[2].j = -lat->symvec[0].i;
+  lat->symvec[2].i = -lat->symvec[0].i-lat->symvec[0].j;
+  lat->symvec[2].j = lat->symvec[0].i;
   lat->symvec[2].k = +lat->symvec[0].k;
 
   /*
