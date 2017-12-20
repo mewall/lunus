@@ -56,12 +56,19 @@ int lparsecelllt(LAT3D *lat)
   lat->a.y = 0.0;
   lat->a.z = 0.0;
   lat->b.x = lat->cell.b*cosf(lat->cell.gamma*PI/180.);
-  if (fabs(lat->b.x<1.0E-4)) {
+  if (fabs(lat->b.x)<1.0E-4) {
     lat->b.x = 0.0;
   }
-  lat->b.y = sqrtf(lat->cell.b*lat->cell.b-lat->b.x*lat->b.x);
+  lat->b.y = lat->cell.b*sinf(lat->cell.gamma*PI/180.);
+  if (fabs(lat->b.y)<1.0E-4) {
+    lat->b.y = 0.0;
+  }
+  //  lat->b.y = sqrtf(lat->cell.b*lat->cell.b-lat->b.x*lat->b.x);
   lat->b.z = 0.0;
   lat->c.x = lat->cell.c*cosf(lat->cell.beta*PI/180.);
+  if (fabs(lat->c.x)<1.0E-4) {
+    lat->c.x = 0.0;
+  }
   lat->c.y = (lat->cell.b*lat->cell.c*cosf(lat->cell.alpha*PI/180.)-lat->b.x*lat->c.x)/lat->b.y;
   if (fabs(lat->c.y)<1.0E-4) {
     lat->c.y = 0.0;
