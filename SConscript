@@ -12,7 +12,7 @@ Import("env_base", "env_etc")
 
 env_etc.lunus_dist = libtbx.env.dist_path("lunus")
 
-print "env_etc.lunus_dist",env_etc.lunus_dist
+#print "env_etc.lunus_dist",env_etc.lunus_dist
 
 env_etc.lunus_include = env_etc.lunus_dist
 env_etc.lunus_common_includes = [
@@ -26,7 +26,7 @@ env_etc.lunus_common_includes = [
 ]
 
 CPPP = os.path.join(env_etc.lunus_include,"c","include")
-print "INCLUDE_PATH-->",CPPP
+#print "INCLUDE_PATH-->",CPPP
 
 #env = env_base.Clone(
 #  SHLINKFLAGS=env_etc.shlinkflags)
@@ -36,12 +36,12 @@ env_base.StaticLibrary(target='#lib/lunus',
   source = [os.path.join(env_etc.lunus_dist,"c","lib","linitim.c"),
             os.path.join(env_etc.lunus_dist,"c","lib","lfreeim.c"),
             os.path.join(env_etc.lunus_dist,"c","lib","lmodeim.c"),
-	    os.path.join(env_etc.lunus_dist,"c","lib","lpunchim.c"),
+            os.path.join(env_etc.lunus_dist,"c","lib","lpunchim.c"),
       os.path.join(env_etc.lunus_dist,"c","lib","lnormim.c"),
       os.path.join(env_etc.lunus_dist,"c","lib","lpolarim.c"),
       os.path.join(env_etc.lunus_dist,"c","lib","lavgrim.c"),
-	    os.path.join(env_etc.lunus_dist,"c","lib","lwindim.c"),
-	    os.path.join(env_etc.lunus_dist,"c","lib","lthrshim.c"),
+            os.path.join(env_etc.lunus_dist,"c","lib","lwindim.c"),
+            os.path.join(env_etc.lunus_dist,"c","lib","lthrshim.c"),
       os.path.join(env_etc.lunus_dist,"c","lib","linitlt.c"),
       os.path.join(env_etc.lunus_dist,"c","lib","lfreelt.c"),
       os.path.join(env_etc.lunus_dist,"c","lib","lreadlt.c"),
@@ -55,15 +55,16 @@ env_base.StaticLibrary(target='#lib/lunus',
       os.path.join(env_etc.lunus_dist,"c","lib","lsymlt.c"),
       os.path.join(env_etc.lunus_dist,"c","lib","lsymlib.c"),
       os.path.join(env_etc.lunus_dist,"c","lib","lanisolt.c"),
-      os.path.join(env_etc.lunus_dist,"c","lib","lsvtools.c")],
+      os.path.join(env_etc.lunus_dist,"c","lib","lsvtools.c"),
+      os.path.join(env_etc.lunus_dist,"c","lib","lspline.c")],
   CPPPATH=[CPPP] )
-print "LIBRARY OK"
+#print "LIBRARY OK"
 
 
 if (not env_etc.no_boost_python):
   Import("env_no_includes_boost_python_ext")
   env_lunus = env_no_includes_boost_python_ext.Clone()
-  
+
   env_etc.include_registry.append(
     env=env_lunus,
     paths=env_etc.lunus_common_includes + [env_etc.python_include])
