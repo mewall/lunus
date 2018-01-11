@@ -668,23 +668,19 @@ def index_from_files(f_one,f_two,f_three):
 ###----------------Direct call of script-------------------###
 
 def main():
-    script, exp_file, img_file, d_min = argv
+    exp_file, d_min = argv[1:]
 
     test_exp = DiffuseExperiment()
     test_exp.read_experiment_file(exp_file)
 
-    # img_set = test_exp.experiments.imagesets()
-    # imgs = img_set[0]
-    # file_list = imgs.paths()
-    # filenum = int(filenum)
-    # img_file =  file_list[filenum]
+    img_set = test_exp.experiments.imagesets()
+    imgs = img_set[0]
+    file_list = imgs.paths()
+    img_file = file_list[0]
 
     test_img = DiffuseImage(img_file)
     test_img.set_general_variables()
-    test_img.remove_bragg_peaks()
-    # test_img.remove_bragg_peaks()
-    #test_img.radial_average()
-    # test_img.radial_average()
+    test_img.remove_bragg_peaks(reference=True)
     test_img.scale_factor()
     test_img.crystal_geometry(test_exp.crystal)
     d_min = float(d_min)
