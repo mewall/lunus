@@ -15,12 +15,20 @@ sematura_phil_str = '''
       .help = Limiting resolution of diffuse intensity map.
   }
 '''
+sematura_defaults = """
+  mp {
+    method = mpi
+      .type = choice
+  }
+"""
+
 
 stills_process.phil_scope = parse(stills_process.control_phil_str +
                                   stills_process.dials_phil_str +
                                   sematura_phil_str,
                                   process_includes=True).fetch(
-                            parse(stills_process.program_defaults_phil_str))
+                            parse(stills_process.program_defaults_phil_str)).fetch(
+                            parse(sematura_defaults))
 
 class Processor(SP_Processor):
 
