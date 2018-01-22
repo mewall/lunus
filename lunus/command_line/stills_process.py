@@ -118,7 +118,8 @@ class Processor(SP_Processor):
 
     if self.ref_data == None:
       print "ref_data = None for Rank = ",rank
-    test_img.scale_factor_from_images(self.ref_data)
+#    test_img.scale_factor_from_images(self.ref_data)
+    test_img.scale_factor()
     test_img.crystal_geometry(test_exp.crystal)
 
     test_img.setup_diffuse_lattice(self.params.lunus.d_min)
