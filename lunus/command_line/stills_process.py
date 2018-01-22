@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# LIBTBX_SET_DISPATCHER_NAME sematura.stills_process
+# LIBTBX_SET_DISPATCHER_NAME lunus.stills_process
 
 from __future__ import absolute_import, division
 from dials.command_line.stills_process import Script
@@ -8,6 +8,8 @@ from dials.command_line.stills_process import Processor as SP_Processor
 
 from dials.command_line import stills_process
 from libtbx.phil import parse
+from diffuse_scattering.sematura import DiffuseExperiment, DiffuseImage
+from copy import deepcopy
 sematura_phil_str = '''
   lunus {
     d_min = 2.5
@@ -31,6 +33,11 @@ stills_process.phil_scope = parse(stills_process.control_phil_str +
                             parse(sematura_defaults))
 
 class Processor(SP_Processor):
+
+
+  ncalls = 0;
+  ref_data = None
+#  ref_img = DiffuseImage("placeholder.file")
 
   def process_datablock(self, tag, datablock):
 
@@ -79,6 +86,12 @@ class Processor(SP_Processor):
         self.experiments = experiments
     DiffuseExperiment.from_experiments = from_experiments
 
+    if (self.params.mp.method == 'mpi'):
+      from mpi4py import MPI
+      comm = MPI.COMM_WORLD
+      rank = comm.Get_rank() # each process in MPI has a unique id, 0-indexed
+    else:
+      rank = 0
     test_exp = DiffuseExperiment()
     test_exp.from_experiments(experiments)
 
@@ -86,16 +99,32 @@ class Processor(SP_Processor):
     imgs = img_set[0]
     file_list = imgs.paths()
     img_file = file_list[0]
-
     test_img = DiffuseImage(img_file)
     test_img.set_general_variables()
     test_img.remove_bragg_peaks(radial=True)
-    test_img.scale_factor()
+    if self.ncalls == 0: 
+      if rank == 0:
+        self.ref_data = deepcopy(test_img.lunus_data_scitbx)
+#      else:
+#        self.ref_data = None
+      if (self.params.mp.method == 'mpi'):
+#      from mpi4py import MPI
+#      comm = MPI.COMM_WORLD
+#        print "Barrier, rank = ",rank
+#        print "Broadcast, rank = ",rank
+        self.ref_data = comm.bcast(self.ref_data,root=0)
+        comm.barrier()
+#        print "Broadcast done, rank = ",rank
+
+    if self.ref_data == None:
+      print "ref_data = None for Rank = ",rank
+    test_img.scale_factor_from_images(self.ref_data)
     test_img.crystal_geometry(test_exp.crystal)
 
     test_img.setup_diffuse_lattice(self.params.lunus.d_min)
     test_img.integrate_diffuse()
-
+    self.ncalls = self.ncalls + 1
+#    print "RANK, NCALLS = ",rank, self.ncalls
 
 stills_process.Processor = Processor
 
