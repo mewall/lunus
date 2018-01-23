@@ -66,10 +66,10 @@ namespace lunus {
       lthrshim(imdiff);
     }
 
-    inline void LunusPolarim(float bxp, float byp, float dist, float polar, float offset, float px) {
+    inline void LunusPolarim(float bx, float by, float dist, float polar, float offset, float px) {
       printf("LunusPolarim\n");
-      imdiff->origin.c = bxp;
-      imdiff->origin.r = byp;
+      imdiff->beam_mm.x = bx;
+      imdiff->beam_mm.y = by;
       imdiff->distance_mm = dist;
       imdiff->polarization = polar;
       imdiff->polarization_offset = offset;
