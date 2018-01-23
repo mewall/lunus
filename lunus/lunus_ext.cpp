@@ -137,6 +137,7 @@ namespace lunus {
       imdiff->hpixels = fast;
       imdiff->vpixels = slow;
       imdiff->image = (IMAGE_DATA_TYPE *)realloc(imdiff->image,imdiff->image_length*sizeof(IMAGE_DATA_TYPE));
+      imdiff->value_offset = 0;
       std::size_t ct=0;
       for (int i = 0;i<imdiff->image_length;i++) {
 	if (begin[i]<0) {

@@ -105,7 +105,7 @@ class Processor(SP_Processor):
     if self.ncalls == 0: 
       if rank == 0:
         self.ref_data = deepcopy(test_img.lunus_data_scitbx)
-        print "ref_data is",self.ref_data
+#        print "ref_data is",self.ref_data
 #      else:
 #        self.ref_data = None
       if (self.params.mp.method == 'mpi'):

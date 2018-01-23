@@ -69,6 +69,7 @@ DIFFIMAGE *linitim(void)
   imdiff->cassette.z = DEFAULT_CASSETTE_ROTZ;
   imdiff->amplitude = DEFAULT_AMPLITUDE;
   imdiff->pitch = DEFAULT_PITCH;
+  imdiff->value_offset = DEFAULT_VALUE_OFFSET;
 
   /*
    * Allocate memory for arrays:
