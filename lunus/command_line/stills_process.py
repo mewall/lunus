@@ -105,6 +105,7 @@ class Processor(SP_Processor):
     if self.ncalls == 0: 
       if rank == 0:
         self.ref_data = deepcopy(test_img.lunus_data_scitbx)
+        print "ref_data is",self.ref_data
 #      else:
 #        self.ref_data = None
       if (self.params.mp.method == 'mpi'):
@@ -119,6 +120,7 @@ class Processor(SP_Processor):
     if self.ref_data == None:
       print "ref_data = None for Rank = ",rank
     test_img.scale_factor_from_images(self.ref_data)
+#    test_img.scale_factor()
     test_img.crystal_geometry(test_exp.crystal)
 
     test_img.setup_diffuse_lattice(self.params.lunus.d_min)
