@@ -24,6 +24,10 @@ script_name=script_sum.sh
 
 script_path=`printf scripts/%s $script_name`
 
+if [ -z ${setup_python+x} ]; then
+  setup_python="module load python/2.7-anaconda-4.1.1"
+fi
+
 cat > $script_path<<EOF
 
 #!/bin/bash                         #-- what is the language of this shell
@@ -56,8 +60,9 @@ cat > $script_path<<EOF
 
 date
 hostname
+echo "SLURM_PROCID = \$SLURM_PROCID"
 
-module load python/2.7-anaconda-4.1.1
+$setup_python
 
 #qstat -j $JOB_ID                                  # This is useful for debugging and usage purposes,
 							# e.g. "did my job exceed its memory request?"
@@ -66,6 +71,7 @@ module load python/2.7-anaconda-4.1.1
 #. $phenix_dir/phenix_env.sh
 
 EOF
+
 
 if [ -z ${pphkl+x} ]; then 
   pphkl=1
