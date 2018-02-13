@@ -47,10 +47,10 @@ num_images=1
 polarim_dist=57.42
 polarim_offset=0.0
 polarim_polarization=0.93
-punchim_xmax=556
 punchim_xmin=510
-punchim_ymax=473
-punchim_ymin=517
+punchim_xmax=556
+punchim_ymin=473
+punchim_ymax=517
 raw_image_dir=${LUNUS_HOME}/test/data
 image_suffix=img
 #reduce params

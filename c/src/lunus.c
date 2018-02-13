@@ -99,6 +99,7 @@ int main(int argc, char *argv[])
 			break;
 		default:
 			printf("\n Usage: lunus <input deck>\n\n");
+			lfinalMPI(mpiv);
 			exit(0);
 	}
 

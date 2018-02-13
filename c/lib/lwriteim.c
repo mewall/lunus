@@ -45,10 +45,21 @@ int lwriteim(DIFFIMAGE *imdiff)
     }
     
     /*
-     * Write image:
+     * Write SMV image:
      */
-    
-    num_wrote = fwrite(imdiff->image, sizeof(IMAGE_DATA_TYPE), 
+    //    int ct=0;
+    SMV_DATA_TYPE *imbuf;
+    imbuf = (SMV_DATA_TYPE *)malloc(imdiff->image_length*sizeof(SMV_DATA_TYPE));
+    for (i = 0;i < imdiff->image_length; i++) {
+      if (imdiff->image[i] < SMV_MIN || imdiff->image[i] > SMV_MAX) {
+	imbuf[i] = SMV_IGNORE_TAG;
+	//	ct++;
+      } else {
+	imbuf[i] = (SMV_DATA_TYPE)imdiff->image[i];
+      }
+    }
+    //    printf("ct = %d",ct);
+    num_wrote = fwrite(imbuf, sizeof(SMV_DATA_TYPE), 
 		       imdiff->image_length, imdiff->outfile);
 
     if (num_wrote != imdiff->image_length) {
@@ -64,13 +75,13 @@ int lwriteim(DIFFIMAGE *imdiff)
     if (strcmp(imdiff->format,"CBF") == 0) {
       // Convert image to int type
       //      printf("Writing .cbf image\n");
-      int *image_cbf;
-      image_cbf = (int *)malloc(sizeof(int)*imdiff->image_length);
+      CBF_DATA_TYPE *image_cbf;
+      image_cbf = (CBF_DATA_TYPE *)malloc(sizeof(CBF_DATA_TYPE)*imdiff->image_length);
       for (i = 0;i<imdiff->image_length;i++) {
 	if (imdiff->image[i] == imdiff->ignore_tag) {
 	  image_cbf[i] = -1;
 	} else {
-	  image_cbf[i] = (int)imdiff->image[i];
+	  image_cbf[i] = (CBF_DATA_TYPE)imdiff->image[i];
 	}
       }
       char *packed;
