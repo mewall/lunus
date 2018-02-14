@@ -60,7 +60,7 @@ cat > $script_path<<EOF
 
 date
 hostname
-echo "SLURM_PROCID = \$SLURM_PROCID"
+echo "PMI_RANK = \$PMI_RANK"
 
 $setup_python
 
@@ -93,7 +93,7 @@ else
 
 cat >>$script_path<<EOF
 
-python $lunus_dir/scripts/calc_partial_sum_npz.py cell.a=$cella cell.b=$cellb cell.c=$cellc diffuse.lattice.resolution=$resolution diffuse.lattice.type=npz diffuse.lattice.glob=$diffuse_glob counts.lattice.glob=$counts_glob target_cell=$cella,$cellb,$cellc,$alpha,$beta,$gamma target_sg=$spacegroup output.fname.base=$sum_fname_base pphkl=$pphkl filterhkl=$filterhkl this.rank=\$SLURM_PROCID num.ranks=\$nranks
+python $lunus_dir/scripts/calc_partial_sum_npz.py cell.a=$cella cell.b=$cellb cell.c=$cellc diffuse.lattice.resolution=$resolution diffuse.lattice.type=npz diffuse.lattice.glob=$diffuse_glob counts.lattice.glob=$counts_glob target_cell=$cella,$cellb,$cellc,$alpha,$beta,$gamma target_sg=$spacegroup output.fname.base=$sum_fname_base pphkl=$pphkl filterhkl=$filterhkl this.rank=\$PMI_RANK num.ranks=\$nranks
 EOF
 
 fi

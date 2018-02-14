@@ -262,7 +262,8 @@ if __name__=="__main__":
     axis = gonio.get_rotation_axis()
     start_angle, delta_angle = scan.get_oscillation()
     crystal.rotate_around_origin(axis, start_angle + (delta_angle/2), deg=True)
-    A_matrix = crystal.get_A().inverse()
+    from scitbx import matrix
+    A_matrix = matrix.sqr(crystal.get_A()).inverse()
     At = np.asarray(A_matrix.transpose()).reshape((3,3))
 #    print "Time to get A matrix = ",time()-t0," sec"
 

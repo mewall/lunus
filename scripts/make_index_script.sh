@@ -85,8 +85,8 @@ hostname
 							# e.g. "did my job exceed its memory request?"
 #. proc.all
 
-#. $cctbx_dir/setpaths_all.sh
-. $phenix_dir/phenix_env.sh
+. $cctbx_dir/setpaths_all.sh
+#. $phenix_dir/phenix_env.sh
 
 
 cfim $template_image_path $work_dir/scripts/tmpdir_common/correction.imf $polarim_dist $polarim_polarization $polarim_offset

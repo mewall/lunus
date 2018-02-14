@@ -202,7 +202,7 @@ if __name__=="__main__":
   latlist = glob.glob(latglob)
   ctlist = glob.glob(ctglob)
 
-  nlist = len(latlist)/nrank
+  nlist = int(len(latlist)/nrank)
   if (len(latlist) % nrank != 0):
       nlist = nlist + 1
 
