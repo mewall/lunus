@@ -233,7 +233,9 @@ if __name__=="__main__":
   print "Writing common files."
   t0 = time()
   np.save(workdir+"/x_vectors.npy",x_vectors)
+  x_vectors.astype('float32').tofile(workdir+"/x_vectors.bin")
   np.save(workdir+"/DATAsize.npy",DATAsize)
+  DATAsize.astype('int32').tofile(workdir+"/DATAsize.bin")
   print "Took {0} secs to write the common files.".format(time()-t0)
 
   imnum=0
@@ -273,3 +275,4 @@ if __name__=="__main__":
         call_params = shlex.split(command)
         subprocess.call(call_params)
     np.save(workdir+"/At.npy",At)
+    At.astype('float32').tofile(workdir+"/At.bin")

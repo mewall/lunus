@@ -8,6 +8,9 @@
 			65535
 */
 
+#ifndef __MWMASK_H
+
+#define __MWMASK_H
 
 /*
  * Includes:
@@ -743,6 +746,7 @@ int lbuttim(DIFFIMAGE *imdiff);
 struct fom lcalcrsf(char *hklfname, LAT3D *lat1,LAT3D *lat2);
 int lccrlt(LAT3D *lat1, LAT3D *lat2);
 int lchbyte(void *ptr, size_t packet_size, size_t list_length);
+int lcloneim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lconstim(DIFFIMAGE *imdiff);
 int lconstlt(LAT3D *lat);
 int lconstrf(DIFFIMAGE *imdiff);
@@ -776,7 +780,7 @@ const char * lgetcbftag(const char *target,const char *tag);
 int lgetmat(DIFFIMAGE *imdiff);
 int lgetovld(DIFFIMAGE *imdiff);
 int lgetpks(DIFFIMAGE *imdiff);
-const char * lgettag(const char *target,const char *tag);
+char * lgettag(const char *target,const char *tag);
 DIFFIMAGE *linitim(void);
 LAT3D *linitlt(void);
 CCP4MAP *linitmap(void);
@@ -818,6 +822,7 @@ int lpunch(DIFFIMAGE *imdiff);
 int lpunchim(DIFFIMAGE *imdiff);
 int lratioim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lrbtlt(LAT3D *lat);
+int lreadbuf(void *buf,char *fname);
 int lreadcube(CCP4MAP *map);
 int lreadhkl(LAT3D *lat,LAT3D *tmpl);
 int lreadim(DIFFIMAGE *imdiff);
@@ -918,3 +923,5 @@ int lLaue8(LAT3D *lat);
 int lLaue9(LAT3D *lat);
 int lLaue10(LAT3D *lat);
 int lLaue11(LAT3D *lat);
+
+#endif

@@ -30,6 +30,11 @@ int lscaleim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2)
 /*
  * Calculate averages:
  */
+	if (imdiff1->rfile == NULL) {
+	  perror("LSCALEIM: imdiff1->rfile == NULL\n");
+	  exit(1);
+	}
+	//	printf("%d, %d\n",imdiff1->mask_inner_radius,imdiff1->mask_outer_radius);
 	ct = 0;
 	avg_xx = 0.0;
 	avg_xy = 0.0;
@@ -44,8 +49,8 @@ int lscaleim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2)
 		  (imdiff1->image[index] != imdiff1->ignore_tag) &&
 		(imdiff2->image[index] != imdiff2->overload_tag) &&
 		(imdiff2->image[index] != imdiff2->ignore_tag)) {
-	      if (radius > imdiff1->mask_inner_radius &&
-		  radius < imdiff1->mask_outer_radius) {
+	      if ((imdiff1->mask_inner_radius == 0 && imdiff1->mask_outer_radius == 0) || (radius > imdiff1->mask_inner_radius &&
+											   radius < imdiff1->mask_outer_radius)) {
 		xx = imdiff1->image[index]*imdiff1->image[index];
 		xy = imdiff2->image[index]*imdiff1->image[index];
 		yy = imdiff2->image[index]*imdiff2->image[index];

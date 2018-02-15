@@ -29,3 +29,19 @@ void lfinalMPI(MPIVARS *mpiv) {
   mpiv->ierr = MPI_Finalize();
 #endif
 }
+
+void lbarrierMPI(MPIVARS *mpiv) {
+
+#ifdef USE_MPI
+  mpiv->ierr = MPI_Barrier(MPI_COMM_WORLD);
+#endif
+
+}
+
+void lbcastImageMPI(IMAGE_DATA_TYPE *data,size_t datalen, int root, MPIVARS *mpiv) {
+
+#ifdef USE_MPI
+  mpiv->ierr = MPI_Bcast((void *)data, (int)datalen, MPI_SHORT, root, MPI_COMM_WORLD);
+#endif
+
+}
