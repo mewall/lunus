@@ -25,20 +25,28 @@ int main(int argc, char *argv[])
     *imageinpath,
     *lunusoutpath,
     *scaleoutpath,
-    *deck,
+    *deck,    
     *image_prefix,
     *image_suffix,
     *lunus_image_prefix,
     *scale_image_prefix,
     *lunus_image_dir,
     *raw_image_dir,
+    *amatrix_format,
+    *amatrix_path,
+    *xvectors_path,
     *do_integrate,
     error_msg[LINESIZE];
 
   void *buf;
 
+  struct xyzcoords *xvectors, *Hlist, *Hintlist;
+
+  struct xyzmatrix *amatrix;
+
   size_t
     i,
+    j,
     num_images;
 
   float
@@ -119,7 +127,7 @@ int main(int argc, char *argv[])
 
 	// Read input deck into buffer
 
-	num_read = lreadbuf(&deck,inputdeck);
+	num_read = lreadbuf((void **)&deck,inputdeck);
 
 	//	printf("Length of input deck = %ld\n",num_read);
 
@@ -300,6 +308,20 @@ int main(int argc, char *argv[])
 	  }
 	} else {
 	  resolution = atof(lgettag(deck,"\nresolution"));
+	}
+
+	if ((xvectors_path=lgettag(deck,"\nxvectors_path")) == NULL) {
+	  if (strcmp(do_integrate,"true")==0) {
+	    perror("Must provide xvectors_path for integration\n");
+	    exit(1);
+	  }
+	}
+
+	if ((amatrix_format=lgettag(deck,"\namatrix_format")) == NULL) {
+	  if (strcmp(do_integrate,"true")==0) {
+	    perror("Must provide amatrix_format for integration\n");
+	    exit(1);
+	  }
 	}
 
 	str_length = strlen(lgettag(deck,"\nthrshim_max"));
@@ -578,20 +600,92 @@ int main(int argc, char *argv[])
 
 	  if (strcmp(do_integrate,"true")==0) {
 	    
-	    // Copy the reference image from rank 0 to all ranks
+	    // Set up common variables on the first pass
 
 	    if (ct == 0) {
+	      // Reference image for scaling
 	      imdiff_scale_ref = linitim();
 	      lcloneim(imdiff_scale_ref,imdiff_scale);
-	      lbarrierMPI(mpiv);
+	      //	      lbarrierMPI(mpiv);
+	      //	      printf("Barrier 1 passed\n");
+	      // Use the rank 0 image
 	      lbcastImageMPI(imdiff_scale_ref->image,imdiff_scale_ref->image_length,0,mpiv);
-	      lbarrierMPI(mpiv);
+	      //	      lbarrierMPI(mpiv);
+	      //	      printf("Barrier 2 passed\n");
+	      // Read the xvectors on rank 0
+	      if (mpiv->my_id == 0) {
+		num_read = lreadbuf((void **)&xvectors,xvectors_path);
+		if (num_read != 3*imdiff->image_length*sizeof(float)) {
+		  perror("LUNUS: Number of xvectors differs from number of pixels in image.\n");
+		  exit(1);
+		}
+#ifdef DEBUG		
+		for (j=0;j<3;j++) {
+		  printf("(%f, %f, %f) ",xvectors[j].x,xvectors[j].y,xvectors[j].z);
+		}
+		printf("\n");
+#endif		
+	      }
+	      // Broadcast the xvectors to other ranks
+	      lbcastBufMPI((void *)&num_read,sizeof(size_t),0,mpiv);
+	      if (mpiv->my_id != 0) {
+		xvectors = (struct xyzcoords *)malloc(num_read);
+	      }
+	      lbcastBufMPI((void *)xvectors,num_read,0,mpiv);
+	      Hlist = (struct xyzcoords *)malloc(num_read);
+	      Hintlist = (struct xyzcoords *)malloc(num_read);
 	    }
 	  
 	    // Calculate the image scale factor
 
 	    lscaleim(imdiff_scale_ref,imdiff_scale);
 	    printf("Image %d scale factor, error = %f, %f\n",i,imdiff_scale_ref->rfile[0],imdiff_scale_ref->rfile[1]);
+
+	    // Read amatrix
+
+	    str_length = snprintf(NULL,0,amatrix_format,i);
+	    
+	    amatrix_path = (char *)malloc(str_length+1);
+	    
+	    sprintf(amatrix_path,amatrix_format,i);
+
+	    num_read = lreadbuf((void **)&amatrix,amatrix_path);
+	    
+#ifdef DEBUG		
+	    printf("(%f, %f, %f) ",amatrix->xx,amatrix->xy,amatrix->xz);
+	    printf("(%f, %f, %f) ",amatrix->yx,amatrix->yy,amatrix->yz);
+	    printf("(%f, %f, %f) ",amatrix->zx,amatrix->zy,amatrix->zz);
+	    printf("\n");
+#endif		
+
+	    struct xyzmatrix *a,at;
+
+	    // Calculate the transpose of a, to use matrix multiplication method
+
+	    a = (struct xyzmatrix *)amatrix;
+
+	    at = lmatt(*a);
+
+	    // Calculate the rotated and scaled xvectors, yielding Miller indices
+
+#ifdef DEBUG
+	    if (i == 1) {
+	    for (j = 50000;j<50010;j++) {
+	      printf("(%f %f %f) ",xvectors[j].x,xvectors[j].y,xvectors[j].z);
+	    }
+	    printf("\n");
+	    for (j=50000;j<50010;j++) {	      
+	      printf("%d ",imdiff->image[j]);
+	    }
+	    }
+#endif
+	    for (j=0; j<imdiff->image_length; j++) {
+	      Hlist[j] = 
+		lmatvecmul(*a, xvectors[j]);
+	      Hintlist[j].x = roundf(Hlist[j].x);
+	      Hintlist[j].y = roundf(Hlist[j].y);
+	      Hintlist[j].z = roundf(Hlist[j].z);
+	    }
 	  }
 	  ct++;
 	}

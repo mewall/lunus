@@ -45,3 +45,11 @@ void lbcastImageMPI(IMAGE_DATA_TYPE *data,size_t datalen, int root, MPIVARS *mpi
 #endif
 
 }
+
+void lbcastBufMPI(void *data,size_t datalen, int root, MPIVARS *mpiv) {
+
+#ifdef USE_MPI
+  mpiv->ierr = MPI_Bcast((void *)data, (int)datalen, MPI_CHAR, root, MPI_COMM_WORLD);
+#endif
+
+}
