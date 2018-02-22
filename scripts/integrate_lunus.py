@@ -35,10 +35,10 @@ def procimg(Isize1,Isize2,scale,mask_tag,A_matrix,rvec,DATA,latxdim,latydim,latz
 #  print np.dot(np.asarray(rvec),At)[0]
 #  print A_matrix*col(rvec[0])
   rvec_size = len(rvec)
+  print "SAMPLES"
+  print rvec[50000:50010]
+  print DATA[50000:50010]
   for y in xrange(y1,y2): # fast dimension
-    print "SAMPLES"
-    print rvec[50000:50010]
-    print DATA[50000:50010]
     Hlist = np.dot(np.asarray(rvec[y:rvec_size:Isize2]),At)
     Hintlist = np.rint(Hlist)
     dHlist = np.abs(Hlist - Hintlist)

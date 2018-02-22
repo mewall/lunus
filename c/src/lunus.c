@@ -35,19 +35,33 @@ int main(int argc, char *argv[])
     *amatrix_format,
     *amatrix_path,
     *xvectors_path,
-    *do_integrate,
+    *do_integrate_str,
+    *filterhkl_str,
+    *lattice_dir,
+    *diffuse_lattice_prefix,
+    *unit_cell,
     error_msg[LINESIZE];
 
   void *buf;
 
-  struct xyzcoords *xvectors, *Hlist, *Hintlist;
+  int
+    do_integrate,
+    filterhkl;
+
+  struct xyzcoords *xvectors_cctbx,*xvectors, *Hlist, *dHlist;
+
+  IJKCOORDS_DATA *ilist, *jlist, *klist;
 
   struct xyzmatrix *amatrix;
 
   size_t
+    index,
     i,
     j,
     num_images;
+
+  IJKCOORDS_DATA
+    i0, j0, k0;
 
   float
     normim_tilt_x=0.0,
@@ -87,7 +101,7 @@ int main(int argc, char *argv[])
   LAT3D
     *lat;
 
-  unsigned long
+  LATTICE_DATA_TYPE
     *latct;
 
   size_t 
@@ -220,13 +234,30 @@ int main(int argc, char *argv[])
 	  windim_ymin = atoi(lgettag(deck,"\nwindim_ymin"));
 	}
 
-	if ((do_integrate=lgettag(deck,"\ndo_integrate")) == NULL) {
-	  do_integrate = (char *)malloc(strlen("false"+1));
-	  strcpy(do_integrate,"false");
+	if ((do_integrate_str=lgettag(deck,"\ndo_integrate")) == NULL) {
+	  do_integrate_str = (char *)malloc(strlen("False"+1));
+	  strcpy(do_integrate_str,"False");
+	}
+
+	if (strcmp(do_integrate_str,"True")==0) {
+	  do_integrate=1;
+	} else {
+	  do_integrate=0;
+	}
+
+	if ((filterhkl_str=lgettag(deck,"\nfilterhkl")) == NULL) {
+	  filterhkl_str = (char *)malloc(strlen("False"+1));
+	  strcpy(filterhkl_str,"False");
+	}
+
+	if (strcmp(filterhkl_str,"True")==0) {
+	  filterhkl=1;
+	} else {
+	  filterhkl=0;
 	}
 
 	if (lgettag(deck,"\nscale_inner_radius") == NULL) {
-	  if (strcmp(do_integrate,"true")==0) {
+	  if (do_integrate!=0) {
 	    perror("Must provide scale_inner_radius for integration\n");
 	    exit(1);
 	  }
@@ -235,7 +266,7 @@ int main(int argc, char *argv[])
 	}
 
 	if (lgettag(deck,"\nscale_outer_radius") == NULL) {
-	  if (strcmp(do_integrate,"true")==0) {
+	  if (do_integrate!=0) {
 	    perror("Must provide scale_outer_radius for integration\n");
 	    exit(1);
 	  }
@@ -247,8 +278,15 @@ int main(int argc, char *argv[])
 	  pphkl = atoi(lgettag(deck,"\npphkl"));
 	}
 
+	if ((unit_cell=lgettag(deck,"\nunit_cell")) == NULL) {
+	  if (do_integrate!=0) {
+	    perror("LUNUS: Must provide unit_cell for integration\n");
+	    exit(1);
+	  }
+	}
+
 	if (lgettag(deck,"\ncella") == NULL) {
-	  if (strcmp(do_integrate,"true")==0) {
+	  if (do_integrate!=0) {
 	    perror("Must provide cella for integration\n");
 	    exit(1);
 	  }
@@ -257,7 +295,7 @@ int main(int argc, char *argv[])
 	}
 
 	if (lgettag(deck,"\ncellb") == NULL) {
-	  if (strcmp(do_integrate,"true")==0) {
+	  if (do_integrate!=0) {
 	    perror("Must provide cellb for integration\n");
 	    exit(1);
 	  }
@@ -266,7 +304,7 @@ int main(int argc, char *argv[])
 	}
 
 	if (lgettag(deck,"\ncellc") == NULL) {
-	  if (strcmp(do_integrate,"true")==0) {
+	  if (do_integrate!=0) {
 	    perror("Must provide cellc for integration\n");
 	    exit(1);
 	  }
@@ -275,7 +313,7 @@ int main(int argc, char *argv[])
 	}
 
 	if (lgettag(deck,"\nalpha") == NULL) {
-	  if (strcmp(do_integrate,"true")==0) {
+	  if (do_integrate!=0) {
 	    perror("Must provide alpha for integration\n");
 	    exit(1);
 	  }
@@ -284,7 +322,7 @@ int main(int argc, char *argv[])
 	}
 
 	if (lgettag(deck,"\nbeta") == NULL) {
-	  if (strcmp(do_integrate,"true")==0) {
+	  if (do_integrate!=0) {
 	    perror("Must provide beta for integration\n");
 	    exit(1);
 	  }
@@ -293,7 +331,7 @@ int main(int argc, char *argv[])
 	}
 
 	if (lgettag(deck,"\ngamma") == NULL) {
-	  if (strcmp(do_integrate,"true")==0) {
+	  if (do_integrate!=0) {
 	    perror("Must provide gamma for integration\n");
 	    exit(1);
 	  }
@@ -302,7 +340,7 @@ int main(int argc, char *argv[])
 	}
 
 	if (lgettag(deck,"\nresolution") == NULL) {
-	  if (strcmp(do_integrate,"true")==0) {
+	  if (do_integrate!=0) {
 	    perror("Must provide resolution for integration\n");
 	    exit(1);
 	  }
@@ -311,15 +349,29 @@ int main(int argc, char *argv[])
 	}
 
 	if ((xvectors_path=lgettag(deck,"\nxvectors_path")) == NULL) {
-	  if (strcmp(do_integrate,"true")==0) {
+	  if (do_integrate!=0) {
 	    perror("Must provide xvectors_path for integration\n");
 	    exit(1);
 	  }
 	}
 
 	if ((amatrix_format=lgettag(deck,"\namatrix_format")) == NULL) {
-	  if (strcmp(do_integrate,"true")==0) {
+	  if (do_integrate!=0) {
 	    perror("Must provide amatrix_format for integration\n");
+	    exit(1);
+	  }
+	}
+
+	if ((lattice_dir=lgettag(deck,"\nlattice_dir")) == NULL) {
+	  if (do_integrate!=0) {
+	    perror("LUNUS: Must provide lattice_dir for integration\n");
+	    exit(1);
+	  }
+	}
+
+	if ((diffuse_lattice_prefix=lgettag(deck,"\ndiffuse_lattice_prefix")) == NULL) {
+	  if (do_integrate!=0) {
+	    perror("LUNUS: Must provide diffuse_lattice_prefix for integration\n");
 	    exit(1);
 	  }
 	}
@@ -473,17 +525,38 @@ int main(int argc, char *argv[])
 	imdiff->mask_inner_radius = scale_inner_radius;
 	imdiff->mask_outer_radius = scale_outer_radius;
 
-	// Define the integration lattices, if performing integration
+	// Define the integration lattices and associated variables
+        //      if performing integration
 
-	if (strcmp(do_integrate,"true")==0) {
+	if (do_integrate!=0) {
 	  lat = linitlt();
-	  lat->xvoxels = ((int)((float)(pphkl)*cella/resolution)+1)*2;
-	  lat->yvoxels = ((int)((float)(pphkl)*cellb/resolution)+1)*2;
-	  lat->zvoxels = ((int)((float)(pphkl)*cellc/resolution)+1)*2;
+	  strcpy(lat->cell_str,unit_cell);
+	  lparsecelllt(lat);
+	  lat->cell.a *= pphkl;
+	  lat->cell.b *= pphkl;
+	  lat->cell.c *= pphkl;
+	  lat->xvoxels = ((int)(lat->cell.a/resolution)+1)*2;
+	  lat->yvoxels = ((int)(lat->cell.b/resolution)+1)*2;
+	  lat->zvoxels = ((int)(lat->cell.c/resolution)+1)*2;
+	  i0 = (IJKCOORDS_DATA)(lat->xvoxels/2. - 1.);
+	  j0 = (IJKCOORDS_DATA)(lat->yvoxels/2. - 1.);
+	  k0 = (IJKCOORDS_DATA)(lat->zvoxels/2. - 1.);
+	  lat->xscale = 1./lat->cell.a;
+	  lat->yscale = 1./lat->cell.b;
+	  lat->zscale = 1./lat->cell.c;
+	  lat->xbound.min = -i0*lat->xscale;
+	  lat->ybound.min = -j0*lat->yscale;
+	  lat->zbound.min = -k0*lat->zscale;
+	  lat->xbound.max = lat->xbound.min + ((float)lat->xvoxels-1)*lat->xscale;
+	  lat->ybound.max = lat->ybound.min + ((float)lat->yvoxels-1)*lat->yscale;
+	  lat->zbound.max = lat->zbound.min + ((float)lat->zvoxels-1)*lat->zscale;
+	  lat->origin.i = (IJKCOORDS_DATA)(-lat->xbound.min/lat->xscale + .5);
+	  lat->origin.j = (IJKCOORDS_DATA)(-lat->ybound.min/lat->yscale + .5);
+	  lat->origin.k = (IJKCOORDS_DATA)(-lat->zbound.min/lat->zscale + .5);
 	  lat->xyvoxels = lat->xvoxels * lat->yvoxels;
 	  lat->lattice_length = lat->xyvoxels*lat->zvoxels;
 	  lat->lattice = (LATTICE_DATA_TYPE *)calloc(lat->lattice_length,sizeof(LATTICE_DATA_TYPE));
-	  latct = (unsigned long *)calloc(lat->lattice_length,sizeof(unsigned long));
+	  latct = (LATTICE_DATA_TYPE *)calloc(lat->lattice_length,sizeof(LATTICE_DATA_TYPE));
 	}
 
 	// Process all of the images
@@ -495,12 +568,12 @@ int main(int argc, char *argv[])
 	  n++;
 	} 
 
-	int i0 = mpiv->my_id*n+1;
-	int i1 = (mpiv->my_id+1)*n;
+	int ib = mpiv->my_id*n+1;
+	int ie = (mpiv->my_id+1)*n;
 
 	int ct=0;
 
-	for (i=i0;i<=i1&&i<=num_images;i++) {
+	for (i=ib;i<=ie&&i<=num_images;i++) {
 
 	  str_length = snprintf(NULL,0,"%s/%s_%05d.%s",raw_image_dir,image_prefix,i,image_suffix);
 
@@ -598,7 +671,7 @@ int main(int argc, char *argv[])
 	  //	  imdiff->correction[0]=1.;
 	  //	  lcfim(imdiff);
 
-	  if (strcmp(do_integrate,"true")==0) {
+	  if (do_integrate!=0) {
 	    
 	    // Set up common variables on the first pass
 
@@ -614,31 +687,50 @@ int main(int argc, char *argv[])
 	      //	      printf("Barrier 2 passed\n");
 	      // Read the xvectors on rank 0
 	      if (mpiv->my_id == 0) {
-		num_read = lreadbuf((void **)&xvectors,xvectors_path);
+		num_read = lreadbuf((void **)&xvectors_cctbx,xvectors_path);
 		if (num_read != 3*imdiff->image_length*sizeof(float)) {
 		  perror("LUNUS: Number of xvectors differs from number of pixels in image.\n");
 		  exit(1);
 		}
 #ifdef DEBUG		
 		for (j=0;j<3;j++) {
-		  printf("(%f, %f, %f) ",xvectors[j].x,xvectors[j].y,xvectors[j].z);
+		  printf("(%f, %f, %f) ",xvectors_cctbx[j].x,xvectors_cctbx[j].y,xvectors_cctbx[j].z);
 		}
 		printf("\n");
 #endif		
+	      // Reorder the xvectors (transpose)
+
+		index = 0;
+
+		xvectors = (struct xyzcoords *)malloc(num_read);		
+
+		size_t k;
+
+		for (j=0; j<imdiff->vpixels; j++) {
+		  for (k=0; k<imdiff->hpixels; k++) {
+		    xvectors[index] = xvectors_cctbx[k*imdiff->vpixels + j];
+		    index++;
+		  }
+		}
 	      }
+
 	      // Broadcast the xvectors to other ranks
 	      lbcastBufMPI((void *)&num_read,sizeof(size_t),0,mpiv);
 	      if (mpiv->my_id != 0) {
 		xvectors = (struct xyzcoords *)malloc(num_read);
 	      }
 	      lbcastBufMPI((void *)xvectors,num_read,0,mpiv);
-	      Hlist = (struct xyzcoords *)malloc(num_read);
-	      Hintlist = (struct xyzcoords *)malloc(num_read);
+	      //	      Hlist = (struct xyzcoords *)malloc(num_read);
+	      //	      dHlist = (struct xyzcoords *)malloc(num_read);
+	      //	      ilist = (IJKCOORDS_DATA *)malloc(num_read);
+	      //	      jlist = (IJKCOORDS_DATA *)malloc(num_read);
+	      //	      klist = (IJKCOORDS_DATA *)malloc(num_read);
 	    }
 	  
 	    // Calculate the image scale factor
 
 	    lscaleim(imdiff_scale_ref,imdiff_scale);
+	    float this_scale_factor = imdiff_scale_ref->rfile[0];
 	    printf("Image %d scale factor, error = %f, %f\n",i,imdiff_scale_ref->rfile[0],imdiff_scale_ref->rfile[1]);
 
 	    // Read amatrix
@@ -669,27 +761,115 @@ int main(int argc, char *argv[])
 	    // Calculate the rotated and scaled xvectors, yielding Miller indices
 
 #ifdef DEBUG
-	    if (i == 1) {
+	    /*	    if (i == 1) {
 	    for (j = 50000;j<50010;j++) {
 	      printf("(%f %f %f) ",xvectors[j].x,xvectors[j].y,xvectors[j].z);
 	    }
 	    printf("\n");
 	    for (j=50000;j<50010;j++) {	      
-	      printf("%d ",imdiff->image[j]);
+	      printf("%d ",imdiff_scale->image[j]);
 	    }
+	    printf("\n");
 	    }
+	    */
 #endif
+
+	    // Collect the image data into the lattice
+
+	    size_t data_added=0;
+	    struct xyzcoords H, dH;
+	    IJKCOORDS_DATA ii,jj,kk;
+	    index = 0;
 	    for (j=0; j<imdiff->image_length; j++) {
-	      Hlist[j] = 
-		lmatvecmul(*a, xvectors[j]);
-	      Hintlist[j].x = roundf(Hlist[j].x);
-	      Hintlist[j].y = roundf(Hlist[j].y);
-	      Hintlist[j].z = roundf(Hlist[j].z);
+	      H = 
+		lmatvecmul(at, xvectors[j]);
+#ifdef DEBUG
+	      if (j<10) {
+		printf("H[%d] = (%f, %f, %f)\n",j,H.x,H.y,H.z);
+	      }
+#endif
+	      dH.x = fabs(H.x - roundf(H.x));
+	      dH.y = fabs(H.y - roundf(H.y));
+	      dH.z = fabs(H.z - roundf(H.z));
+	      if (filterhkl==0 || dH.x>=0.25 || dH.y>=0.25 || dH.z>=0.25) {
+		ii = (IJKCOORDS_DATA)roundf(H.x*(float)pphkl) + i0;
+		jj = (IJKCOORDS_DATA)roundf(H.y*(float)pphkl) + j0;
+		kk = (IJKCOORDS_DATA)roundf(H.z*(float)pphkl) + k0;
+		if (ii>=0 && ii<lat->xvoxels && jj>=0 && jj<lat->yvoxels &&
+		    kk>=0 && kk<lat->zvoxels && imdiff_scale->image[index]>0 &&
+		    imdiff_scale->image[index]!=imdiff->ignore_tag) {
+		  size_t latidx = kk*lat->xyvoxels + jj*lat->xvoxels + ii;
+		  if (filterhkl!=0) {
+		    lat->lattice[latidx] += 
+		      (LATTICE_DATA_TYPE)imdiff->image[index]
+		      * imdiff->correction[index]
+		      * this_scale_factor;
+		  } else {
+		    lat->lattice[latidx] += 
+		      (LATTICE_DATA_TYPE)imdiff_scale->image[index]
+		      * this_scale_factor;
+		  }
+		  latct[latidx] += 1.;
+		  data_added += 1;
+		}
+	      }
+	      index++;
 	    }
+#ifdef DEBUG
+	    printf("data_added = %ld\n",data_added);
+#endif
 	  }
 	  ct++;
 	}
 
+	if (do_integrate != 0) {
+
+	  // Merge the data and counts
+
+	  LATTICE_DATA_TYPE *latsum, *latctsum;
+	  
+	  if (mpiv->my_id == 0) {
+	    latsum = (LATTICE_DATA_TYPE *)calloc(lat->lattice_length,sizeof(LATTICE_DATA_TYPE));
+	    latctsum = (LATTICE_DATA_TYPE *)calloc(lat->lattice_length,sizeof(LATTICE_DATA_TYPE));
+	  }
+	  
+	  lreduceSumLatticeMPI(lat->lattice,latsum,lat->lattice_length,0,mpiv);
+	  lreduceSumLatticeMPI(latct,latctsum,lat->lattice_length,0,mpiv);
+	  
+	  // Calculate the mean and output the result
+	  
+	  if (mpiv->my_id == 0) {
+	    for (j=0; j<lat->lattice_length; j++) {
+	      if (latct[j] != 0) {
+		lat->lattice[j] = latsum[j]/latct[j];
+	      } else {
+		lat->lattice[j] = lat->mask_tag;
+	      }
+	    }
+	    
+	    // output the result
+	    
+	    str_length = snprintf(NULL,0,"%s/%s.lat",lattice_dir,diffuse_lattice_prefix);
+	    
+	    char *latticeoutpath;
+	    
+	    latticeoutpath = (char *)malloc(str_length+1);
+	    
+	    sprintf(latticeoutpath,"%s/%s.lat",lattice_dir,diffuse_lattice_prefix);
+	    
+	    //	  printf("imageinpath = %s\n",imageinpath);
+	    
+	    FILE *latticeout;
+	    
+	    if ( (latticeout = fopen(latticeoutpath,"wb")) == NULL ) {
+	      printf("Can't open %s.",latticeoutpath);
+	      exit(1);
+	    }
+	    lat->outfile=latticeout;
+	    lwritelt(lat);
+	    fclose(latticeout);
+	  }
+	}
 	lfinalMPI(mpiv);
 
 }

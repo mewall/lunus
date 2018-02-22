@@ -835,6 +835,7 @@ int lreadmap(CCP4MAP *map);
 int lreadrf(DIFFIMAGE *imdiff);
 int lreadvtk(LAT3D *lat);
 int lreadxs(XTALSTRUCT *xs);
+void lreduceSumLatticeMPI(LATTICE_DATA_TYPE *data,LATTICE_DATA_TYPE *target,size_t datalen, int root, MPIVARS *mpiv);
 int lresizelt(LAT3D *lat1, LAT3D *lat2);
 int lrevyim(DIFFIMAGE *imdiff);
 int lrf2lt(LAT3D *lat);
