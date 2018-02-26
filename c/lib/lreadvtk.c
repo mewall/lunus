@@ -68,9 +68,9 @@ int lreadvtk(LAT3D *lat)
     lparsecelllt(lat); // parse the cell string and place results in lat->cell,
                      //    lat->astar, lat->bstar, and lat->cstar
     //        printf("unit_cell=%s\n",lat->cell_str);
-    printf("a,b,c,alpha,beta,gamma=%f,%f,%f,%f,%f,%f\n",lat->cell.a,lat->cell.b,lat->cell.c,lat->cell.alpha,lat->cell.beta,lat->cell.gamma);
-    printf("a = (%f,%f,%f), b = (%f,%f,%f), c = (%f,%f,%f)\n",lat->a.x,lat->a.y,lat->a.z,lat->b.x,lat->b.y,lat->b.z,lat->c.x,lat->c.y,lat->c.z);
-    printf("astar = (%f,%f,%f), bstar = (%f,%f,%f), cstar = (%f,%f,%f)\n",lat->astar.x,lat->astar.y,lat->astar.z,lat->bstar.x,lat->bstar.y,lat->bstar.z,lat->cstar.x,lat->cstar.y,lat->cstar.z);
+    //    printf("a,b,c,alpha,beta,gamma=%f,%f,%f,%f,%f,%f\n",lat->cell.a,lat->cell.b,lat->cell.c,lat->cell.alpha,lat->cell.beta,lat->cell.gamma);
+    //    printf("a = (%f,%f,%f), b = (%f,%f,%f), c = (%f,%f,%f)\n",lat->a.x,lat->a.y,lat->a.z,lat->b.x,lat->b.y,lat->b.z,lat->c.x,lat->c.y,lat->c.z);
+    //    printf("astar = (%f,%f,%f), bstar = (%f,%f,%f), cstar = (%f,%f,%f)\n",lat->astar.x,lat->astar.y,lat->astar.z,lat->bstar.x,lat->bstar.y,lat->bstar.z,lat->cstar.x,lat->cstar.y,lat->cstar.z);
   }
 
   if (strstr(inl2,"space_group=")!=NULL) {
