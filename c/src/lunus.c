@@ -781,11 +781,10 @@ int main(int argc, char *argv[])
 	    IJKCOORDS_DATA ii,jj,kk;
 	    index = 0;
 	    for (j=0; j<imdiff->image_length; j++) {
-	      H = 
-		lmatvecmul(at, xvectors[j]);
+	      H = lmatvecmul(at, xvectors[j]);
 #ifdef DEBUG
 	      if (j<10) {
-		printf("H[%d] = (%f, %f, %f)\n",j,H.x,H.y,H.z);
+		printf("Image %d, H[%d] = (%f, %f, %f)\n",i,j,H.x,H.y,H.z);
 	      }
 #endif
 	      dH.x = fabs(H.x - roundf(H.x));
@@ -822,26 +821,39 @@ int main(int argc, char *argv[])
 	  ct++;
 	}
 
+#ifdef DEBUG
+	// Count number of data points in the lattice
+	int num_data_points=0;
+	float sum_data_points=0.0;
+
+	for (j=0;j<lat->lattice_length;j++) {
+	  if (latct[j] != 0) {
+	    if (lat->lattice[j]/latct[j] < 32767.) {
+	      num_data_points++;
+	      sum_data_points += lat->lattice[j]/latct[j];
+	    }
+	  }
+	}
+	printf("num_data_points=%d, mean_data_points=%f\n",num_data_points,sum_data_points/(float)num_data_points);
+#endif
 	if (do_integrate != 0) {
 
 	  // Merge the data and counts
 
 	  LATTICE_DATA_TYPE *latsum, *latctsum;
 	  
-	  if (mpiv->my_id == 0) {
-	    latsum = (LATTICE_DATA_TYPE *)calloc(lat->lattice_length,sizeof(LATTICE_DATA_TYPE));
-	    latctsum = (LATTICE_DATA_TYPE *)calloc(lat->lattice_length,sizeof(LATTICE_DATA_TYPE));
-	  }
+	  latsum = (LATTICE_DATA_TYPE *)calloc(lat->lattice_length,sizeof(LATTICE_DATA_TYPE));
+	  latctsum = (LATTICE_DATA_TYPE *)calloc(lat->lattice_length,sizeof(LATTICE_DATA_TYPE));
 	  
 	  lreduceSumLatticeMPI(lat->lattice,latsum,lat->lattice_length,0,mpiv);
 	  lreduceSumLatticeMPI(latct,latctsum,lat->lattice_length,0,mpiv);
 	  
-	  // Calculate the mean and output the result
+	  // Calculate the mean on the root rank and output the result
 	  
 	  if (mpiv->my_id == 0) {
 	    for (j=0; j<lat->lattice_length; j++) {
-	      if (latct[j] != 0) {
-		lat->lattice[j] = latsum[j]/latct[j];
+	      if (latctsum[j] != 0) {
+		lat->lattice[j] = latsum[j]/latctsum[j];
 	      } else {
 		lat->lattice[j] = lat->mask_tag;
 	      }

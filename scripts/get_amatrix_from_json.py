@@ -41,4 +41,5 @@ if __name__=="__main__":
 #  A_matrix = np.linalg.inv(np.asarray(crystal.get_A()).reshape((3,3)))
   At = np.asarray(A_matrix.transpose()).reshape((3,3))
 
-  np.save(amatrix,At)
+#  np.save(amatrix,At)
+  At.astype('float32').tofile(amatrix)

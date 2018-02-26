@@ -29,7 +29,8 @@ if __name__=="__main__":
   try:
     datasizeidx = [a.find("datasize")==0 for a in args].index(True)
   except ValueError:
-    raise ValueError,"Output datasze file must be specified."
+    print "You really should supply datasize, but ok"
+#    raise ValueError,"Output datasze file must be specified."
   else:
     datasize = args.pop(datasizeidx).split("=")[1]
 
@@ -54,7 +55,8 @@ if __name__=="__main__":
     # Generate x vectors
   x = np.asarray(s1 - beam.get_s0())
     
-  DATAsize = np.asarray(detector[0].get_image_size())
+#  DATAsize = np.asarray(detector[0].get_image_size())
 
-  np.save(xvectors,x)
-  np.save(datasize,DATAsize)
+#  np.save(xvectors,x)
+#  np.save(datasize,DATAsize)
+  x.astype('float32').tofile(xvectors)

@@ -58,6 +58,8 @@ void lreduceSumLatticeMPI(LATTICE_DATA_TYPE *data,LATTICE_DATA_TYPE *target,size
 
 #ifdef USE_MPI
   mpiv->ierr = MPI_Reduce((void *)data, (void *)target,(int)datalen, MPI_FLOAT, MPI_SUM, root, MPI_COMM_WORLD);
+#else
+  memcpy((void *)target,(void *)data,(size_t)datalen*sizeof(MPI_FLOAT));
 #endif
 
 }
