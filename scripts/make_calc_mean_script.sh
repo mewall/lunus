@@ -24,6 +24,10 @@ diffuse_glob=`printf "%s/%s_sum_diffuse_*.npz" $lattice_dir $diffuse_lattice_pre
 counts_glob=`printf "%s/%s_sum_counts_*.npz" $lattice_dir $diffuse_lattice_prefix`
 mean_lattice_file=`printf "%s/%s_mean.vtk" $lattice_dir $diffuse_lattice_prefix`
 
+if [ -z ${setup_python+x} ]; then
+  setup_python="module load python/2.7-anaconda-4.1.1"
+fi
+
 cat > $script_path<<EOF
 
 #!/bin/bash                         #-- what is the language of this shell
@@ -57,7 +61,7 @@ cat > $script_path<<EOF
 date
 hostname
 
-module load python/2.7-anaconda-4.1.1
+$setup_python
 
 #qstat -j $JOB_ID                                  # This is useful for debugging and usage purposes,
 							# e.g. "did my job exceed its memory request?"

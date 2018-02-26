@@ -25,6 +25,18 @@ struct xyzmatrix lrotmat(float rotx, float roty, float rotz)
 
 }
 
+struct xyzmatrix lmatt(struct xyzmatrix a)
+{
+  struct xyzmatrix at;
+
+  at.xx = a.xx; at.xy = a.yx; at.xz = a.zx;
+  at.yx = a.xy; at.yy = a.yy; at.yz = a.zy;
+  at.zx = a.xz; at.zy = a.yz; at.zz = a.zz;
+
+  return at;
+
+}
+
 struct xyzmatrix lmatmul(struct xyzmatrix a, struct xyzmatrix b)
 {
   struct xyzmatrix c;

@@ -9,7 +9,7 @@
 #include<mwmask.h>
 #include<string.h>
 
-const char * lgettag(const char *target,const char *tag)
+char * lgettag(const char *target,const char *tag)
 {
   char *pos_begin,*pos_end,*pos_tmp;
   char *val;

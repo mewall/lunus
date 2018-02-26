@@ -8,6 +8,9 @@
 			65535
 */
 
+#ifndef __MWMASK_H
+
+#define __MWMASK_H
 
 /*
  * Includes:
@@ -736,6 +739,9 @@ int lavgpolim(DIFFIMAGE *imdiff);
 int lavgsqim(DIFFIMAGE *imdiff);
 int lavsqrim(DIFFIMAGE *imdiff);
 int lavsqrlt(LAT3D *lat);
+void lbarrierMPI(MPIVARS *mpiv);
+void lbcastBufMPI(void *data,size_t datalen, int root, MPIVARS *mpiv);
+void lbcastImageMPI(IMAGE_DATA_TYPE *data,size_t datalen, int root, MPIVARS *mpiv);
 int lbeamim(DIFFIMAGE *imdiff);
 size_t lbufcompress(const int* values, const size_t sz, char *packed);
 void lbufuncompress(const char* packed, const size_t packed_sz, int* values, size_t values_sz);
@@ -743,6 +749,7 @@ int lbuttim(DIFFIMAGE *imdiff);
 struct fom lcalcrsf(char *hklfname, LAT3D *lat1,LAT3D *lat2);
 int lccrlt(LAT3D *lat1, LAT3D *lat2);
 int lchbyte(void *ptr, size_t packet_size, size_t list_length);
+int lcloneim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lconstim(DIFFIMAGE *imdiff);
 int lconstlt(LAT3D *lat);
 int lconstrf(DIFFIMAGE *imdiff);
@@ -776,7 +783,7 @@ const char * lgetcbftag(const char *target,const char *tag);
 int lgetmat(DIFFIMAGE *imdiff);
 int lgetovld(DIFFIMAGE *imdiff);
 int lgetpks(DIFFIMAGE *imdiff);
-const char * lgettag(const char *target,const char *tag);
+char * lgettag(const char *target,const char *tag);
 DIFFIMAGE *linitim(void);
 LAT3D *linitlt(void);
 CCP4MAP *linitmap(void);
@@ -790,6 +797,7 @@ int lllmdclt(LAT3D *lat);
 int lllmlt(LAT3D *lat);
 struct xyzmatrix lmatinv(struct xyzmatrix a);
 struct xyzmatrix lmatmul(struct xyzmatrix a, struct xyzmatrix b);
+struct xyzmatrix lmatt(struct xyzmatrix a);
 int lmedim(DIFFIMAGE *imdiff);
 size_t lmin(size_t arg1, size_t arg2);
 int lminim(DIFFIMAGE *imdiff);
@@ -818,6 +826,7 @@ int lpunch(DIFFIMAGE *imdiff);
 int lpunchim(DIFFIMAGE *imdiff);
 int lratioim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lrbtlt(LAT3D *lat);
+size_t lreadbuf(void **buf,const char *fname);
 int lreadcube(CCP4MAP *map);
 int lreadhkl(LAT3D *lat,LAT3D *tmpl);
 int lreadim(DIFFIMAGE *imdiff);
@@ -826,6 +835,7 @@ int lreadmap(CCP4MAP *map);
 int lreadrf(DIFFIMAGE *imdiff);
 int lreadvtk(LAT3D *lat);
 int lreadxs(XTALSTRUCT *xs);
+void lreduceSumLatticeMPI(LATTICE_DATA_TYPE *data,LATTICE_DATA_TYPE *target,size_t datalen, int root, MPIVARS *mpiv);
 int lresizelt(LAT3D *lat1, LAT3D *lat2);
 int lrevyim(DIFFIMAGE *imdiff);
 int lrf2lt(LAT3D *lat);
@@ -918,3 +928,5 @@ int lLaue8(LAT3D *lat);
 int lLaue9(LAT3D *lat);
 int lLaue10(LAT3D *lat);
 int lLaue11(LAT3D *lat);
+
+#endif

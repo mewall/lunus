@@ -29,7 +29,7 @@ namespace lunus {
 
   class LunusDIFFIMAGE {
   protected:
-    DIFFIMAGE *imdiff;
+    DIFFIMAGE *imdiff, *imdiff_ref;
 
   public:
     inline  LunusDIFFIMAGE() {
@@ -66,10 +66,10 @@ namespace lunus {
       lthrshim(imdiff);
     }
 
-    inline void LunusPolarim(float bxp, float byp, float dist, float polar, float offset, float px) {
+    inline void LunusPolarim(float bx, float by, float dist, float polar, float offset, float px) {
       printf("LunusPolarim\n");
-      imdiff->origin.c = bxp;
-      imdiff->origin.r = byp;
+      imdiff->beam_mm.x = bx;
+      imdiff->beam_mm.y = by;
       imdiff->distance_mm = dist;
       imdiff->polarization = polar;
       imdiff->polarization_offset = offset;
@@ -93,6 +93,41 @@ namespace lunus {
       lmodeim(imdiff);
     }
 
+    inline scitbx::af::flex_double LunusScaleim(float bx, float by, float px, int inner_radius, int outer_radius) {
+      imdiff_ref->mask_inner_radius = inner_radius;
+      imdiff_ref->mask_outer_radius = outer_radius;
+      imdiff_ref->beam_mm.x = bx;
+      imdiff_ref->beam_mm.y = by;
+      imdiff_ref->pixel_size_mm = px;
+      imdiff->mask_inner_radius = inner_radius;
+      imdiff->mask_outer_radius = outer_radius;
+      imdiff->beam_mm.x = bx;
+      imdiff->beam_mm.y = by;
+      imdiff->pixel_size_mm = px;
+      scitbx::af::flex_double scale_info(2);
+      double* begin=scale_info.begin();
+      printf("LunusScaleim\n");
+      if (imdiff_ref == NULL) {
+	printf("LunusScaleim: imdiff_ref not defined. Need to define reference using set_reference()\n");
+	exit(1);
+      }
+      if (imdiff_ref->image_length != imdiff->image_length) {
+	printf("LunusScaleim: imdiff_ref image is different length than imdiff. Exiting.\n");
+	exit(1);
+      }
+      /*
+      lscaleim(imdiff,imdiff_ref);
+      begin[0] = imdiff->rfile[0];
+      begin[1] = imdiff->rfile[1];
+      */
+      lscaleim(imdiff_ref,imdiff);
+      begin[0] = imdiff_ref->rfile[0];
+      begin[1] = imdiff_ref->rfile[1];
+      //      printf("Scale, Error = %f, %f\n",imdiff->rfile[0],imdiff->rfile[1]);
+      return scale_info;
+    }
+	
+
     inline void set_image(scitbx::af::flex_int data) {
       int* begin=data.begin();
       std::size_t size=data.size();
@@ -102,6 +137,7 @@ namespace lunus {
       imdiff->hpixels = fast;
       imdiff->vpixels = slow;
       imdiff->image = (IMAGE_DATA_TYPE *)realloc(imdiff->image,imdiff->image_length*sizeof(IMAGE_DATA_TYPE));
+      imdiff->value_offset = 0;
       std::size_t ct=0;
       for (int i = 0;i<imdiff->image_length;i++) {
 	if (begin[i]<0) {
@@ -114,6 +150,29 @@ namespace lunus {
       printf("Converted image size %ld,%ld with %ld negative pixel values.\n",fast,slow,ct);
     }
 
+    inline void set_reference() {
+      //      if (imdiff_ref != NULL) {
+      //	lfreeim(imdiff_ref);
+      //      }
+      imdiff_ref = linitim();
+      imdiff_ref->image_length = imdiff->image_length;
+      imdiff_ref->hpixels = imdiff->hpixels;
+      imdiff_ref->vpixels = imdiff->vpixels;
+      imdiff_ref->pixel_size_mm = imdiff->pixel_size_mm;
+      imdiff_ref->beam_mm.x = imdiff->beam_mm.x;
+      imdiff_ref->beam_mm.y = imdiff->beam_mm.y;
+      imdiff_ref->image = (IMAGE_DATA_TYPE *)realloc(imdiff_ref->image,imdiff_ref->image_length*sizeof(IMAGE_DATA_TYPE));
+      memcpy((void *)imdiff_ref->image,(void *)imdiff->image,imdiff->image_length*sizeof(IMAGE_DATA_TYPE));
+      int ct=0;
+      for (int i = 0;i<imdiff_ref->image_length;i++) {
+	if (imdiff_ref->image[i] == imdiff_ref->ignore_tag) {
+	  ct++;
+	}
+      }
+      printf("Number of ignored pixels = %d\n",ct);
+    }
+
+
     inline scitbx::af::flex_double LunusRadialAvgim(float bx, float by, float px) {
       imdiff->beam_mm.x = bx;
       imdiff->beam_mm.y = by;
@@ -125,12 +184,12 @@ namespace lunus {
       std::size_t ct=0;
       imdiff->rfile = (RFILE_DATA_TYPE *)realloc(imdiff->rfile,imdiff->rfile_length*sizeof(RFILE_DATA_TYPE));
       for (int i = 0;i<imdiff->rfile_length;i++) {
-  if (imdiff->rfile[i] == imdiff->ignore_tag) {
-    begin[i] = -1;
-    ct++;
-  } else {
-    begin[i] = imdiff->rfile[i];
-  }
+	if (imdiff->rfile[i] == imdiff->ignore_tag) {
+	  begin[i] = -1;
+	  ct++;
+	} else {
+	  begin[i] = imdiff->rfile[i];
+	}
       }
       printf("Calculated radial average for %ld bins, with %ld empty bins.\n",rs,ct);
       return data;
@@ -294,6 +353,7 @@ namespace boost_python { namespace {
     class_<lunus::LunusDIFFIMAGE>("LunusDIFFIMAGE",init<>())
       .def("get_image_data_type_size",&lunus::LunusDIFFIMAGE::get_image_data_type_size)
       .def("set_image",&lunus::LunusDIFFIMAGE::set_image)
+      .def("set_reference",&lunus::LunusDIFFIMAGE::set_reference)
       .def("get_image",&lunus::LunusDIFFIMAGE::get_image)
       .def("LunusPunchim",&lunus::LunusDIFFIMAGE::LunusPunchim)
       .def("LunusWindim",&lunus::LunusDIFFIMAGE::LunusWindim)
@@ -302,6 +362,7 @@ namespace boost_python { namespace {
       .def("LunusNormim",&lunus::LunusDIFFIMAGE::LunusNormim)
       .def("LunusModeim",&lunus::LunusDIFFIMAGE::LunusModeim)
       .def("LunusRadialAvgim",&lunus::LunusDIFFIMAGE::LunusRadialAvgim)
+      .def("LunusScaleim",&lunus::LunusDIFFIMAGE::LunusScaleim)
     ;
 
     class_<lunus::LunusLAT3D>("LunusLAT3D",init<>())
