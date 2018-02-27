@@ -113,6 +113,8 @@ int lwriteim(DIFFIMAGE *imdiff)
 	return_value = 1;
 	sprintf(imdiff->error_msg,"\nCouldn't write all of CBF footer.\n\n");
       }
+      free(image_cbf);
+      free(packed);
     }
   }
   return(return_value);

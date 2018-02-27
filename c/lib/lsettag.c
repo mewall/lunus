@@ -72,9 +72,8 @@ int lsetcbftag(char **target,size_t *target_length, const char *tag,const char *
   tail_length = (size_t)*target_length-((size_t)pos_end-(size_t)*target);
   tail = (char *)malloc(sizeof(char)*tail_length);
   memcpy(tail,pos_end,tail_length);
-  free(*target);
   *target_length += len_val - len;
-  *target = (char *)malloc(*target_length);
+  *target = (char *)realloc(*target,*target_length);
   memcpy(*target,head,head_length);
   //  printf("val = %s\n",val);
   memcpy(*target+head_length,val,len_val);

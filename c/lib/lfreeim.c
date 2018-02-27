@@ -28,11 +28,7 @@ int lfreeim(DIFFIMAGE *imdiff)
   free((struct rccorrds *)imdiff->overload);
   free((struct xycoords *)imdiff->peak);
   free((WEIGHTS_DATA_TYPE *)imdiff->weights);
-  for(i=0; i<MAX_RFILE_LENGTH; i++) {
-    if (imdiff->rdata[i].allocate_flag == VALUE_ALLOCATED) {
-      free((IMAGE_DATA_TYPE *)imdiff->rdata[i].value);
-    }
-  }
-  free((RDATA_DATA_TYPE *)imdiff->rdata);
+  free(imdiff->correction);
+  //  free(imdiff->footer);
   free((DIFFIMAGE *)imdiff);
 }

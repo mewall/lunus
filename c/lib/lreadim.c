@@ -122,6 +122,7 @@ int lreadim(DIFFIMAGE *imdiff)
       for (i=0;i<imdiff->image_length;i++) {
 	imdiff->image[i]=(IMAGE_DATA_TYPE)imbuf[i];
       }
+      free(imbuf);
     } else {
       if (strstr(buf,"###CBF")!=NULL) {
 	  //	  printf("CBF format\n");
@@ -216,8 +217,7 @@ int lreadim(DIFFIMAGE *imdiff)
 	  size_t buf_length, padding;
 	  buf_length = atol(lgetcbftag(imdiff->header,"X-Binary-Size:"));
 	  padding = atol(lgetcbftag(imdiff->header,"X-Binary-Size-Padding:"));
-	  free(buf);
-	  buf = (char *)malloc(buf_length+padding);
+	  buf = (char *)realloc(buf,buf_length+padding);
 	  num_read = fread(buf, sizeof(char), buf_length,
 			   imdiff->infile);
 	  // Read the footer
@@ -227,6 +227,7 @@ int lreadim(DIFFIMAGE *imdiff)
 	  end_pos = ftell(imdiff->infile); // get current file pointer
 	  fseek(imdiff->infile,this_pos,SEEK_SET);
 	  imdiff->footer_length = (size_t)(end_pos-this_pos);
+	  if (imdiff->footer != NULL) free(imdiff->footer);
 	  imdiff->footer = (char *)malloc(buf_length);
 	  num_read = fread(imdiff->footer, sizeof(char), imdiff->footer_length,
 			   imdiff->infile);
@@ -263,7 +264,7 @@ int lreadim(DIFFIMAGE *imdiff)
 	  //	  printf("Uncompress, buf_length = %ld\n",buf_length);
 	  lbufuncompress(buf,buf_length,image_cbf,imdiff->image_length);
 	  // Convert image to imdiff format
-	  free(imdiff->image);
+	  if (imdiff->image != NULL) free(imdiff->image);
 	  imdiff->image = (IMAGE_DATA_TYPE *)malloc(sizeof(IMAGE_DATA_TYPE)*imdiff->image_length);
 	  for (i=0;i<imdiff->image_length;i++) {
 	    if (image_cbf[i] < 0 || image_cbf[i] > IMAGE_MAX) {
@@ -272,11 +273,14 @@ int lreadim(DIFFIMAGE *imdiff)
 	      imdiff->image[i] = (IMAGE_DATA_TYPE)image_cbf[i];
 	    }
 	  }
+          free(image_cbf);
 	  //	  printf("Read .cbf image\n");
 	}
     }
   }
    
+  imdiff->correction = (float *)realloc(imdiff->correction,imdiff->image_length*sizeof(float));
+  free(buf);
 
   return(0);
 }

@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
     do_integrate,
     filterhkl;
 
-  struct xyzcoords *xvectors_cctbx,*xvectors, *Hlist, *dHlist;
+  struct xyzcoords *xvectors_cctbx = NULL,*xvectors = NULL, *Hlist, *dHlist;
 
   IJKCOORDS_DATA *ilist, *jlist, *klist;
 
@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
     pphkl = 1;
 
   DIFFIMAGE 
-    *imdiff, *imdiff_corrected, *imdiff_scale, *imdiff_scale_ref;
+    *imdiff, *imdiff_corrected = NULL, *imdiff_scale = NULL, *imdiff_scale_ref = NULL;
 
   LAT3D
     *lat;
@@ -555,7 +555,9 @@ int main(int argc, char *argv[])
 	  lat->origin.k = (IJKCOORDS_DATA)(-lat->zbound.min/lat->zscale + .5);
 	  lat->xyvoxels = lat->xvoxels * lat->yvoxels;
 	  lat->lattice_length = lat->xyvoxels*lat->zvoxels;
+	  if (lat->lattice != NULL) free(lat->lattice);
 	  lat->lattice = (LATTICE_DATA_TYPE *)calloc(lat->lattice_length,sizeof(LATTICE_DATA_TYPE));
+	  if (latct != NULL) free(latct);
 	  latct = (LATTICE_DATA_TYPE *)calloc(lat->lattice_length,sizeof(LATTICE_DATA_TYPE));
 	}
 
@@ -608,14 +610,13 @@ int main(int argc, char *argv[])
 
 	  // Calculate correction factor
 
-	  imdiff->correction = (float *)malloc(imdiff->image_length*sizeof(float));
 	  imdiff->correction[0]=correction_factor_scale;
-	  lcfim(imdiff);
-	  
+	  lcfim(imdiff);	  
 
 	  // Write masked and corrected image
 
-	  imdiff_corrected = linitim();
+	  if (imdiff_corrected != NULL) lfreeim(imdiff_corrected);
+          imdiff_corrected = linitim();
 	  lcloneim(imdiff_corrected,imdiff);
 	  if (lmulcfim(imdiff_corrected) != 0) {
 	    perror(imdiff_corrected->error_msg);
@@ -642,7 +643,8 @@ int main(int argc, char *argv[])
 
 	  // Mode filter to create image to be used for scaling
 
-	  imdiff_scale = linitim();
+	  if (imdiff_scale != NULL) lfreeim(imdiff_scale);
+          imdiff_scale = linitim();
 	  lcloneim(imdiff_scale,imdiff_corrected);
 
 	  lmodeim(imdiff_scale);
@@ -702,6 +704,8 @@ int main(int argc, char *argv[])
 
 		index = 0;
 
+		if (xvectors != NULL) free(xvectors);
+
 		xvectors = (struct xyzcoords *)malloc(num_read);		
 
 		size_t k;
@@ -717,6 +721,7 @@ int main(int argc, char *argv[])
 	      // Broadcast the xvectors to other ranks
 	      lbcastBufMPI((void *)&num_read,sizeof(size_t),0,mpiv);
 	      if (mpiv->my_id != 0) {
+		if (xvectors != NULL) free(xvectors);
 		xvectors = (struct xyzcoords *)malloc(num_read);
 	      }
 	      lbcastBufMPI((void *)xvectors,num_read,0,mpiv);

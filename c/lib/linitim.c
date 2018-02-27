@@ -92,12 +92,9 @@ DIFFIMAGE *linitim(void)
   imdiff->weights = (WEIGHTS_DATA_TYPE *)malloc(sizeof(WEIGHTS_DATA_TYPE)*
 						(MAX_WEIGHTS_DIMENSION*
 						 MAX_WEIGHTS_DIMENSION + 1));
-  imdiff->rdata = (RDATA_DATA_TYPE *)
-    malloc(sizeof(RDATA_DATA_TYPE) * MAX_RFILE_LENGTH);
   if (!imdiff->rfile || !imdiff->imscaler || !imdiff->imoffsetr || 
       !imdiff->mask || !imdiff->image || !imdiff->header || 
-      !imdiff->overload || !imdiff->peak || !imdiff->weights ||
-      !imdiff->rdata) {
+      !imdiff->overload || !imdiff->peak || !imdiff->weights) {
     printf("\nLINITIM:  Unable to allocate all memory.\n");
     imdiff = NULL;
     goto CloseShop;
@@ -105,10 +102,6 @@ DIFFIMAGE *linitim(void)
   
   for(i=0; i<MAX_WEIGHTS_DIMENSION*MAX_WEIGHTS_DIMENSION; i++) {
     imdiff->weights[i] = 1.;
-  }
-  for(i=0; i<MAX_RFILE_LENGTH; i++) {
-    imdiff->rdata[i].count = 0;
-    imdiff->rdata[i].allocate_flag = !VALUE_ALLOCATED;
   }
   
  CloseShop:

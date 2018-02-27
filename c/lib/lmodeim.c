@@ -77,7 +77,7 @@ int lmodeim(DIFFIMAGE *imdiff)
   for (j=0; j<imdiff->vpixels; j++) {
     size_t i;
     size_t *count;
-    count = (size_t *)calloc(UINT_MAX,sizeof(size_t));
+    count = (size_t *)calloc(MAX_IMAGE_DATA_VALUE,sizeof(size_t));
     unsigned int *count_pointer;
     count_pointer = (unsigned int *)calloc((imdiff->mode_height+1) *
 				     (imdiff->mode_width+1), 
@@ -101,7 +101,8 @@ int lmodeim(DIFFIMAGE *imdiff)
 	      size_t imd_index;
 	      imd_index = index + n*imdiff->hpixels + m;
 	      if ((imdiff->image[imd_index] != imdiff->overload_tag) &&
-		  (imdiff->image[imd_index] != imdiff->ignore_tag)) {
+		  (imdiff->image[imd_index] != imdiff->ignore_tag) &&
+                  (imdiff->image[imd_index] < MAX_IMAGE_DATA_VALUE)) {
 		//		count_pointer[l]=(imdiff->image[imd_index] - 
 		//				    (imdiff->image[imd_index] % 
 		//				     imdiff->mode_binsize) + 32768);		
