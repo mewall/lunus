@@ -42,7 +42,7 @@ int lwritecube(LAT3D *lat)
     for (j=0;j<lat->yvoxels;j++) {
       for (i=0;i<lat->xvoxels;i++) {
 	index = lat->xyvoxels*k+lat->xvoxels*j+i;
-	fprintf(lat->outfile, "%12.6g",lat->lattice[index]);
+	fprintf(lat->outfile, "%12.5g ",lat->lattice[index]);
 	if (i%6 == 5) fprintf(lat->outfile,"\n");
 	ct++;
       }
