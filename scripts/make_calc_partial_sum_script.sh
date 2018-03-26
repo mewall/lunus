@@ -60,7 +60,18 @@ cat > $script_path<<EOF
 
 date
 hostname
-echo "PMI_RANK = \$PMI_RANK"
+
+if [[ -z "\${PMI_RANK}" ]]; then
+  if [[ -z "\${SLURM_PROCID}" ]]; then
+    echo "Cannot determine rank. Exiting"
+    exit
+  else
+    this_rank="\${SLURM_PROCID}"
+  fi
+else
+  this_rank="\${PMI_RANK}"
+fi
+echo "this_rank = \$this_rank"
 
 $setup_python
 
@@ -93,7 +104,7 @@ else
 
 cat >>$script_path<<EOF
 
-python $lunus_dir/scripts/calc_partial_sum_npz.py cell.a=$cella cell.b=$cellb cell.c=$cellc diffuse.lattice.resolution=$resolution diffuse.lattice.type=npz diffuse.lattice.glob=$diffuse_glob counts.lattice.glob=$counts_glob target_cell=$cella,$cellb,$cellc,$alpha,$beta,$gamma target_sg=$spacegroup output.fname.base=$sum_fname_base pphkl=$pphkl filterhkl=$filterhkl this.rank=\$PMI_RANK num.ranks=\$nranks
+python $lunus_dir/scripts/calc_partial_sum_npz.py cell.a=$cella cell.b=$cellb cell.c=$cellc diffuse.lattice.resolution=$resolution diffuse.lattice.type=npz diffuse.lattice.glob=$diffuse_glob counts.lattice.glob=$counts_glob target_cell=$cella,$cellb,$cellc,$alpha,$beta,$gamma target_sg=$spacegroup output.fname.base=$sum_fname_base pphkl=$pphkl filterhkl=$filterhkl this.rank=\$this_rank num.ranks=\$nranks
 EOF
 
 fi
