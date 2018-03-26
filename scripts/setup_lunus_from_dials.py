@@ -110,5 +110,5 @@ if __name__=="__main__":
         command = 'mkdir {}'.format(workdir)
         call_params = shlex.split(command)
         subprocess.call(call_params)
-        At.astype('float32').tofile(workdir+"/At.bin")
+      At.astype('float32').tofile(workdir+"/At.bin")
       imnum = imnum +1

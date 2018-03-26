@@ -51,17 +51,17 @@ int lcfim(DIFFIMAGE *imdiff)
 	  cos_two_theta = cosf(two_theta);
 	  sin_two_theta = sinf(two_theta);
 	  cos_two_rho = cosf(2*acosf(rvec.x / radius) - two_rho_offset);
-          // solid angle normalization
-	  imdiff->correction[index] = scale*powf((1. + arctan_argument*arctan_argument),3./2.);
           // polarization
-	  imdiff->correction[index] *= (2. / (1. + cos_two_theta*cos_two_theta -
+	  imdiff->correction[index] = scale*(2. / (1. + cos_two_theta*cos_two_theta -
 			       imdiff->polarization*cos_two_rho*
 			         sin_two_theta*sin_two_theta));
+          // solid angle normalization
+	  imdiff->correction[index] *= powf((1. + arctan_argument*arctan_argument),3./2.);
 	  //	  if (imdiff->correction[index]>maxcorr) {
 	  //  maxcorr = imdiff->correction[index];
 	  //}
 	} else {
-	  imdiff->correction[index] = 1.;
+	  imdiff->correction[index] = scale;
 	}
       index++;
     }

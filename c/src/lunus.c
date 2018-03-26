@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
     *lat;
 
   LATTICE_DATA_TYPE
-    *latct;
+    *latct = NULL;
 
   size_t 
     str_length,
@@ -525,6 +525,12 @@ int main(int argc, char *argv[])
 	imdiff->mask_inner_radius = scale_inner_radius;
 	imdiff->mask_outer_radius = scale_outer_radius;
 
+	// Initialize other images
+
+	imdiff_corrected = linitim();
+	imdiff_scale = linitim();
+	imdiff_scale_ref = linitim();
+
 	// Define the integration lattices and associated variables
         //      if performing integration
 
@@ -555,9 +561,9 @@ int main(int argc, char *argv[])
 	  lat->origin.k = (IJKCOORDS_DATA)(-lat->zbound.min/lat->zscale + .5);
 	  lat->xyvoxels = lat->xvoxels * lat->yvoxels;
 	  lat->lattice_length = lat->xyvoxels*lat->zvoxels;
-	  if (lat->lattice != NULL) free(lat->lattice);
+	  //	  if (lat->lattice != NULL) free(lat->lattice);
 	  lat->lattice = (LATTICE_DATA_TYPE *)calloc(lat->lattice_length,sizeof(LATTICE_DATA_TYPE));
-	  if (latct != NULL) free(latct);
+	  //	  if (latct != NULL) free(latct);
 	  latct = (LATTICE_DATA_TYPE *)calloc(lat->lattice_length,sizeof(LATTICE_DATA_TYPE));
 	}
 
@@ -615,8 +621,6 @@ int main(int argc, char *argv[])
 
 	  // Write masked and corrected image
 
-	  if (imdiff_corrected != NULL) lfreeim(imdiff_corrected);
-          imdiff_corrected = linitim();
 	  lcloneim(imdiff_corrected,imdiff);
 	  if (lmulcfim(imdiff_corrected) != 0) {
 	    perror(imdiff_corrected->error_msg);
@@ -643,8 +647,6 @@ int main(int argc, char *argv[])
 
 	  // Mode filter to create image to be used for scaling
 
-	  if (imdiff_scale != NULL) lfreeim(imdiff_scale);
-          imdiff_scale = linitim();
 	  lcloneim(imdiff_scale,imdiff_corrected);
 
 	  lmodeim(imdiff_scale);
@@ -679,7 +681,6 @@ int main(int argc, char *argv[])
 
 	    if (ct == 0) {
 	      // Reference image for scaling
-	      imdiff_scale_ref = linitim();
 	      lcloneim(imdiff_scale_ref,imdiff_scale);
 	      //	      lbarrierMPI(mpiv);
 	      //	      printf("Barrier 1 passed\n");

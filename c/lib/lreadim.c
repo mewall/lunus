@@ -267,7 +267,7 @@ int lreadim(DIFFIMAGE *imdiff)
 	  if (imdiff->image != NULL) free(imdiff->image);
 	  imdiff->image = (IMAGE_DATA_TYPE *)malloc(sizeof(IMAGE_DATA_TYPE)*imdiff->image_length);
 	  for (i=0;i<imdiff->image_length;i++) {
-	    if (image_cbf[i] < 0 || image_cbf[i] > IMAGE_MAX) {
+	    if (image_cbf[i] < 0 || image_cbf[i] > MAX_IMAGE_DATA_VALUE) {
 	      imdiff->image[i]=imdiff->ignore_tag;
 	    } else {
 	      imdiff->image[i] = (IMAGE_DATA_TYPE)image_cbf[i];
