@@ -8,6 +8,10 @@ if [ -z ${image_mask_tag+x} ]; then
     image_mask_tag=32767
 fi
 
+if [ -z ${setup_python+x} ]; then
+  setup_python="module load python/2.7-anaconda-4.1.1"
+fi
+
 if [ ! -d $work_dir ]; then
 	mkdir $work_dir
 fi
@@ -81,7 +85,9 @@ cat > $script_path<<EOF
 date
 hostname
 
-module load python
+$setup_python
+
+#module load python
 #module load python/2.7-anaconda-4.1.1
 
 . $cctbx_dir/setpaths_all.sh

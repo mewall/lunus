@@ -114,6 +114,7 @@ int main(int argc, char *argv[])
 
   // Initialize MPI
 
+
   mpiv = (MPIVARS *)malloc(sizeof(MPIVARS));
   mpiv->argc = argc;
   mpiv->argv = argv;
@@ -137,14 +138,16 @@ int main(int argc, char *argv[])
 			exit(0);
 	}
 
+#ifdef DEBUG
 	//	printf("LUNUS: reading input deck\n");
-
+#endif
 	// Read input deck into buffer
 
 	num_read = lreadbuf((void **)&deck,inputdeck);
 
+#ifdef DEBUG
 	//	printf("Length of input deck = %ld\n",num_read);
-
+#endif
 	// Parse input deck
 
 	if ((raw_image_dir=lgettag(deck,"\nraw_image_dir")) == NULL) {
@@ -491,6 +494,7 @@ int main(int argc, char *argv[])
 	 * Initialize diffraction image:
 	 */
 
+
 	if ((imdiff = linitim()) == NULL) {
 	  perror("Couldn't initialize diffraction image.\n\n");
 	  exit(0);
@@ -569,7 +573,7 @@ int main(int argc, char *argv[])
 
 	// Process all of the images
 
-	int n;
+	/*	int n;
 
 	n = num_images/mpiv->num_procs;
 	if (num_images % mpiv->num_procs != 0) {
@@ -578,10 +582,11 @@ int main(int argc, char *argv[])
 
 	int ib = mpiv->my_id*n+1;
 	int ie = (mpiv->my_id+1)*n;
-
+	*/
 	int ct=0;
 
-	for (i=ib;i<=ie&&i<=num_images;i++) {
+	//	for (i=ib;i<=ie&&i<=num_images;i++) {
+	for (i=mpiv->my_id+1;i<=num_images;i=i+mpiv->num_procs) {
 
 	  str_length = snprintf(NULL,0,"%s/%s_%05d.%s",raw_image_dir,image_prefix,i,image_suffix);
 
@@ -589,7 +594,11 @@ int main(int argc, char *argv[])
 
 	  sprintf(imageinpath,"%s/%s_%05d.%s",raw_image_dir,image_prefix,i,image_suffix);
 
+#ifdef DEBUG
 	  //	  printf("imageinpath = %s\n",imageinpath);
+#endif
+
+
 
 	  /*
 	   * Read diffraction image:
@@ -749,7 +758,8 @@ int main(int argc, char *argv[])
 
 	    num_read = lreadbuf((void **)&amatrix,amatrix_path);
 	    
-#ifdef DEBUG		
+#ifdef DEBUG
+	    printf("Amatrix for image %d: ",i);
 	    printf("(%f, %f, %f) ",amatrix->xx,amatrix->xy,amatrix->xz);
 	    printf("(%f, %f, %f) ",amatrix->yx,amatrix->yy,amatrix->yz);
 	    printf("(%f, %f, %f) ",amatrix->zx,amatrix->zy,amatrix->zz);
@@ -828,19 +838,21 @@ int main(int argc, char *argv[])
 	}
 
 #ifdef DEBUG
-	// Count number of data points in the lattice
-	int num_data_points=0;
-	float sum_data_points=0.0;
-
-	for (j=0;j<lat->lattice_length;j++) {
-	  if (latct[j] != 0) {
-	    if (lat->lattice[j]/latct[j] < 32767.) {
-	      num_data_points++;
-	      sum_data_points += lat->lattice[j]/latct[j];
+	if (do_integrate != 0) {
+	  // Count number of data points in the lattice
+	  int num_data_points=0;
+	  float sum_data_points=0.0;
+	  
+	  for (j=0;j<lat->lattice_length;j++) {
+	    if (latct[j] != 0) {
+	      if (lat->lattice[j]/latct[j] < 32767.) {
+		num_data_points++;
+		sum_data_points += lat->lattice[j]/latct[j];
+	      }
 	    }
 	  }
+	  printf("num_data_points=%d, mean_data_points=%f\n",num_data_points,sum_data_points/(float)num_data_points);
 	}
-	printf("num_data_points=%d, mean_data_points=%f\n",num_data_points,sum_data_points/(float)num_data_points);
 #endif
 	if (do_integrate != 0) {
 
@@ -886,7 +898,7 @@ int main(int argc, char *argv[])
 	    lat->outfile=latticeout;
 	    lwritelt(lat);
 	    fclose(latticeout);
-	  }
+	    }
 	}
 	lfinalMPI(mpiv);
 

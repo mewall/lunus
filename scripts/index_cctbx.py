@@ -275,4 +275,5 @@ if __name__=="__main__":
         call_params = shlex.split(command)
         subprocess.call(call_params)
     np.save(workdir+"/At.npy",At)
+    print "Amatrix for image ",imgname,":",At
     At.astype('float32').tofile(workdir+"/At.bin")
