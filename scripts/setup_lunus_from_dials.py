@@ -64,6 +64,9 @@ if __name__=="__main__":
   experiments = ExperimentListFactory.from_json_file(metro, check_format=False)
   beam = experiments[0].beam
   detector = experiments[0].detector
+
+  print "s0 from experiment[0]: ",beam.get_s0()
+  print "wavelength from experiment[0]: ",beam.get_wavelength()
  
   lab_coordinates = flex.vec3_double()
   for panel in detector: 
@@ -76,7 +79,7 @@ if __name__=="__main__":
     # Generate x vectors
   x = np.asarray(s1 - beam.get_s0())
     
-#  DATAsize = np.asarray(detector[0].get_image_size())
+  DATAsize = np.asarray(detector[0].get_image_size())
 
 #  np.save(xvectors,x)
 #  np.save(datasize,DATAsize)
@@ -85,6 +88,10 @@ if __name__=="__main__":
     command = 'mkdir {0}'.format(xvectors_dir)
     call_params = shlex.split(command)
     subprocess.call(call_params)
+
+  np.save(xvectors_dir+"/x_vectors.npy",x)
+
+  np.save(xvectors_dir+"/DATAsize.npy",DATAsize)
 
   x.astype('float32').tofile(xvectors_dir+"/xvectors.bin")
 
@@ -96,7 +103,10 @@ if __name__=="__main__":
       beam = img.get_beam()
       scan = img.get_scan()
       gonio = img.get_goniometer()
-      
+
+      print "s0 from ",imgname,": ",beam.get_s0()
+      print "wavelength from ",imgname,": ",beam.get_wavelength()
+
       crystal = copy.deepcopy(experiments.crystals()[0])
       axis = gonio.get_rotation_axis()
       start_angle, delta_angle = scan.get_oscillation()
@@ -110,5 +120,6 @@ if __name__=="__main__":
         command = 'mkdir {}'.format(workdir)
         call_params = shlex.split(command)
         subprocess.call(call_params)
+      np.save(workdir+"/At.npy",At)
       At.astype('float32').tofile(workdir+"/At.bin")
       imnum = imnum +1

@@ -705,8 +705,9 @@ int main(int argc, char *argv[])
 		  exit(1);
 		}
 #ifdef DEBUG		
-		for (j=0;j<3;j++) {
-		  printf("(%f, %f, %f) ",xvectors_cctbx[j].x,xvectors_cctbx[j].y,xvectors_cctbx[j].z);
+		printf("SAMPLES\n");
+		for (j=50000;j<50010;j++) {
+		  printf("(%f, %f, %f): %d\n",xvectors_cctbx[j].x,xvectors_cctbx[j].y,xvectors_cctbx[j].z, imdiff_corrected->image[j]);
 		}
 		printf("\n");
 #endif		
@@ -816,8 +817,7 @@ int main(int argc, char *argv[])
 		  size_t latidx = kk*lat->xyvoxels + jj*lat->xvoxels + ii;
 		  if (filterhkl!=0) {
 		    lat->lattice[latidx] += 
-		      (LATTICE_DATA_TYPE)imdiff->image[index]
-		      * imdiff->correction[index]
+		      (LATTICE_DATA_TYPE)imdiff_corrected->image[index]
 		      * this_scale_factor;
 		  } else {
 		    lat->lattice[latidx] += 

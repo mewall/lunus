@@ -146,7 +146,7 @@ cat >>$script_path<<EOF
 mv $this_diffuse_file $lattice_dir/.
 mv $this_counts_file $lattice_dir/.
 cd ..
-rm -r "tmpdir_"$i
+#rm -r "tmpdir_"$i
 
 date
 EOF
