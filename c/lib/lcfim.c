@@ -46,7 +46,7 @@ int lcfim(DIFFIMAGE *imdiff)
 	radius_squared = ((rvec.x*rvec.x) + (rvec.y*rvec.y));
 	radius = sqrtf(radius_squared);
 	arctan_argument = radius / imdiff->distance_mm;
-	if (arctan_argument > POLARIZATION_CORRECTION_THRESHOLD) {
+	//	if (arctan_argument > POLARIZATION_CORRECTION_THRESHOLD) {
 	  two_theta = atanf(arctan_argument);
 	  cos_two_theta = cosf(two_theta);
 	  sin_two_theta = sinf(two_theta);
@@ -60,9 +60,9 @@ int lcfim(DIFFIMAGE *imdiff)
 	  //	  if (imdiff->correction[index]>maxcorr) {
 	  //  maxcorr = imdiff->correction[index];
 	  //}
-	} else {
-	  imdiff->correction[index] = scale;
-	}
+	  //    	} else {
+	  //	  imdiff->correction[index] = scale;
+	  //	}
       index++;
     }
   }

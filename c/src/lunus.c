@@ -36,6 +36,7 @@ int main(int argc, char *argv[])
     *amatrix_path,
     *xvectors_path,
     *do_integrate_str,
+    *integration_image_type,
     *filterhkl_str,
     *lattice_dir,
     *diffuse_lattice_prefix,
@@ -246,6 +247,11 @@ int main(int argc, char *argv[])
 	  do_integrate=1;
 	} else {
 	  do_integrate=0;
+	}
+
+	if ((integration_image_type=lgettag(deck,"\nintegration_image_type")) == NULL) {
+	  do_integrate_str = (char *)malloc(strlen("raw"+1));
+	  strcpy(do_integrate_str,"raw");
 	}
 
 	if ((filterhkl_str=lgettag(deck,"\nfilterhkl")) == NULL) {
@@ -623,6 +629,33 @@ int main(int argc, char *argv[])
 	  lwindim(imdiff);
 	  lthrshim(imdiff);
 
+	  // Mode filter to create image to be used for scaling
+
+	  lcloneim(imdiff_scale,imdiff);
+
+	  lmodeim(imdiff_scale);
+
+	  // Write mode filtered image
+
+	  str_length = snprintf(NULL,0,"%s/%s_%05d.%s",lunus_image_dir,scale_image_prefix,i,image_suffix);
+
+	  scaleoutpath = (char *)malloc(str_length+1);
+
+	  sprintf(scaleoutpath,"%s/%s_%05d.%s",lunus_image_dir,scale_image_prefix,i,image_suffix);
+
+	  if ( (scaleout = fopen(scaleoutpath,"wb")) == NULL ) {
+	    printf("Can't open %s.",scaleoutpath);
+	    exit(1);
+	  }
+
+	  imdiff_scale->outfile = scaleout;
+	  if(lwriteim(imdiff_scale) != 0) {
+	    perror(imdiff_scale->error_msg);
+	    exit(1);
+	  }
+
+	  fclose(scaleout);
+
 	  // Calculate correction factor
 
 	  imdiff->correction[0]=correction_factor_scale;
@@ -653,33 +686,6 @@ int main(int argc, char *argv[])
 	  }
 
 	  fclose(lunusout);
-
-	  // Mode filter to create image to be used for scaling
-
-	  lcloneim(imdiff_scale,imdiff_corrected);
-
-	  lmodeim(imdiff_scale);
-
-	  // Write mode filtered image
-
-	  str_length = snprintf(NULL,0,"%s/%s_%05d.%s",lunus_image_dir,scale_image_prefix,i,image_suffix);
-
-	  scaleoutpath = (char *)malloc(str_length+1);
-
-	  sprintf(scaleoutpath,"%s/%s_%05d.%s",lunus_image_dir,scale_image_prefix,i,image_suffix);
-
-	  if ( (scaleout = fopen(scaleoutpath,"wb")) == NULL ) {
-	    printf("Can't open %s.",scaleoutpath);
-	    exit(1);
-	  }
-
-	  imdiff_scale->outfile = scaleout;
-	  if(lwriteim(imdiff_scale) != 0) {
-	    perror(imdiff_scale->error_msg);
-	    exit(1);
-	  }
-
-	  fclose(scaleout);
 
 	  //	  imdiff->correction[0]=1.;
 	  //	  lcfim(imdiff);
@@ -815,11 +821,18 @@ int main(int argc, char *argv[])
 		    kk>=0 && kk<lat->zvoxels && imdiff_scale->image[index]>0 &&
 		    imdiff_scale->image[index]!=imdiff->ignore_tag) {
 		  size_t latidx = kk*lat->xyvoxels + jj*lat->xvoxels + ii;
-		  if (filterhkl!=0) {
+		  if (strcmp(integration_image_type,"raw")==0) {
+		    lat->lattice[latidx] += 
+		      (LATTICE_DATA_TYPE)imdiff->image[index]
+		      * imdiff->correction[index]
+		      * this_scale_factor;
+		  }
+		  if (strcmp(integration_image_type,"corrected")==0) {
 		    lat->lattice[latidx] += 
 		      (LATTICE_DATA_TYPE)imdiff_corrected->image[index]
 		      * this_scale_factor;
-		  } else {
+		  }
+		  if (strcmp(integration_image_type,"scale")==0) {
 		    lat->lattice[latidx] += 
 		      (LATTICE_DATA_TYPE)imdiff_scale->image[index]
 		      * this_scale_factor;
