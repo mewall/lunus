@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
   float
     normim_tilt_x=0.0,
     normim_tilt_y=0.0,
-    polarim_dist=-1.,
+    distance_mm=0.0,
     polarim_offset=0.0,
     polarim_polarization=1.0,
     correction_factor_scale=1.0,
@@ -436,6 +436,12 @@ int main(int argc, char *argv[])
 	  polarim_polarization = atof(lgettag(deck,"\npolarim_polarization"));
 	}
 
+	str_length = strlen(lgettag(deck,"\ndistance_mm"));
+
+	if (str_length != 0) {
+	  distance_mm = atof(lgettag(deck,"\ndistance_mm"));
+	}
+
 	str_length = strlen(lgettag(deck,"\ncorrection_factor_scale"));
 	
 	if (str_length != 0) {
@@ -492,6 +498,12 @@ int main(int argc, char *argv[])
 	  printf("polarim_offset=%f\n",polarim_offset);
 	
 	  printf("polarim_polarization=%f\n",polarim_polarization);
+
+	  if (distance_mm>0.0) {
+	    printf("distance_mm=%f\n",distance_mm);
+	  } else {
+	    printf("distance_mm=(obtained from image header)\n");
+	  }
 
 	  printf("correction_factor_scale=%f\n",correction_factor_scale);
 
@@ -623,6 +635,35 @@ int main(int argc, char *argv[])
 
 	  fclose(imagein);
 
+	  // Define image parameters from input deck
+	  
+	  imdiff->punchim_upper.c = punchim_xmax;
+	  imdiff->punchim_lower.c = punchim_xmin;
+	  imdiff->punchim_upper.r = punchim_ymax;
+	  imdiff->punchim_lower.r = punchim_ymin;
+	  
+	  imdiff->window_upper.c = windim_xmax;
+	  imdiff->window_lower.c = windim_xmin;
+	  imdiff->window_upper.r = windim_ymax;
+	  imdiff->window_lower.r = windim_ymin;
+	  
+	  imdiff->upper_threshold = thrshim_max;
+	  imdiff->lower_threshold = thrshim_min;
+	  
+	  imdiff->polarization = polarim_polarization;
+	  imdiff->polarization_offset = polarim_offset;
+	  
+	  imdiff->cassette.x = normim_tilt_x;
+	  imdiff->cassette.y = normim_tilt_y;
+	  imdiff->cassette.z = 0.0;
+	  
+	  imdiff->mode_height = modeim_kernel_width - 1;
+	  imdiff->mode_width = modeim_kernel_width - 1;
+	  imdiff->mode_binsize = modeim_bin_size;
+	  
+	  imdiff->mask_inner_radius = scale_inner_radius;
+	  imdiff->mask_outer_radius = scale_outer_radius;
+	  
 	  // Apply masks
 
 	  lpunchim(imdiff);
