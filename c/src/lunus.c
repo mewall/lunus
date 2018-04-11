@@ -436,9 +436,7 @@ int main(int argc, char *argv[])
 	  polarim_polarization = atof(lgettag(deck,"\npolarim_polarization"));
 	}
 
-	str_length = strlen(lgettag(deck,"\ndistance_mm"));
-
-	if (str_length != 0) {
+	if (lgettag(deck,"\ndistance_mm") != NULL) {
 	  distance_mm = atof(lgettag(deck,"\ndistance_mm"));
 	}
 
@@ -652,6 +650,10 @@ int main(int argc, char *argv[])
 	  
 	  imdiff->polarization = polarim_polarization;
 	  imdiff->polarization_offset = polarim_offset;
+
+	  if (distance_mm>0.0) {
+	    imdiff->distance_mm = distance_mm;
+	  }
 	  
 	  imdiff->cassette.x = normim_tilt_x;
 	  imdiff->cassette.y = normim_tilt_y;
@@ -820,6 +822,8 @@ int main(int argc, char *argv[])
 
 	    a = (struct xyzmatrix *)amatrix;
 
+	    //	    *at = *a;
+
 	    at = lmatt(*a);
 
 	    // Calculate the rotated and scaled xvectors, yielding Miller indices
@@ -876,6 +880,7 @@ int main(int argc, char *argv[])
 		  if (strcmp(integration_image_type,"scale")==0) {
 		    lat->lattice[latidx] += 
 		      (LATTICE_DATA_TYPE)imdiff_scale->image[index]
+		      * imdiff->correction[index]
 		      * this_scale_factor;
 		  }
 		  latct[latidx] += 1.;

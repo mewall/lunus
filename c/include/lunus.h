@@ -843,6 +843,7 @@ float lrfaclt(LAT3D *lat1, LAT3D *lat2);
 int lrmpkim(DIFFIMAGE *imdiff);
 int lrotlt(LAT3D *lat);
 struct xyzmatrix lrotmat(float rotx, float roty, float rotz);
+struct xyzcoords lrotvecy(struct xyzcoords a, float cos_theta,float sin_theta);
 struct xyzcoords lrotvecz(struct xyzcoords a, float cos_theta,float sin_theta);
 int lrsccmap(CCP4MAP *map1, CCP4MAP *map2);
 float lrsrlt(LAT3D *lat1, LAT3D *lat2);

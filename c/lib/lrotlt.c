@@ -60,30 +60,20 @@ int lrotlt(LAT3D *lat)
       for (index1.i = 0; index1.i < lat->xvoxels; index1.i++) {
 	i1 = index1.k*lat->xyvoxels+index1.j*lat->xvoxels+index1.i;
 	rvec1 = lijksub(index1,lat->origin);
-	s1.x = (float)rvec1.i*lat->xscale;
-	s1.y = (float)rvec1.j*lat->yscale;
-	s1.z = (float)rvec1.k*lat->zscale;
+	s1.x = (float)rvec1.i;
+	s1.y = (float)rvec1.j;
+	s1.z = (float)rvec1.k;
 	if (lat->axis == 3) {
 	  s2 = lrotvecz(s1,cosangle,sinangle);
+	} else if (lat->axis == 2) {
+	  s2 = lrotvecy(s1,cosangle,sinangle);
 	} else {
 	  perror("LROTLT: axis number not recognized");
 	  goto CloseShop;
 	}
-	if (rvec2.i >= 0) {
-	  rvec2.i = (IJKCOORDS_DATA)(s2.x/lat->xscale+.5);
-	} else {
-	  rvec2.i = (IJKCOORDS_DATA)(s2.x/lat->xscale-.5);
-	}
-	if (rvec2.j >= 0) {
-	  rvec2.j = (IJKCOORDS_DATA)(s2.y/lat->yscale+.5);
-	} else {
-	  rvec2.j = (IJKCOORDS_DATA)(s2.y/lat->yscale-.5);
-	}
-	if (rvec2.k >= 0) {
-	  rvec2.k = (IJKCOORDS_DATA)(s2.z/lat->zscale+.5);
-	} else {
-	  rvec2.k = (IJKCOORDS_DATA)(s2.z/lat->zscale-.5);
-	}
+	rvec2.i = (IJKCOORDS_DATA)roundf(s2.x);
+	rvec2.j = (IJKCOORDS_DATA)roundf(s2.y);
+	rvec2.k = (IJKCOORDS_DATA)roundf(s2.z);
 	index2 = lijksum(rvec2,lat->origin);
 	if (index2.i >= 0 && index2.i < lat->xvoxels && index2.j >= 0 && index2.j < lat->yvoxels && 
 	    index2.k >= 0 && index2.k < lat->zvoxels) {

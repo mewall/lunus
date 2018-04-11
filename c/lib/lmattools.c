@@ -166,3 +166,14 @@ struct xyzcoords lrotvecz(struct xyzcoords a, float cos_theta,float sin_theta)
 
   return b;
 }
+
+struct xyzcoords lrotvecy(struct xyzcoords a, float cos_theta,float sin_theta)
+{
+  struct xyzcoords b;
+
+  b.x = a.z*sin_theta + a.x*cos_theta;
+  b.y = a.y;
+  b.z = a.z*cos_theta - a.x*sin_theta;
+
+  return b;
+}
