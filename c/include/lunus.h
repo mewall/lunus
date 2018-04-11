@@ -679,6 +679,7 @@ typedef struct {
   LATTICE_DATA_TYPE threshold;  /* Threshold for use in correlation calculation, and perhaps elsewhere */
   struct ijkcoords origin;      /* Origin voxel position */
   struct ijkcoords index;       /* Currently selected voxel position index */
+  struct xyzcoords sv;          /* Currently selected scattering vector */
   RFILE_DATA_TYPE *rfile;       /* Radial distribution function */
   size_t rfile_length;	        /* Number of rfile values */
   struct xyzcoords minrange;    /* Minimum valid distances to Bragg */
@@ -784,6 +785,7 @@ int lgetmat(DIFFIMAGE *imdiff);
 int lgetovld(DIFFIMAGE *imdiff);
 int lgetpks(DIFFIMAGE *imdiff);
 char * lgettag(const char *target,const char *tag);
+struct ijkcoords lindexFromS(LAT3D *lat);
 DIFFIMAGE *linitim(void);
 LAT3D *linitlt(void);
 CCP4MAP *linitmap(void);

@@ -59,47 +59,49 @@ int lrotlt(LAT3D *lat)
     for(index1.j = 0; index1.j < lat->yvoxels; index1.j++) {
       for (index1.i = 0; index1.i < lat->xvoxels; index1.i++) {
 	i1 = index1.k*lat->xyvoxels+index1.j*lat->xvoxels+index1.i;
-	rvec1 = lijksub(index1,lat->origin);
-	s1.x = (float)rvec1.i;
-	s1.y = (float)rvec1.j;
-	s1.z = (float)rvec1.k;
-	if (lat->axis == 3) {
-	  s2 = lrotvecz(s1,cosangle,sinangle);
-	} else if (lat->axis == 2) {
-	  s2 = lrotvecy(s1,cosangle,sinangle);
-	} else {
-	  perror("LROTLT: axis number not recognized");
-	  goto CloseShop;
-	}
-	rvec2.i = (IJKCOORDS_DATA)roundf(s2.x);
-	rvec2.j = (IJKCOORDS_DATA)roundf(s2.y);
-	rvec2.k = (IJKCOORDS_DATA)roundf(s2.z);
-	index2 = lijksum(rvec2,lat->origin);
-	if (index2.i >= 0 && index2.i < lat->xvoxels && index2.j >= 0 && index2.j < lat->yvoxels && 
-	    index2.k >= 0 && index2.k < lat->zvoxels) {
-	  i2 = index2.k*lat->xyvoxels+index2.j*lat->xvoxels+index2.i;
-	  if (ct[i2] == 0 && lat->lattice[i1] != lat->mask_tag) {
-	    lattice[i2] = lat->lattice[i1];
-	    ct[i2]++;
+	if (lat->lattice[i1] != lat->mask_tag) {
+	  //	  lat->index = lijksub(index1,lat->origin);
+	  lat->index = index1;
+	  //	printf("Before: %d %d %d\n",lat->index.i,lat->index.j,lat->index.k);
+	  s1 = lsFromIndex(lat);
+	  if (lat->axis == 3) {
+	    s2 = lrotvecz(s1,cosangle,sinangle);
+	  } else if (lat->axis == 2) {
+	    s2 = lrotvecy(s1,cosangle,sinangle);
 	  } else {
-	    lattice[i2] =
-	      ((LATTICE_DATA_TYPE)ct[i2]*lattice[i2]+lat->lattice[i1])/(LATTICE_DATA_TYPE)(ct[i2]+1);
-	    ct[i2]++;
+	    perror("LROTLT: axis number not recognized");
+	    goto CloseShop;
 	  }
-	}
+	  lat->sv = s2;
+	  index2 = lindexFromS(lat);
+	  //	printf("After: %d %d %d\n",lat->index.i,lat->index.j,lat->index.k);
+	  //	  index2 = lijksum(lat->index,lat->origin);
+	  if (index2.i >= 0 && index2.i < lat->xvoxels && index2.j >= 0 && index2.j < lat->yvoxels && 
+	      index2.k >= 0 && index2.k < lat->zvoxels) {
+	    i2 = index2.k*lat->xyvoxels+index2.j*lat->xvoxels+index2.i;
+	    if (ct[i2] == 0) {
+	      lattice[i2] = lat->lattice[i1];
+	      ct[i2]++;
+	    } else {
+	      lattice[i2] =
+		((LATTICE_DATA_TYPE)ct[i2]*lattice[i2]+lat->lattice[i1])/(LATTICE_DATA_TYPE)(ct[i2]+1);
+	      ct[i2]++;
+	    }
+	  }
+	}	
       }
     }
   }
-
+  
   /*
    * Copy lattice to input lattice:
    */
-
+  
   for(index = 0; index < lat->lattice_length; index++)
     {
       lat->lattice[index] = lattice[index];
     }
-  CloseShop:
+ CloseShop:
   free((LATTICE_DATA_TYPE *)lattice);
   return(return_value);
 }
