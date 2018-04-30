@@ -97,7 +97,9 @@ if __name__=="__main__":
 
   if rotation_series:
     imnum=1
-    for imgname in glob.glob(image_glob):
+    filelist=glob.glob(image_glob)
+    filelist.sort()
+    for imgname in filelist:
       img = dxtbx.load(imgname)
       detector = img.get_detector()
       beam = img.get_beam()

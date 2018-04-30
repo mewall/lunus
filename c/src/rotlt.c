@@ -20,7 +20,8 @@ int main(int argc, char *argv[])
 	*latticeout;
 
   char
-    error_msg[LINESIZE];
+    error_msg[LINESIZE],
+    cell_str[256];
 
   int
     axis;
@@ -44,16 +45,20 @@ int main(int argc, char *argv[])
 	latticeout = stdout;
 	angle = 90.0;
 
+  strcpy(cell_str,"None");
+
 /*
  * Read information from input line:
  */
 	switch(argc) {
-    case 8: 
-    origin.k = atol(argv[7]);
+    case 9: 
+    origin.k = atol(argv[8]);
+    case 8:
+    origin.j = atol(argv[7]);
     case 7:
-    origin.j = atol(argv[6]);
+    origin.i = atol(argv[6]);
     case 6:
-    origin.i = atol(argv[5]);
+      strcpy(cell_str,argv[5]);
 	case 5:
 	  angle = atof(argv[4]);
 	  case 4:
@@ -108,11 +113,24 @@ int main(int argc, char *argv[])
     exit(0);
   }
 
+  if (!(strcmp(cell_str,"None")==0)) {
+    strcpy(lat->cell_str,cell_str);
+  } else {
+    lat->cell.a = 1./lat->xscale;
+    lat->cell.b = 1./lat->yscale;
+    lat->cell.c = 1./lat->zscale;
+    lat->cell.alpha = lat->cell.beta = lat->cell.gamma = 90.0;
+    sprintf(cell_str,"%f,%f,%f,90.0,90.0,90.0",(float)lat->cell.a,(float)lat->cell.b,(float)lat->cell.c);
+    printf("%s\n",cell_str);
+  }
+  lparsecelllt(lat);
+  printf("%f,%f,%f,%f,%f,%f\n",(float)lat->cell.a,(float)lat->cell.b,(float)lat->cell.c,(float)lat->cell.alpha,(float)lat->cell.beta,(float)lat->cell.gamma);
+
   /*
    * Perform symmetry operation:
    */
 
-  if (argc==8) {
+  if (argc==9) {
     lat->origin.i=origin.i; lat->origin.j=origin.j; lat->origin.k=origin.k;
   }
   lat->axis = axis;

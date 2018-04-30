@@ -29,10 +29,15 @@ int main(int argc, char *argv[])
 	origin;
 
   float 
-    polarization_offset,
+    polarization_offset = 0.0,
     polarization,
     distance_mm,
     scale;
+
+  int
+    provided_distance=0,
+    provided_polarization=0,
+    provided_polarization_offset=0;
 
 /*
  * Set input line defaults:
@@ -54,10 +59,13 @@ int main(int argc, char *argv[])
 	  scale = atof(argv[6]);
 	  case 6:
 	  polarization_offset = atof(argv[5]);
+	  provided_polarization_offset=1;
 	  case 5:
 	  polarization = atof(argv[4]);
+	  provided_polarization=1;
 	  case 4:
 	  distance_mm = atof(argv[3]);
+	  provided_distance=1;
 	  case 3:
 	  if (strcmp(argv[2], "-") == 0) {
 	    imageout = stdout;
@@ -102,19 +110,6 @@ int main(int argc, char *argv[])
   //  imdiff->origin = origin;
 
   /*
-   * Set sample-to-detector distance for the image
-   */
-
-  imdiff->distance_mm = distance_mm;
-  
-  /* 
-   * Set the polarization of the beam:
-   */
-
-  imdiff->polarization = polarization;
-  imdiff->polarization_offset = polarization_offset;
-
-  /*
    * Read diffraction image:
    */
   
@@ -124,6 +119,19 @@ int main(int argc, char *argv[])
     goto CloseShop;
   }
   
+  /*
+   * Set sample-to-detector distance for the image if provided
+   */
+
+  if (provided_distance==1) imdiff->distance_mm = distance_mm;
+  
+  /* 
+   * Set the polarization of the beam:
+   */
+
+  if (provided_polarization==1) imdiff->polarization = polarization;
+  if (provided_polarization_offset==1) imdiff->polarization_offset = polarization_offset;
+
   // Allocate memory for the correction image
 
   imdiff->correction = (float *)malloc(imdiff->image_length*sizeof(float));

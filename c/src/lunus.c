@@ -36,6 +36,7 @@ int main(int argc, char *argv[])
     *amatrix_path,
     *xvectors_path,
     *do_integrate_str,
+    *integration_image_type,
     *filterhkl_str,
     *lattice_dir,
     *diffuse_lattice_prefix,
@@ -66,7 +67,7 @@ int main(int argc, char *argv[])
   float
     normim_tilt_x=0.0,
     normim_tilt_y=0.0,
-    polarim_dist=-1.,
+    distance_mm=0.0,
     polarim_offset=0.0,
     polarim_polarization=1.0,
     correction_factor_scale=1.0,
@@ -246,6 +247,11 @@ int main(int argc, char *argv[])
 	  do_integrate=1;
 	} else {
 	  do_integrate=0;
+	}
+
+	if ((integration_image_type=lgettag(deck,"\nintegration_image_type")) == NULL) {
+	  do_integrate_str = (char *)malloc(strlen("raw"+1));
+	  strcpy(do_integrate_str,"raw");
 	}
 
 	if ((filterhkl_str=lgettag(deck,"\nfilterhkl")) == NULL) {
@@ -430,6 +436,10 @@ int main(int argc, char *argv[])
 	  polarim_polarization = atof(lgettag(deck,"\npolarim_polarization"));
 	}
 
+	if (lgettag(deck,"\ndistance_mm") != NULL) {
+	  distance_mm = atof(lgettag(deck,"\ndistance_mm"));
+	}
+
 	str_length = strlen(lgettag(deck,"\ncorrection_factor_scale"));
 	
 	if (str_length != 0) {
@@ -486,6 +496,12 @@ int main(int argc, char *argv[])
 	  printf("polarim_offset=%f\n",polarim_offset);
 	
 	  printf("polarim_polarization=%f\n",polarim_polarization);
+
+	  if (distance_mm>0.0) {
+	    printf("distance_mm=%f\n",distance_mm);
+	  } else {
+	    printf("distance_mm=(obtained from image header)\n");
+	  }
 
 	  printf("correction_factor_scale=%f\n",correction_factor_scale);
 
@@ -617,11 +633,71 @@ int main(int argc, char *argv[])
 
 	  fclose(imagein);
 
+	  // Define image parameters from input deck
+	  
+	  imdiff->punchim_upper.c = punchim_xmax;
+	  imdiff->punchim_lower.c = punchim_xmin;
+	  imdiff->punchim_upper.r = punchim_ymax;
+	  imdiff->punchim_lower.r = punchim_ymin;
+	  
+	  imdiff->window_upper.c = windim_xmax;
+	  imdiff->window_lower.c = windim_xmin;
+	  imdiff->window_upper.r = windim_ymax;
+	  imdiff->window_lower.r = windim_ymin;
+	  
+	  imdiff->upper_threshold = thrshim_max;
+	  imdiff->lower_threshold = thrshim_min;
+	  
+	  imdiff->polarization = polarim_polarization;
+	  imdiff->polarization_offset = polarim_offset;
+
+	  if (distance_mm>0.0) {
+	    imdiff->distance_mm = distance_mm;
+	  }
+	  
+	  imdiff->cassette.x = normim_tilt_x;
+	  imdiff->cassette.y = normim_tilt_y;
+	  imdiff->cassette.z = 0.0;
+	  
+	  imdiff->mode_height = modeim_kernel_width - 1;
+	  imdiff->mode_width = modeim_kernel_width - 1;
+	  imdiff->mode_binsize = modeim_bin_size;
+	  
+	  imdiff->mask_inner_radius = scale_inner_radius;
+	  imdiff->mask_outer_radius = scale_outer_radius;
+	  
 	  // Apply masks
 
 	  lpunchim(imdiff);
 	  lwindim(imdiff);
 	  lthrshim(imdiff);
+
+	  // Mode filter to create image to be used for scaling
+
+	  lcloneim(imdiff_scale,imdiff);
+
+	  lmodeim(imdiff_scale);
+
+	  // Write mode filtered image
+
+	  str_length = snprintf(NULL,0,"%s/%s_%05d.%s",lunus_image_dir,scale_image_prefix,i,image_suffix);
+
+	  scaleoutpath = (char *)malloc(str_length+1);
+
+	  sprintf(scaleoutpath,"%s/%s_%05d.%s",lunus_image_dir,scale_image_prefix,i,image_suffix);
+
+	  if ( (scaleout = fopen(scaleoutpath,"wb")) == NULL ) {
+	    printf("Can't open %s.",scaleoutpath);
+	    exit(1);
+	  }
+
+	  imdiff_scale->outfile = scaleout;
+	  if(lwriteim(imdiff_scale) != 0) {
+	    perror(imdiff_scale->error_msg);
+	    exit(1);
+	  }
+
+	  fclose(scaleout);
 
 	  // Calculate correction factor
 
@@ -653,33 +729,6 @@ int main(int argc, char *argv[])
 	  }
 
 	  fclose(lunusout);
-
-	  // Mode filter to create image to be used for scaling
-
-	  lcloneim(imdiff_scale,imdiff_corrected);
-
-	  lmodeim(imdiff_scale);
-
-	  // Write mode filtered image
-
-	  str_length = snprintf(NULL,0,"%s/%s_%05d.%s",lunus_image_dir,scale_image_prefix,i,image_suffix);
-
-	  scaleoutpath = (char *)malloc(str_length+1);
-
-	  sprintf(scaleoutpath,"%s/%s_%05d.%s",lunus_image_dir,scale_image_prefix,i,image_suffix);
-
-	  if ( (scaleout = fopen(scaleoutpath,"wb")) == NULL ) {
-	    printf("Can't open %s.",scaleoutpath);
-	    exit(1);
-	  }
-
-	  imdiff_scale->outfile = scaleout;
-	  if(lwriteim(imdiff_scale) != 0) {
-	    perror(imdiff_scale->error_msg);
-	    exit(1);
-	  }
-
-	  fclose(scaleout);
 
 	  //	  imdiff->correction[0]=1.;
 	  //	  lcfim(imdiff);
@@ -773,6 +822,8 @@ int main(int argc, char *argv[])
 
 	    a = (struct xyzmatrix *)amatrix;
 
+	    //	    *at = *a;
+
 	    at = lmatt(*a);
 
 	    // Calculate the rotated and scaled xvectors, yielding Miller indices
@@ -815,13 +866,21 @@ int main(int argc, char *argv[])
 		    kk>=0 && kk<lat->zvoxels && imdiff_scale->image[index]>0 &&
 		    imdiff_scale->image[index]!=imdiff->ignore_tag) {
 		  size_t latidx = kk*lat->xyvoxels + jj*lat->xvoxels + ii;
-		  if (filterhkl!=0) {
+		  if (strcmp(integration_image_type,"raw")==0) {
+		    lat->lattice[latidx] += 
+		      (LATTICE_DATA_TYPE)imdiff->image[index]
+		      * imdiff->correction[index]
+		      * this_scale_factor;
+		  }
+		  if (strcmp(integration_image_type,"corrected")==0) {
 		    lat->lattice[latidx] += 
 		      (LATTICE_DATA_TYPE)imdiff_corrected->image[index]
 		      * this_scale_factor;
-		  } else {
+		  }
+		  if (strcmp(integration_image_type,"scale")==0) {
 		    lat->lattice[latidx] += 
 		      (LATTICE_DATA_TYPE)imdiff_scale->image[index]
+		      * imdiff->correction[index]
 		      * this_scale_factor;
 		  }
 		  latct[latidx] += 1.;
