@@ -250,8 +250,8 @@ int main(int argc, char *argv[])
 	}
 
 	if ((integration_image_type=lgettag(deck,"\nintegration_image_type")) == NULL) {
-	  do_integrate_str = (char *)malloc(strlen("raw"+1));
-	  strcpy(do_integrate_str,"raw");
+	  integration_image_type = (char *)malloc(strlen("raw"+1));
+	  strcpy(integration_image_type,"raw");
 	}
 
 	if ((filterhkl_str=lgettag(deck,"\nfilterhkl")) == NULL) {
