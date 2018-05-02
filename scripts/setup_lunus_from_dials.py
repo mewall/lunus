@@ -35,7 +35,7 @@ if __name__=="__main__":
   except ValueError:
     stills_process = False
   else:
-    index_glob = args.pop(imageglobidx).split("=")[1]
+    index_glob = args.pop(indexglobidx).split("=")[1]
     stills_process = True
   # Output xvectors directory
   try:
@@ -113,6 +113,29 @@ if __name__=="__main__":
       axis = gonio.get_rotation_axis()
       start_angle, delta_angle = scan.get_oscillation()
       crystal.rotate_around_origin(axis, start_angle + (delta_angle/2), deg=True)
+      from scitbx import matrix
+      A_matrix = matrix.sqr(crystal.get_A()).inverse()
+      At = np.asarray(A_matrix.transpose()).reshape((3,3))
+
+      workdir=amatrix_dir_prefix+"{0}".format(imnum)
+      if (not os.path.isdir(workdir)):
+        command = 'mkdir {}'.format(workdir)
+        call_params = shlex.split(command)
+        subprocess.call(call_params)
+      np.save(workdir+"/At.npy",At)
+      At.astype('float32').tofile(workdir+"/At.bin")
+      imnum = imnum +1
+
+  if stills_process:
+    imnum=1
+    filelist=glob.glob(index_glob)
+    filelist.sort()
+    for jsonname in filelist:
+      experiments = ExperimentListFactory.from_json_file(jsonname, check_format=False)
+      detector = experiments[0].detector
+      beam = experiments[0].beam
+      crystal = experiments.crystals()[0]
+
       from scitbx import matrix
       A_matrix = matrix.sqr(crystal.get_A()).inverse()
       At = np.asarray(A_matrix.transpose()).reshape((3,3))

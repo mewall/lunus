@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
         *scaleout;
   
   char
-    inputdeck[1000],
+    inputdeck[10000],
     *imageinpath,
     *lunusoutpath,
     *scaleoutpath,
@@ -41,6 +41,8 @@ int main(int argc, char *argv[])
     *lattice_dir,
     *diffuse_lattice_prefix,
     *unit_cell,
+    *filelist_name = NULL,
+    *filelist[20000],
     error_msg[LINESIZE];
 
   void *buf;
@@ -248,6 +250,8 @@ int main(int argc, char *argv[])
 	} else {
 	  do_integrate=0;
 	}
+
+	filelist_name=lgettag(deck,"\nfilelist_name")
 
 	if ((integration_image_type=lgettag(deck,"\nintegration_image_type")) == NULL) {
 	  integration_image_type = (char *)malloc(strlen("raw"+1));
@@ -601,6 +605,24 @@ int main(int argc, char *argv[])
 	*/
 	int ct=0;
 
+	if (filelist_name != NULL) {
+
+	  FILE *f;
+
+	  if (f = fopen(filelist_name,"r") == NULL) {
+	    printf("Can't open %s.\n",filelist_name);
+	    exit(1);
+	  }
+	  
+	  size_t bufsize = LINESIZE;
+
+	  i = 0;
+
+	  filelist[i] = (char *)malloc(LINESIZE+1);
+
+	  int chars_read;
+
+	  while (
 	//	for (i=ib;i<=ie&&i<=num_images;i++) {
 	for (i=mpiv->my_id+1;i<=num_images;i=i+mpiv->num_procs) {
 
