@@ -41,8 +41,8 @@ int main(int argc, char *argv[])
     *lattice_dir,
     *diffuse_lattice_prefix,
     *unit_cell,
-    *filelist_name = NULL,
-    *filelist[20000],
+    *imagelist_name = NULL,
+    *imagelist[20000],
     error_msg[LINESIZE];
 
   void *buf;
@@ -251,7 +251,7 @@ int main(int argc, char *argv[])
 	  do_integrate=0;
 	}
 
-	filelist_name=lgettag(deck,"\nfilelist_name")
+	imagelist_name=lgettag(deck,"\nimagelist_name");
 
 	if ((integration_image_type=lgettag(deck,"\nintegration_image_type")) == NULL) {
 	  integration_image_type = (char *)malloc(strlen("raw"+1));
@@ -605,32 +605,72 @@ int main(int argc, char *argv[])
 	*/
 	int ct=0;
 
-	if (filelist_name != NULL) {
+	if (imagelist_name == NULL) {
+
+	  if (raw_image_dir == NULL || image_prefix == NULL || image_suffix == NULL) {
+	    perror("Can't generate image list due to NULL value of one or more filename components.\n");
+	    exit(1);
+	  }
+
+	  printf("No imagelist provided. Generating image list using loop scheme.\n");
+
+	  for (i=0;i<num_images;i++) {
+
+	    str_length = snprintf(NULL,0,"%s/%s_%05d.%s",raw_image_dir,image_prefix,i+1,image_suffix);
+
+	    imagelist[i] = (char *)malloc(str_length+1);
+
+	    sprintf(imagelist[i],"%s/%s_%05d.%s",raw_image_dir,image_prefix,i+1,image_suffix);
+
+	  }
+
+	} else {
 
 	  FILE *f;
 
-	  if (f = fopen(filelist_name,"r") == NULL) {
-	    printf("Can't open %s.\n",filelist_name);
+	  if ((f = fopen(imagelist_name,"r")) == NULL) {
+	    printf("Can't open %s.\n",imagelist_name);
 	    exit(1);
 	  }
 	  
 	  size_t bufsize = LINESIZE;
+	  char *buf;
 
 	  i = 0;
 
-	  filelist[i] = (char *)malloc(LINESIZE+1);
+	  buf = (char *)malloc(LINESIZE+1);
 
 	  int chars_read;
 
-	  while (
+	  while ((chars_read = getline(&buf,&bufsize,f)) != -1) {
+
+	    buf[chars_read-1]=0;
+
+	    str_length = snprintf(NULL,0,"%s/%s",raw_image_dir,buf);
+
+	    imagelist[i] = (char *)malloc(str_length+1);
+
+	    sprintf(imagelist[i],"%s/%s",raw_image_dir,buf);
+	    
+	    //	    printf("%s\n",imagelist[i]);
+
+	    i++;
+
+	  }
+	  num_images = i;
+	}
+	//	printf("i=%d, imagelist[0] = %s\n",i,imagelist[0]);
+
+	//	exit(1);
+
 	//	for (i=ib;i<=ie&&i<=num_images;i++) {
 	for (i=mpiv->my_id+1;i<=num_images;i=i+mpiv->num_procs) {
 
-	  str_length = snprintf(NULL,0,"%s/%s_%05d.%s",raw_image_dir,image_prefix,i,image_suffix);
+	  //	  str_length = snprintf(NULL,0,"%s/%s_%05d.%s",raw_image_dir,image_prefix,i,image_suffix);
 
-	  imageinpath = (char *)malloc(str_length+1);
+	  //	  imageinpath = (char *)malloc(str_length+1);
 
-	  sprintf(imageinpath,"%s/%s_%05d.%s",raw_image_dir,image_prefix,i,image_suffix);
+	  //	  sprintf(imageinpath,"%s/%s_%05d.%s",raw_image_dir,image_prefix,i,image_suffix);
 
 #ifdef DEBUG
 	  //	  printf("imageinpath = %s\n",imageinpath);
@@ -642,8 +682,8 @@ int main(int argc, char *argv[])
 	   * Read diffraction image:
 	   */
 	  
-	  if ( (imagein = fopen(imageinpath,"rb")) == NULL ) {
-	    printf("Can't open %s.",imageinpath);
+	  if ( (imagein = fopen(imagelist[i-1],"rb")) == NULL ) {
+	    printf("Can't open %s.",imagelist[i-1]);
 	    exit(0);
 	  }
 
