@@ -742,6 +742,7 @@ int main(int argc, char *argv[])
 
 	  // Write mode filtered image
 
+	  /*
 	  str_length = snprintf(NULL,0,"%s/%s_%05d.%s",lunus_image_dir,scale_image_prefix,i,image_suffix);
 
 	  scaleoutpath = (char *)malloc(str_length+1);
@@ -760,6 +761,7 @@ int main(int argc, char *argv[])
 	  }
 
 	  fclose(scaleout);
+	  */
 
 	  // Calculate correction factor
 
@@ -773,6 +775,9 @@ int main(int argc, char *argv[])
 	    perror(imdiff_corrected->error_msg);
 	    exit(1);
 	  }
+
+	  /*
+
 	  str_length = snprintf(NULL,0,"%s/%s_%05d.%s",lunus_image_dir,lunus_image_prefix,i,image_suffix);
 
 	  lunusoutpath = (char *)malloc(str_length+1);
@@ -791,6 +796,7 @@ int main(int argc, char *argv[])
 	  }
 
 	  fclose(lunusout);
+	  */
 
 	  //	  imdiff->correction[0]=1.;
 	  //	  lcfim(imdiff);
@@ -869,7 +875,12 @@ int main(int argc, char *argv[])
 	    sprintf(amatrix_path,amatrix_format,i);
 
 	    num_read = lreadbuf((void **)&amatrix,amatrix_path);
-	    
+
+	    if (num_read == -1) {
+	      printf("Missing amatrix file %s. Skipping frame %d.\n",amatrix_path,i);
+	      goto Skip;
+	    }
+
 #ifdef DEBUG
 	    printf("Amatrix for image %d: ",i);
 	    printf("(%f, %f, %f) ",amatrix->xx,amatrix->xy,amatrix->xz);
@@ -955,6 +966,7 @@ int main(int argc, char *argv[])
 	    printf("data_added = %ld\n",data_added);
 #endif
 	  }
+	Skip:
 	  ct++;
 	}
 

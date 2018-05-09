@@ -14,8 +14,8 @@ size_t lreadbuf(void **buf,const char *fname)
   FILE *f;
   
   if ( (f = fopen(fname,"rb")) == NULL ) {
-    printf("LREADBUF: Can't open %s.\n",fname);
-    exit(0);
+    printf("LREADBUF: Can't open %s. Returning with value -1.\n",fname);
+    return(-1);
   }
 
   this_pos = ftell(f);
