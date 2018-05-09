@@ -35,7 +35,7 @@ if __name__=="__main__":
   except ValueError:
     stills_process = False
   else:
-    index_glob = args.pop(imageglobidx).split("=")[1]
+    index_glob = args.pop(indexglobidx).split("=")[1]
     stills_process = True
   # Output xvectors directory
   try:
@@ -64,6 +64,9 @@ if __name__=="__main__":
   experiments = ExperimentListFactory.from_json_file(metro, check_format=False)
   beam = experiments[0].beam
   detector = experiments[0].detector
+
+  print "s0 from experiment[0]: ",beam.get_s0()
+  print "wavelength from experiment[0]: ",beam.get_wavelength()
  
   lab_coordinates = flex.vec3_double()
   for panel in detector: 
@@ -76,7 +79,7 @@ if __name__=="__main__":
     # Generate x vectors
   x = np.asarray(s1 - beam.get_s0())
     
-#  DATAsize = np.asarray(detector[0].get_image_size())
+  DATAsize = np.asarray(detector[0].get_image_size())
 
 #  np.save(xvectors,x)
 #  np.save(datasize,DATAsize)
@@ -86,17 +89,26 @@ if __name__=="__main__":
     call_params = shlex.split(command)
     subprocess.call(call_params)
 
+  np.save(xvectors_dir+"/x_vectors.npy",x)
+
+  np.save(xvectors_dir+"/DATAsize.npy",DATAsize)
+
   x.astype('float32').tofile(xvectors_dir+"/xvectors.bin")
 
   if rotation_series:
     imnum=1
-    for imgname in glob.glob(image_glob):
+    filelist=glob.glob(image_glob)
+    filelist.sort()
+    for imgname in filelist:
       img = dxtbx.load(imgname)
       detector = img.get_detector()
       beam = img.get_beam()
       scan = img.get_scan()
       gonio = img.get_goniometer()
-      
+
+      print "s0 from ",imgname,": ",beam.get_s0()
+      print "wavelength from ",imgname,": ",beam.get_wavelength()
+
       crystal = copy.deepcopy(experiments.crystals()[0])
       axis = gonio.get_rotation_axis()
       start_angle, delta_angle = scan.get_oscillation()
@@ -110,5 +122,29 @@ if __name__=="__main__":
         command = 'mkdir {}'.format(workdir)
         call_params = shlex.split(command)
         subprocess.call(call_params)
-        At.astype('float32').tofile(workdir+"/At.bin")
+      np.save(workdir+"/At.npy",At)
+      At.astype('float32').tofile(workdir+"/At.bin")
+      imnum = imnum +1
+
+  if stills_process:
+    imnum=1
+    filelist=glob.glob(index_glob)
+    filelist.sort()
+    for jsonname in filelist:
+      experiments = ExperimentListFactory.from_json_file(jsonname, check_format=False)
+      detector = experiments[0].detector
+      beam = experiments[0].beam
+      crystal = experiments.crystals()[0]
+
+      from scitbx import matrix
+      A_matrix = matrix.sqr(crystal.get_A()).inverse()
+      At = np.asarray(A_matrix.transpose()).reshape((3,3))
+
+      workdir=amatrix_dir_prefix+"{0}".format(imnum)
+      if (not os.path.isdir(workdir)):
+        command = 'mkdir {}'.format(workdir)
+        call_params = shlex.split(command)
+        subprocess.call(call_params)
+      np.save(workdir+"/At.npy",At)
+      At.astype('float32').tofile(workdir+"/At.bin")
       imnum = imnum +1

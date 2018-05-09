@@ -236,6 +236,10 @@ if __name__=="__main__":
   x_vectors.astype('float32').tofile(workdir+"/x_vectors.bin")
   np.save(workdir+"/DATAsize.npy",DATAsize)
   DATAsize.astype('int32').tofile(workdir+"/DATAsize.bin")
+  experiments_file=workdir+"/lightweight_indexer_experiments.json"
+  idxr.export_as_json(experiments,file_name=experiments_file)
+  reflections_file=workdir+"/lightweight_reflections.pickle"
+  idxr.export_reflections(indexed,file_name=reflections_file)
   print "Took {0} secs to write the common files.".format(time()-t0)
 
   imnum=0
@@ -275,4 +279,5 @@ if __name__=="__main__":
         call_params = shlex.split(command)
         subprocess.call(call_params)
     np.save(workdir+"/At.npy",At)
+    print "Amatrix for image ",imgname,":",At
     At.astype('float32').tofile(workdir+"/At.bin")

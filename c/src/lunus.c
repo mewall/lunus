@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
         *scaleout;
   
   char
-    inputdeck[1000],
+    inputdeck[10000],
     *imageinpath,
     *lunusoutpath,
     *scaleoutpath,
@@ -36,10 +36,13 @@ int main(int argc, char *argv[])
     *amatrix_path,
     *xvectors_path,
     *do_integrate_str,
+    *integration_image_type,
     *filterhkl_str,
     *lattice_dir,
     *diffuse_lattice_prefix,
     *unit_cell,
+    *imagelist_name = NULL,
+    *imagelist[20000],
     error_msg[LINESIZE];
 
   void *buf;
@@ -66,7 +69,7 @@ int main(int argc, char *argv[])
   float
     normim_tilt_x=0.0,
     normim_tilt_y=0.0,
-    polarim_dist=-1.,
+    distance_mm=0.0,
     polarim_offset=0.0,
     polarim_polarization=1.0,
     correction_factor_scale=1.0,
@@ -102,7 +105,7 @@ int main(int argc, char *argv[])
     *lat;
 
   LATTICE_DATA_TYPE
-    *latct;
+    *latct = NULL;
 
   size_t 
     str_length,
@@ -113,6 +116,7 @@ int main(int argc, char *argv[])
 
 
   // Initialize MPI
+
 
   mpiv = (MPIVARS *)malloc(sizeof(MPIVARS));
   mpiv->argc = argc;
@@ -137,14 +141,16 @@ int main(int argc, char *argv[])
 			exit(0);
 	}
 
+#ifdef DEBUG
 	//	printf("LUNUS: reading input deck\n");
-
+#endif
 	// Read input deck into buffer
 
 	num_read = lreadbuf((void **)&deck,inputdeck);
 
+#ifdef DEBUG
 	//	printf("Length of input deck = %ld\n",num_read);
-
+#endif
 	// Parse input deck
 
 	if ((raw_image_dir=lgettag(deck,"\nraw_image_dir")) == NULL) {
@@ -243,6 +249,13 @@ int main(int argc, char *argv[])
 	  do_integrate=1;
 	} else {
 	  do_integrate=0;
+	}
+
+	imagelist_name=lgettag(deck,"\nimagelist_name");
+
+	if ((integration_image_type=lgettag(deck,"\nintegration_image_type")) == NULL) {
+	  integration_image_type = (char *)malloc(strlen("raw"+1));
+	  strcpy(integration_image_type,"raw");
 	}
 
 	if ((filterhkl_str=lgettag(deck,"\nfilterhkl")) == NULL) {
@@ -427,6 +440,10 @@ int main(int argc, char *argv[])
 	  polarim_polarization = atof(lgettag(deck,"\npolarim_polarization"));
 	}
 
+	if (lgettag(deck,"\ndistance_mm") != NULL) {
+	  distance_mm = atof(lgettag(deck,"\ndistance_mm"));
+	}
+
 	str_length = strlen(lgettag(deck,"\ncorrection_factor_scale"));
 	
 	if (str_length != 0) {
@@ -484,12 +501,19 @@ int main(int argc, char *argv[])
 	
 	  printf("polarim_polarization=%f\n",polarim_polarization);
 
+	  if (distance_mm>0.0) {
+	    printf("distance_mm=%f\n",distance_mm);
+	  } else {
+	    printf("distance_mm=(obtained from image header)\n");
+	  }
+
 	  printf("correction_factor_scale=%f\n",correction_factor_scale);
 
 	}
 	/*
 	 * Initialize diffraction image:
 	 */
+
 
 	if ((imdiff = linitim()) == NULL) {
 	  perror("Couldn't initialize diffraction image.\n\n");
@@ -525,6 +549,12 @@ int main(int argc, char *argv[])
 	imdiff->mask_inner_radius = scale_inner_radius;
 	imdiff->mask_outer_radius = scale_outer_radius;
 
+	// Initialize other images
+
+	imdiff_corrected = linitim();
+	imdiff_scale = linitim();
+	imdiff_scale_ref = linitim();
+
 	// Define the integration lattices and associated variables
         //      if performing integration
 
@@ -555,15 +585,15 @@ int main(int argc, char *argv[])
 	  lat->origin.k = (IJKCOORDS_DATA)(-lat->zbound.min/lat->zscale + .5);
 	  lat->xyvoxels = lat->xvoxels * lat->yvoxels;
 	  lat->lattice_length = lat->xyvoxels*lat->zvoxels;
-	  if (lat->lattice != NULL) free(lat->lattice);
+	  //	  if (lat->lattice != NULL) free(lat->lattice);
 	  lat->lattice = (LATTICE_DATA_TYPE *)calloc(lat->lattice_length,sizeof(LATTICE_DATA_TYPE));
-	  if (latct != NULL) free(latct);
+	  //	  if (latct != NULL) free(latct);
 	  latct = (LATTICE_DATA_TYPE *)calloc(lat->lattice_length,sizeof(LATTICE_DATA_TYPE));
 	}
 
 	// Process all of the images
 
-	int n;
+	/*	int n;
 
 	n = num_images/mpiv->num_procs;
 	if (num_images % mpiv->num_procs != 0) {
@@ -572,25 +602,88 @@ int main(int argc, char *argv[])
 
 	int ib = mpiv->my_id*n+1;
 	int ie = (mpiv->my_id+1)*n;
-
+	*/
 	int ct=0;
 
-	for (i=ib;i<=ie&&i<=num_images;i++) {
+	if (imagelist_name == NULL) {
 
-	  str_length = snprintf(NULL,0,"%s/%s_%05d.%s",raw_image_dir,image_prefix,i,image_suffix);
+	  if (raw_image_dir == NULL || image_prefix == NULL || image_suffix == NULL) {
+	    perror("Can't generate image list due to NULL value of one or more filename components.\n");
+	    exit(1);
+	  }
 
-	  imageinpath = (char *)malloc(str_length+1);
+	  printf("No imagelist provided. Generating image list using loop scheme.\n");
 
-	  sprintf(imageinpath,"%s/%s_%05d.%s",raw_image_dir,image_prefix,i,image_suffix);
+	  for (i=0;i<num_images;i++) {
 
+	    str_length = snprintf(NULL,0,"%s/%s_%05d.%s",raw_image_dir,image_prefix,i+1,image_suffix);
+
+	    imagelist[i] = (char *)malloc(str_length+1);
+
+	    sprintf(imagelist[i],"%s/%s_%05d.%s",raw_image_dir,image_prefix,i+1,image_suffix);
+
+	  }
+
+	} else {
+
+	  FILE *f;
+
+	  if ((f = fopen(imagelist_name,"r")) == NULL) {
+	    printf("Can't open %s.\n",imagelist_name);
+	    exit(1);
+	  }
+	  
+	  size_t bufsize = LINESIZE;
+	  char *buf;
+
+	  i = 0;
+
+	  buf = (char *)malloc(LINESIZE+1);
+
+	  int chars_read;
+
+	  while ((chars_read = getline(&buf,&bufsize,f)) != -1) {
+
+	    buf[chars_read-1]=0;
+
+	    str_length = snprintf(NULL,0,"%s/%s",raw_image_dir,buf);
+
+	    imagelist[i] = (char *)malloc(str_length+1);
+
+	    sprintf(imagelist[i],"%s/%s",raw_image_dir,buf);
+	    
+	    //	    printf("%s\n",imagelist[i]);
+
+	    i++;
+
+	  }
+	  num_images = i;
+	}
+	//	printf("i=%d, imagelist[0] = %s\n",i,imagelist[0]);
+
+	//	exit(1);
+
+	//	for (i=ib;i<=ie&&i<=num_images;i++) {
+	for (i=mpiv->my_id+1;i<=num_images;i=i+mpiv->num_procs) {
+
+	  //	  str_length = snprintf(NULL,0,"%s/%s_%05d.%s",raw_image_dir,image_prefix,i,image_suffix);
+
+	  //	  imageinpath = (char *)malloc(str_length+1);
+
+	  //	  sprintf(imageinpath,"%s/%s_%05d.%s",raw_image_dir,image_prefix,i,image_suffix);
+
+#ifdef DEBUG
 	  //	  printf("imageinpath = %s\n",imageinpath);
+#endif
+
+
 
 	  /*
 	   * Read diffraction image:
 	   */
 	  
-	  if ( (imagein = fopen(imageinpath,"rb")) == NULL ) {
-	    printf("Can't open %s.",imageinpath);
+	  if ( (imagein = fopen(imagelist[i-1],"rb")) == NULL ) {
+	    printf("Can't open %s.",imagelist[i-1]);
 	    exit(0);
 	  }
 
@@ -602,55 +695,54 @@ int main(int argc, char *argv[])
 
 	  fclose(imagein);
 
+	  // Define image parameters from input deck
+	  
+	  imdiff->punchim_upper.c = punchim_xmax;
+	  imdiff->punchim_lower.c = punchim_xmin;
+	  imdiff->punchim_upper.r = punchim_ymax;
+	  imdiff->punchim_lower.r = punchim_ymin;
+	  
+	  imdiff->window_upper.c = windim_xmax;
+	  imdiff->window_lower.c = windim_xmin;
+	  imdiff->window_upper.r = windim_ymax;
+	  imdiff->window_lower.r = windim_ymin;
+	  
+	  imdiff->upper_threshold = thrshim_max;
+	  imdiff->lower_threshold = thrshim_min;
+	  
+	  imdiff->polarization = polarim_polarization;
+	  imdiff->polarization_offset = polarim_offset;
+
+	  if (distance_mm>0.0) {
+	    imdiff->distance_mm = distance_mm;
+	  }
+	  
+	  imdiff->cassette.x = normim_tilt_x;
+	  imdiff->cassette.y = normim_tilt_y;
+	  imdiff->cassette.z = 0.0;
+	  
+	  imdiff->mode_height = modeim_kernel_width - 1;
+	  imdiff->mode_width = modeim_kernel_width - 1;
+	  imdiff->mode_binsize = modeim_bin_size;
+	  
+	  imdiff->mask_inner_radius = scale_inner_radius;
+	  imdiff->mask_outer_radius = scale_outer_radius;
+	  
 	  // Apply masks
 
 	  lpunchim(imdiff);
 	  lwindim(imdiff);
 	  lthrshim(imdiff);
 
-	  // Calculate correction factor
-
-	  imdiff->correction[0]=correction_factor_scale;
-	  lcfim(imdiff);	  
-
-	  // Write masked and corrected image
-
-	  if (imdiff_corrected != NULL) lfreeim(imdiff_corrected);
-          imdiff_corrected = linitim();
-	  lcloneim(imdiff_corrected,imdiff);
-	  if (lmulcfim(imdiff_corrected) != 0) {
-	    perror(imdiff_corrected->error_msg);
-	    exit(1);
-	  }
-	  str_length = snprintf(NULL,0,"%s/%s_%05d.%s",lunus_image_dir,lunus_image_prefix,i,image_suffix);
-
-	  lunusoutpath = (char *)malloc(str_length+1);
-
-	  sprintf(lunusoutpath,"%s/%s_%05d.%s",lunus_image_dir,lunus_image_prefix,i,image_suffix);
-
-	  if ( (lunusout = fopen(lunusoutpath,"wb")) == NULL ) {
-	    printf("Can't open %s.",lunusoutpath);
-	    exit(1);
-	  }
-
-	  imdiff_corrected->outfile = lunusout;
-	  if(lwriteim(imdiff_corrected) != 0) {
-	    perror(imdiff_corrected->error_msg);
-	    exit(1);
-	  }
-
-	  fclose(lunusout);
-
 	  // Mode filter to create image to be used for scaling
 
-	  if (imdiff_scale != NULL) lfreeim(imdiff_scale);
-          imdiff_scale = linitim();
-	  lcloneim(imdiff_scale,imdiff_corrected);
+	  lcloneim(imdiff_scale,imdiff);
 
 	  lmodeim(imdiff_scale);
 
 	  // Write mode filtered image
 
+	  /*
 	  str_length = snprintf(NULL,0,"%s/%s_%05d.%s",lunus_image_dir,scale_image_prefix,i,image_suffix);
 
 	  scaleoutpath = (char *)malloc(str_length+1);
@@ -669,6 +761,42 @@ int main(int argc, char *argv[])
 	  }
 
 	  fclose(scaleout);
+	  */
+
+	  // Calculate correction factor
+
+	  imdiff->correction[0]=correction_factor_scale;
+	  lcfim(imdiff);	  
+
+	  // Write masked and corrected image
+
+	  lcloneim(imdiff_corrected,imdiff);
+	  if (lmulcfim(imdiff_corrected) != 0) {
+	    perror(imdiff_corrected->error_msg);
+	    exit(1);
+	  }
+
+	  /*
+
+	  str_length = snprintf(NULL,0,"%s/%s_%05d.%s",lunus_image_dir,lunus_image_prefix,i,image_suffix);
+
+	  lunusoutpath = (char *)malloc(str_length+1);
+
+	  sprintf(lunusoutpath,"%s/%s_%05d.%s",lunus_image_dir,lunus_image_prefix,i,image_suffix);
+
+	  if ( (lunusout = fopen(lunusoutpath,"wb")) == NULL ) {
+	    printf("Can't open %s.",lunusoutpath);
+	    exit(1);
+	  }
+
+	  imdiff_corrected->outfile = lunusout;
+	  if(lwriteim(imdiff_corrected) != 0) {
+	    perror(imdiff_corrected->error_msg);
+	    exit(1);
+	  }
+
+	  fclose(lunusout);
+	  */
 
 	  //	  imdiff->correction[0]=1.;
 	  //	  lcfim(imdiff);
@@ -679,7 +807,6 @@ int main(int argc, char *argv[])
 
 	    if (ct == 0) {
 	      // Reference image for scaling
-	      imdiff_scale_ref = linitim();
 	      lcloneim(imdiff_scale_ref,imdiff_scale);
 	      //	      lbarrierMPI(mpiv);
 	      //	      printf("Barrier 1 passed\n");
@@ -695,8 +822,9 @@ int main(int argc, char *argv[])
 		  exit(1);
 		}
 #ifdef DEBUG		
-		for (j=0;j<3;j++) {
-		  printf("(%f, %f, %f) ",xvectors_cctbx[j].x,xvectors_cctbx[j].y,xvectors_cctbx[j].z);
+		printf("SAMPLES\n");
+		for (j=50000;j<50010;j++) {
+		  printf("(%f, %f, %f): %d\n",xvectors_cctbx[j].x,xvectors_cctbx[j].y,xvectors_cctbx[j].z, imdiff_corrected->image[j]);
 		}
 		printf("\n");
 #endif		
@@ -747,8 +875,14 @@ int main(int argc, char *argv[])
 	    sprintf(amatrix_path,amatrix_format,i);
 
 	    num_read = lreadbuf((void **)&amatrix,amatrix_path);
-	    
-#ifdef DEBUG		
+
+	    if (num_read == -1) {
+	      printf("Missing amatrix file %s. Skipping frame %d.\n",amatrix_path,i);
+	      goto Skip;
+	    }
+
+#ifdef DEBUG
+	    printf("Amatrix for image %d: ",i);
 	    printf("(%f, %f, %f) ",amatrix->xx,amatrix->xy,amatrix->xz);
 	    printf("(%f, %f, %f) ",amatrix->yx,amatrix->yy,amatrix->yz);
 	    printf("(%f, %f, %f) ",amatrix->zx,amatrix->zy,amatrix->zz);
@@ -760,6 +894,8 @@ int main(int argc, char *argv[])
 	    // Calculate the transpose of a, to use matrix multiplication method
 
 	    a = (struct xyzmatrix *)amatrix;
+
+	    //	    *at = *a;
 
 	    at = lmatt(*a);
 
@@ -803,14 +939,21 @@ int main(int argc, char *argv[])
 		    kk>=0 && kk<lat->zvoxels && imdiff_scale->image[index]>0 &&
 		    imdiff_scale->image[index]!=imdiff->ignore_tag) {
 		  size_t latidx = kk*lat->xyvoxels + jj*lat->xvoxels + ii;
-		  if (filterhkl!=0) {
+		  if (strcmp(integration_image_type,"raw")==0) {
 		    lat->lattice[latidx] += 
 		      (LATTICE_DATA_TYPE)imdiff->image[index]
 		      * imdiff->correction[index]
 		      * this_scale_factor;
-		  } else {
+		  }
+		  if (strcmp(integration_image_type,"corrected")==0) {
+		    lat->lattice[latidx] += 
+		      (LATTICE_DATA_TYPE)imdiff_corrected->image[index]
+		      * this_scale_factor;
+		  }
+		  if (strcmp(integration_image_type,"scale")==0) {
 		    lat->lattice[latidx] += 
 		      (LATTICE_DATA_TYPE)imdiff_scale->image[index]
+		      * imdiff->correction[index]
 		      * this_scale_factor;
 		  }
 		  latct[latidx] += 1.;
@@ -823,23 +966,26 @@ int main(int argc, char *argv[])
 	    printf("data_added = %ld\n",data_added);
 #endif
 	  }
+	Skip:
 	  ct++;
 	}
 
 #ifdef DEBUG
-	// Count number of data points in the lattice
-	int num_data_points=0;
-	float sum_data_points=0.0;
-
-	for (j=0;j<lat->lattice_length;j++) {
-	  if (latct[j] != 0) {
-	    if (lat->lattice[j]/latct[j] < 32767.) {
-	      num_data_points++;
-	      sum_data_points += lat->lattice[j]/latct[j];
+	if (do_integrate != 0) {
+	  // Count number of data points in the lattice
+	  int num_data_points=0;
+	  float sum_data_points=0.0;
+	  
+	  for (j=0;j<lat->lattice_length;j++) {
+	    if (latct[j] != 0) {
+	      if (lat->lattice[j]/latct[j] < 32767.) {
+		num_data_points++;
+		sum_data_points += lat->lattice[j]/latct[j];
+	      }
 	    }
 	  }
+	  printf("num_data_points=%d, mean_data_points=%f\n",num_data_points,sum_data_points/(float)num_data_points);
 	}
-	printf("num_data_points=%d, mean_data_points=%f\n",num_data_points,sum_data_points/(float)num_data_points);
 #endif
 	if (do_integrate != 0) {
 
@@ -885,7 +1031,7 @@ int main(int argc, char *argv[])
 	    lat->outfile=latticeout;
 	    lwritelt(lat);
 	    fclose(latticeout);
-	  }
+	    }
 	}
 	lfinalMPI(mpiv);
 
