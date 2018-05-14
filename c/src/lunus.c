@@ -840,6 +840,8 @@ int main(int argc, char *argv[])
 
 		for (j=0; j<imdiff->vpixels; j++) {
 		  for (k=0; k<imdiff->hpixels; k++) {
+		    // The following conditional is needed to prevent a segfault-inducing Intel 18.X optimization error:
+		    if (index == 0) printf("");
 		    xvectors[index] = xvectors_cctbx[k*imdiff->vpixels + j];
 		    index++;
 		  }
