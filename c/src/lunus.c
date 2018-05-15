@@ -36,11 +36,13 @@ int main(int argc, char *argv[])
     *amatrix_path,
     *xvectors_path,
     *do_integrate_str,
+    *writevtk_str,
     *integration_image_type,
     *filterhkl_str,
     *lattice_dir,
     *diffuse_lattice_prefix,
     *unit_cell,
+    *spacegroup,
     *imagelist_name = NULL,
     *imagelist[20000],
     error_msg[LINESIZE];
@@ -48,6 +50,7 @@ int main(int argc, char *argv[])
   void *buf;
 
   int
+    writevtk,
     do_integrate,
     filterhkl;
 
@@ -251,6 +254,17 @@ int main(int argc, char *argv[])
 	  do_integrate=0;
 	}
 
+	if ((writevtk_str=lgettag(deck,"\nwritevtk")) == NULL) {
+	  writevtk_str = (char *)malloc(strlen("False"+1));
+	  strcpy(writevtk_str,"False");
+	}
+
+	if (strcmp(writevtk_str,"True")==0) {
+	  writevtk=1;
+	} else {
+	  writevtk=0;
+	}
+
 	imagelist_name=lgettag(deck,"\nimagelist_name");
 
 	if ((integration_image_type=lgettag(deck,"\nintegration_image_type")) == NULL) {
@@ -294,6 +308,13 @@ int main(int argc, char *argv[])
 	if ((unit_cell=lgettag(deck,"\nunit_cell")) == NULL) {
 	  if (do_integrate!=0) {
 	    perror("LUNUS: Must provide unit_cell for integration\n");
+	    exit(1);
+	  }
+	}
+
+	if ((spacegroup=lgettag(deck,"\nspacegroup")) == NULL) {
+	  if (writevtk!=0) {
+	    perror("LUNUS: Must provide spacegroup for writing .vtk\n");
 	    exit(1);
 	  }
 	}
@@ -841,7 +862,8 @@ int main(int argc, char *argv[])
 		for (j=0; j<imdiff->vpixels; j++) {
 		  for (k=0; k<imdiff->hpixels; k++) {
 		    // The following conditional is needed to prevent a segfault-inducing Intel 18.X optimization error:
-		    if (index == 0) printf("");
+		    //		    if (index == 0) printf("");
+		    //		    xvectors[k*imdiff->vpixels + j] = xvectors_cctbx[index];
 		    xvectors[index] = xvectors_cctbx[k*imdiff->vpixels + j];
 		    index++;
 		  }
@@ -1027,13 +1049,39 @@ int main(int argc, char *argv[])
 	    FILE *latticeout;
 	    
 	    if ( (latticeout = fopen(latticeoutpath,"wb")) == NULL ) {
-	      printf("Can't open %s.",latticeoutpath);
+	      printf("Can't open %s.\n",latticeoutpath);
 	      exit(1);
 	    }
 	    lat->outfile=latticeout;
 	    lwritelt(lat);
 	    fclose(latticeout);
+	    // Write .vtk if requested
+
+	    if (writevtk != 0) {
+
+	      str_length = snprintf(NULL,0,"%s/%s.vtk",lattice_dir,diffuse_lattice_prefix);
+	    
+	      char *vtkoutpath;
+	      
+	      vtkoutpath = (char *)malloc(str_length+1);
+	      
+	      sprintf(vtkoutpath,"%s/%s.vtk",lattice_dir,diffuse_lattice_prefix);
+	      
+	      //	  printf("imageinpath = %s\n",imageinpath);
+	      
+	      FILE *vtkout;
+	      
+	      if ( (vtkout = fopen(vtkoutpath,"w")) == NULL ) {
+		printf("Can't open %s.\n",vtkoutpath);
+		exit(1);
+	      }
+	      
+	      lat->outfile=vtkout;
+	      lat->cell_str=unit_cell;
+	      lat->space_group_str=spacegroup;
+	      lwritevtk(lat);
 	    }
+	  }
 	}
 	lfinalMPI(mpiv);
 

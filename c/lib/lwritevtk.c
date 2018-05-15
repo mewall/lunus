@@ -19,7 +19,11 @@ int lwritevtk(LAT3D *lat)
  */
 
   fprintf(lat->outfile,"# vtk DataFile Version 2.0\n");
-  fprintf(lat->outfile,"Input file is %s\n",lat->filename);
+  if (lat->cell_str == NULL || lat->space_group_str == NULL) {
+    fprintf(lat->outfile,"Input file is %s\n",lat->filename);
+  } else {
+    fprintf(lat->outfile,"lattice_type_str=P1;unit_cell=%s;space_group=%s;\n",lat->cell_str,lat->space_group_str);
+  }
   fprintf(lat->outfile,"ASCII\n");
   fprintf(lat->outfile,"DATASET STRUCTURED_POINTS\n");
   fprintf(lat->outfile,"DIMENSIONS %d %d %d\n",(int)lat->xvoxels,(int)lat->yvoxels,(int)lat->zvoxels);
