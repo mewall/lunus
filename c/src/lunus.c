@@ -796,7 +796,6 @@ int main(int argc, char *argv[])
 	}
 	}
 	lbcastBufMPI((void *)&num_images,sizeof(size_t),0,mpiv);
-	printf("rank=%d, num_images=%ld\n",mpiv->my_id,num_images);
 	int il_sz[num_images];
 	if (mpiv->my_id == 0) {
 	  for (i=0;i<num_images;i++) {
@@ -804,7 +803,6 @@ int main(int argc, char *argv[])
 	  }
 	}
 	lbcastBufMPI((void *)&il_sz,sizeof(int)*num_images,0,mpiv);
-	printf("rank=%d, il_sz[0]=%d\n",mpiv->my_id,il_sz[0]);
 	for (i=0;i<num_images;i++) {
 	  if (mpiv->my_id != 0) {
 	    imagelist[i] = (char *)malloc(il_sz[i]);
@@ -812,10 +810,7 @@ int main(int argc, char *argv[])
 	  lbcastBufMPI((void *)imagelist[i],il_sz[i],0,mpiv);
 	}
 
-	printf("rank=%d, imagelist[0]=%s\n",mpiv->my_id,imagelist[0]);
-
-	lbcastBufMPI((void *)&at,sizeof(struct xyzmatrix)*num_images,0,mpiv);
-	
+	lbcastBufMPI((void *)&at,sizeof(struct xyzmatrix)*num_images,0,mpiv);	
 
 	for (i=mpiv->my_id+1;i<=num_images;i=i+mpiv->num_procs) {
 
@@ -1128,6 +1123,7 @@ int main(int argc, char *argv[])
 	    for (j=0; j<lat->lattice_length; j++) {
 	      if (latctsum[j] != 0) {
 		lat->lattice[j] = latsum[j]/latctsum[j];
+		if isnan(lat->lattice[j]) lat->lattice[j] = lat->mask_tag;
 	      } else {
 		lat->lattice[j] = lat->mask_tag;
 	      }
