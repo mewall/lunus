@@ -11,7 +11,100 @@
    */
 
 #include<mwmask.h>
+#include<cJSON.h>
 
+char * readExptJSON(struct xyzmatrix *a,const char *json_name) {
+
+  char *json_text, *image_name;
+
+  cJSON 
+    *j = NULL, 
+    *imageset = NULL, 
+    *crystal = NULL, 
+    *real_space_a = NULL,
+    *real_space_b = NULL,
+    *real_space_c = NULL;
+
+  if (lreadbuf((void **)&json_text,json_name) == -1) {
+    perror("Can't read json file\n");
+    goto readExptJSONFail;
+  }
+
+  j = cJSON_Parse(json_text);
+
+  imageset = cJSON_GetArrayItem(cJSON_GetObjectItem(j,"imageset"),0);
+  
+  image_name = cJSON_GetArrayItem(cJSON_GetObjectItem(imageset,"images"),0)->valuestring;
+
+  crystal = cJSON_GetArrayItem(cJSON_GetObjectItem(j,"crystal"),0);
+
+  real_space_a = cJSON_GetObjectItem(crystal,"real_space_a");
+  real_space_b = cJSON_GetObjectItem(crystal,"real_space_b");
+  real_space_c = cJSON_GetObjectItem(crystal,"real_space_c");
+
+  a->xx = cJSON_GetArrayItem(real_space_a,0)->valuedouble;
+  a->xy = cJSON_GetArrayItem(real_space_a,1)->valuedouble;
+  a->xz = cJSON_GetArrayItem(real_space_a,2)->valuedouble;
+  a->yx = cJSON_GetArrayItem(real_space_b,0)->valuedouble;
+  a->yy = cJSON_GetArrayItem(real_space_b,1)->valuedouble;
+  a->yz = cJSON_GetArrayItem(real_space_b,2)->valuedouble;
+  a->zx = cJSON_GetArrayItem(real_space_c,0)->valuedouble;
+  a->zy = cJSON_GetArrayItem(real_space_c,1)->valuedouble;
+  a->zz = cJSON_GetArrayItem(real_space_c,2)->valuedouble;
+
+#ifdef DEBUG
+    printf("Amatrix for image %s: ",image_name);
+    printf("(%f, %f, %f) ",a->xx,a->xy,a->xz);
+    printf("(%f, %f, %f) ",a->yx,a->yy,a->yz);
+    printf("(%f, %f, %f) ",a->zx,a->zy,a->zz);
+    printf("\n");
+#endif		
+
+
+  return(image_name);
+
+ readExptJSONFail:
+  return(NULL);
+
+}
+
+int readAmatrix(struct xyzmatrix *a,const char *amatrix_format,const size_t i) {
+
+  int num_read,str_length;
+
+  char *amatrix_path;
+
+  struct xyzmatrix *amatrix;
+
+  str_length = snprintf(NULL,0,amatrix_format,i);
+	    
+  amatrix_path = (char *)malloc(str_length+1);
+  
+  sprintf(amatrix_path,amatrix_format,i);
+  
+  num_read = lreadbuf((void **)&amatrix,amatrix_path);
+
+  if (num_read != -1) {
+  
+
+  // Calculate the transpose of a, to use matrix multiplication method
+  
+    *a = lmatt(*amatrix);
+
+#ifdef DEBUG
+    printf("Amatrix for image %d: ",i);
+    printf("(%f, %f, %f) ",a->xx,a->xy,a->xz);
+    printf("(%f, %f, %f) ",a->yx,a->yy,a->yz);
+    printf("(%f, %f, %f) ",a->zx,a->zy,a->zz);
+    printf("\n");
+#endif		
+
+    return(0);
+  
+  } else {
+    return(-1);
+  }
+}
 int main(int argc, char *argv[])
 {
   FILE
@@ -32,6 +125,7 @@ int main(int argc, char *argv[])
     *scale_image_prefix,
     *lunus_image_dir,
     *raw_image_dir,
+    *json_dir,
     *amatrix_format,
     *amatrix_path,
     *xvectors_path,
@@ -44,7 +138,9 @@ int main(int argc, char *argv[])
     *unit_cell,
     *spacegroup,
     *imagelist_name = NULL,
+    *jsonlist_name = NULL,
     *imagelist[20000],
+    *jsonlist[20000],
     error_msg[LINESIZE];
 
   void *buf;
@@ -58,7 +154,7 @@ int main(int argc, char *argv[])
 
   IJKCOORDS_DATA *ilist, *jlist, *klist;
 
-  struct xyzmatrix *amatrix;
+  struct xyzmatrix *amatrix,at[20000];
 
   size_t
     index,
@@ -76,12 +172,6 @@ int main(int argc, char *argv[])
     polarim_offset=0.0,
     polarim_polarization=1.0,
     correction_factor_scale=1.0,
-    cella,
-    cellb,
-    cellc,
-    alpha,
-    beta,
-    gamma,
     resolution;
 
   int
@@ -159,6 +249,11 @@ int main(int argc, char *argv[])
 	if ((raw_image_dir=lgettag(deck,"\nraw_image_dir")) == NULL) {
 	  perror("LUNUS: Must provide raw_image_dir\n");
 	  exit(1);
+	}
+
+	if ((json_dir=lgettag(deck,"\njson_dir")) == NULL) {
+	  json_dir = (char *)malloc(strlen(".")+1);
+	  json_dir = ".";
 	}
 
 	if ((lunus_image_dir=lgettag(deck,"\nlunus_image_dir")) == NULL) {
@@ -267,6 +362,8 @@ int main(int argc, char *argv[])
 
 	imagelist_name=lgettag(deck,"\nimagelist_name");
 
+	jsonlist_name=lgettag(deck,"\njsonlist_name");
+
 	if ((integration_image_type=lgettag(deck,"\nintegration_image_type")) == NULL) {
 	  integration_image_type = (char *)malloc(strlen("raw"+1));
 	  strcpy(integration_image_type,"raw");
@@ -319,59 +416,6 @@ int main(int argc, char *argv[])
 	  }
 	}
 
-	if (lgettag(deck,"\ncella") == NULL) {
-	  if (do_integrate!=0) {
-	    perror("Must provide cella for integration\n");
-	    exit(1);
-	  }
-	} else {
-	  cella = atof(lgettag(deck,"\ncella"));
-	}
-
-	if (lgettag(deck,"\ncellb") == NULL) {
-	  if (do_integrate!=0) {
-	    perror("Must provide cellb for integration\n");
-	    exit(1);
-	  }
-	} else {
-	  cellb = atof(lgettag(deck,"\ncellb"));
-	}
-
-	if (lgettag(deck,"\ncellc") == NULL) {
-	  if (do_integrate!=0) {
-	    perror("Must provide cellc for integration\n");
-	    exit(1);
-	  }
-	} else {
-	  cellc = atof(lgettag(deck,"\ncellc"));
-	}
-
-	if (lgettag(deck,"\nalpha") == NULL) {
-	  if (do_integrate!=0) {
-	    perror("Must provide alpha for integration\n");
-	    exit(1);
-	  }
-	} else {
-	  alpha = atof(lgettag(deck,"\nalpha"));
-	}
-
-	if (lgettag(deck,"\nbeta") == NULL) {
-	  if (do_integrate!=0) {
-	    perror("Must provide beta for integration\n");
-	    exit(1);
-	  }
-	} else {
-	  beta = atof(lgettag(deck,"\nbeta"));
-	}
-
-	if (lgettag(deck,"\ngamma") == NULL) {
-	  if (do_integrate!=0) {
-	    perror("Must provide gamma for integration\n");
-	    exit(1);
-	  }
-	} else {
-	  gamma = atof(lgettag(deck,"\ngamma"));
-	}
 
 	if (lgettag(deck,"\nresolution") == NULL) {
 	  if (do_integrate!=0) {
@@ -626,24 +670,86 @@ int main(int argc, char *argv[])
 	*/
 	int ct=0;
 
-	if (imagelist_name == NULL) {
+	if (mpiv->my_id == 0) {
+
+	if (imagelist_name == NULL && jsonlist_name == NULL) {
 
 	  if (raw_image_dir == NULL || image_prefix == NULL || image_suffix == NULL) {
 	    perror("Can't generate image list due to NULL value of one or more filename components.\n");
 	    exit(1);
 	  }
 
-	  printf("No imagelist provided. Generating image list using loop scheme.\n");
+	  printf("No imagelist or jsonlist provided. Generating image list using loop scheme.\n");
+
+	  size_t ii=0;
 
 	  for (i=0;i<num_images;i++) {
 
-	    str_length = snprintf(NULL,0,"%s/%s_%05d.%s",raw_image_dir,image_prefix,i+1,image_suffix);
+	    // Read amatrix
 
-	    imagelist[i] = (char *)malloc(str_length+1);
+	    if ((readAmatrix(&at[ii],amatrix_format,i) == -1)) {
+	      printf("Missing amatrix file %s. Skipping frame %d.\n",amatrix_path,i);
+	    } else {
+	      
+	      
+	      //	printf("i=%d, imagelist[0] = %s\n",i,imagelist[0]);
+	      
+	      //	exit(1);
+	      
+	      //	for (i=ib;i<=ie&&i<=num_images;i++) {
+	      
+	      str_length = snprintf(NULL,0,"%s/%s_%05d.%s",raw_image_dir,image_prefix,i+1,image_suffix);
+	      
+	      imagelist[ii] = (char *)malloc(str_length+1);
+	      
+	      sprintf(imagelist[ii],"%s/%s_%05d.%s",raw_image_dir,image_prefix,i+1,image_suffix);
+	      
+	      ii++;
+	    }
+	    
+	  }
+	  num_images = ii;
 
-	    sprintf(imagelist[i],"%s/%s_%05d.%s",raw_image_dir,image_prefix,i+1,image_suffix);
+	} else if (jsonlist_name != NULL) {
+
+	  FILE *f;
+
+	  if ((f = fopen(jsonlist_name,"r")) == NULL) {
+	    printf("Can't open %s.\n",jsonlist_name);
+	    exit(1);
+	  }
+	  
+	  size_t bufsize = LINESIZE;
+	  char *buf;
+
+	  i = 0;
+
+	  buf = (char *)malloc(LINESIZE+1);
+
+	  int chars_read;
+
+	  while ((chars_read = getline(&buf,&bufsize,f)) != -1) {
+
+	    buf[chars_read-1]=0;
+
+	    char *json_name;
+
+	    str_length = snprintf(NULL,0,"%s/%s",json_dir,buf);
+
+	    json_name = (char *)malloc(str_length+1);
+
+	    sprintf(json_name,"%s/%s",json_dir,buf);
+	    
+	    if ((imagelist[i] = readExptJSON(&at[i],json_name)) == NULL) {
+	      printf("Skipping %s, unable to read\n",json_name);
+	    } else {
+	      printf("%s\n",imagelist[i]);
+	      i++;
+	    }
 
 	  }
+
+	  num_images = i;
 
 	} else {
 
@@ -665,26 +771,52 @@ int main(int argc, char *argv[])
 
 	  while ((chars_read = getline(&buf,&bufsize,f)) != -1) {
 
-	    buf[chars_read-1]=0;
+	    // Read amatrix
 
-	    str_length = snprintf(NULL,0,"%s/%s",raw_image_dir,buf);
-
-	    imagelist[i] = (char *)malloc(str_length+1);
-
-	    sprintf(imagelist[i],"%s/%s",raw_image_dir,buf);
+	    if ((readAmatrix(&at[i],amatrix_format,i+1) == -1)) {
+	      printf("Missing amatrix file %s. Skipping frame %d.\n",amatrix_path,i);
+	    } else {
+	      
+	      
+	      buf[chars_read-1]=0;
+	      
+	      str_length = snprintf(NULL,0,"%s/%s",raw_image_dir,buf);
+	      
+	      imagelist[i] = (char *)malloc(str_length+1);
+	      
+	      sprintf(imagelist[i],"%s/%s",raw_image_dir,buf);
+	      
+	      //	    printf("%s\n",imagelist[i]);
+	      
+	      i++;
+	    }
 	    
-	    //	    printf("%s\n",imagelist[i]);
-
-	    i++;
-
 	  }
 	  num_images = i;
 	}
-	//	printf("i=%d, imagelist[0] = %s\n",i,imagelist[0]);
+	}
+	lbcastBufMPI((void *)&num_images,sizeof(size_t),0,mpiv);
+	printf("rank=%d, num_images=%ld\n",mpiv->my_id,num_images);
+	int il_sz[num_images];
+	if (mpiv->my_id == 0) {
+	  for (i=0;i<num_images;i++) {
+	    il_sz[i] = strlen(imagelist[i])+1;
+	  }
+	}
+	lbcastBufMPI((void *)&il_sz,sizeof(int)*num_images,0,mpiv);
+	printf("rank=%d, il_sz[0]=%d\n",mpiv->my_id,il_sz[0]);
+	for (i=0;i<num_images;i++) {
+	  if (mpiv->my_id != 0) {
+	    imagelist[i] = (char *)malloc(il_sz[i]);
+	  }
+	  lbcastBufMPI((void *)imagelist[i],il_sz[i],0,mpiv);
+	}
 
-	//	exit(1);
+	printf("rank=%d, imagelist[0]=%s\n",mpiv->my_id,imagelist[0]);
 
-	//	for (i=ib;i<=ie&&i<=num_images;i++) {
+	lbcastBufMPI((void *)&at,sizeof(struct xyzmatrix)*num_images,0,mpiv);
+	
+
 	for (i=mpiv->my_id+1;i<=num_images;i=i+mpiv->num_procs) {
 
 	  //	  str_length = snprintf(NULL,0,"%s/%s_%05d.%s",raw_image_dir,image_prefix,i,image_suffix);
@@ -890,38 +1022,6 @@ int main(int argc, char *argv[])
 	    float this_scale_factor = imdiff_scale_ref->rfile[0];
 	    printf("Image %d scale factor, error = %f, %f\n",i,imdiff_scale_ref->rfile[0],imdiff_scale_ref->rfile[1]);
 
-	    // Read amatrix
-
-	    str_length = snprintf(NULL,0,amatrix_format,i);
-	    
-	    amatrix_path = (char *)malloc(str_length+1);
-	    
-	    sprintf(amatrix_path,amatrix_format,i);
-
-	    num_read = lreadbuf((void **)&amatrix,amatrix_path);
-
-	    if (num_read == -1) {
-	      printf("Missing amatrix file %s. Skipping frame %d.\n",amatrix_path,i);
-	      goto Skip;
-	    }
-
-#ifdef DEBUG
-	    printf("Amatrix for image %d: ",i);
-	    printf("(%f, %f, %f) ",amatrix->xx,amatrix->xy,amatrix->xz);
-	    printf("(%f, %f, %f) ",amatrix->yx,amatrix->yy,amatrix->yz);
-	    printf("(%f, %f, %f) ",amatrix->zx,amatrix->zy,amatrix->zz);
-	    printf("\n");
-#endif		
-
-	    struct xyzmatrix *a,at;
-
-	    // Calculate the transpose of a, to use matrix multiplication method
-
-	    a = (struct xyzmatrix *)amatrix;
-
-	    //	    *at = *a;
-
-	    at = lmatt(*a);
 
 	    // Calculate the rotated and scaled xvectors, yielding Miller indices
 
@@ -946,7 +1046,7 @@ int main(int argc, char *argv[])
 	    IJKCOORDS_DATA ii,jj,kk;
 	    index = 0;
 	    for (j=0; j<imdiff->image_length; j++) {
-	      H = lmatvecmul(at, xvectors[j]);
+	      H = lmatvecmul(at[i-1], xvectors[j]);
 #ifdef DEBUG
 	      if (j<10) {
 		printf("Image %d, H[%d] = (%f, %f, %f)\n",i,j,H.x,H.y,H.z);
@@ -990,7 +1090,6 @@ int main(int argc, char *argv[])
 	    printf("data_added = %ld\n",data_added);
 #endif
 	  }
-	Skip:
 	  ct++;
 	}
 

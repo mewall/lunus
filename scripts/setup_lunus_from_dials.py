@@ -14,6 +14,8 @@ if __name__=="__main__":
 
  # Read command line arguments
 
+  output_format="binary"
+
  # Input json
   try:
     metroidx = [a.find("metrology")==0 for a in args].index(True)
@@ -44,6 +46,14 @@ if __name__=="__main__":
     xvectors_dir = "tmpdir_common"
   else:
     xvectors_dir = args.pop(xvectorsdiridx).split("=")[1]
+  # Output json files directory
+  try:
+    jsondiridx = [a.find("json_dir")==0 for a in args].index(True)
+  except ValueError:
+    json_dir = "tmpdir_common"
+  else:
+    json_dir = args.pop(jsondiridx).split("=")[1]
+    output_format="json"
   # Output amatrix directory
   try:
     amatrixdiridx = [a.find("amatrix_dir")==0 for a in args].index(True)
@@ -96,6 +106,9 @@ if __name__=="__main__":
   x.astype('float32').tofile(xvectors_dir+"/xvectors.bin")
 
   if rotation_series:
+    from dxtbx.imageset import ImageSetFactory
+    from dxtbx.model.experiment_list import Experiment, ExperimentList
+    from dxtbx.serialize import dump
     imnum=1
     filelist=glob.glob(image_glob)
     filelist.sort()
@@ -113,17 +126,28 @@ if __name__=="__main__":
       axis = gonio.get_rotation_axis()
       start_angle, delta_angle = scan.get_oscillation()
       crystal.rotate_around_origin(axis, start_angle + (delta_angle/2), deg=True)
-      from scitbx import matrix
-      A_matrix = matrix.sqr(crystal.get_A()).inverse()
-      At = np.asarray(A_matrix.transpose()).reshape((3,3))
+      if (output_format == "json"):
+        exp_list = ExperimentList()
+        exp_list.append(Experiment(imageset=ImageSetFactory.make_imageset(list([imgname])),
+                                   beam=beam,
+                                   detector=detector,
+                                   goniometer=gonio,
+                                   scan=scan,
+                                   crystal=crystal))
+        dump.experiment_list(exp_list,json_dir+"/experiments_for_lunus_{0}.json".format(imnum))
+      else:
+        from scitbx import matrix
+        A_matrix = matrix.sqr(crystal.get_A()).inverse()
+        At = np.asarray(A_matrix.transpose()).reshape((3,3))
+        print At
 
-      workdir=amatrix_dir_prefix+"{0}".format(imnum)
-      if (not os.path.isdir(workdir)):
-        command = 'mkdir {}'.format(workdir)
-        call_params = shlex.split(command)
-        subprocess.call(call_params)
-      np.save(workdir+"/At.npy",At)
-      At.astype('float32').tofile(workdir+"/At.bin")
+        workdir=amatrix_dir_prefix+"{0}".format(imnum)
+        if (not os.path.isdir(workdir)):
+          command = 'mkdir {}'.format(workdir)
+          call_params = shlex.split(command)
+          subprocess.call(call_params)
+        np.save(workdir+"/At.npy",At)
+        At.astype('float32').tofile(workdir+"/At.bin")
       imnum = imnum +1
 
   if stills_process:
@@ -140,11 +164,12 @@ if __name__=="__main__":
       A_matrix = matrix.sqr(crystal.get_A()).inverse()
       At = np.asarray(A_matrix.transpose()).reshape((3,3))
 
-      workdir=amatrix_dir_prefix+"{0}".format(imnum)
-      if (not os.path.isdir(workdir)):
-        command = 'mkdir {}'.format(workdir)
-        call_params = shlex.split(command)
-        subprocess.call(call_params)
-      np.save(workdir+"/At.npy",At)
-      At.astype('float32').tofile(workdir+"/At.bin")
+      if (output_format != "json"):
+        workdir=amatrix_dir_prefix+"{0}".format(imnum)
+        if (not os.path.isdir(workdir)):
+          command = 'mkdir {}'.format(workdir)
+          call_params = shlex.split(command)
+          subprocess.call(call_params)
+        np.save(workdir+"/At.npy",At)
+        At.astype('float32').tofile(workdir+"/At.bin")
       imnum = imnum +1

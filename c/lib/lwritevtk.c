@@ -22,7 +22,11 @@ int lwritevtk(LAT3D *lat)
   if (lat->cell_str == NULL || lat->space_group_str == NULL) {
     fprintf(lat->outfile,"Input file is %s\n",lat->filename);
   } else {
-    fprintf(lat->outfile,"lattice_type_str=P1;unit_cell=%s;space_group=%s;\n",lat->cell_str,lat->space_group_str);
+    if (lat->cell_str[0] == 0 || lat->space_group_str == 0) {
+      fprintf(lat->outfile,"Input file is %s\n",lat->filename);
+    } else {
+      fprintf(lat->outfile,"lattice_type_str=P1;unit_cell=%s;space_group=%s;\n",lat->cell_str,lat->space_group_str);
+    }
   }
   fprintf(lat->outfile,"ASCII\n");
   fprintf(lat->outfile,"DATASET STRUCTURED_POINTS\n");
