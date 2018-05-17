@@ -99,9 +99,9 @@ if __name__=="__main__":
     call_params = shlex.split(command)
     subprocess.call(call_params)
 
-  np.save(xvectors_dir+"/x_vectors.npy",x)
+#  np.save(xvectors_dir+"/x_vectors.npy",x)
 
-  np.save(xvectors_dir+"/DATAsize.npy",DATAsize)
+#  np.save(xvectors_dir+"/DATAsize.npy",DATAsize)
 
   x.astype('float32').tofile(xvectors_dir+"/xvectors.bin")
 
@@ -134,7 +134,7 @@ if __name__=="__main__":
                                    goniometer=gonio,
                                    scan=scan,
                                    crystal=crystal))
-        dump.experiment_list(exp_list,json_dir+"/experiments_for_lunus_{0}.json".format(imnum))
+        dump.experiment_list(exp_list,json_dir+"/experiments_for_lunus_{0:05d}.json".format(imnum))
       else:
         from scitbx import matrix
         A_matrix = matrix.sqr(crystal.get_A()).inverse()
@@ -146,7 +146,7 @@ if __name__=="__main__":
           command = 'mkdir {}'.format(workdir)
           call_params = shlex.split(command)
           subprocess.call(call_params)
-        np.save(workdir+"/At.npy",At)
+#        np.save(workdir+"/At.npy",At)
         At.astype('float32').tofile(workdir+"/At.bin")
       imnum = imnum +1
 
@@ -170,6 +170,6 @@ if __name__=="__main__":
           command = 'mkdir {}'.format(workdir)
           call_params = shlex.split(command)
           subprocess.call(call_params)
-        np.save(workdir+"/At.npy",At)
+#        np.save(workdir+"/At.npy",At)
         At.astype('float32').tofile(workdir+"/At.bin")
       imnum = imnum +1
