@@ -53,11 +53,11 @@ char * readExptJSON(struct xyzmatrix *a,const char *json_name) {
   a->zz = cJSON_GetArrayItem(real_space_c,2)->valuedouble;
 
 #ifdef DEBUG
-    printf("Amatrix for image %s: ",image_name);
-    printf("(%f, %f, %f) ",a->xx,a->xy,a->xz);
-    printf("(%f, %f, %f) ",a->yx,a->yy,a->yz);
-    printf("(%f, %f, %f) ",a->zx,a->zy,a->zz);
-    printf("\n");
+  //    printf("Amatrix for image %s: ",image_name);
+  //    printf("(%f, %f, %f) ",a->xx,a->xy,a->xz);
+  //    printf("(%f, %f, %f) ",a->yx,a->yy,a->yz);
+  //    printf("(%f, %f, %f) ",a->zx,a->zy,a->zz);
+  //    printf("\n");
 #endif		
 
 
@@ -92,11 +92,11 @@ int readAmatrix(struct xyzmatrix *a,const char *amatrix_format,const size_t i) {
     *a = lmatt(*amatrix);
 
 #ifdef DEBUG
-    printf("Amatrix for image %d: ",i);
-    printf("(%f, %f, %f) ",a->xx,a->xy,a->xz);
-    printf("(%f, %f, %f) ",a->yx,a->yy,a->yz);
-    printf("(%f, %f, %f) ",a->zx,a->zy,a->zz);
-    printf("\n");
+    //    printf("Amatrix for image %d: ",i);
+    //    printf("(%f, %f, %f) ",a->xx,a->xy,a->xz);
+    //    printf("(%f, %f, %f) ",a->yx,a->yy,a->yz);
+    //    printf("(%f, %f, %f) ",a->zx,a->zy,a->zz);
+    //    printf("\n");
 #endif		
 
     return(0);
@@ -129,10 +129,8 @@ int main(int argc, char *argv[])
     *amatrix_format,
     *amatrix_path,
     *xvectors_path,
-    *do_integrate_str,
     *writevtk_str,
     *integration_image_type,
-    *filterhkl_str,
     *lattice_dir,
     *diffuse_lattice_prefix,
     *unit_cell,
@@ -147,8 +145,8 @@ int main(int argc, char *argv[])
 
   int
     writevtk,
-    do_integrate,
-    filterhkl;
+    do_integrate = 1,
+    filterhkl = 1;
 
   struct xyzcoords *xvectors_cctbx = NULL,*xvectors = NULL, *Hlist, *dHlist;
 
@@ -246,25 +244,16 @@ int main(int argc, char *argv[])
 #endif
 	// Parse input deck
 
-	if ((raw_image_dir=lgettag(deck,"\nraw_image_dir")) == NULL) {
-	  perror("LUNUS: Must provide raw_image_dir\n");
-	  exit(1);
-	}
+	raw_image_dir=lgettag(deck,"\nraw_image_dir");
 
 	if ((json_dir=lgettag(deck,"\njson_dir")) == NULL) {
 	  json_dir = (char *)malloc(strlen(".")+1);
-	  json_dir = ".";
+	  strcpy(json_dir,".");
 	}
 
-	if ((lunus_image_dir=lgettag(deck,"\nlunus_image_dir")) == NULL) {
-	  perror("LUNUS: Must provide lunus_image_dir\n");
-	  exit(1);
-	}
+	lunus_image_dir=lgettag(deck,"\nlunus_image_dir");
 
-	if ((image_prefix=lgettag(deck,"\nimage_prefix")) == NULL) {
-	  perror("LUNUS: Must provide image_prefix\n");
-	  exit(1);
-	}
+	image_prefix=lgettag(deck,"\nimage_prefix");
 
 	if ((image_suffix=lgettag(deck,"\nimage_suffix")) == NULL) {
 	  image_suffix = (char *)malloc(strlen("img"+1));
@@ -272,81 +261,56 @@ int main(int argc, char *argv[])
 	}
 	  
 
-	if ((lunus_image_prefix=lgettag(deck,"\nlunus_image_prefix")) == NULL) {
-	  perror("Must provide lunus_image_prefix\n");
-	  exit(1);
-	}
+	lunus_image_prefix=lgettag(deck,"\nlunus_image_prefix");
 
-	if ((scale_image_prefix=lgettag(deck,"\nscale_image_prefix")) == NULL) {
-	  perror("Must provide scale_image_prefix\n");
-	  exit(1);
-	}
+	scale_image_prefix=lgettag(deck,"\nscale_image_prefix");
 
 	if (lgettag(deck,"\npunchim_xmax") == NULL) {
-	  perror("Must provide punchim_xmax\n");
-	  exit(1);
+	  punchim_xmax = -1;
 	} else {
 	  punchim_xmax = atoi(lgettag(deck,"\npunchim_xmax"));
 	}
 
 	if (lgettag(deck,"\npunchim_xmin") == NULL) {
-	  perror("Must provide punchim_xmin\n");
-	  exit(1);
+	  punchim_xmin = -1;
 	} else {
 	  punchim_xmin = atoi(lgettag(deck,"\npunchim_xmin"));
 	}
 
 	if (lgettag(deck,"\npunchim_ymax") == NULL) {
-	  perror("Must provide punchim_ymax\n");
-	  exit(1);
+	  punchim_ymax = -1;
 	} else {
 	  punchim_ymax = atoi(lgettag(deck,"\npunchim_ymax"));
 	}
 
 	if (lgettag(deck,"\npunchim_ymin") == NULL) {
-	  perror("Must provide punchim_ymin\n");
-	  exit(1);
+	  punchim_ymin = -1;
 	} else {
 	  punchim_ymin = atoi(lgettag(deck,"\npunchim_ymin"));
 	}
 
 	if (lgettag(deck,"\nwindim_xmax") == NULL) {
-	  perror("Must provide windim_xmax\n");
-	  exit(1);
+	  windim_xmax = -1;
 	} else {
 	  windim_xmax = atoi(lgettag(deck,"\nwindim_xmax"));
 	}
 
 	if (lgettag(deck,"\nwindim_xmin") == NULL) {
-	  perror("Must provide windim_xmin\n");
-	  exit(1);
+	  windim_xmin = -1;
 	} else {
 	  windim_xmin = atoi(lgettag(deck,"\nwindim_xmin"));
 	}
 
 	if (lgettag(deck,"\nwindim_ymax") == NULL) {
-	  perror("Must provide windim_ymax\n");
-	  exit(1);
+	  windim_ymax = -1;
 	} else {
 	  windim_ymax = atoi(lgettag(deck,"\nwindim_ymax"));
 	}
 
 	if (lgettag(deck,"\nwindim_ymin") == NULL) {
-	  perror("Must provide windim_ymin\n");
-	  exit(1);
+	  windim_ymin = -1;
 	} else {
 	  windim_ymin = atoi(lgettag(deck,"\nwindim_ymin"));
-	}
-
-	if ((do_integrate_str=lgettag(deck,"\ndo_integrate")) == NULL) {
-	  do_integrate_str = (char *)malloc(strlen("False"+1));
-	  strcpy(do_integrate_str,"False");
-	}
-
-	if (strcmp(do_integrate_str,"True")==0) {
-	  do_integrate=1;
-	} else {
-	  do_integrate=0;
 	}
 
 	if ((writevtk_str=lgettag(deck,"\nwritevtk")) == NULL) {
@@ -369,59 +333,43 @@ int main(int argc, char *argv[])
 	  strcpy(integration_image_type,"raw");
 	}
 
-	if ((filterhkl_str=lgettag(deck,"\nfilterhkl")) == NULL) {
-	  filterhkl_str = (char *)malloc(strlen("False"+1));
-	  strcpy(filterhkl_str,"False");
-	}
-
-	if (strcmp(filterhkl_str,"True")==0) {
-	  filterhkl=1;
-	} else {
+	if (lgettag(deck,"\nfilterhkl") == NULL) {
+	  filterhkl = 1;
+	} else if (strcmp(lgettag(deck,"\nfilterhkl"),"False")==0) {
 	  filterhkl=0;
-	}
+	} 
+	//else {
+	  //	  printf("LUNUS: filterhkl=False is only value recognized, setting filterhkl = 1.\n");
+	//	}
 
 	if (lgettag(deck,"\nscale_inner_radius") == NULL) {
-	  if (do_integrate!=0) {
-	    perror("Must provide scale_inner_radius for integration\n");
-	    exit(1);
-	  }
+	  scale_inner_radius = -1;
 	} else {
 	  scale_inner_radius = atoi(lgettag(deck,"\nscale_inner_radius"));
 	}
 
 	if (lgettag(deck,"\nscale_outer_radius") == NULL) {
-	  if (do_integrate!=0) {
-	    perror("Must provide scale_outer_radius for integration\n");
-	    exit(1);
-	  }
+	  scale_outer_radius = -1;
 	} else {
 	  scale_outer_radius = atoi(lgettag(deck,"\nscale_outer_radius"));
 	}
 
-	if (lgettag(deck,"\npphkl") != NULL) {
+	if (lgettag(deck,"\npphkl") == NULL) {
+	  pphkl = 1;
+	} else {
 	  pphkl = atoi(lgettag(deck,"\npphkl"));
 	}
 
-	if ((unit_cell=lgettag(deck,"\nunit_cell")) == NULL) {
-	  if (do_integrate!=0) {
-	    perror("LUNUS: Must provide unit_cell for integration\n");
-	    exit(1);
-	  }
+	if (lgettag(deck,"\npoints_per_hkl") != NULL) {
+	  pphkl = atoi(lgettag(deck,"\npoints_per_hkl"));
 	}
 
-	if ((spacegroup=lgettag(deck,"\nspacegroup")) == NULL) {
-	  if (writevtk!=0) {
-	    perror("LUNUS: Must provide spacegroup for writing .vtk\n");
-	    exit(1);
-	  }
-	}
+	unit_cell=lgettag(deck,"\nunit_cell");
 
+	spacegroup=lgettag(deck,"\nspacegroup");
 
 	if (lgettag(deck,"\nresolution") == NULL) {
-	  if (do_integrate!=0) {
-	    perror("Must provide resolution for integration\n");
-	    exit(1);
-	  }
+	  resolution = -1.;
 	} else {
 	  resolution = atof(lgettag(deck,"\nresolution"));
 	}
@@ -433,109 +381,104 @@ int main(int argc, char *argv[])
 	  }
 	}
 
-	if ((amatrix_format=lgettag(deck,"\namatrix_format")) == NULL) {
-	  if (do_integrate!=0) {
-	    perror("Must provide amatrix_format for integration\n");
-	    exit(1);
-	  }
-	}
+	amatrix_format=lgettag(deck,"\namatrix_format");
 
 	if ((lattice_dir=lgettag(deck,"\nlattice_dir")) == NULL) {
-	  if (do_integrate!=0) {
-	    perror("LUNUS: Must provide lattice_dir for integration\n");
-	    exit(1);
-	  }
+	  lattice_dir = (char *)malloc(strlen(".")+1);
+	  strcpy(lattice_dir,".");
+	}
+
+	if (lgettag(deck,"\ndiffuse_lattice_dir") != NULL) {
+	  lattice_dir = lgettag(deck,"\ndiffuse_lattice_dir");
 	}
 
 	if ((diffuse_lattice_prefix=lgettag(deck,"\ndiffuse_lattice_prefix")) == NULL) {
-	  if (do_integrate!=0) {
-	    perror("LUNUS: Must provide diffuse_lattice_prefix for integration\n");
-	    exit(1);
-	  }
+	  diffuse_lattice_prefix = (char *)malloc(strlen("diffuse_lunus")+1);
+	  strcpy(diffuse_lattice_prefix,"diffuse_lunus");
 	}
 
-	str_length = strlen(lgettag(deck,"\nthrshim_max"));
-
-	if (str_length != 0) {
+	if(lgettag(deck,"\nthrshim_max") == NULL) {
+	  thrshim_max = -1;
+	} else {
 	  thrshim_max = atoi(lgettag(deck,"\nthrshim_max"));
 	}
 
-	str_length = strlen(lgettag(deck,"\nthrshim_min"));
-
-	if (str_length != 0) {
+	if(lgettag(deck,"\nthrshim_min") == NULL) {
+	  thrshim_min = -1;
+	} else {
 	  thrshim_min = atoi(lgettag(deck,"\nthrshim_min"));
 	}
 
-	str_length = strlen(lgettag(deck,"\nmodeim_bin_size"));
-
-	if (str_length != 0) {
+	if(lgettag(deck,"\nmodeim_bin_size") == NULL) {
+	  modeim_bin_size = -1;
+	} else {
 	  modeim_bin_size = atoi(lgettag(deck,"\nmodeim_bin_size"));
 	}
 
-	str_length = strlen(lgettag(deck,"\nmodeim_kernel_width"));
-
-	if (str_length != 0) {
+	if(lgettag(deck,"\nmodeim_kernel_width") == NULL) {
+	  modeim_kernel_width = -1;
+	} else {
 	  modeim_kernel_width = atoi(lgettag(deck,"\nmodeim_kernel_width"));
 	}
 
-	str_length = strlen(lgettag(deck,"\nnum_images"));
-
-	if (str_length != 0) {
-	  num_images = (size_t)atol(lgettag(deck,"\nnum_images"));
+	if(lgettag(deck,"\nnum_images") == NULL) {
+	  num_images = -1;
+	} else {
+	  num_images = atoi(lgettag(deck,"\nnum_images"));
 	}
 
-	/*	str_length = strlen(lgettag(deck,"\npolarim_dist"));
-
-	if (str_length != 0) {
-	  polarim_dist = atof(lgettag(deck,"\npolarim_dist"));
-	}
-
-	printf("polarim_dist=%f\n",polarim_dist);
-	*/
-
-	str_length = strlen(lgettag(deck,"\npolarim_offset"));
-
-	if (str_length != 0) {
+	if(lgettag(deck,"\npolarim_offset") == NULL) {
+	  polarim_offset = 0.0;
+	} else {
 	  polarim_offset = atof(lgettag(deck,"\npolarim_offset"));
 	}
 
-	str_length = strlen(lgettag(deck,"\npolarim_polarization"));
-
-	if (str_length != 0) {
+	if(lgettag(deck,"\npolarim_polarization") == NULL) {
+	  polarim_polarization = 1.;
+	} else {
 	  polarim_polarization = atof(lgettag(deck,"\npolarim_polarization"));
 	}
 
-	if (lgettag(deck,"\ndistance_mm") != NULL) {
+	if (lgettag(deck,"\ndistance_mm") == NULL) {
+	  distance_mm = -1.;
+	} else {
 	  distance_mm = atof(lgettag(deck,"\ndistance_mm"));
 	}
 
-	str_length = strlen(lgettag(deck,"\ncorrection_factor_scale"));
-	
-	if (str_length != 0) {
+	if (lgettag(deck,"\ncorrection_factor_scale") == NULL) {
+	  correction_factor_scale = 1.;
+	} else {
 	  correction_factor_scale = atof(lgettag(deck,"\ncorrection_factor_scale"));
 	}
 
-	/*
-	str_length = strlen(lgettag(deck,"\ndo_integrate"));
-	
-	if (str_length != 0) {
-	  lunus_integrate = atof(lgettag(deck,"\ndo_integrate"));
+	if (lgettag(deck,"\noverall_scale_factor") != NULL) {
+	  correction_factor_scale = atof(lgettag(deck,"\noverall_scale_factor"));
 	}
-	*/
+	  
 
 	if (mpiv->my_id == 0) {
-	  printf("raw_image_dir=%s\n",raw_image_dir);
+	  if (raw_image_dir != NULL) printf("raw_image_dir=%s\n",raw_image_dir);
 	  
-	  printf("lunus_image_dir=%s\n",lunus_image_dir);
+	  if (lunus_image_dir != NULL) printf("lunus_image_dir=%s\n",lunus_image_dir);
 	  
-	  printf("image_prefix=%s\n",image_prefix);
+	  if (image_prefix != NULL) printf("image_prefix=%s\n",image_prefix);
 	  
-	  printf("image_suffix=%s\n",image_suffix);
+	  if (image_suffix != NULL) printf("image_suffix=%s\n",image_suffix);
 	  
-	  printf("lunus_image_prefix=%s\n",lunus_image_prefix);
+	  if (lunus_image_prefix != NULL) printf("lunus_image_prefix=%s\n",lunus_image_prefix);
 	  
-	  printf("scale_image_prefix=%s\n",scale_image_prefix);
+	  if (scale_image_prefix != NULL) printf("scale_image_prefix=%s\n",scale_image_prefix);
+
+	  if (imagelist_name != NULL) printf("imagelist_name=%s\n",imagelist_name);
+
+	  if (jsonlist_name != NULL) printf("jsonlist_name=%s\n",jsonlist_name);
 	  
+	  printf("integration_image_type=%s\n",integration_image_type);
+
+	  printf("lattice_dir=%s\n",lattice_dir);
+	  
+	  printf("diffuse_lattice_prefix=%s\n",diffuse_lattice_prefix);
+
 	  printf("punchim_xmax=%d\n",punchim_xmax);
 	  
 	  printf("punchim_xmin=%d\n",punchim_xmin);
@@ -565,6 +508,14 @@ int main(int argc, char *argv[])
 	  printf("polarim_offset=%f\n",polarim_offset);
 	
 	  printf("polarim_polarization=%f\n",polarim_polarization);
+
+	  printf("resolution=%f\n",resolution);
+
+	  if (filterhkl == 1) {
+	    printf("filterhkl=True\n");
+	  } else {
+	    printf("filterhkl=False\n");
+	  }
 
 	  if (distance_mm>0.0) {
 	    printf("distance_mm=%f\n",distance_mm);
@@ -619,42 +570,6 @@ int main(int argc, char *argv[])
 	imdiff_corrected = linitim();
 	imdiff_scale = linitim();
 	imdiff_scale_ref = linitim();
-
-	// Define the integration lattices and associated variables
-        //      if performing integration
-
-	if (do_integrate!=0) {
-	  lat = linitlt();
-	  strcpy(lat->cell_str,unit_cell);
-	  lparsecelllt(lat);
-	  lat->cell.a *= pphkl;
-	  lat->cell.b *= pphkl;
-	  lat->cell.c *= pphkl;
-	  lat->xvoxels = ((int)(lat->cell.a/resolution)+1)*2;
-	  lat->yvoxels = ((int)(lat->cell.b/resolution)+1)*2;
-	  lat->zvoxels = ((int)(lat->cell.c/resolution)+1)*2;
-	  i0 = (IJKCOORDS_DATA)(lat->xvoxels/2. - 1.);
-	  j0 = (IJKCOORDS_DATA)(lat->yvoxels/2. - 1.);
-	  k0 = (IJKCOORDS_DATA)(lat->zvoxels/2. - 1.);
-	  lat->xscale = 1./lat->cell.a;
-	  lat->yscale = 1./lat->cell.b;
-	  lat->zscale = 1./lat->cell.c;
-	  lat->xbound.min = -i0*lat->xscale;
-	  lat->ybound.min = -j0*lat->yscale;
-	  lat->zbound.min = -k0*lat->zscale;
-	  lat->xbound.max = lat->xbound.min + ((float)lat->xvoxels-1)*lat->xscale;
-	  lat->ybound.max = lat->ybound.min + ((float)lat->yvoxels-1)*lat->yscale;
-	  lat->zbound.max = lat->zbound.min + ((float)lat->zvoxels-1)*lat->zscale;
-	  lat->origin.i = (IJKCOORDS_DATA)(-lat->xbound.min/lat->xscale + .5);
-	  lat->origin.j = (IJKCOORDS_DATA)(-lat->ybound.min/lat->yscale + .5);
-	  lat->origin.k = (IJKCOORDS_DATA)(-lat->zbound.min/lat->zscale + .5);
-	  lat->xyvoxels = lat->xvoxels * lat->yvoxels;
-	  lat->lattice_length = lat->xyvoxels*lat->zvoxels;
-	  //	  if (lat->lattice != NULL) free(lat->lattice);
-	  lat->lattice = (LATTICE_DATA_TYPE *)calloc(lat->lattice_length,sizeof(LATTICE_DATA_TYPE));
-	  //	  if (latct != NULL) free(latct);
-	  latct = (LATTICE_DATA_TYPE *)calloc(lat->lattice_length,sizeof(LATTICE_DATA_TYPE));
-	}
 
 	// Process all of the images
 
@@ -743,7 +658,7 @@ int main(int argc, char *argv[])
 	    if ((imagelist[i] = readExptJSON(&at[i],json_name)) == NULL) {
 	      printf("Skipping %s, unable to read\n",json_name);
 	    } else {
-	      printf("%s\n",imagelist[i]);
+	      //	      printf("%s\n",imagelist[i]);
 	      i++;
 	    }
 
@@ -811,6 +726,62 @@ int main(int argc, char *argv[])
 	}
 
 	lbcastBufMPI((void *)&at,sizeof(struct xyzmatrix)*num_images,0,mpiv);	
+
+	// Define the integration lattices and associated variables
+        //      if performing integration
+
+	//	printf("entering unit cell\n");
+
+	if (do_integrate!=0) {
+	  lat = linitlt();
+	  if (unit_cell == NULL) {
+	    float a,b,c,alpha,beta,gamma,adotb,adotc,bdotc;
+	    struct xyzmatrix a0;
+	    a0 = at[0];
+	    a = sqrtf(a0.xx*a0.xx+a0.xy*a0.xy+a0.xz*a0.xz);
+	    b = sqrtf(a0.yx*a0.yx+a0.yy*a0.yy+a0.yz*a0.yz);
+	    c = sqrtf(a0.zx*a0.zx+a0.zy*a0.zy+a0.zz*a0.zz);
+	    adotb = a0.xx*a0.yx + a0.xy*a0.yy + a0.xz*a0.yz;
+	    adotc = a0.xx*a0.zx + a0.xy*a0.zy + a0.xz*a0.zz;
+	    bdotc = a0.yx*a0.zx + a0.yy*a0.zy + a0.yz*a0.zz;
+	    alpha = acosf(bdotc/b/c)*180./PI;
+	    beta = acosf(adotc/a/c)*180./PI;
+	    gamma = acosf(adotb/a/b)*180./PI;
+	    str_length = snprintf(NULL,0,"%f,%f,%f,%f,%f,%f",a,b,c,alpha,beta,gamma);
+	    unit_cell = (char *)malloc(str_length+1);
+	    sprintf(unit_cell,"%f,%f,%f,%f,%f,%f",a,b,c,alpha,beta,gamma);
+	    printf("Calculated unit cell from first amatrix=%s\n",unit_cell);
+	  }
+	  strcpy(lat->cell_str,unit_cell);
+	  lparsecelllt(lat);
+	  lat->cell.a *= pphkl;
+	  lat->cell.b *= pphkl;
+	  lat->cell.c *= pphkl;
+	  lat->xvoxels = ((int)(lat->cell.a/resolution)+1)*2;
+	  lat->yvoxels = ((int)(lat->cell.b/resolution)+1)*2;
+	  lat->zvoxels = ((int)(lat->cell.c/resolution)+1)*2;
+	  i0 = (IJKCOORDS_DATA)(lat->xvoxels/2. - 1.);
+	  j0 = (IJKCOORDS_DATA)(lat->yvoxels/2. - 1.);
+	  k0 = (IJKCOORDS_DATA)(lat->zvoxels/2. - 1.);
+	  lat->xscale = 1./lat->cell.a;
+	  lat->yscale = 1./lat->cell.b;
+	  lat->zscale = 1./lat->cell.c;
+	  lat->xbound.min = -i0*lat->xscale;
+	  lat->ybound.min = -j0*lat->yscale;
+	  lat->zbound.min = -k0*lat->zscale;
+	  lat->xbound.max = lat->xbound.min + ((float)lat->xvoxels-1)*lat->xscale;
+	  lat->ybound.max = lat->ybound.min + ((float)lat->yvoxels-1)*lat->yscale;
+	  lat->zbound.max = lat->zbound.min + ((float)lat->zvoxels-1)*lat->zscale;
+	  lat->origin.i = (IJKCOORDS_DATA)(-lat->xbound.min/lat->xscale + .5);
+	  lat->origin.j = (IJKCOORDS_DATA)(-lat->ybound.min/lat->yscale + .5);
+	  lat->origin.k = (IJKCOORDS_DATA)(-lat->zbound.min/lat->zscale + .5);
+	  lat->xyvoxels = lat->xvoxels * lat->yvoxels;
+	  lat->lattice_length = lat->xyvoxels*lat->zvoxels;
+	  //	  if (lat->lattice != NULL) free(lat->lattice);
+	  lat->lattice = (LATTICE_DATA_TYPE *)calloc(lat->lattice_length,sizeof(LATTICE_DATA_TYPE));
+	  //	  if (latct != NULL) free(latct);
+	  latct = (LATTICE_DATA_TYPE *)calloc(lat->lattice_length,sizeof(LATTICE_DATA_TYPE));
+	}
 
 	for (i=mpiv->my_id+1;i<=num_images;i=i+mpiv->num_procs) {
 
@@ -1172,8 +1143,11 @@ int main(int argc, char *argv[])
 	      }
 	      
 	      lat->outfile=vtkout;
-	      lat->cell_str=unit_cell;
-	      lat->space_group_str=spacegroup;
+	      if (spacegroup != NULL) {
+		strcpy(lat->space_group_str,spacegroup);
+	      } else {
+		strcpy(lat->space_group_str,"Unknown");
+	      }
 	      lwritevtk(lat);
 	    }
 	  }
