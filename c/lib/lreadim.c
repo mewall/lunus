@@ -227,8 +227,8 @@ int lreadim(DIFFIMAGE *imdiff)
 	  end_pos = ftell(imdiff->infile); // get current file pointer
 	  fseek(imdiff->infile,this_pos,SEEK_SET);
 	  imdiff->footer_length = (size_t)(end_pos-this_pos);
-	  if (imdiff->footer != NULL) free(imdiff->footer);
-	  imdiff->footer = (char *)malloc(buf_length);
+	  //	  if (imdiff->footer != NULL) free(imdiff->footer);
+	  imdiff->footer = (char *)realloc(imdiff->footer,imdiff->footer_length);
 	  num_read = fread(imdiff->footer, sizeof(char), imdiff->footer_length,
 			   imdiff->infile);
 	  if (num_read != imdiff->footer_length) {
@@ -264,8 +264,8 @@ int lreadim(DIFFIMAGE *imdiff)
 	  //	  printf("Uncompress, buf_length = %ld\n",buf_length);
 	  lbufuncompress(buf,buf_length,image_cbf,imdiff->image_length);
 	  // Convert image to imdiff format
-	  if (imdiff->image != NULL) free(imdiff->image);
-	  imdiff->image = (IMAGE_DATA_TYPE *)malloc(sizeof(IMAGE_DATA_TYPE)*imdiff->image_length);
+	  //	  if (imdiff->image != NULL) free(imdiff->image);
+	  imdiff->image = (IMAGE_DATA_TYPE *)realloc(imdiff->image,sizeof(IMAGE_DATA_TYPE)*imdiff->image_length);
 	  for (i=0;i<imdiff->image_length;i++) {
 	    if (image_cbf[i] < 0 || image_cbf[i] > MAX_IMAGE_DATA_VALUE) {
 	      imdiff->image[i]=imdiff->ignore_tag;

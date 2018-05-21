@@ -37,6 +37,7 @@ DIFFIMAGE *linitim(void)
   imdiff->ignore_tag = DEFAULT_IGNORE_TAG;
   imdiff->lattice_ignore_tag = DEFAULT_LATTICE_IGNORE_TAG;
   imdiff->header_length = DEFAULT_HEADER_LENGTH;
+  imdiff->footer_length = DEFAULT_FOOTER_LENGTH;
   imdiff->mask_inner_radius = DEFAULT_INNER_RADIUS;
   imdiff->mask_outer_radius = DEFAULT_OUTER_RADIUS;
   imdiff->origin.r = DEFAULT_IMAGE_ORIGIN;
@@ -86,6 +87,7 @@ DIFFIMAGE *linitim(void)
   imdiff->image = (IMAGE_DATA_TYPE *)calloc(imdiff->image_length,
 					    sizeof(IMAGE_DATA_TYPE));
   imdiff->header = (char *)malloc(sizeof(char)*imdiff->header_length);
+  imdiff->footer = (char *)malloc(sizeof(char)*imdiff->footer_length);
   imdiff->overload = (struct rccoords *)malloc(sizeof(struct rccoords)*
 					       MAX_OVERLOADS);
   imdiff->peak = (struct xycoords *)malloc(sizeof(struct xycoords)*MAX_PEAKS);

@@ -55,6 +55,7 @@
 #define DEFAULT_VSIZE 1024		/* # Vertical pixels */
 #define DEFAULT_HSIZE 1024		/* # Horizontal pixels */
 #define DEFAULT_HEADER_LENGTH 4096	/* TV6 TIFF image header length */
+#define DEFAULT_FOOTER_LENGTH 4096	/* TV6 TIFF image header length */
 #define DEFAULT_IMAGELENGTH 1048576	/* TV6 TIFF image #pixels */
 #define DEFAULT_OVERLOAD_TAG 0x7fff	/* 32766 */
 //#define DEFAULT_OVERLOAD_TAG 0x7ffe	/* 32766 */
