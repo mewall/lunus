@@ -21,7 +21,8 @@ int lwritehkl(LAT3D *lat)
   int index = 0,ct=0;
   int i,j,k,hh,kk,ll;
   int hmax,kmax,lmax;
-  
+ 
+  /*
   if (lat->origin.i >= lat->xvoxels/2) {
     hmax = lat->xvoxels-lat->origin.i;
   } else {
@@ -37,6 +38,11 @@ int lwritehkl(LAT3D *lat)
   } else {
     lmax = lat->origin.k;
   }
+  */
+
+  hmax = lat->xvoxels-lat->origin.i;
+  kmax = lat->yvoxels-lat->origin.j;
+  lmax = lat->zvoxels-lat->origin.k;
 
   for (i=0;i<lat->xvoxels;i++) {
     hh = i - lat->origin.i;
