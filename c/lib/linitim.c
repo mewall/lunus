@@ -71,6 +71,7 @@ DIFFIMAGE *linitim(void)
   imdiff->amplitude = DEFAULT_AMPLITUDE;
   imdiff->pitch = DEFAULT_PITCH;
   imdiff->value_offset = DEFAULT_VALUE_OFFSET;
+  imdiff->x = 1.0;
 
   /*
    * Allocate memory for arrays:

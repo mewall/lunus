@@ -513,6 +513,7 @@ typedef struct
   struct xyzcoords q;
   struct irange rfirange;       /* Range of rfile index values */
   float *correction;             /* Correction factor, pixel by pixel */
+  float x;                      /* Multiplicative factor for lbkgsubim() */
 } DIFFIMAGE;
 
 /*
@@ -730,6 +731,7 @@ typedef struct {
 
 int labsim(DIFFIMAGE *imdiff);
 int labslt(LAT3D *lat);
+int laddcbftag(DIFFIMAGE *imdiff,const char *tag,const char *tagval);
 int lanisoult(LAT3D *lat);
 void lanisolt(LAT3D *lat);
 int lavgim(DIFFIMAGE *imdiff);
@@ -745,6 +747,7 @@ void lbarrierMPI(MPIVARS *mpiv);
 void lbcastBufMPI(void *data,size_t datalen, int root, MPIVARS *mpiv);
 void lbcastImageMPI(IMAGE_DATA_TYPE *data,size_t datalen, int root, MPIVARS *mpiv);
 int lbeamim(DIFFIMAGE *imdiff);
+int lbkgsubim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 size_t lbufcompress(const int* values, const size_t sz, char *packed);
 void lbufuncompress(const char* packed, const size_t packed_sz, int* values, size_t values_sz);
 int lbuttim(DIFFIMAGE *imdiff);
