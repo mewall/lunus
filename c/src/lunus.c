@@ -984,6 +984,9 @@ int main(int argc, char *argv[])
 	  
 	    // Calculate the image scale factor
 
+	    printf("imdiff_scale_ref->value_offset = %d\n",imdiff_scale_ref->value_offset);
+	    printf("imdiff_scale->value_offset = %d\n",imdiff_scale->value_offset);
+
 	    lscaleim(imdiff_scale_ref,imdiff_scale);
 	    float this_scale_factor = imdiff_scale_ref->rfile[0];
 	    printf("Image %d scale factor, error = %f, %f\n",i,imdiff_scale_ref->rfile[0],imdiff_scale_ref->rfile[1]);

@@ -27,6 +27,10 @@ int lscaleim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2)
 
 	struct xycoords r_mm;
 
+	printf ("inner radius 1: %d\n",imdiff1->mask_inner_radius);
+	printf ("inner radius 2: %d\n",imdiff1->mask_inner_radius);
+
+
 /*
  * Calculate averages:
  */
@@ -49,11 +53,12 @@ int lscaleim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2)
 		  (imdiff1->image[index] != imdiff1->ignore_tag) &&
 		(imdiff2->image[index] != imdiff2->overload_tag) &&
 		(imdiff2->image[index] != imdiff2->ignore_tag)) {
+	      printf("yes\n");
 	      if ((imdiff1->mask_inner_radius == 0 && imdiff1->mask_outer_radius == 0) || (radius > imdiff1->mask_inner_radius &&
 											   radius < imdiff1->mask_outer_radius)) {
 		float x,y;
-		x = imdiff1->image[index] - imdiff1->value_offset;
-		y = imdiff2->image[index] - imdiff2->value_offset;
+		x = (float)imdiff1->image[index];// - imdiff1->value_offset;
+		y = (float)imdiff2->image[index];// - imdiff2->value_offset;
 		xx = x*x;
 		xy = x*y;
 		yy = y*y;
@@ -66,6 +71,7 @@ int lscaleim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2)
 	    index++;
 	  }
 	}
+	printf("ct = %ld\n",ct);
 	//	avg_xx /= (float)ct;
 	//	avg_xy /= (float)ct;
 	//				printf("avg_xx=%g, avg_xy=%g, ct=%ld\n",avg_xx,avg_xy,ct);
