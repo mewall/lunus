@@ -51,9 +51,12 @@ int lscaleim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2)
 		(imdiff2->image[index] != imdiff2->ignore_tag)) {
 	      if ((imdiff1->mask_inner_radius == 0 && imdiff1->mask_outer_radius == 0) || (radius > imdiff1->mask_inner_radius &&
 											   radius < imdiff1->mask_outer_radius)) {
-		xx = imdiff1->image[index]*imdiff1->image[index];
-		xy = imdiff2->image[index]*imdiff1->image[index];
-		yy = imdiff2->image[index]*imdiff2->image[index];
+		float x,y;
+		x = imdiff1->image[index] - imdiff1->value_offset;
+		y = imdiff2->image[index] - imdiff2->value_offset;
+		xx = x*x;
+		xy = x*y;
+		yy = y*y;
 		avg_xx += xx;
 		avg_xy += xy;
 		avg_yy += yy;

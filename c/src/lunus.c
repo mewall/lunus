@@ -1031,18 +1031,18 @@ int main(int argc, char *argv[])
 		  size_t latidx = kk*lat->xyvoxels + jj*lat->xvoxels + ii;
 		  if (strcmp(integration_image_type,"raw")==0) {
 		    lat->lattice[latidx] += 
-		      (LATTICE_DATA_TYPE)imdiff->image[index]
+		      (LATTICE_DATA_TYPE)(imdiff->image[index]-imdiff->value_offset)
 		      * imdiff->correction[index]
 		      * this_scale_factor;
 		  }
 		  if (strcmp(integration_image_type,"corrected")==0) {
 		    lat->lattice[latidx] += 
-		      (LATTICE_DATA_TYPE)imdiff_corrected->image[index]
+		      (LATTICE_DATA_TYPE)(imdiff_corrected->image[index]-imdiff_corrected->value_offset)
 		      * this_scale_factor;
 		  }
 		  if (strcmp(integration_image_type,"scale")==0) {
 		    lat->lattice[latidx] += 
-		      (LATTICE_DATA_TYPE)imdiff_scale->image[index]
+		      (LATTICE_DATA_TYPE)(imdiff_scale->image[index]-imdiff_scale->value_offset)
 		      * imdiff->correction[index]
 		      * this_scale_factor;
 		  }
