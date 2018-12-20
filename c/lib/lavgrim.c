@@ -41,4 +41,5 @@ int lavgrim(DIFFIMAGE *imdiff)
 	    index++;
 	  }
 	}
+	free(n);
 }

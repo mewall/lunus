@@ -24,8 +24,10 @@ int lcloneim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2)
 	imdiff1->header = (IMAGE_DATA_TYPE *)malloc(imdiff1->header_length*sizeof(char));
 	memcpy((void *)imdiff1->header,(void *)imdiff2->header,imdiff1->header_length*sizeof(char));
 	imdiff1->rfile = NULL;
-	imdiff1->rfile = (IMAGE_DATA_TYPE *)malloc(imdiff1->rfile_length*sizeof(RFILE_DATA_TYPE));
-	memcpy((void *)imdiff1->rfile,(void *)imdiff2->rfile,imdiff1->rfile_length*sizeof(RFILE_DATA_TYPE));
+	*/
+	//	imdiff1->rfile = (RFILE_DATA_TYPE *)malloc(imdiff1->rfile_length*sizeof(RFILE_DATA_TYPE));
+	//	memcpy((void *)imdiff1->rfile,(void *)imdiff2->rfile,imdiff1->rfile_length*sizeof(RFILE_DATA_TYPE));
+	/*
 	imdiff1->imscaler = NULL;
 	imdiff1->imoffsetr = NULL;
 	imdiff1->mask = NULL;

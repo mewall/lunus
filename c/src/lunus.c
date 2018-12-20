@@ -801,6 +801,8 @@ int main(int argc, char *argv[])
 	   * Read diffraction image:
 	   */
 	  
+	  printf("Reading image %s\n",imagelist[i-1]);
+
 	  if ( (imagein = fopen(imagelist[i-1],"rb")) == NULL ) {
 	    printf("Can't open %s.",imagelist[i-1]);
 	    exit(0);
@@ -813,6 +815,7 @@ int main(int argc, char *argv[])
 	  }
 
 	  fclose(imagein);
+
 
 	  // Define image parameters from input deck
 	  
@@ -856,6 +859,7 @@ int main(int argc, char *argv[])
 	  // Mode filter to create image to be used for scaling
 
 	  lcloneim(imdiff_scale,imdiff);
+
 
 	  lmodeim(imdiff_scale);
 
@@ -930,6 +934,17 @@ int main(int argc, char *argv[])
 	      //	      lbarrierMPI(mpiv);
 	      //	      printf("Barrier 1 passed\n");
 	      // Use the rank 0 image
+
+	      size_t ctv;
+	      size_t iv;
+	for (iv = 0;iv<imdiff_scale->image_length;iv++) {
+	  if (imdiff_scale->image[iv] != imdiff_scale->overload_tag && 
+	      imdiff_scale->image[iv] != imdiff_scale->mask_tag) {
+	    ctv++;
+	  }
+	}
+	printf("There are %ld valid pixel values in imdiff\n",ctv);
+
 	      lbcastImageMPI(imdiff_scale_ref->image,imdiff_scale_ref->image_length,0,mpiv);
 	      //	      lbarrierMPI(mpiv);
 	      //	      printf("Barrier 2 passed\n");
