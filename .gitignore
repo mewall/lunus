@@ -1,0 +1,6 @@
+*~
+*.o
+.DS_Store
+*.pyc
+.adxv_beam_center
+tmp*
