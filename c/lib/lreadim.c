@@ -209,7 +209,11 @@ int lreadim(DIFFIMAGE *imdiff)
 	    imdiff->wavelength /= 10.;
 	  }
 	  // Make pedestal = 0 for CBF
-	  imdiff->value_offset = 0;
+	  if (lgetcbftag(imdiff->header,"Pedestal") == NULL) {
+	    imdiff->value_offset = 0;
+	  } else {
+	    imdiff->value_offset = atoi(lgetcbftag(imdiff->header,"Pedestal"));
+	  }
 	  // Polarization defaults
 	  imdiff->polarization = 1.0;
 	  imdiff->polarization_offset = 0.0;
