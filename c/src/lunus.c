@@ -154,8 +154,8 @@ int main(int argc, char *argv[])
 	raw_image_dir=lgettag(deck,"\nraw_image_dir");
 
 	if ((json_dir=lgettag(deck,"\njson_dir")) == NULL) {
-	  json_dir = (char *)malloc(strlen("")+1);
-	  strcpy(json_dir,"");
+	  json_dir = (char *)malloc(strlen(".")+1);
+	  strcpy(json_dir,".");
 	}
 
 	lunus_image_dir=lgettag(deck,"\nlunus_image_dir");
