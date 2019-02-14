@@ -8,6 +8,7 @@ cd -
 if [ $c == 1 ]; then
   rslt=0
 else
+  echo "Failed correlation test, c = $c"
   rslt=1
 fi
 exit $rslt
