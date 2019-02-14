@@ -1,8 +1,8 @@
-#!/bin/bash
+#!/bin/bash -c
 
 export WORKDIR=${PWD}
 sed 's@\${work_dir}@'${WORKDIR}'@g' lunus_params_unique.sh > lunus_input_params.sh
-sed 's@\${work_dir}@'${WORKDIR}'@g' jsonlist_template.inp > jsonlist.inp
+sed 's@\${LUNUS_HOME}@'${LUNUS_HOME}'@g' jsonlist_template.inp > jsonlist.inp
 ts=`date +%s`
 if [ "${LUNUS_MPI}" == "YES" ]; then
   if [ -z ${SLURM_NODELIST+x} ]; then
