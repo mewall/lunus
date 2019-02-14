@@ -1,13 +1,14 @@
 before_script:
   - export LUNUS_HOME=${PWD};export PATH=${PATH}:${LUNUS_HOME}/c/bin
   - echo ${LUNUS_HOME}
+  - ls
+  - ls test/data/snase/raw/tmpdir_common
   - cd c/src
   - cp Makefile.head.docker Makefile.head
   - ./makemake Makefile
   - cat Makefile
   - make
   - cd -
-  - ls test/data/snase/raw/tmpdir_common
 
 lunus_test:
   script:
