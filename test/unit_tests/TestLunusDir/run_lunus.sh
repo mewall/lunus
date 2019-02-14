@@ -20,5 +20,5 @@ else
   lunus lunus_input_params.sh 
 fi
 te=`date +%s`
-dt_lunus=`echo "$te-$ts" | bc`
-echo "TIMING: Lunus = $dt_lunus sec"
+#dt_lunus=`echo "$te-$ts" | bc`
+#echo "TIMING: Lunus = $dt_lunus sec"
