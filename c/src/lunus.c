@@ -744,8 +744,8 @@ int main(int argc, char *argv[])
 	      exit(0);
 	    }
 	    imdiff_bkg->infile = imagein;
-	    if (lreadim(imdiff) != 0) {
-	      perror(imdiff->error_msg);
+	    if (lreadim(imdiff_bkg) != 0) {
+	      perror(imdiff_bkg->error_msg);
 	      exit(0);
 	    }
 	    lbkgsubim(imdiff,imdiff_bkg);
