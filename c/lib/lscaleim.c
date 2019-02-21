@@ -32,6 +32,7 @@ int lscaleim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2)
 	rf1 = (RFILE_DATA_TYPE *)calloc(MAX_RFILE_LENGTH,sizeof(RFILE_DATA_TYPE));
 	rf2 = (RFILE_DATA_TYPE *)calloc(MAX_RFILE_LENGTH,sizeof(RFILE_DATA_TYPE));
 	lavgrim(imdiff1);
+	ct = 0;
 	for (i=0; i<imdiff1->rfile_length;i++) rf1[i] = imdiff1->rfile[i];
 	//	memcpy((void *)rf1,(void *)imdiff1->rfile,imdiff1->rfile_length*sizeof(RFILE_DATA_TYPE));
 	lavgrim(imdiff2);
@@ -59,6 +60,8 @@ int lscaleim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2)
 	avg_xx /= (float)ct;
 	avg_xy /= (float)ct;
 	avg_yy /= (float)ct;
+
+	printf("ct = %ld\n",ct);
 
 	imdiff1->rfile[0] = (RFILE_DATA_TYPE)avg_xx/avg_xy;
 	imdiff1->rfile[1] = (RFILE_DATA_TYPE)sqrtf(avg_xx+avg_yy*imdiff1->rfile[0]*imdiff1->rfile[0]-2.*imdiff1->rfile[0]*avg_xy)/sqrtf(avg_xx);
