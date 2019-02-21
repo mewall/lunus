@@ -738,6 +738,9 @@ int main(int argc, char *argv[])
 
 	  if (strlen(bkglist[i-1]) > 0) {
 
+#ifdef DEBUG
+	    printf("Background image available\n");
+#endif
 	    have_bkg = 1;
 	    if ( (imagein = fopen(bkglist[i-1],"rb")) == NULL ) {
 	      printf("Can't open %s.",bkglist[i-1]);
