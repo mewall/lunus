@@ -1,9 +1,9 @@
 #include<lunus.h>
 #include<cJSON.h>
 
-char * readExptJSON(struct xyzmatrix *a,const char *json_name) {
+int readExptJSON(struct xyzmatrix *a,char **image_name,char **pedestal_name,const char *json_name) {
 
-  char *json_text, *image_name;
+  char *json_text;
 
   cJSON 
     *j = NULL, 
@@ -22,7 +22,9 @@ char * readExptJSON(struct xyzmatrix *a,const char *json_name) {
 
   imageset = cJSON_GetArrayItem(cJSON_GetObjectItem(j,"imageset"),0);
   
-  image_name = cJSON_GetArrayItem(cJSON_GetObjectItem(imageset,"images"),0)->valuestring;
+  *image_name = cJSON_GetArrayItem(cJSON_GetObjectItem(imageset,"images"),0)->valuestring;
+
+  *pedestal_name = cJSON_GetObjectItem(imageset,"pedestal")->valuestring;
 
   crystal = cJSON_GetArrayItem(cJSON_GetObjectItem(j,"crystal"),0);
 
@@ -48,11 +50,10 @@ char * readExptJSON(struct xyzmatrix *a,const char *json_name) {
   //    printf("\n");
 #endif		
 
-
-  return(image_name);
+  return(0);
 
  readExptJSONFail:
-  return(NULL);
+  return(1);
 
 }
 

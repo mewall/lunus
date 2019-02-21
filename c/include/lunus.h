@@ -938,5 +938,5 @@ int lLaue9(LAT3D *lat);
 int lLaue10(LAT3D *lat);
 int lLaue11(LAT3D *lat);
 int readAmatrix(struct xyzmatrix *a,const char *amatrix_format,const size_t i);
-char * readExptJSON(struct xyzmatrix *a,const char *json_name);
+int readExptJSON(struct xyzmatrix *a,char **image_name,char **pedestal_name,const char *json_name);
 #endif

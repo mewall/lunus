@@ -15,6 +15,7 @@ if __name__=="__main__":
  # Read command line arguments
 
   output_format="binary"
+  add_background_images=False
 
  # Input json
   try:
@@ -31,7 +32,15 @@ if __name__=="__main__":
   else:
     image_glob = args.pop(imageglobidx).split("=")[1]
     rotation_series = True
- # Image input glob
+ # Background image input glob
+  try:
+    bkgglobidx = [a.find("bkg_glob")==0 for a in args].index(True)
+  except ValueError:
+    add_background_images = False
+  else:
+    bkg_glob = args.pop(bkgglobidx).split("=")[1]
+    add_background_images = True
+ # Index file input glob
   try:
     indexglobidx = [a.find("index_glob")==0 for a in args].index(True)
   except ValueError:
@@ -112,7 +121,11 @@ if __name__=="__main__":
     imnum=1
     filelist=glob.glob(image_glob)
     filelist.sort()
-    for imgname in filelist:
+    if (add_background_images==True):
+      bkglist=glob.glob(bkg_glob)
+      bkglist.sort()
+    for i in range(len(filelist)):
+      imgname=filelist[i]
       img = dxtbx.load(imgname)
       detector = img.get_detector()
       beam = img.get_beam()
@@ -134,6 +147,9 @@ if __name__=="__main__":
                                    goniometer=gonio,
                                    scan=scan,
                                    crystal=crystal))
+        if (add_background_images==True):
+          bkgname=bkglist[i]
+          exp_list[0].imageset.external_lookup.pedestal.filename=os.path.abspath(bkgname)
         dump.experiment_list(exp_list,json_dir+"/experiments_for_lunus_{0:05d}.json".format(imnum))
       else:
         from scitbx import matrix

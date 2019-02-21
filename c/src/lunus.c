@@ -45,6 +45,8 @@ int main(int argc, char *argv[])
     *imagelist_name = NULL,
     *jsonlist_name = NULL,
     *imagelist[20000],
+    *bkglist[20000],
+    **matched_pair,
     *jsonlist[20000],
     error_msg[LINESIZE];
 
@@ -97,7 +99,7 @@ int main(int argc, char *argv[])
     pphkl = 1;
 
   DIFFIMAGE 
-    *imdiff, *imdiff_corrected = NULL, *imdiff_scale = NULL, *imdiff_scale_ref = NULL;
+    *imdiff, *imdiff_bkg, *imdiff_corrected = NULL, *imdiff_scale = NULL, *imdiff_scale_ref = NULL;
 
   LAT3D
     *lat;
@@ -482,6 +484,7 @@ int main(int argc, char *argv[])
 	imdiff_corrected = linitim();
 	imdiff_scale = linitim();
 	imdiff_scale_ref = linitim();
+	imdiff_bkg = linitim();
 
 	// Process all of the images
 
@@ -567,10 +570,9 @@ int main(int argc, char *argv[])
 
 	    sprintf(json_name,"%s/%s",json_dir,buf);
 	    
-	    if ((imagelist[i] = readExptJSON(&at[i],json_name)) == NULL) {
+	    if ((readExptJSON(&at[i],&imagelist[i],&bkglist[i],json_name)) != 0) {
 	      printf("Skipping %s, unable to read\n",json_name);
 	    } else {
-	      //	      printf("%s\n",imagelist[i]);
 	      i++;
 	    }
 
@@ -633,8 +635,10 @@ int main(int argc, char *argv[])
 	for (i=0;i<num_images;i++) {
 	  if (mpiv->my_id != 0) {
 	    imagelist[i] = (char *)malloc(il_sz[i]);
+	    bkglist[i] = (char *)malloc(il_sz[i]);
 	  }
 	  lbcastBufMPI((void *)imagelist[i],il_sz[i],0,mpiv);
+	  lbcastBufMPI((void *)bkglist[i],il_sz[i],0,mpiv);
 	}
 
 	lbcastBufMPI((void *)&at,sizeof(struct xyzmatrix)*num_images,0,mpiv);	
@@ -725,6 +729,29 @@ int main(int argc, char *argv[])
 	  }
 
 	  fclose(imagein);
+
+	  /*
+	   * Subtract background image if available:
+	   */
+
+	  int have_bkg = 0;
+
+	  if (strlen(bkglist[i-1]) > 0) {
+
+	    have_bkg = 1;
+	    if ( (imagein = fopen(bkglist[i-1],"rb")) == NULL ) {
+	      printf("Can't open %s.",bkglist[i-1]);
+	      exit(0);
+	    }
+	    imdiff_bkg->infile = imagein;
+	    if (lreadim(imdiff) != 0) {
+	      perror(imdiff->error_msg);
+	      exit(0);
+	    }
+	    lbkgsubim(imdiff,imdiff_bkg);
+
+	    fclose(imagein);
+	  }
 
 	  // Define image parameters from input deck
 	  
