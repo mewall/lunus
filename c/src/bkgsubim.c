@@ -106,7 +106,6 @@ int main(int argc, char *argv[])
 
 	imdiff1->origin = origin1;
 	imdiff2->origin = origin2;
-
  
  /*
   * Read diffraction image:
@@ -131,7 +130,7 @@ int main(int argc, char *argv[])
     goto CloseShop;
   }
 
-  // Set the pedestal tag for the output image
+  // Set the pedestal tag
 
   char pedestal_tag[1000];
     if (strcmp(imdiff1->format,"SMV")==0) {

@@ -79,6 +79,7 @@ int main(int argc, char *argv[])
     polarim_offset=0.0,
     polarim_polarization=1.0,
     correction_factor_scale=1.0,
+    background_subtraction_factor=1.0,
     resolution;
 
   int
@@ -360,6 +361,12 @@ int main(int argc, char *argv[])
 	  correction_factor_scale = atof(lgettag(deck,"\ncorrection_factor_scale"));
 	}
 
+	if (lgettag(deck,"\nbackground_subtraction_factor") == NULL) {
+	  background_subtraction_factor = 1.;
+	} else {
+	  background_subtraction_factor = atof(lgettag(deck,"\nbackground_subtraction_factor"));
+	} 
+
 	if (lgettag(deck,"\noverall_scale_factor") != NULL) {
 	  correction_factor_scale = atof(lgettag(deck,"\noverall_scale_factor"));
 	}
@@ -498,6 +505,7 @@ int main(int argc, char *argv[])
 	int ib = mpiv->my_id*n+1;
 	int ie = (mpiv->my_id+1)*n;
 	*/
+
 	int ct=0;
 
 	if (mpiv->my_id == 0) {
@@ -573,6 +581,7 @@ int main(int argc, char *argv[])
 	    if ((readExptJSON(&at[i],&imagelist[i],&bkglist[i],json_name)) != 0) {
 	      printf("Skipping %s, unable to read\n",json_name);
 	    } else {
+	      printf("%s,%s\n",imagelist[i],bkglist[i]);
 	      i++;
 	    }
 
@@ -626,19 +635,22 @@ int main(int argc, char *argv[])
 	}
 	lbcastBufMPI((void *)&num_images,sizeof(size_t),0,mpiv);
 	int il_sz[num_images];
+	int bl_sz[num_images];
 	if (mpiv->my_id == 0) {
 	  for (i=0;i<num_images;i++) {
 	    il_sz[i] = strlen(imagelist[i])+1;
+	    bl_sz[i] = strlen(bkglist[i])+1;
 	  }
 	}
 	lbcastBufMPI((void *)&il_sz,sizeof(int)*num_images,0,mpiv);
+	lbcastBufMPI((void *)&bl_sz,sizeof(int)*num_images,0,mpiv);
 	for (i=0;i<num_images;i++) {
 	  if (mpiv->my_id != 0) {
 	    imagelist[i] = (char *)malloc(il_sz[i]);
-	    bkglist[i] = (char *)malloc(il_sz[i]);
+	    bkglist[i] = (char *)malloc(bl_sz[i]);
 	  }
 	  lbcastBufMPI((void *)imagelist[i],il_sz[i],0,mpiv);
-	  lbcastBufMPI((void *)bkglist[i],il_sz[i],0,mpiv);
+	  lbcastBufMPI((void *)bkglist[i],bl_sz[i],0,mpiv);
 	}
 
 	lbcastBufMPI((void *)&at,sizeof(struct xyzmatrix)*num_images,0,mpiv);	
@@ -730,32 +742,6 @@ int main(int argc, char *argv[])
 
 	  fclose(imagein);
 
-	  /*
-	   * Subtract background image if available:
-	   */
-
-	  int have_bkg = 0;
-
-	  if (strlen(bkglist[i-1]) > 0) {
-
-#ifdef DEBUG
-	    printf("Background image available\n");
-#endif
-	    have_bkg = 1;
-	    if ( (imagein = fopen(bkglist[i-1],"rb")) == NULL ) {
-	      printf("Can't open %s.",bkglist[i-1]);
-	      exit(0);
-	    }
-	    imdiff_bkg->infile = imagein;
-	    if (lreadim(imdiff_bkg) != 0) {
-	      perror(imdiff_bkg->error_msg);
-	      exit(0);
-	    }
-	    lbkgsubim(imdiff,imdiff_bkg);
-
-	    fclose(imagein);
-	  }
-
 	  // Define image parameters from input deck
 	  
 	  imdiff->punchim_upper.c = punchim_xmax;
@@ -794,6 +780,41 @@ int main(int argc, char *argv[])
 	  lpunchim(imdiff);
 	  lwindim(imdiff);
 	  lthrshim(imdiff);
+
+	  // Subtract background image if available:
+
+	  int have_bkg = 0;
+
+	  if (strlen(bkglist[i-1]) > 0) {
+
+#ifdef DEBUG
+	    printf("Background image available\n");
+#endif
+	    have_bkg = 1;
+	    if ( (imagein = fopen(bkglist[i-1],"rb")) == NULL ) {
+	      printf("Can't open %s.",bkglist[i-1]);
+	      exit(0);
+	    }
+	    imdiff_bkg->infile = imagein;
+	    if (lreadim(imdiff_bkg) != 0) {
+	      perror(imdiff_bkg->error_msg);
+	      exit(0);
+	    }
+#ifdef DEBUG
+	    printf("Subtracting background using factor %f\n",background_subtraction_factor);
+#endif
+	    imdiff_bkg->x = background_subtraction_factor;
+
+	    lbkgsubim(imdiff,imdiff_bkg);
+
+	    /*
+	    lavgrim(imdiff);
+	    for (j=0; j<imdiff->rfile_length;j++) {
+	      printf("%f,",imdiff->rfile[j]);
+	    }
+	    */
+	    fclose(imagein);
+	  }
 
 	  // Mode filter to create image to be used for scaling
 
