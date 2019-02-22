@@ -166,7 +166,7 @@ int main(int argc, char *argv[])
 	image_prefix=lgettag(deck,"\nimage_prefix");
 
 	if ((image_suffix=lgettag(deck,"\nimage_suffix")) == NULL) {
-	  image_suffix = (char *)malloc(strlen("img"+1));
+	  image_suffix = (char *)malloc(strlen("img")+1);
 	  strcpy(image_suffix,"img");
 	}
 	  
@@ -224,7 +224,7 @@ int main(int argc, char *argv[])
 	}
 
 	if ((writevtk_str=lgettag(deck,"\nwritevtk")) == NULL) {
-	  writevtk_str = (char *)malloc(strlen("False"+1));
+	  writevtk_str = (char *)malloc(strlen("False")+1);
 	  strcpy(writevtk_str,"False");
 	}
 
@@ -239,7 +239,7 @@ int main(int argc, char *argv[])
 	jsonlist_name=lgettag(deck,"\njsonlist_name");
 
 	if ((integration_image_type=lgettag(deck,"\nintegration_image_type")) == NULL) {
-	  integration_image_type = (char *)malloc(strlen("raw"+1));
+	  integration_image_type = (char *)malloc(strlen("raw")+1);
 	  strcpy(integration_image_type,"raw");
 	}
 
