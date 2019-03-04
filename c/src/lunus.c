@@ -581,7 +581,7 @@ int main(int argc, char *argv[])
 	    if ((readExptJSON(&at[i],&imagelist[i],&bkglist[i],json_name)) != 0) {
 	      printf("Skipping %s, unable to read\n",json_name);
 	    } else {
-	      printf("%s,%s\n",imagelist[i],bkglist[i]);
+	      //	      printf("%s,%s\n",imagelist[i],bkglist[i]);
 	      i++;
 	    }
 
@@ -788,7 +788,7 @@ int main(int argc, char *argv[])
 	  if (strlen(bkglist[i-1]) > 0) {
 
 #ifdef DEBUG
-	    printf("Background image available\n");
+	    printf("Matched pair:%s,%s\n",imagelist[i-1],bkglist[i-1]);
 #endif
 	    have_bkg = 1;
 	    if ( (imagein = fopen(bkglist[i-1],"rb")) == NULL ) {
@@ -890,10 +890,34 @@ int main(int argc, char *argv[])
 	    if (ct == 0) {
 	      // Reference image for scaling
 	      lcloneim(imdiff_scale_ref,imdiff_scale);
+#ifdef DEBUG
+	      printf("Rank %d, imdiff_scale_ref->image_length = %ld,imdiff_scale_ref->overload_tag=%d,imdiff_scale_ref->ignore_tag=%d,imdiff_scale_ref->value_offset=%d,",mpiv->my_id,imdiff_scale_ref->image_length,imdiff_scale_ref->overload_tag,imdiff_scale_ref->ignore_tag,imdiff_scale_ref->value_offset);
+#endif
 	      //	      lbarrierMPI(mpiv);
 	      //	      printf("Barrier 1 passed\n");
 	      // Use the rank 0 image
+	      lbarrierMPI(mpiv);
 	      lbcastImageMPI(imdiff_scale_ref->image,imdiff_scale_ref->image_length,0,mpiv);
+	      lbcastBufMPI((void *)&imdiff_scale_ref->value_offset,sizeof(IMAGE_DATA_TYPE),0,mpiv);
+#ifdef DEBUG
+	      int num_nz=0;
+	      size_t num_ign = 0;
+	      float sum_vals = 0.0;
+	      for (j=0; j<imdiff_scale_ref->image_length; j++) {	      
+	      if (imdiff_scale_ref->image[j] != imdiff_scale_ref->overload_tag && imdiff_scale_ref->image[j] != 0) {
+	      num_nz++;
+	      sum_vals += imdiff_scale_ref->image[j];
+	      //	      printf("image[%d]=%d,",j,imdiff_scale_ref->image[j]);
+	    } else num_ign ++;
+	      //	      if (num_nz>10) break;
+	    }
+	      printf("num_ign = %ld,avg = %g,",num_ign,sum_vals/(float)num_nz);
+	      lavgrim(imdiff_scale_ref);
+	      for (j=100; j<110;j++) {
+		if (j>100 && j<=110)  printf("rf[%d]=%f,",j,imdiff_scale_ref->rfile[j]);
+	      }
+	      printf("\n");
+#endif
 	      //	      lbarrierMPI(mpiv);
 	      //	      printf("Barrier 2 passed\n");
 	      // Read the xvectors on rank 0
