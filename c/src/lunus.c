@@ -126,10 +126,6 @@ int main(int argc, char *argv[])
   linitMPI(mpiv);
 
 /*
- * Set input line defaults:
- */
-
-/*
  * Read information from input line:
  */
 	switch(argc) {
@@ -248,9 +244,6 @@ int main(int argc, char *argv[])
 	} else if (strcmp(lgettag(deck,"\nfilterhkl"),"False")==0) {
 	  filterhkl=0;
 	} 
-	//else {
-	  //	  printf("LUNUS: filterhkl=False is only value recognized, setting filterhkl = 1.\n");
-	//	}
 
 	if (lgettag(deck,"\nscale_inner_radius") == NULL) {
 	  scale_inner_radius = -1;
@@ -459,33 +452,6 @@ int main(int argc, char *argv[])
 
 	lsetparamsim(imdiff);
 
-	/*	imdiff->punchim_upper.c = punchim_xmax;
-	imdiff->punchim_lower.c = punchim_xmin;
-	imdiff->punchim_upper.r = punchim_ymax;
-	imdiff->punchim_lower.r = punchim_ymin;
-
-	imdiff->window_upper.c = windim_xmax;
-	imdiff->window_lower.c = windim_xmin;
-	imdiff->window_upper.r = windim_ymax;
-	imdiff->window_lower.r = windim_ymin;
-
-	imdiff->upper_threshold = thrshim_max;
-	imdiff->lower_threshold = thrshim_min;
-
-	imdiff->polarization = polarim_polarization;
-	imdiff->polarization_offset = polarim_offset;
-
-	imdiff->cassette.x = normim_tilt_x;
-	imdiff->cassette.y = normim_tilt_y;
-	imdiff->cassette.z = 0.0;
-
-	imdiff->mode_height = modeim_kernel_width - 1;
-	imdiff->mode_width = modeim_kernel_width - 1;
-	imdiff->mode_binsize = modeim_bin_size;
-
-	imdiff->scale_inner_radius = scale_inner_radius;
-	imdiff->scale_outer_radius = scale_outer_radius;
-	*/
 	// Initialize other images
 
 	imdiff_corrected = linitim();
@@ -495,144 +461,140 @@ int main(int argc, char *argv[])
 
 	// Process all of the images
 
-	/*	int n;
-
-	n = num_images/mpiv->num_procs;
-	if (num_images % mpiv->num_procs != 0) {
-	  n++;
-	} 
-
-	int ib = mpiv->my_id*n+1;
-	int ie = (mpiv->my_id+1)*n;
-	*/
-
 	int ct=0;
 
 	if (mpiv->my_id == 0) {
 
-	if (imagelist_name == NULL && jsonlist_name == NULL) {
-
-	  if (raw_image_dir == NULL || image_prefix == NULL || image_suffix == NULL) {
-	    perror("Can't generate image list due to NULL value of one or more filename components.\n");
-	    exit(1);
-	  }
-
-	  printf("No imagelist or jsonlist provided. Generating image list using loop scheme.\n");
-
-	  size_t ii=0;
-
-	  for (i=0;i<num_images;i++) {
-
-	    // Read amatrix
-
-	    if ((readAmatrix(&at[ii],amatrix_format,i) == -1)) {
-	      printf("Missing amatrix file %s. Skipping frame %d.\n",amatrix_path,i);
-	    } else {
-	      
-	      
-	      //	printf("i=%d, imagelist[0] = %s\n",i,imagelist[0]);
-	      
-	      //	exit(1);
-	      
-	      //	for (i=ib;i<=ie&&i<=num_images;i++) {
-	      
-	      str_length = snprintf(NULL,0,"%s/%s_%05d.%s",raw_image_dir,image_prefix,i+1,image_suffix);
-	      
-	      imagelist[ii] = (char *)malloc(str_length+1);
-	      
-	      sprintf(imagelist[ii],"%s/%s_%05d.%s",raw_image_dir,image_prefix,i+1,image_suffix);
-	      
-	      ii++;
+	  if (imagelist_name == NULL && jsonlist_name == NULL) {
+	    
+	    if (raw_image_dir == NULL || image_prefix == NULL || image_suffix == NULL) {
+	      perror("Can't generate image list due to NULL value of one or more filename components.\n");
+	      exit(1);
 	    }
 	    
-	  }
-	  num_images = ii;
-
-	} else if (jsonlist_name != NULL) {
-
-	  FILE *f;
-
-	  if ((f = fopen(jsonlist_name,"r")) == NULL) {
-	    printf("Can't open %s.\n",jsonlist_name);
-	    exit(1);
-	  }
-	  
-	  size_t bufsize = LINESIZE;
-	  char *buf;
-
-	  i = 0;
-
-	  buf = (char *)malloc(LINESIZE+1);
-
-	  int chars_read;
-
-	  while ((chars_read = getline(&buf,&bufsize,f)) != -1) {
-
-	    buf[chars_read-1]=0;
-
-	    char *json_name;
-
-	    str_length = snprintf(NULL,0,"%s/%s",json_dir,buf);
-
-	    json_name = (char *)malloc(str_length+1);
-
-	    sprintf(json_name,"%s/%s",json_dir,buf);
+	    printf("No imagelist or jsonlist provided. Generating image list using loop scheme.\n");
 	    
-	    if ((readExptJSON(&at[i],&imagelist[i],&bkglist[i],json_name)) != 0) {
-	      printf("Skipping %s, unable to read\n",json_name);
-	    } else {
-	      //	      printf("%s,%s\n",imagelist[i],bkglist[i]);
-	      i++;
+	    size_t ii=0;
+	    
+	    for (i=0;i<num_images;i++) {
+	      
+	      // Read amatrix
+	      
+	      if ((readAmatrix(&at[ii],amatrix_format,i) == -1)) {
+		printf("Missing amatrix file %s. Skipping frame %d.\n",amatrix_path,i);
+	      } else {
+		
+		
+		//	printf("i=%d, imagelist[0] = %s\n",i,imagelist[0]);
+		
+		//	exit(1);
+	      
+		//	for (i=ib;i<=ie&&i<=num_images;i++) {
+	      
+		str_length = snprintf(NULL,0,"%s/%s_%05d.%s",raw_image_dir,image_prefix,i+1,image_suffix);
+	      
+		imagelist[ii] = (char *)malloc(str_length+1);
+	      
+		sprintf(imagelist[ii],"%s/%s_%05d.%s",raw_image_dir,image_prefix,i+1,image_suffix);
+	      
+		ii++;
+	      }
+	    
 	    }
+	    num_images = ii;
 
-	  }
+	  } else if (jsonlist_name != NULL) {
 
-	  num_images = i;
+	    // Obtain image filenames and crystal orientations from .json files
 
-	} else {
+	    FILE *f;
 
-	  FILE *f;
-
-	  if ((f = fopen(imagelist_name,"r")) == NULL) {
-	    printf("Can't open %s.\n",imagelist_name);
-	    exit(1);
-	  }
+	    if ((f = fopen(jsonlist_name,"r")) == NULL) {
+	      printf("Can't open %s.\n",jsonlist_name);
+	      exit(1);
+	    }
 	  
-	  size_t bufsize = LINESIZE;
-	  char *buf;
+	    size_t bufsize = LINESIZE;
+	    char *buf;
 
-	  i = 0;
+	    i = 0;
 
-	  buf = (char *)malloc(LINESIZE+1);
+	    buf = (char *)malloc(LINESIZE+1);
 
-	  int chars_read;
+	    int chars_read;
 
-	  while ((chars_read = getline(&buf,&bufsize,f)) != -1) {
+	    while ((chars_read = getline(&buf,&bufsize,f)) != -1) {
 
-	    // Read amatrix
-
-	    if ((readAmatrix(&at[i],amatrix_format,i+1) == -1)) {
-	      printf("Missing amatrix file %s. Skipping frame %d.\n",amatrix_path,i);
-	    } else {
-	      
-	      
 	      buf[chars_read-1]=0;
-	      
-	      str_length = snprintf(NULL,0,"%s/%s",raw_image_dir,buf);
-	      
-	      imagelist[i] = (char *)malloc(str_length+1);
-	      
-	      sprintf(imagelist[i],"%s/%s",raw_image_dir,buf);
-	      
-	      //	    printf("%s\n",imagelist[i]);
-	      
-	      i++;
-	    }
+
+	      char *json_name;
+
+	      str_length = snprintf(NULL,0,"%s/%s",json_dir,buf);
+
+	      json_name = (char *)malloc(str_length+1);
+
+	      sprintf(json_name,"%s/%s",json_dir,buf);
 	    
+	      if ((readExptJSON(&at[i],&imagelist[i],&bkglist[i],json_name)) != 0) {
+		printf("Skipping %s, unable to read\n",json_name);
+	      } else {
+		//	      printf("%s,%s\n",imagelist[i],bkglist[i]);
+		i++;
+	      }
+
+	    }
+
+	    num_images = i;
+
+	  } else {
+
+	    // Read image list and A matrix files
+
+	    FILE *f;
+
+	    if ((f = fopen(imagelist_name,"r")) == NULL) {
+	      printf("Can't open %s.\n",imagelist_name);
+	      exit(1);
+	    }
+	  
+	    size_t bufsize = LINESIZE;
+	    char *buf;
+
+	    i = 0;
+
+	    buf = (char *)malloc(LINESIZE+1);
+
+	    int chars_read;
+
+	    while ((chars_read = getline(&buf,&bufsize,f)) != -1) {
+	    
+	      // Read amatrix
+	    
+	      if ((readAmatrix(&at[i],amatrix_format,i+1) == -1)) {
+		printf("Missing amatrix file %s. Skipping frame %d.\n",amatrix_path,i);
+	      } else {
+	      
+	      
+		buf[chars_read-1]=0;
+	      
+		str_length = snprintf(NULL,0,"%s/%s",raw_image_dir,buf);
+	      
+		imagelist[i] = (char *)malloc(str_length+1);
+	      
+		sprintf(imagelist[i],"%s/%s",raw_image_dir,buf);
+	      
+		//	    printf("%s\n",imagelist[i]);
+	      
+		i++;
+	      }
+	    
+	    }
+	    num_images = i;
 	  }
-	  num_images = i;
 	}
-	}
+
+	// Broadcast file lists from rank 0 to other MPI ranks
+
 	lbcastBufMPI((void *)&num_images,sizeof(size_t),0,mpiv);
 	int il_sz[num_images];
 	int bl_sz[num_images];
@@ -653,12 +615,11 @@ int main(int argc, char *argv[])
 	  lbcastBufMPI((void *)bkglist[i],bl_sz[i],0,mpiv);
 	}
 
+	// Broadcast the list of orientation matrices to all MPI ranks
+
 	lbcastBufMPI((void *)&at,sizeof(struct xyzmatrix)*num_images,0,mpiv);	
 
-	// Define the integration lattices and associated variables
-        //      if performing integration
-
-	//	printf("entering unit cell\n");
+	// Initialize the 3D dataset for the images on this MPI rank
 
 	if (do_integrate!=0) {
 	  lat = linitlt();
@@ -711,19 +672,9 @@ int main(int argc, char *argv[])
 	  latct = (LATTICE_DATA_TYPE *)calloc(lat->lattice_length,sizeof(LATTICE_DATA_TYPE));
 	}
 
+	// Process the images on this rank yielding a partial sum for the 3D dataset
+
 	for (i=mpiv->my_id+1;i<=num_images;i=i+mpiv->num_procs) {
-
-	  //	  str_length = snprintf(NULL,0,"%s/%s_%05d.%s",raw_image_dir,image_prefix,i,image_suffix);
-
-	  //	  imageinpath = (char *)malloc(str_length+1);
-
-	  //	  sprintf(imageinpath,"%s/%s_%05d.%s",raw_image_dir,image_prefix,i,image_suffix);
-
-#ifdef DEBUG
-	  //	  printf("imageinpath = %s\n",imageinpath);
-#endif
-
-
 
 	  /*
 	   * Read diffraction image:
