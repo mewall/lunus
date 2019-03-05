@@ -897,7 +897,9 @@ int main(int argc, char *argv[])
 	      //	      printf("Barrier 1 passed\n");
 	      // Use the rank 0 image
 	      lbarrierMPI(mpiv);
+	      // Broadcast the image data
 	      lbcastImageMPI(imdiff_scale_ref->image,imdiff_scale_ref->image_length,0,mpiv);
+	      // Broadcast the pedestal as well -- this is critical
 	      lbcastBufMPI((void *)&imdiff_scale_ref->value_offset,sizeof(IMAGE_DATA_TYPE),0,mpiv);
 #ifdef DEBUG
 	      int num_nz=0;
