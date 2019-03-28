@@ -143,7 +143,21 @@ int main(int argc, char *argv[])
 #endif
 	// Read input deck into buffer
 
-	num_read = lreadbuf((void **)&deck,inputdeck);
+	if (mpiv->my_id == 0) {
+	  num_read = lreadbuf((void **)&deck,inputdeck);
+	}
+
+	// Broadcast num_read and the input deck
+
+	lbcastBufMPI((void *)&num_read,(int)sizeof(size_t),0,mpiv);
+
+        if (mpiv->my_id != 0) {
+	  deck = (char *)malloc(num_read*sizeof(char));
+	}
+
+	lbcastBufMPI((void *)deck,(int)num_read,0,mpiv);
+
+
 
 #ifdef DEBUG
 	//	printf("Length of input deck = %ld\n",num_read);
@@ -694,7 +708,12 @@ int main(int argc, char *argv[])
 	  fclose(imagein);
 
 	  // Define image parameters from input deck
+
+	  imdiff->params = deck;
+
+	  lsetparamsim(imdiff);
 	  
+	  /*
 	  imdiff->punchim_upper.c = punchim_xmax;
 	  imdiff->punchim_lower.c = punchim_xmin;
 	  imdiff->punchim_upper.r = punchim_ymax;
@@ -725,7 +744,7 @@ int main(int argc, char *argv[])
 	  
 	  imdiff->scale_inner_radius = scale_inner_radius;
 	  imdiff->scale_outer_radius = scale_outer_radius;
-	  
+	  */	  
 	  // Apply masks
 
 	  lpunchim(imdiff);

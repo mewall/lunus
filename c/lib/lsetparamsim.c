@@ -67,7 +67,7 @@ int lsetparamsim(DIFFIMAGE *imdiff)
 	}
 
 	if(lgettag(deck,"\nmodeim_kernel_width") != NULL) {
-	  imdiff->mode_height = atoi(lgettag(deck,"\nmodeim_kernel_width"));
+	  imdiff->mode_height = atoi(lgettag(deck,"\nmodeim_kernel_width")) - 1;
 	  imdiff->mode_width = imdiff->mode_height;
 	}
 
