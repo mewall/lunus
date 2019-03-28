@@ -88,7 +88,7 @@ int lwriteim(DIFFIMAGE *imdiff)
       packed = (char *)malloc(imdiff->image_length*sizeof(int));
       size_t n;
       n = lbufcompress(image_cbf,imdiff->image_length,packed);
-      realloc(packed,n);
+      packed = (char *)realloc(packed,n);
       //      printf("Compressed image\n");
       char tag[256];
       sprintf(tag,"%ld",n);

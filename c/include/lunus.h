@@ -812,6 +812,7 @@ size_t lmin(size_t arg1, size_t arg2);
 int lminim(DIFFIMAGE *imdiff);
 int lminr(LAT3D *lat);
 int lminrim(DIFFIMAGE *imdiff);
+int lminrlt(LAT3D *lat);
 int lmirrorlt(LAT3D *lat,int axis);
 int lmodeim(DIFFIMAGE *imdiff);
 int lmulcfim(DIFFIMAGE *imdiff);

@@ -134,7 +134,7 @@ int lreadim(DIFFIMAGE *imdiff)
 	  size_t cif_binary_offset;
 	  while ((cif_binary_pos = strstr(buf,"--CIF-BINARY-FORMAT-SECTION--")) == NULL) {
 	    header_length += DEFAULT_HEADER_LENGTH;
-	    realloc(buf,(size_t)(header_length+DEFAULT_HEADER_LENGTH));
+	    buf = (char *)realloc(buf,(size_t)(header_length+DEFAULT_HEADER_LENGTH));
 	    num_read = fread(&buf[header_length], sizeof(char), DEFAULT_HEADER_LENGTH,
 			 imdiff->infile);
 	    if (num_read != DEFAULT_HEADER_LENGTH) {
@@ -146,7 +146,7 @@ int lreadim(DIFFIMAGE *imdiff)
 	  //	  printf("Read .cbf file with --CIF-BINARY-FORMAT-SECTION-- position = %ld\n",cif_binary_offset);
 	  while ((image_pos = strstr(cif_binary_pos,"\x0c\x1a\x04\xd5")) == NULL) {
 	    header_length += DEFAULT_HEADER_LENGTH;
-	    realloc(buf,(size_t)(header_length+DEFAULT_HEADER_LENGTH));
+	    buf = (char *)realloc(buf,(size_t)(header_length+DEFAULT_HEADER_LENGTH));
 	    num_read = fread(&buf[header_length], sizeof(char), DEFAULT_HEADER_LENGTH,
 			 imdiff->infile);
 	    if (num_read != DEFAULT_HEADER_LENGTH) {
