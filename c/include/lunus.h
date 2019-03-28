@@ -792,6 +792,8 @@ int lgetmat(DIFFIMAGE *imdiff);
 int lgetovld(DIFFIMAGE *imdiff);
 int lgetpks(DIFFIMAGE *imdiff);
 char * lgettag(const char *target,const char *tag);
+float lgettagf(const char *target,const char *tag);
+int lgettagi(const char *target,const char *tag);
 struct ijkcoords lindexFromS(LAT3D *lat);
 DIFFIMAGE *linitim(void);
 LAT3D *linitlt(void);

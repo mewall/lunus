@@ -185,57 +185,59 @@ int main(int argc, char *argv[])
 
 	scale_image_prefix=lgettag(deck,"\nscale_image_prefix");
 
-	if (lgettag(deck,"\npunchim_xmax") == NULL) {
+	if (strstr(deck,"\npunchim_xmax") == NULL) {
 	  punchim_xmax = -1;
 	} else {
 	  punchim_xmax = atoi(lgettag(deck,"\npunchim_xmax"));
 	}
 
-	if (lgettag(deck,"\npunchim_xmin") == NULL) {
+	if (strstr(deck,"\npunchim_xmin") == NULL) {
 	  punchim_xmin = -1;
 	} else {
 	  punchim_xmin = atoi(lgettag(deck,"\npunchim_xmin"));
 	}
 
-	if (lgettag(deck,"\npunchim_ymax") == NULL) {
+	if (strstr(deck,"\npunchim_ymax") == NULL) {
 	  punchim_ymax = -1;
 	} else {
 	  punchim_ymax = atoi(lgettag(deck,"\npunchim_ymax"));
 	}
 
-	if (lgettag(deck,"\npunchim_ymin") == NULL) {
+	if (strstr(deck,"\npunchim_ymin") == NULL) {
 	  punchim_ymin = -1;
 	} else {
 	  punchim_ymin = atoi(lgettag(deck,"\npunchim_ymin"));
 	}
 
-	if (lgettag(deck,"\nwindim_xmax") == NULL) {
+	if (strstr(deck,"\nwindim_xmax") == NULL) {
 	  windim_xmax = -1;
 	} else {
 	  windim_xmax = atoi(lgettag(deck,"\nwindim_xmax"));
 	}
 
-	if (lgettag(deck,"\nwindim_xmin") == NULL) {
+	if (strstr(deck,"\nwindim_xmin") == NULL) {
 	  windim_xmin = -1;
 	} else {
 	  windim_xmin = atoi(lgettag(deck,"\nwindim_xmin"));
 	}
 
-	if (lgettag(deck,"\nwindim_ymax") == NULL) {
+	if (strstr(deck,"\nwindim_ymax") == NULL) {
 	  windim_ymax = -1;
 	} else {
 	  windim_ymax = atoi(lgettag(deck,"\nwindim_ymax"));
 	}
 
-	if (lgettag(deck,"\nwindim_ymin") == NULL) {
+	if (strstr(deck,"\nwindim_ymin") == NULL) {
 	  windim_ymin = -1;
 	} else {
 	  windim_ymin = atoi(lgettag(deck,"\nwindim_ymin"));
 	}
 
-	if ((writevtk_str=lgettag(deck,"\nwritevtk")) == NULL) {
+	if (strstr(deck,"\nwritevtk") == NULL) {
 	  writevtk_str = (char *)malloc(strlen("False")+1);
 	  strcpy(writevtk_str,"False");
+	} else {
+	  writevtk_str = lgettag(deck,"\nwritevtk");
 	}
 
 	if (strcmp(writevtk_str,"True")==0) {
@@ -248,36 +250,38 @@ int main(int argc, char *argv[])
 
 	jsonlist_name=lgettag(deck,"\njsonlist_name");
 
-	if ((integration_image_type=lgettag(deck,"\nintegration_image_type")) == NULL) {
+	if (strstr(deck,"\nintegration_image_type") == NULL) {
 	  integration_image_type = (char *)malloc(strlen("raw")+1);
 	  strcpy(integration_image_type,"raw");
+	} else {
+	  integration_image_type=lgettag(deck,"\nintegration_image_type");
 	}
 
-	if (lgettag(deck,"\nfilterhkl") == NULL) {
+	if (strstr(deck,"\nfilterhkl") == NULL) {
 	  filterhkl = 1;
 	} else if (strcmp(lgettag(deck,"\nfilterhkl"),"False")==0) {
 	  filterhkl=0;
 	} 
 
-	if (lgettag(deck,"\nscale_inner_radius") == NULL) {
+	if (strstr(deck,"\nscale_inner_radius") == NULL) {
 	  scale_inner_radius = -1;
 	} else {
 	  scale_inner_radius = atoi(lgettag(deck,"\nscale_inner_radius"));
 	}
 
-	if (lgettag(deck,"\nscale_outer_radius") == NULL) {
+	if (strstr(deck,"\nscale_outer_radius") == NULL) {
 	  scale_outer_radius = -1;
 	} else {
 	  scale_outer_radius = atoi(lgettag(deck,"\nscale_outer_radius"));
 	}
 
-	if (lgettag(deck,"\npphkl") == NULL) {
+	if (strstr(deck,"\npphkl") == NULL) {
 	  pphkl = 1;
 	} else {
 	  pphkl = atoi(lgettag(deck,"\npphkl"));
 	}
 
-	if (lgettag(deck,"\npoints_per_hkl") != NULL) {
+	if (strstr(deck,"\npoints_per_hkl") != NULL) {
 	  pphkl = atoi(lgettag(deck,"\npoints_per_hkl"));
 	}
 
@@ -285,96 +289,102 @@ int main(int argc, char *argv[])
 
 	spacegroup=lgettag(deck,"\nspacegroup");
 
-	if (lgettag(deck,"\nresolution") == NULL) {
+	if (strstr(deck,"\nresolution") == NULL) {
 	  resolution = -1.;
 	} else {
 	  resolution = atof(lgettag(deck,"\nresolution"));
 	}
 
-	if ((xvectors_path=lgettag(deck,"\nxvectors_path")) == NULL) {
+	if (strstr(deck,"\nxvectors_path") == NULL) {
 	  if (do_integrate!=0) {
 	    perror("Must provide xvectors_path for integration\n");
 	    exit(1);
 	  }
+	} else {
+	  xvectors_path=lgettag(deck,"\nxvectors_path");
 	}
 
 	amatrix_format=lgettag(deck,"\namatrix_format");
 
-	if ((lattice_dir=lgettag(deck,"\nlattice_dir")) == NULL) {
+	if (strstr(deck,"\nlattice_dir") == NULL) {
 	  lattice_dir = (char *)malloc(strlen(".")+1);
 	  strcpy(lattice_dir,".");
+	} else {
+	  lattice_dir=lgettag(deck,"\nlattice_dir");
 	}
 
-	if (lgettag(deck,"\ndiffuse_lattice_dir") != NULL) {
+	if (strstr(deck,"\ndiffuse_lattice_dir") != NULL) {
 	  lattice_dir = lgettag(deck,"\ndiffuse_lattice_dir");
 	}
 
-	if ((diffuse_lattice_prefix=lgettag(deck,"\ndiffuse_lattice_prefix")) == NULL) {
+	if (strstr(deck,"\ndiffuse_lattice_prefix") == NULL) {
 	  diffuse_lattice_prefix = (char *)malloc(strlen("diffuse_lunus")+1);
 	  strcpy(diffuse_lattice_prefix,"diffuse_lunus");
+	} else {
+	  diffuse_lattice_prefix=lgettag(deck,"\ndiffuse_lattice_prefix");
 	}
 
-	if(lgettag(deck,"\nthrshim_max") == NULL) {
+	if(strstr(deck,"\nthrshim_max") == NULL) {
 	  thrshim_max = -1;
 	} else {
 	  thrshim_max = atoi(lgettag(deck,"\nthrshim_max"));
 	}
 
-	if(lgettag(deck,"\nthrshim_min") == NULL) {
+	if(strstr(deck,"\nthrshim_min") == NULL) {
 	  thrshim_min = -1;
 	} else {
 	  thrshim_min = atoi(lgettag(deck,"\nthrshim_min"));
 	}
 
-	if(lgettag(deck,"\nmodeim_bin_size") == NULL) {
+	if(strstr(deck,"\nmodeim_bin_size") == NULL) {
 	  modeim_bin_size = -1;
 	} else {
 	  modeim_bin_size = atoi(lgettag(deck,"\nmodeim_bin_size"));
 	}
 
-	if(lgettag(deck,"\nmodeim_kernel_width") == NULL) {
+	if(strstr(deck,"\nmodeim_kernel_width") == NULL) {
 	  modeim_kernel_width = -1;
 	} else {
 	  modeim_kernel_width = atoi(lgettag(deck,"\nmodeim_kernel_width"));
 	}
 
-	if(lgettag(deck,"\nnum_images") == NULL) {
+	if(strstr(deck,"\nnum_images") == NULL) {
 	  num_images = -1;
 	} else {
 	  num_images = atoi(lgettag(deck,"\nnum_images"));
 	}
 
-	if(lgettag(deck,"\npolarim_offset") == NULL) {
+	if(strstr(deck,"\npolarim_offset") == NULL) {
 	  polarim_offset = 0.0;
 	} else {
 	  polarim_offset = atof(lgettag(deck,"\npolarim_offset"));
 	}
 
-	if(lgettag(deck,"\npolarim_polarization") == NULL) {
+	if(strstr(deck,"\npolarim_polarization") == NULL) {
 	  polarim_polarization = 1.;
 	} else {
 	  polarim_polarization = atof(lgettag(deck,"\npolarim_polarization"));
 	}
 
-	if (lgettag(deck,"\ndistance_mm") == NULL) {
+	if (strstr(deck,"\ndistance_mm") == NULL) {
 	  distance_mm = -1.;
 	} else {
 	  distance_mm = atof(lgettag(deck,"\ndistance_mm"));
 	}
 
-	if (lgettag(deck,"\ncorrection_factor_scale") == NULL) {
+	if (strstr(deck,"\ncorrection_factor_scale") == NULL) {
 	  correction_factor_scale = 1.;
 	} else {
 	  correction_factor_scale = atof(lgettag(deck,"\ncorrection_factor_scale"));
 	}
 
-	if (lgettag(deck,"\nbackground_subtraction_factor") == NULL) {
+	if (strstr(deck,"\nbackground_subtraction_factor") == NULL) {
 	  background_subtraction_factor = 1.;
 	} else {
 	  background_subtraction_factor = atof(lgettag(deck,"\nbackground_subtraction_factor"));
 	} 
 
-	if (lgettag(deck,"\noverall_scale_factor") != NULL) {
+	if (strstr(deck,"\noverall_scale_factor") != NULL) {
 	  correction_factor_scale = atof(lgettag(deck,"\noverall_scale_factor"));
 	}
 	  
@@ -712,7 +722,7 @@ int main(int argc, char *argv[])
 	  imdiff->params = deck;
 
 	  lsetparamsim(imdiff);
-	  
+
 	  /*
 	  imdiff->punchim_upper.c = punchim_xmax;
 	  imdiff->punchim_lower.c = punchim_xmin;
@@ -722,7 +732,7 @@ int main(int argc, char *argv[])
 	  imdiff->window_upper.c = windim_xmax;
 	  imdiff->window_lower.c = windim_xmin;
 	  imdiff->window_upper.r = windim_ymax;
-	  imdiff->window_lower.r = windim_ymin;
+	  imdiff->window_lower.r = windim_ymin;	  
 	  
 	  imdiff->upper_threshold = thrshim_max;
 	  imdiff->lower_threshold = thrshim_min;
@@ -730,21 +740,26 @@ int main(int argc, char *argv[])
 	  imdiff->polarization = polarim_polarization;
 	  imdiff->polarization_offset = polarim_offset;
 
-	  if (distance_mm>0.0) {
-	    imdiff->distance_mm = distance_mm;
-	  }
-	  
 	  imdiff->cassette.x = normim_tilt_x;
 	  imdiff->cassette.y = normim_tilt_y;
 	  imdiff->cassette.z = 0.0;
-	  
+	  	  
+	  imdiff->mode_binsize = modeim_bin_size;
+
+	  //	  printf("imdiff->mode_height = %d\n",imdiff->mode_height);
 	  imdiff->mode_height = modeim_kernel_width - 1;
 	  imdiff->mode_width = modeim_kernel_width - 1;
-	  imdiff->mode_binsize = modeim_bin_size;
+
+	  //	  printf("imdiff->mode_width = %d\n",imdiff->mode_width);
 	  
 	  imdiff->scale_inner_radius = scale_inner_radius;
 	  imdiff->scale_outer_radius = scale_outer_radius;
-	  */	  
+
+	  if (distance_mm>0.0) {
+	    imdiff->distance_mm = distance_mm;
+	  }
+
+	  */	  	  
 	  // Apply masks
 
 	  lpunchim(imdiff);
