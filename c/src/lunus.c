@@ -22,26 +22,26 @@ int main(int argc, char *argv[])
   
   char
     inputdeck[10000],
-    *imageinpath,
-    *lunusoutpath,
-    *scaleoutpath,
-    *deck,    
-    *image_prefix,
-    *image_suffix,
-    *lunus_image_prefix,
-    *scale_image_prefix,
-    *lunus_image_dir,
-    *raw_image_dir,
-    *json_dir,
-    *amatrix_format,
-    *amatrix_path,
-    *xvectors_path,
-    *writevtk_str,
-    *integration_image_type,
-    *lattice_dir,
-    *diffuse_lattice_prefix,
-    *unit_cell,
-    *spacegroup,
+    *imageinpath = NULL,
+    *lunusoutpath = NULL,
+    *scaleoutpath = NULL,
+    *deck = NULL,    
+    *image_prefix = NULL,
+    *image_suffix = NULL,
+    *lunus_image_prefix = NULL,
+    *scale_image_prefix = NULL,
+    *lunus_image_dir = NULL,
+    *raw_image_dir = NULL,
+    *json_dir = NULL,
+    *amatrix_format = NULL,
+    *amatrix_path = NULL,
+    *xvectors_path = NULL,
+    *writevtk_str = NULL,
+    *integration_image_type = NULL,
+    *lattice_dir = NULL,
+    *diffuse_lattice_prefix = NULL,
+    *unit_cell = NULL,
+    *spacegroup = NULL,
     *imagelist_name = NULL,
     *jsonlist_name = NULL,
     *imagelist[20000],
@@ -152,7 +152,7 @@ int main(int argc, char *argv[])
 	lbcastBufMPI((void *)&num_read,(int)sizeof(size_t),0,mpiv);
 
         if (mpiv->my_id != 0) {
-	  deck = (char *)malloc(num_read*sizeof(char));
+	  deck = (char *)calloc(num_read+1,sizeof(char));
 	}
 
 	lbcastBufMPI((void *)deck,(int)num_read,0,mpiv);
@@ -164,73 +164,84 @@ int main(int argc, char *argv[])
 #endif
 	// Parse input deck
 
-	raw_image_dir=lgettag(deck,"\nraw_image_dir");
-
-	if ((json_dir=lgettag(deck,"\njson_dir")) == NULL) {
-	  json_dir = (char *)malloc(strlen(".")+1);
-	  strcpy(json_dir,".");
+	if (strstr(deck,"\nraw_image_dir") != NULL) {
+	  raw_image_dir=lgettag(deck,"\nraw_image_dir");
 	}
 
-	lunus_image_dir=lgettag(deck,"\nlunus_image_dir");
+	if (strstr(deck,"\njson_dir") == NULL) {
+	  json_dir = (char *)malloc(strlen(".")+1);
+	  strcpy(json_dir,".");
+	} else {
+	  json_dir = lgettag(deck,"\njson_dir");
+	}
 
-	image_prefix=lgettag(deck,"\nimage_prefix");
+	if (strstr(deck,"\nlunus_image_dir") != NULL) {
+	  lunus_image_dir=lgettag(deck,"\nlunus_image_dir");
+	}
 
-	if ((image_suffix=lgettag(deck,"\nimage_suffix")) == NULL) {
-	  image_suffix = (char *)malloc(strlen("img")+1);
-	  strcpy(image_suffix,"img");
+	if (strstr(deck,"\nimage_prefix") != NULL) {
+	  image_prefix=lgettag(deck,"\nimage_prefix");
+	}
+
+	if (strstr(deck,"\nimage_suffix") != NULL) {
+	  image_suffix = lgettag(deck,"\nimage_suffix");
 	}
 	  
 
-	lunus_image_prefix=lgettag(deck,"\nlunus_image_prefix");
+	if (strstr(deck,"\nlunus_image_prefix") != NULL) {
+	  lunus_image_prefix=lgettag(deck,"\nlunus_image_prefix");
+	}
 
-	scale_image_prefix=lgettag(deck,"\nscale_image_prefix");
+	if (strstr(deck,"\nscale_image_prefix") != NULL) {
+	  scale_image_prefix=lgettag(deck,"\nscale_image_prefix");
+	}
 
 	if (strstr(deck,"\npunchim_xmax") == NULL) {
 	  punchim_xmax = -1;
 	} else {
-	  punchim_xmax = atoi(lgettag(deck,"\npunchim_xmax"));
+	  punchim_xmax = lgettagi(deck,"\npunchim_xmax");
 	}
 
 	if (strstr(deck,"\npunchim_xmin") == NULL) {
 	  punchim_xmin = -1;
 	} else {
-	  punchim_xmin = atoi(lgettag(deck,"\npunchim_xmin"));
+	  punchim_xmin = lgettagi(deck,"\npunchim_xmin");
 	}
 
 	if (strstr(deck,"\npunchim_ymax") == NULL) {
 	  punchim_ymax = -1;
 	} else {
-	  punchim_ymax = atoi(lgettag(deck,"\npunchim_ymax"));
+	  punchim_ymax = lgettagi(deck,"\npunchim_ymax");
 	}
 
 	if (strstr(deck,"\npunchim_ymin") == NULL) {
 	  punchim_ymin = -1;
 	} else {
-	  punchim_ymin = atoi(lgettag(deck,"\npunchim_ymin"));
+	  punchim_ymin = lgettagi(deck,"\npunchim_ymin");
 	}
 
 	if (strstr(deck,"\nwindim_xmax") == NULL) {
 	  windim_xmax = -1;
 	} else {
-	  windim_xmax = atoi(lgettag(deck,"\nwindim_xmax"));
+	  windim_xmax = lgettagi(deck,"\nwindim_xmax");
 	}
 
 	if (strstr(deck,"\nwindim_xmin") == NULL) {
 	  windim_xmin = -1;
 	} else {
-	  windim_xmin = atoi(lgettag(deck,"\nwindim_xmin"));
+	  windim_xmin = lgettagi(deck,"\nwindim_xmin");
 	}
 
 	if (strstr(deck,"\nwindim_ymax") == NULL) {
 	  windim_ymax = -1;
 	} else {
-	  windim_ymax = atoi(lgettag(deck,"\nwindim_ymax"));
+	  windim_ymax = lgettagi(deck,"\nwindim_ymax");
 	}
 
 	if (strstr(deck,"\nwindim_ymin") == NULL) {
 	  windim_ymin = -1;
 	} else {
-	  windim_ymin = atoi(lgettag(deck,"\nwindim_ymin"));
+	  windim_ymin = lgettagi(deck,"\nwindim_ymin");
 	}
 
 	if (strstr(deck,"\nwritevtk") == NULL) {
@@ -246,9 +257,13 @@ int main(int argc, char *argv[])
 	  writevtk=0;
 	}
 
-	imagelist_name=lgettag(deck,"\nimagelist_name");
+	if (strstr(deck,"\nimagelist_name") != NULL) {
+	  imagelist_name=lgettag(deck,"\nimagelist_name");
+	}
 
-	jsonlist_name=lgettag(deck,"\njsonlist_name");
+	if (strstr(deck,"\njsonlist_name") != NULL) {
+	  jsonlist_name=lgettag(deck,"\njsonlist_name");
+	}
 
 	if (strstr(deck,"\nintegration_image_type") == NULL) {
 	  integration_image_type = (char *)malloc(strlen("raw")+1);
@@ -266,33 +281,37 @@ int main(int argc, char *argv[])
 	if (strstr(deck,"\nscale_inner_radius") == NULL) {
 	  scale_inner_radius = -1;
 	} else {
-	  scale_inner_radius = atoi(lgettag(deck,"\nscale_inner_radius"));
+	  scale_inner_radius = lgettagi(deck,"\nscale_inner_radius");
 	}
 
 	if (strstr(deck,"\nscale_outer_radius") == NULL) {
 	  scale_outer_radius = -1;
 	} else {
-	  scale_outer_radius = atoi(lgettag(deck,"\nscale_outer_radius"));
+	  scale_outer_radius = lgettagi(deck,"\nscale_outer_radius");
 	}
 
 	if (strstr(deck,"\npphkl") == NULL) {
 	  pphkl = 1;
 	} else {
-	  pphkl = atoi(lgettag(deck,"\npphkl"));
+	  pphkl = lgettagi(deck,"\npphkl");
 	}
 
 	if (strstr(deck,"\npoints_per_hkl") != NULL) {
-	  pphkl = atoi(lgettag(deck,"\npoints_per_hkl"));
+	  pphkl = lgettagi(deck,"\npoints_per_hkl");
 	}
 
-	unit_cell=lgettag(deck,"\nunit_cell");
+	if (strstr(deck,"\nunit_cell") != NULL) {
+	  unit_cell=lgettag(deck,"\nunit_cell");
+	}
 
-	spacegroup=lgettag(deck,"\nspacegroup");
+	if (strstr(deck,"\nunit_cell") != NULL) {
+	  spacegroup=lgettag(deck,"\nspacegroup");
+	}
 
 	if (strstr(deck,"\nresolution") == NULL) {
 	  resolution = -1.;
 	} else {
-	  resolution = atof(lgettag(deck,"\nresolution"));
+	  resolution = lgettagf(deck,"\nresolution");
 	}
 
 	if (strstr(deck,"\nxvectors_path") == NULL) {
@@ -304,7 +323,9 @@ int main(int argc, char *argv[])
 	  xvectors_path=lgettag(deck,"\nxvectors_path");
 	}
 
-	amatrix_format=lgettag(deck,"\namatrix_format");
+	if (strstr(deck,"\namatrix_format") != NULL) {
+	  amatrix_format=lgettag(deck,"\namatrix_format");
+	}
 
 	if (strstr(deck,"\nlattice_dir") == NULL) {
 	  lattice_dir = (char *)malloc(strlen(".")+1);
@@ -327,65 +348,65 @@ int main(int argc, char *argv[])
 	if(strstr(deck,"\nthrshim_max") == NULL) {
 	  thrshim_max = -1;
 	} else {
-	  thrshim_max = atoi(lgettag(deck,"\nthrshim_max"));
+	  thrshim_max = lgettagi(deck,"\nthrshim_max");
 	}
 
 	if(strstr(deck,"\nthrshim_min") == NULL) {
 	  thrshim_min = -1;
 	} else {
-	  thrshim_min = atoi(lgettag(deck,"\nthrshim_min"));
+	  thrshim_min = lgettagi(deck,"\nthrshim_min");
 	}
 
 	if(strstr(deck,"\nmodeim_bin_size") == NULL) {
 	  modeim_bin_size = -1;
 	} else {
-	  modeim_bin_size = atoi(lgettag(deck,"\nmodeim_bin_size"));
+	  modeim_bin_size = lgettagi(deck,"\nmodeim_bin_size");
 	}
 
 	if(strstr(deck,"\nmodeim_kernel_width") == NULL) {
 	  modeim_kernel_width = -1;
 	} else {
-	  modeim_kernel_width = atoi(lgettag(deck,"\nmodeim_kernel_width"));
+	  modeim_kernel_width = lgettagi(deck,"\nmodeim_kernel_width");
 	}
 
 	if(strstr(deck,"\nnum_images") == NULL) {
 	  num_images = -1;
 	} else {
-	  num_images = atoi(lgettag(deck,"\nnum_images"));
+	  num_images = lgettagi(deck,"\nnum_images");
 	}
 
 	if(strstr(deck,"\npolarim_offset") == NULL) {
 	  polarim_offset = 0.0;
 	} else {
-	  polarim_offset = atof(lgettag(deck,"\npolarim_offset"));
+	  polarim_offset = lgettagf(deck,"\npolarim_offset");
 	}
 
 	if(strstr(deck,"\npolarim_polarization") == NULL) {
 	  polarim_polarization = 1.;
 	} else {
-	  polarim_polarization = atof(lgettag(deck,"\npolarim_polarization"));
+	  polarim_polarization = lgettagf(deck,"\npolarim_polarization");
 	}
 
 	if (strstr(deck,"\ndistance_mm") == NULL) {
 	  distance_mm = -1.;
 	} else {
-	  distance_mm = atof(lgettag(deck,"\ndistance_mm"));
+	  distance_mm = lgettagf(deck,"\ndistance_mm");
 	}
 
 	if (strstr(deck,"\ncorrection_factor_scale") == NULL) {
 	  correction_factor_scale = 1.;
 	} else {
-	  correction_factor_scale = atof(lgettag(deck,"\ncorrection_factor_scale"));
+	  correction_factor_scale = lgettagf(deck,"\ncorrection_factor_scale");
 	}
 
 	if (strstr(deck,"\nbackground_subtraction_factor") == NULL) {
 	  background_subtraction_factor = 1.;
 	} else {
-	  background_subtraction_factor = atof(lgettag(deck,"\nbackground_subtraction_factor"));
+	  background_subtraction_factor = lgettagf(deck,"\nbackground_subtraction_factor");
 	} 
 
 	if (strstr(deck,"\noverall_scale_factor") != NULL) {
-	  correction_factor_scale = atof(lgettag(deck,"\noverall_scale_factor"));
+	  correction_factor_scale = lgettagf(deck,"\noverall_scale_factor");
 	}
 	  
 	// Print input deck values

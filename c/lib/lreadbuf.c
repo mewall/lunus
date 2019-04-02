@@ -25,7 +25,7 @@ size_t lreadbuf(void **buf,const char *fname)
   buf_length = (size_t)(end_pos-this_pos);
   //  if (*buf != NULL) free(*buf);
   //  printf("buf_length = %ld\n",buf_length);
-  *buf = (void *)malloc(buf_length);
+  *buf = (void *)calloc(buf_length+1,sizeof(char));
   if (*buf == NULL) {
     printf("LREADBUF: Could not allocate buffer\n");
     exit(1);

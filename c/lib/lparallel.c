@@ -20,6 +20,7 @@ void linitMPI(MPIVARS *mpiv) {
 #else
   mpiv->my_id = 0;
   mpiv->num_procs = 1;
+  mpiv->ierr = 0;
 #endif
 }
 

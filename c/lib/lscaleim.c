@@ -12,9 +12,9 @@ int lscaleim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2)
 {
 	float
 	  xx,xy,yy,
-	  avg_xx,
-	  avg_xy,
-	  avg_yy;
+	  avg_xx = 0.0,
+	  avg_xy = 0.0,
+	  avg_yy = 0.0;
 
 	int 
 		return_value = 0;
@@ -29,13 +29,13 @@ int lscaleim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2)
 
 	struct xycoords r_mm;
 
-	rf1 = (RFILE_DATA_TYPE *)calloc(MAX_RFILE_LENGTH,sizeof(RFILE_DATA_TYPE));
-	rf2 = (RFILE_DATA_TYPE *)calloc(MAX_RFILE_LENGTH,sizeof(RFILE_DATA_TYPE));
 #ifdef DEBUG
-	printf("imdiff1->scale_inner_radius=%d,imdiff1->scale_outer_radius=%d\n",imdiff1->scale_inner_radius,imdiff1->scale_outer_radius);
+	printf("imdiff1->overload_tag=%d,imdiff1->ignore_tag=%d,imdiff1->scale_inner_radius=%d,imdiff1->scale_outer_radius=%d\n",imdiff1->overload_tag,imdiff1->ignore_tag,imdiff1->scale_inner_radius,imdiff1->scale_outer_radius);
 	printf("imdiff2->scale_inner_radius=%d,imdiff2->scale_outer_radius=%d\n",imdiff2->scale_inner_radius,imdiff2->scale_outer_radius);
 #endif
 	lavgrim(imdiff1);
+	rf1 = (RFILE_DATA_TYPE *)calloc(imdiff1->rfile_length,sizeof(RFILE_DATA_TYPE));
+	rf2 = (RFILE_DATA_TYPE *)calloc(imdiff1->rfile_length,sizeof(RFILE_DATA_TYPE));
 	ct = 0;
 	for (i=0; i<imdiff1->rfile_length;i++) {
 	  rf1[i] = imdiff1->rfile[i];
@@ -55,8 +55,8 @@ int lscaleim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2)
 	//	memcpy((void *)rf2,(void *)imdiff2->rfile,imdiff2->rfile_length*sizeof(RFILE_DATA_TYPE));
 
 	for (i=0;i<imdiff1->rfile_length;i++) {
-	  if (rf1[i] != imdiff1->overload_tag && rf1[i] != imdiff1->mask_tag &&
-	      rf2[i] != imdiff1->overload_tag && rf2[i] != imdiff1->mask_tag) {
+	  if (rf1[i] != imdiff1->overload_tag && rf1[i] != imdiff1->ignore_tag &&
+	      rf2[i] != imdiff1->overload_tag && rf2[i] != imdiff1->ignore_tag) {
 	    if ((imdiff1->scale_inner_radius == 0 && imdiff1->scale_outer_radius == 0) || (i > imdiff1->scale_inner_radius && i < imdiff1->scale_outer_radius)) {
 	    float x,y;
 	    x = (float)rf1[i];
