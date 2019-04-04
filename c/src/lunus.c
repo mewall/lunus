@@ -250,6 +250,8 @@ int main(int argc, char *argv[])
 
 	  printf("resolution=%f\n",resolution);
 
+	  printf("pphkl=%d\n",pphkl);
+
 	  if (filterhkl == 1) {
 	    printf("filterhkl=True\n");
 	  } else {
