@@ -37,7 +37,7 @@ int lcfim(DIFFIMAGE *imdiff)
     two_rho_offset,
     maxcorr;
 
-  scale = imdiff->correction[0];
+  scale = imdiff->correction_factor_scale;
   two_rho_offset = 2.*PI/180.*imdiff->polarization_offset;
   for(r=0; r < imdiff->vpixels; r++) {
     rvec.y = (float)(r*imdiff->pixel_size_mm-imdiff->beam_mm.y);

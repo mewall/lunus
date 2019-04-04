@@ -516,7 +516,10 @@ typedef struct
   struct xyzcoords q;
   struct irange rfirange;       /* Range of rfile index values */
   float *correction;             /* Correction factor, pixel by pixel */
-  float x;                      /* Multiplicative factor for lbkgsubim() */
+  float correction_factor_scale; /* Overall scale factor for correction */
+  float background_subtraction_factor;/* Multiplicative factor for lbkgsubim() */
+  struct xyzcoords *xvectors;   /* lab coordinates corresponding to each pixel in the image */
+  struct xyzmatrix amatrix;     /* A matrix for mapping lab coords to reciprocal space coords */
 } DIFFIMAGE;
 
 /*
@@ -781,13 +784,17 @@ int lexplt(LAT3D *lat);
 void lfft(float *data,int *nn,int ndim,int isign);
 int lfilltaglt(LAT3D *lat);
 void lfinalMPI(MPIVARS *mpiv);
+int lfindtag(const char *target,const char *tag,const char sep,char **pos_begin,char **pos_end);
 int lfmtlt(LAT3D *lat);
 int lfreeim(DIFFIMAGE *imdiff);
 int lfreelt(LAT3D *lat);
 int lgausslt(LAT3D *lat);
 int lgensv(DIFFIMAGE *imdiff);
 int lgetanls(DIFFIMAGE *imdiff);
-const char * lgetcbftag(const char *target,const char *tag);
+char * lgetcbftag(const char *target,const char *tag);
+float lgetcbftagf(const char *target,const char *tag);
+int lgetcbftagi(const char *target,const char *tag);
+long lgetcbftagl(const char *target,const char *tag);
 int lgetmat(DIFFIMAGE *imdiff);
 int lgetovld(DIFFIMAGE *imdiff);
 int lgetpks(DIFFIMAGE *imdiff);

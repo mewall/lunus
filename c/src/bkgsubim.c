@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
     goto CloseShop;
   }
 
-  imdiff2->x = x;
+  imdiff1->background_subtraction_factor = x;
 
   if (lbkgsubim(imdiff1,imdiff2) != 0) {
     perror(imdiff2->error_msg);

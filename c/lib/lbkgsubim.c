@@ -46,7 +46,7 @@ int lbkgsubim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2)
 		  index2 = r2*imdiff2->hpixels + c2;
 		  if ((imdiff2->image[index2] != imdiff2->overload_tag) &&
 		      (imdiff2->image[index2] != imdiff2->ignore_tag )) {
-		    imdiff1->image[index1] = roundf(imdiff1->image[index1] -					     imdiff2->image[index2]*imdiff2->x);
+		    imdiff1->image[index1] = roundf(imdiff1->image[index1] -					     imdiff2->image[index2]*imdiff1->background_subtraction_factor);
 		    if (imdiff1->image[index1] < minval) {
 		      minval = imdiff1->image[index1];
 		    }

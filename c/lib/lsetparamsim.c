@@ -83,6 +83,23 @@ int lsetparamsim(DIFFIMAGE *imdiff)
 	  imdiff->distance_mm = lgettagf(deck,"\ndistance_mm");
 	}
 
+	if (strstr(deck,"\nbackground_subtraction_factor") == NULL) {
+	  imdiff->background_subtraction_factor = 1.;
+	} else {
+	  imdiff->background_subtraction_factor = lgettagf(deck,"\nbackground_subtraction_factor");
+	} 
+
+	if (strstr(deck,"\ncorrection_factor_scale") == NULL) {
+	  imdiff->correction_factor_scale = 1.;
+	} else {
+	  imdiff->correction_factor_scale = lgettagf(deck,"\ncorrection_factor_scale");
+	}
+
+	if (strstr(deck,"\noverall_scale_factor") != NULL) {
+	  imdiff->correction_factor_scale = lgettagf(deck,"\noverall_scale_factor");
+	}
+	  
+
   return(0);
 }
 

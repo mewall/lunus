@@ -165,6 +165,7 @@ int lreadim(DIFFIMAGE *imdiff)
 	    sprintf(imdiff->error_msg,"\nCouldn't read all of header.\n\n");
 	    return(1);
 	  }
+	  imdiff->header[imdiff->header_length] = 0;
 	  //	  printf("imdiff->header_length = %ld\n",imdiff->header_length);
 	  //	  imdiff->header[imdiff->header_length]=0;
 	  // Write header
@@ -183,20 +184,28 @@ int lreadim(DIFFIMAGE *imdiff)
 	  printf("X-Binary-Size-Padding = %s\n",lgetcbftag(imdiff->header,"X-Binary-Size-Padding:"));
 	  */
 	  char units[256];
-	  imdiff->hpixels = atoi(lgetcbftag(imdiff->header,"X-Binary-Size-Fastest-Dimension:"));
-	  imdiff->vpixels = atoi(lgetcbftag(imdiff->header,"X-Binary-Size-Second-Dimension:"));
+	  char *tagbuf = NULL;
+	  imdiff->hpixels = lgetcbftagi(imdiff->header,"X-Binary-Size-Fastest-Dimension:");
+	  imdiff->vpixels = lgetcbftagi(imdiff->header,"X-Binary-Size-Second-Dimension:");
+	  //	  printf("imdiff->hpixels=%d,imdiff->vpixels=%d\n",imdiff->hpixels,imdiff->vpixels);
 	  imdiff->image_length = imdiff->hpixels * imdiff->vpixels;
-	  sscanf(lgetcbftag(imdiff->header,"Start_angle"),"%f %s",&imdiff->osc_start,units);
-	  sscanf(lgetcbftag(imdiff->header,"Angle_increment"),"%f %s",&imdiff->osc_range,units);
-	  sscanf(lgetcbftag(imdiff->header,"Detector_distance"),"%f %s",&imdiff->distance_mm,units);
+	  tagbuf = lgetcbftag(imdiff->header,"Start_angle");
+	  sscanf(tagbuf,"%f %s",&imdiff->osc_start,units);
+	  if (tagbuf != NULL) free(tagbuf);
+	  sscanf(tagbuf = lgetcbftag(imdiff->header,"Angle_increment"),"%f %s",&imdiff->osc_range,units);
+	  if (tagbuf != NULL) free(tagbuf);
+	  sscanf(tagbuf = lgetcbftag(imdiff->header,"Detector_distance"),"%f %s",&imdiff->distance_mm,units);
+	  if (tagbuf != NULL) free(tagbuf);
 	  if (strcmp(units,"m")==0) {
 	    imdiff->distance_mm *= 1000.;
 	  }
-	  sscanf(lgetcbftag(imdiff->header,"Pixel_size"),"%g %s",&imdiff->pixel_size_mm,units);
+	  sscanf(tagbuf = lgetcbftag(imdiff->header,"Pixel_size"),"%g %s",&imdiff->pixel_size_mm,units);
+	  if (tagbuf != NULL) free(tagbuf);
 	  if (strcmp(units,"m")==0) {
 	    imdiff->pixel_size_mm *= 1000.;
 	  }
-	  sscanf(lgetcbftag(imdiff->header,"Beam_xy"),"%*c%f, %f%*c %s",&imdiff->beam_mm.x,&imdiff->beam_mm.y,units);
+	  sscanf(tagbuf = lgetcbftag(imdiff->header,"Beam_xy"),"%*c%f, %f%*c %s",&imdiff->beam_mm.x,&imdiff->beam_mm.y,units);
+	  if (tagbuf != NULL) free(tagbuf);
 	  if (strcmp(units,"pixels")==0) {
 	    imdiff->beam_mm.x *= imdiff->pixel_size_mm;
 	    imdiff->beam_mm.y *= imdiff->pixel_size_mm;
@@ -204,24 +213,26 @@ int lreadim(DIFFIMAGE *imdiff)
 	  // origin in pixels
 	  imdiff->origin.c = imdiff->beam_mm.x/imdiff->pixel_size_mm+.5;
 	  imdiff->origin.r = imdiff->beam_mm.y/imdiff->pixel_size_mm+.5;
-	  sscanf(lgetcbftag(imdiff->header,"Wavelength"),"%g %s",&imdiff->wavelength,units);
+	  sscanf(tagbuf = lgetcbftag(imdiff->header,"Wavelength"),"%g %s",&imdiff->wavelength,units);
+	  if (tagbuf != NULL) free(tagbuf);
 	  if (strcmp(units,"nm")==0) {
 	    imdiff->wavelength /= 10.;
 	  }
 	  // Make pedestal = 0 for CBF
-	  if (lgetcbftag(imdiff->header,"Pedestal") == NULL) {
+	  if (strstr(imdiff->header,"Pedestal") == NULL) {
 	    imdiff->value_offset = 0;
 	  } else {
-	    imdiff->value_offset = atoi(lgetcbftag(imdiff->header,"Pedestal"));
+	    imdiff->value_offset = lgetcbftagi(imdiff->header,"Pedestal");
 	  }
 	  // Polarization defaults
 	  imdiff->polarization = 1.0;
 	  imdiff->polarization_offset = 0.0;
 	  //	  	  printf("osc_start,osc_range,distance_mm,pixel_size_mm,beam_mm.x,beam_mm.y,wavelength=%f,%f,%f,%f,%f,%f,%f\n",imdiff->osc_start,imdiff->osc_range,imdiff->distance_mm,imdiff->pixel_size_mm,imdiff->beam_mm.x,imdiff->beam_mm.y,imdiff->wavelength);
+	  char *buf;
 	  size_t buf_length, padding;
-	  buf_length = atol(lgetcbftag(imdiff->header,"X-Binary-Size:"));
-	  padding = atol(lgetcbftag(imdiff->header,"X-Binary-Size-Padding:"));
-	  buf = (char *)realloc(buf,buf_length+padding);
+	  buf_length = lgetcbftagl(imdiff->header,"X-Binary-Size:");
+	  padding = lgetcbftagl(imdiff->header,"X-Binary-Size-Padding:");
+	  buf = (char *)calloc(buf_length+padding,sizeof(char));
 	  num_read = fread(buf, sizeof(char), buf_length,
 			   imdiff->infile);
 	  // Read the footer

@@ -32,6 +32,7 @@ DIFFIMAGE *linitim(void)
   imdiff->vpixels = DEFAULT_VSIZE;
   imdiff->hpixels = DEFAULT_HSIZE;
   imdiff->image_length = DEFAULT_IMAGELENGTH;
+  imdiff->rfile_length = MAX_RFILE_LENGTH;
   imdiff->punch_tag = PUNCH_TAG;
   imdiff->overload_tag = DEFAULT_OVERLOAD_TAG;
   imdiff->ignore_tag = DEFAULT_IGNORE_TAG;
@@ -71,8 +72,9 @@ DIFFIMAGE *linitim(void)
   imdiff->amplitude = DEFAULT_AMPLITUDE;
   imdiff->pitch = DEFAULT_PITCH;
   imdiff->value_offset = DEFAULT_VALUE_OFFSET;
-  imdiff->x = 1.0;
-
+  imdiff->correction_factor_scale = 1.0;
+  imdiff->background_subtraction_factor = 1.0;
+  imdiff->xvectors = NULL;
   /*
    * Allocate memory for arrays:
    */
