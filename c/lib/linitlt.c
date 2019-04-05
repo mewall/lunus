@@ -71,6 +71,11 @@ LAT3D *linitlt(void)
     lat->lattice[index] = lat->mask_tag;
   }
 
+  lat->integration_image_type = NULL;
+
+  lat->resolution.max = 0.0;
+  lat->resolution.min = 100.0;
+
   CloseShop:
 
   return(lat);

@@ -68,14 +68,13 @@ int main(int argc, char *argv[])
   float
     normim_tilt_x=0.0,
     normim_tilt_y=0.0,
-    background_subtraction_factor=1.0,
     resolution;
 
   int
     pphkl = 1;
 
   DIFFIMAGE 
-    *imdiff, *imdiff_bkg, *imdiff_corrected = NULL, *imdiff_scale = NULL, *imdiff_scale_ref = NULL;
+    *imdiff = NULL, *imdiff_bkg = NULL, *imdiff_corrected = NULL, *imdiff_scale = NULL, *imdiff_scale_ref = NULL;
 
   LAT3D
     *lat;
@@ -228,13 +227,7 @@ int main(int argc, char *argv[])
 	  diffuse_lattice_prefix=lgettag(deck,"\ndiffuse_lattice_prefix");
 	}
 
-	if (strstr(deck,"\nbackground_subtraction_factor") == NULL) {
-	  background_subtraction_factor = 1.;
-	} else {
-	  background_subtraction_factor = lgettagf(deck,"\nbackground_subtraction_factor");
-	} 
-
-	// Print input deck values
+	// Get file lists and A matrices
 
 	if (mpiv->my_id == 0) {
 
@@ -259,32 +252,6 @@ int main(int argc, char *argv[])
 	  }
 
 	}
-	/*
-	 * Initialize diffraction image:
-	 */
-
-
-	if ((imdiff = linitim()) == NULL) {
-	  perror("Couldn't initialize diffraction image.\n\n");
-	  exit(0);
-	}
-
-	// Define parameters from input deck
-
-	imdiff->params = deck;
-
-	lsetparamsim(imdiff);
-
-	// Initialize other images
-
-	imdiff_corrected = linitim();
-	imdiff_scale = linitim();
-	imdiff_scale_ref = linitim();
-	imdiff_bkg = linitim();
-
-	// Process all of the images
-
-	int ct=0;
 
 	if (mpiv->my_id == 0) {
 
@@ -396,15 +363,14 @@ int main(int argc, char *argv[])
 	  lbcastBufMPI((void *)bkglist[i],bl_sz[i],0,mpiv);
 	}
 
-	// Broadcast the list of orientation matrices to all MPI ranks
+	// Broadcast the list of A matrices to all MPI ranks
 
 	lbcastBufMPI((void *)&at,sizeof(struct xyzmatrix)*num_images,0,mpiv);	
 
-	// Initialize the 3D dataset for the images on this MPI rank
+	// Initialize the 3D dataset for this MPI rank
 
-	if (do_integrate!=0) {
-	  lat = linitlt();
-	  if (unit_cell == NULL) {
+	lat = linitlt();
+	if (unit_cell == NULL) {
 	    float a,b,c,alpha,beta,gamma,adotb,adotc,bdotc;
 	    struct xyzmatrix a0;
 	    a0 = at[0];
@@ -451,7 +417,31 @@ int main(int argc, char *argv[])
 	  lat->lattice = (LATTICE_DATA_TYPE *)calloc(lat->lattice_length,sizeof(LATTICE_DATA_TYPE));
 	  //	  if (latct != NULL) free(latct);
 	  latct = (LATTICE_DATA_TYPE *)calloc(lat->lattice_length,sizeof(LATTICE_DATA_TYPE));
+
+
+	/*
+	 * Initialize diffraction image:
+	 */
+
+
+	if ((imdiff = linitim()) == NULL) {
+	  perror("Couldn't initialize diffraction image.\n\n");
+	  exit(0);
 	}
+
+	// Define parameters from input deck
+
+	imdiff->params = deck;
+
+	lsetparamsim(imdiff);
+
+	// Set mpi variables for imdiff
+
+	imdiff->mpiv = mpiv;
+
+	// Process all of the images
+
+	int ct=0;
 
 	// Process the images on this rank yielding a partial sum for the 3D dataset
 
@@ -474,7 +464,7 @@ int main(int argc, char *argv[])
 
 	  fclose(imagein);
 
-	  // Associate an a matrix with this image
+	  // Associate an A matrix with this image
 
 	  imdiff->amatrix = at[i-1];
 
@@ -484,22 +474,16 @@ int main(int argc, char *argv[])
 
 	  lsetparamsim(imdiff);
 
-	  // Apply masks
-
-	  lpunchim(imdiff);
-	  lwindim(imdiff);
-	  lthrshim(imdiff);
-
 	  // Subtract background image if available:
 
-	  int have_bkg = 0;
+	  int needs_bkgsub = 0;
 
 	  if (strlen(bkglist[i-1]) > 0) {
 
 #ifdef DEBUG
 	    printf("Matched pair:%s,%s\n",imagelist[i-1],bkglist[i-1]);
 #endif
-	    have_bkg = 1;
+	    needs_bkgsub = 1;
 	    if ( (imagein = fopen(bkglist[i-1],"rb")) == NULL ) {
 	      printf("Can't open %s.",bkglist[i-1]);
 	      exit(0);
@@ -509,14 +493,23 @@ int main(int argc, char *argv[])
 	      perror(imdiff_bkg->error_msg);
 	      exit(0);
 	    }
-#ifdef DEBUG
-	    printf("Subtracting background using factor %f\n",imdiff->background_subtraction_factor);
-#endif
-
-	    lbkgsubim(imdiff,imdiff_bkg);
-
 	    fclose(imagein);
 	  }
+
+	  if (needs_bkgsub == 1) lbkgsubim(imdiff,imdiff_bkg);
+
+	  // Initialize other images
+	  
+	  if (imdiff_corrected == NULL) imdiff_corrected = linitim();
+	  if (imdiff_scale == NULL) imdiff_scale = linitim();
+	  if (imdiff_scale_ref == NULL) imdiff_scale_ref = linitim();
+	  if (imdiff_bkg == NULL) imdiff_bkg = linitim();
+
+	  // Apply masks
+
+	  lpunchim(imdiff);
+	  lwindim(imdiff);
+	  lthrshim(imdiff);
 
 	  // Mode filter to create image to be used for scaling
 
@@ -536,179 +529,176 @@ int main(int argc, char *argv[])
 	    exit(1);
 	  }
 
-	  if (do_integrate!=0) {
 	    
-	    // Set up common variables on the first pass
+	  // Set up common variables on the first pass
 
-	    if (ct == 0) {
-	      // Reference image for scaling
-	      lcloneim(imdiff_scale_ref,imdiff_scale);
+	  if (ct == 0) {
+	    // Reference image for scaling
+	    lcloneim(imdiff_scale_ref,imdiff_scale);
 #ifdef DEBUG
-	      printf("Rank %d, imdiff_scale_ref->image_length = %ld,imdiff_scale_ref->overload_tag=%d,imdiff_scale_ref->ignore_tag=%d,imdiff_scale_ref->value_offset=%d,",mpiv->my_id,imdiff_scale_ref->image_length,imdiff_scale_ref->overload_tag,imdiff_scale_ref->ignore_tag,imdiff_scale_ref->value_offset);
+	    printf("Rank %d, imdiff_scale_ref->image_length = %ld,imdiff_scale_ref->overload_tag=%d,imdiff_scale_ref->ignore_tag=%d,imdiff_scale_ref->value_offset=%d,",imdiff->mpiv->my_id,imdiff_scale_ref->image_length,imdiff_scale_ref->overload_tag,imdiff_scale_ref->ignore_tag,imdiff_scale_ref->value_offset);
 #endif
-	      //	      lbarrierMPI(mpiv);
-	      //	      printf("Barrier 1 passed\n");
-	      // Use the rank 0 image
-	      lbarrierMPI(mpiv);
-	      // Broadcast the image data
-	      lbcastImageMPI(imdiff_scale_ref->image,imdiff_scale_ref->image_length,0,mpiv);
-	      // Broadcast the pedestal as well -- this is critical
-	      lbcastBufMPI((void *)&imdiff_scale_ref->value_offset,sizeof(IMAGE_DATA_TYPE),0,mpiv);
+	    //	      lbarrierMPI(mpiv);
+	    //	      printf("Barrier 1 passed\n");
+	    // Use the rank 0 image
+	    lbarrierMPI(imdiff->mpiv);
+	    // Broadcast the image data
+	    lbcastImageMPI(imdiff_scale_ref->image,imdiff_scale_ref->image_length,0,imdiff->mpiv);
+	    // Broadcast the pedestal as well -- this is critical
+	    lbcastBufMPI((void *)&imdiff_scale_ref->value_offset,sizeof(IMAGE_DATA_TYPE),0,imdiff->mpiv);
 #ifdef DEBUG
-	      int num_nz=0;
-	      size_t num_ign = 0;
-	      float sum_vals = 0.0;
-	      for (j=0; j<imdiff_scale_ref->image_length; j++) {	      
+	    int num_nz=0;
+	    size_t num_ign = 0;
+	    float sum_vals = 0.0;
+	    for (j=0; j<imdiff_scale_ref->image_length; j++) {	      
 	      if (imdiff_scale_ref->image[j] != imdiff_scale_ref->overload_tag && imdiff_scale_ref->image[j] != 0) {
-	      num_nz++;
-	      sum_vals += imdiff_scale_ref->image[j];
-	      //	      printf("image[%d]=%d,",j,imdiff_scale_ref->image[j]);
-	    } else num_ign ++;
+		num_nz++;
+		sum_vals += imdiff_scale_ref->image[j];
+		//	      printf("image[%d]=%d,",j,imdiff_scale_ref->image[j]);
+	      } else num_ign ++;
 	      //	      if (num_nz>10) break;
 	    }
-	      printf("num_ign = %ld,avg = %g,",num_ign,sum_vals/(float)num_nz);
-	      lavgrim(imdiff_scale_ref);
-	      for (j=100; j<110;j++) {
-		if (j>100 && j<=110)  printf("rf[%d]=%f,",j,imdiff_scale_ref->rfile[j]);
+	    printf("num_ign = %ld,avg = %g,",num_ign,sum_vals/(float)num_nz);
+	    lavgrim(imdiff_scale_ref);
+	    for (j=100; j<110;j++) {
+	      if (j>100 && j<=110)  printf("rf[%d]=%f,",j,imdiff_scale_ref->rfile[j]);
+	    }
+	    printf("\n");
+#endif
+	    //	      lbarrierMPI(mpiv);
+	    //	      printf("Barrier 2 passed\n");
+	    // Read the xvectors on rank 0
+	    if (imdiff->mpiv->my_id == 0) {
+	      num_read = lreadbuf((void **)&xvectors_cctbx,xvectors_path);
+	      if (num_read != 3*imdiff->image_length*sizeof(float)) {
+		perror("LUNUS: Number of xvectors differs from number of pixels in image.\n");
+		exit(1);
+	      }
+#ifdef DEBUG		
+	      printf("SAMPLES\n");
+	      for (j=50000;j<50010;j++) {
+		printf("(%f, %f, %f): %d\n",xvectors_cctbx[j].x,xvectors_cctbx[j].y,xvectors_cctbx[j].z, imdiff_corrected->image[j]);
 	      }
 	      printf("\n");
-#endif
-	      //	      lbarrierMPI(mpiv);
-	      //	      printf("Barrier 2 passed\n");
-	      // Read the xvectors on rank 0
-	      if (mpiv->my_id == 0) {
-		num_read = lreadbuf((void **)&xvectors_cctbx,xvectors_path);
-		if (num_read != 3*imdiff->image_length*sizeof(float)) {
-		  perror("LUNUS: Number of xvectors differs from number of pixels in image.\n");
-		  exit(1);
-		}
-#ifdef DEBUG		
-		printf("SAMPLES\n");
-		for (j=50000;j<50010;j++) {
-		  printf("(%f, %f, %f): %d\n",xvectors_cctbx[j].x,xvectors_cctbx[j].y,xvectors_cctbx[j].z, imdiff_corrected->image[j]);
-		}
-		printf("\n");
 #endif		
 	      // Reorder the xvectors (transpose)
 
-		index = 0;
+	      index = 0;
 
-		if (xvectors != NULL) free(xvectors);
+	      if (xvectors != NULL) free(xvectors);
 
-		xvectors = (struct xyzcoords *)malloc(num_read);		
+	      xvectors = (struct xyzcoords *)malloc(num_read);		
 
-		if (num_read != sizeof(struct xyzcoords)*imdiff->image_length) {
-		  perror("Number of xvectors not equal to image length. Exiting.\n");
-		  exit(1);;
-		}
+	      if (num_read != sizeof(struct xyzcoords)*imdiff->image_length) {
+		perror("Number of xvectors not equal to image length. Exiting.\n");
+		exit(1);;
+	      }
 		   
-		size_t k;
+	      size_t k;
 
-		for (j=0; j<imdiff->vpixels; j++) {
-		  for (k=0; k<imdiff->hpixels; k++) {
-		    // The following conditional is needed to prevent a segfault-inducing Intel 18.X optimization error:
-		    //		    if (index == 0) printf("");
-		    //		    xvectors[k*imdiff->vpixels + j] = xvectors_cctbx[index];
-		    xvectors[index] = xvectors_cctbx[k*imdiff->vpixels + j];
-		    index++;
-		  }
+	      for (j=0; j<imdiff->vpixels; j++) {
+		for (k=0; k<imdiff->hpixels; k++) {
+		  // The following conditional is needed to prevent a segfault-inducing Intel 18.X optimization error:
+		  //		    if (index == 0) printf("");
+		  //		    xvectors[k*imdiff->vpixels + j] = xvectors_cctbx[index];
+		  xvectors[index] = xvectors_cctbx[k*imdiff->vpixels + j];
+		  index++;
 		}
 	      }
-
-	      // Broadcast the xvectors to other ranks
-	      lbcastBufMPI((void *)&num_read,sizeof(size_t),0,mpiv);
-	      if (mpiv->my_id != 0) {
-		if (xvectors != NULL) free(xvectors);
-		xvectors = (struct xyzcoords *)malloc(num_read);
-	      }
-	      lbcastBufMPI((void *)xvectors,num_read,0,mpiv);
-	      //	      Hlist = (struct xyzcoords *)malloc(num_read);
-	      //	      dHlist = (struct xyzcoords *)malloc(num_read);
-	      //	      ilist = (IJKCOORDS_DATA *)malloc(num_read);
-	      //	      jlist = (IJKCOORDS_DATA *)malloc(num_read);
-	      //	      klist = (IJKCOORDS_DATA *)malloc(num_read);
-	      imdiff->xvectors = xvectors;
 	    }
-	  
-	    // Calculate the image scale factor
 
-	    lscaleim(imdiff_scale_ref,imdiff_scale);
-	    float this_scale_factor = imdiff_scale_ref->rfile[0];
-	    printf("Image %d scale factor, error = %f, %f\n",i,imdiff_scale_ref->rfile[0],imdiff_scale_ref->rfile[1]);
-
-
-	    // Calculate the rotated and scaled xvectors, yielding Miller indices
-
-#ifdef DEBUG
-	    /*	    if (i == 1) {
-	    for (j = 50000;j<50010;j++) {
-	      printf("(%f %f %f) ",xvectors[j].x,xvectors[j].y,xvectors[j].z);
+	    // Broadcast the xvectors to other ranks
+	    lbcastBufMPI((void *)&num_read,sizeof(size_t),0,imdiff->mpiv);
+	    if (mpiv->my_id != 0) {
+	      if (xvectors != NULL) free(xvectors);
+	      xvectors = (struct xyzcoords *)malloc(num_read);
 	    }
-	    printf("\n");
-	    for (j=50000;j<50010;j++) {	      
-	      printf("%d ",imdiff_scale->image[j]);
-	    }
-	    printf("\n");
-	    }
-	    */
-#endif
-
-	    // Collect the image data into the lattice
-
-	    size_t data_added=0;
-	    struct xyzcoords H, dH;
-	    IJKCOORDS_DATA ii,jj,kk;
-	    index = 0;
-	    for (j=0; j<imdiff->image_length; j++) {
-	      H = lmatvecmul(imdiff->amatrix, imdiff->xvectors[j]);
-#ifdef DEBUG
-	      if (j<10) {
-		printf("Image %d, H[%d] = (%f, %f, %f)\n",i,j,H.x,H.y,H.z);
-	      }
-#endif
-	      dH.x = fabs(H.x - roundf(H.x));
-	      dH.y = fabs(H.y - roundf(H.y));
-	      dH.z = fabs(H.z - roundf(H.z));
-	      if (filterhkl==0 || dH.x>=0.25 || dH.y>=0.25 || dH.z>=0.25) {
-		ii = (IJKCOORDS_DATA)roundf(H.x*(float)pphkl) + i0;
-		jj = (IJKCOORDS_DATA)roundf(H.y*(float)pphkl) + j0;
-		kk = (IJKCOORDS_DATA)roundf(H.z*(float)pphkl) + k0;
-		if (ii>=0 && ii<lat->xvoxels && jj>=0 && jj<lat->yvoxels &&
-		    kk>=0 && kk<lat->zvoxels && imdiff_scale->image[index]>0 &&
-		    imdiff_scale->image[index]!=imdiff->ignore_tag) {
-		  size_t latidx = kk*lat->xyvoxels + jj*lat->xvoxels + ii;
-		  if (strcmp(integration_image_type,"raw")==0) {
-		    lat->lattice[latidx] += 
-		      (LATTICE_DATA_TYPE)(imdiff->image[index]-imdiff->value_offset)
-		      * imdiff->correction[index]
-		      * this_scale_factor;
-		  }
-		  if (strcmp(integration_image_type,"corrected")==0) {
-		    lat->lattice[latidx] += 
-		      (LATTICE_DATA_TYPE)(imdiff_corrected->image[index]-imdiff_corrected->value_offset)
-		      * this_scale_factor;
-		  }
-		  if (strcmp(integration_image_type,"scale")==0) {
-		    lat->lattice[latidx] += 
-		      (LATTICE_DATA_TYPE)(imdiff_scale->image[index]-imdiff_scale->value_offset)
-		      * imdiff->correction[index]
-		      * this_scale_factor;
-		  }
-		  latct[latidx] += 1.;
-		  data_added += 1;
-		}
-	      }
-	      index++;
-	    }
-#ifdef DEBUG
-	    printf("data_added = %ld\n",data_added);
-#endif
+	    lbcastBufMPI((void *)xvectors,num_read,0,imdiff->mpiv);
+	    //	      Hlist = (struct xyzcoords *)malloc(num_read);
+	    //	      dHlist = (struct xyzcoords *)malloc(num_read);
+	    //	      ilist = (IJKCOORDS_DATA *)malloc(num_read);
+	    //	      jlist = (IJKCOORDS_DATA *)malloc(num_read);
+	    //	      klist = (IJKCOORDS_DATA *)malloc(num_read);
+	    imdiff->xvectors = xvectors;
 	  }
+	  
+	  // Calculate the image scale factor
+
+	  lscaleim(imdiff_scale_ref,imdiff_scale);
+	  float this_scale_factor = imdiff_scale_ref->rfile[0];
+	  printf("Image %d scale factor, error = %f, %f\n",i,imdiff_scale_ref->rfile[0],imdiff_scale_ref->rfile[1]);
+
+
+	  // Calculate the rotated and scaled xvectors, yielding Miller indices
+
+#ifdef DEBUG
+	  /*	    if (i == 1) {
+		    for (j = 50000;j<50010;j++) {
+		    printf("(%f %f %f) ",xvectors[j].x,xvectors[j].y,xvectors[j].z);
+		    }
+		    printf("\n");
+		    for (j=50000;j<50010;j++) {	      
+		    printf("%d ",imdiff_scale->image[j]);
+		    }
+		    printf("\n");
+		    }
+	  */
+#endif
+
+	  // Collect the image data into the lattice
+
+	  size_t data_added=0;
+	  struct xyzcoords H, dH;
+	  IJKCOORDS_DATA ii,jj,kk;
+	  index = 0;
+	  for (j=0; j<imdiff->image_length; j++) {
+	    H = lmatvecmul(imdiff->amatrix, imdiff->xvectors[j]);
+#ifdef DEBUG
+	    if (j<10) {
+	      printf("Image %d, H[%d] = (%f, %f, %f)\n",i,j,H.x,H.y,H.z);
+	    }
+#endif
+	    dH.x = fabs(H.x - roundf(H.x));
+	    dH.y = fabs(H.y - roundf(H.y));
+	    dH.z = fabs(H.z - roundf(H.z));
+	    if (filterhkl==0 || dH.x>=0.25 || dH.y>=0.25 || dH.z>=0.25) {
+	      ii = (IJKCOORDS_DATA)roundf(H.x*(float)pphkl) + i0;
+	      jj = (IJKCOORDS_DATA)roundf(H.y*(float)pphkl) + j0;
+	      kk = (IJKCOORDS_DATA)roundf(H.z*(float)pphkl) + k0;
+	      if (ii>=0 && ii<lat->xvoxels && jj>=0 && jj<lat->yvoxels &&
+		  kk>=0 && kk<lat->zvoxels && imdiff_scale->image[index]>0 &&
+		  imdiff_scale->image[index]!=imdiff->ignore_tag) {
+		size_t latidx = kk*lat->xyvoxels + jj*lat->xvoxels + ii;
+		if (strcmp(integration_image_type,"raw")==0) {
+		  lat->lattice[latidx] += 
+		    (LATTICE_DATA_TYPE)(imdiff->image[index]-imdiff->value_offset)
+		    * imdiff->correction[index]
+		    * this_scale_factor;
+		}
+		if (strcmp(integration_image_type,"corrected")==0) {
+		  lat->lattice[latidx] += 
+		    (LATTICE_DATA_TYPE)(imdiff_corrected->image[index]-imdiff_corrected->value_offset)
+		    * this_scale_factor;
+		}
+		if (strcmp(integration_image_type,"scale")==0) {
+		  lat->lattice[latidx] += 
+		    (LATTICE_DATA_TYPE)(imdiff_scale->image[index]-imdiff_scale->value_offset)
+		    * imdiff->correction[index]
+		    * this_scale_factor;
+		}
+		latct[latidx] += 1.;
+		data_added += 1;
+	      }
+	    }
+	    index++;
+	  }
+#ifdef DEBUG
+	  printf("data_added = %ld\n",data_added);
+#endif
 	  ct++;
 	}
 
 #ifdef DEBUG
-	if (do_integrate != 0) {
 	  // Count number of data points in the lattice
 	  int num_data_points=0;
 	  float sum_data_points=0.0;
@@ -722,9 +712,7 @@ int main(int argc, char *argv[])
 	    }
 	  }
 	  printf("num_data_points=%d, mean_data_points=%f\n",num_data_points,sum_data_points/(float)num_data_points);
-	}
 #endif
-	if (do_integrate != 0) {
 
 	  // Merge the data and counts
 
@@ -799,7 +787,6 @@ int main(int argc, char *argv[])
 	      lwritevtk(lat);
 	    }
 	  }
-	}
 	lfinalMPI(mpiv);
 
 }

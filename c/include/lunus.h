@@ -520,6 +520,7 @@ typedef struct
   float background_subtraction_factor;/* Multiplicative factor for lbkgsubim() */
   struct xyzcoords *xvectors;   /* lab coordinates corresponding to each pixel in the image */
   struct xyzmatrix amatrix;     /* A matrix for mapping lab coords to reciprocal space coords */
+  MPIVARS *mpiv;
 } DIFFIMAGE;
 
 /*
@@ -719,6 +720,10 @@ typedef struct {
   struct xyzmatrix anisoU;      /* anisotropic U matrix */
   struct xyzcoords shift;       /* translation vector */
   int decimation_factor;        /* decimation factor */
+  int filterhkl;                /* 1 = filter out points in neighborhood of Bragg peak */
+  int pphkl;                    /* Number of samples per Bragg peak */
+  char *params;                 /* Input deck of parameters, bash syntax */
+  char *integration_image_type; /* Selects which image to use for integration */
 } LAT3D;
 
 // Crystal structure data type
@@ -874,6 +879,7 @@ int lscalelt(LAT3D *lat1, LAT3D *lat2);
 struct xyzcoords lsFromIndex(LAT3D *lat);
 int lsetcbftag(char **t,size_t *target_length, const char *tag,const char *val);
 int lsetparamsim(DIFFIMAGE *imdiff);
+int lsetparamslt(LAT3D *lat);
 int lsettag(char *target,const char *tag,const char *val);
 int lshiftlt(LAT3D *lat,struct ijkcoords t);
 int lshiftsflt(LAT3D *lat1,LAT3D *lat2);
