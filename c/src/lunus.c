@@ -12,6 +12,160 @@
 
 #include<lunus.h>
 
+int laddimlt(LAT3D *lat,DIFFIMAGE *imdiff) 
+{
+  static int ct = 0;
+  static DIFFIMAGE 
+    *imdiff_bkg = NULL, *imdiff_corrected = NULL, *imdiff_scale = NULL, *imdiff_scale_ref = NULL;
+  IJKCOORDS_DATA
+    i0, j0, k0;
+
+  // Initialize other images
+  
+  if (imdiff_corrected == NULL) imdiff_corrected = linitim();
+  if (imdiff_scale == NULL) imdiff_scale = linitim();
+  if (imdiff_scale_ref == NULL) imdiff_scale_ref = linitim();
+  if (imdiff_bkg == NULL) imdiff_bkg = linitim();
+
+  // Apply masks
+  
+  lpunchim(imdiff);
+  lwindim(imdiff);
+  lthrshim(imdiff);
+  
+  // Mode filter to create image to be used for scaling
+
+  lcloneim(imdiff_scale,imdiff);
+
+  lmodeim(imdiff_scale);
+  
+  // Calculate correction factor
+  
+  lcfim(imdiff);	  
+  
+  // Calculate corrected image
+  
+  lcloneim(imdiff_corrected,imdiff);
+  if (lmulcfim(imdiff_corrected) != 0) {
+    perror(imdiff_corrected->error_msg);
+    exit(1);
+  }
+  
+	    
+  // Set up common variables on the first pass
+
+  if (ct == 0) {
+    // Reference image for scaling
+    lcloneim(imdiff_scale_ref,imdiff_scale);
+#ifdef DEBUG
+    printf("Rank %d, imdiff_scale_ref->image_length = %ld,imdiff_scale_ref->overload_tag=%d,imdiff_scale_ref->ignore_tag=%d,imdiff_scale_ref->value_offset=%d,",imdiff->mpiv->my_id,imdiff_scale_ref->image_length,imdiff_scale_ref->overload_tag,imdiff_scale_ref->ignore_tag,imdiff_scale_ref->value_offset);
+#endif
+    //	      lbarrierMPI(mpiv);
+    //	      printf("Barrier 1 passed\n");
+    // Use the rank 0 image
+    lbarrierMPI(imdiff->mpiv);
+    // Broadcast the image data
+    lbcastImageMPI(imdiff_scale_ref->image,imdiff_scale_ref->image_length,0,imdiff->mpiv);
+    // Broadcast the pedestal as well -- this is critical
+    lbcastBufMPI((void *)&imdiff_scale_ref->value_offset,sizeof(IMAGE_DATA_TYPE),0,imdiff->mpiv);
+#ifdef DEBUG
+    int num_nz=0;
+    size_t num_ign = 0;
+    float sum_vals = 0.0;
+    for (j=0; j<imdiff_scale_ref->image_length; j++) {	      
+      if (imdiff_scale_ref->image[j] != imdiff_scale_ref->overload_tag && imdiff_scale_ref->image[j] != 0) {
+	num_nz++;
+	sum_vals += imdiff_scale_ref->image[j];
+	//	      printf("image[%d]=%d,",j,imdiff_scale_ref->image[j]);
+      } else num_ign ++;
+      //	      if (num_nz>10) break;
+    }
+    printf("num_ign = %ld,avg = %g,",num_ign,sum_vals/(float)num_nz);
+    lavgrim(imdiff_scale_ref);
+    for (j=100; j<110;j++) {
+      if (j>100 && j<=110)  printf("rf[%d]=%f,",j,imdiff_scale_ref->rfile[j]);
+    }
+    printf("\n");
+#endif
+    //	      lbarrierMPI(mpiv);
+    //	      printf("Barrier 2 passed\n");
+  }
+	  
+  // Calculate the image scale factor
+
+  lscaleim(imdiff_scale_ref,imdiff_scale);
+  float this_scale_factor = imdiff_scale_ref->rfile[0];
+
+  // Calculate the rotated and scaled xvectors, yielding Miller indices
+
+#ifdef DEBUG
+  /*	    if (i == 1) {
+	    for (j = 50000;j<50010;j++) {
+	    printf("(%f %f %f) ",xvectors[j].x,xvectors[j].y,xvectors[j].z);
+	    }
+	    printf("\n");
+	    for (j=50000;j<50010;j++) {	      
+	    printf("%d ",imdiff_scale->image[j]);
+	    }
+	    printf("\n");
+	    }
+  */
+#endif
+
+  // Collect the image data into the lattice
+
+  size_t data_added=0;
+  struct xyzcoords H, dH;
+  IJKCOORDS_DATA ii,jj,kk;
+  size_t index = 0;
+  size_t j;
+  for (j=0; j<imdiff->image_length; j++) {
+    H = lmatvecmul(imdiff->amatrix, imdiff->xvectors[j]);
+#ifdef DEBUG
+    if (j<10) {
+      printf("Image %d, H[%d] = (%f, %f, %f)\n",i,j,H.x,H.y,H.z);
+    }
+#endif
+    dH.x = fabs(H.x - roundf(H.x));
+    dH.y = fabs(H.y - roundf(H.y));
+    dH.z = fabs(H.z - roundf(H.z));
+    if (lat->filterhkl==0 || dH.x>=0.25 || dH.y>=0.25 || dH.z>=0.25) {
+      ii = (IJKCOORDS_DATA)roundf(H.x*(float)lat->pphkl) + i0;
+      jj = (IJKCOORDS_DATA)roundf(H.y*(float)lat->pphkl) + j0;
+      kk = (IJKCOORDS_DATA)roundf(H.z*(float)lat->pphkl) + k0;
+      if (ii>=0 && ii<lat->xvoxels && jj>=0 && jj<lat->yvoxels &&
+	  kk>=0 && kk<lat->zvoxels && imdiff_scale->image[index]>0 &&
+	  imdiff_scale->image[index]!=imdiff->ignore_tag) {
+	size_t latidx = kk*lat->xyvoxels + jj*lat->xvoxels + ii;
+	if (strcmp(lat->integration_image_type,"raw")==0) {
+	  lat->lattice[latidx] += 
+	    (LATTICE_DATA_TYPE)(imdiff->image[index]-imdiff->value_offset)
+	    * imdiff->correction[index]
+	    * this_scale_factor;
+	}
+	if (strcmp(lat->integration_image_type,"corrected")==0) {
+	  lat->lattice[latidx] += 
+	    (LATTICE_DATA_TYPE)(imdiff_corrected->image[index]-imdiff_corrected->value_offset)
+	    * this_scale_factor;
+	}
+	if (strcmp(lat->integration_image_type,"scale")==0) {
+	  lat->lattice[latidx] += 
+	    (LATTICE_DATA_TYPE)(imdiff_scale->image[index]-imdiff_scale->value_offset)
+	    * imdiff->correction[index]
+	    * this_scale_factor;
+	}
+	lat->latct[latidx] += 1;
+	data_added += 1;
+      }
+    }
+    index++;
+  }
+#ifdef DEBUG
+  printf("data_added = %ld\n",data_added);
+#endif
+  ct++;
+}
+
 int main(int argc, char *argv[])
 {
   FILE
@@ -414,7 +568,7 @@ int main(int argc, char *argv[])
 	  //	  if (lat->lattice != NULL) free(lat->lattice);
 	  lat->lattice = (LATTICE_DATA_TYPE *)calloc(lat->lattice_length,sizeof(LATTICE_DATA_TYPE));
 	  //	  if (latct != NULL) free(latct);
-	  lat->latct = (LATTICE_DATA_TYPE *)calloc(lat->lattice_length,sizeof(size_t));
+	  lat->latct = (size_t *)calloc(lat->lattice_length,sizeof(size_t));
 
 
 	/*
