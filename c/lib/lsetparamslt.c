@@ -23,8 +23,13 @@ int lsetparamslt(LAT3D *lat)
 
 	if (strstr(deck,"\nfilterhkl") == NULL) {
 	  lat->filterhkl = 1;
-	} else if (strcmp(lgettag(deck,"\nfilterhkl"),"False")==0) {
-	  lat->filterhkl=0;
+	} else {
+	  char *filterhkl_str = lgettag(deck,"\nfilterhkl");
+	  if (strcmp(filterhkl_str,"False")==0) {
+	    lat->filterhkl=0;
+	  } else {
+	    lat->filterhkl=1;
+	  }
 	} 
 
 	if (strstr(deck,"\npphkl") == NULL) {
@@ -37,7 +42,9 @@ int lsetparamslt(LAT3D *lat)
 	  lat->pphkl = lgettagi(deck,"\npoints_per_hkl");
 	}
 
-	if (strstr(deck,"\nunit_cell") != NULL) {
+	if (strstr(deck,"\nunit_cell") == NULL) {
+	  strcpy(lat->cell_str,"None");
+	} else {	  
 	  lat->cell_str=lgettag(deck,"\nunit_cell");
 	}
 

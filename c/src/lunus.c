@@ -33,7 +33,6 @@ int main(int argc, char *argv[])
     *integration_image_type = NULL,
     *lattice_dir = NULL,
     *diffuse_lattice_prefix = NULL,
-    *unit_cell = NULL,
     *spacegroup = NULL,
     *imagelist_name = NULL,
     *jsonlist_name = NULL,
@@ -78,9 +77,6 @@ int main(int argc, char *argv[])
 
   LAT3D
     *lat;
-
-  LATTICE_DATA_TYPE
-    *latct = NULL;
 
   size_t 
     str_length,
@@ -180,10 +176,6 @@ int main(int argc, char *argv[])
 
 	if (strstr(deck,"\npoints_per_hkl") != NULL) {
 	  pphkl = lgettagi(deck,"\npoints_per_hkl");
-	}
-
-	if (strstr(deck,"\nunit_cell") != NULL) {
-	  unit_cell=lgettag(deck,"\nunit_cell");
 	}
 
 	if (strstr(deck,"\nspacegroup") != NULL) {
@@ -370,7 +362,14 @@ int main(int argc, char *argv[])
 	// Initialize the 3D dataset for this MPI rank
 
 	lat = linitlt();
-	if (unit_cell == NULL) {
+
+	// Get lattice params from input deck
+
+	lat->params = deck;
+
+	lsetparamslt(lat);
+
+	if (strstr(lat->cell_str,"None") != NULL) {
 	    float a,b,c,alpha,beta,gamma,adotb,adotc,bdotc;
 	    struct xyzmatrix a0;
 	    a0 = at[0];
@@ -383,19 +382,18 @@ int main(int argc, char *argv[])
 	    alpha = acosf(bdotc/b/c)*180./PI;
 	    beta = acosf(adotc/a/c)*180./PI;
 	    gamma = acosf(adotb/a/b)*180./PI;
-	    str_length = snprintf(NULL,0,"%f,%f,%f,%f,%f,%f",a,b,c,alpha,beta,gamma);
-	    unit_cell = (char *)calloc(str_length+1,sizeof(char));
-	    sprintf(unit_cell,"%f,%f,%f,%f,%f,%f",a,b,c,alpha,beta,gamma);
-	    printf("Calculated unit cell from first amatrix=%s\n",unit_cell);
+	    //	    str_length = snprintf(NULL,0,"%f,%f,%f,%f,%f,%f",a,b,c,alpha,beta,gamma);
+	    //	    unit_cell = (char *)calloc(str_length+1,sizeof(char));
+	    sprintf(lat->cell_str,"%f,%f,%f,%f,%f,%f",a,b,c,alpha,beta,gamma);
+	    printf("Calculated unit cell from first amatrix=%s\n",lat->cell_str);
 	  }
-	  strcpy(lat->cell_str,unit_cell);
 	  lparsecelllt(lat);
-	  lat->cell.a *= pphkl;
-	  lat->cell.b *= pphkl;
-	  lat->cell.c *= pphkl;
-	  lat->xvoxels = ((int)(lat->cell.a/resolution)+1)*2;
-	  lat->yvoxels = ((int)(lat->cell.b/resolution)+1)*2;
-	  lat->zvoxels = ((int)(lat->cell.c/resolution)+1)*2;
+	  lat->cell.a *= lat->pphkl;
+	  lat->cell.b *= lat->pphkl;
+	  lat->cell.c *= lat->pphkl;
+	  lat->xvoxels = ((int)(lat->cell.a/lat->resolution.max)+1)*2;
+	  lat->yvoxels = ((int)(lat->cell.b/lat->resolution.max)+1)*2;
+	  lat->zvoxels = ((int)(lat->cell.c/lat->resolution.max)+1)*2;
 	  i0 = (IJKCOORDS_DATA)(lat->xvoxels/2. - 1.);
 	  j0 = (IJKCOORDS_DATA)(lat->yvoxels/2. - 1.);
 	  k0 = (IJKCOORDS_DATA)(lat->zvoxels/2. - 1.);
@@ -416,7 +414,7 @@ int main(int argc, char *argv[])
 	  //	  if (lat->lattice != NULL) free(lat->lattice);
 	  lat->lattice = (LATTICE_DATA_TYPE *)calloc(lat->lattice_length,sizeof(LATTICE_DATA_TYPE));
 	  //	  if (latct != NULL) free(latct);
-	  latct = (LATTICE_DATA_TYPE *)calloc(lat->lattice_length,sizeof(LATTICE_DATA_TYPE));
+	  lat->latct = (LATTICE_DATA_TYPE *)calloc(lat->lattice_length,sizeof(size_t));
 
 
 	/*
@@ -438,6 +436,60 @@ int main(int argc, char *argv[])
 	// Set mpi variables for imdiff
 
 	imdiff->mpiv = mpiv;
+
+	// Read the xvectors on rank 0
+	if (imdiff->mpiv->my_id == 0) {
+	  num_read = lreadbuf((void **)&xvectors_cctbx,xvectors_path);
+	  if (num_read != 3*imdiff->image_length*sizeof(float)) {
+	    perror("LUNUS: Number of xvectors differs from number of pixels in image.\n");
+	    exit(1);
+	  }
+#ifdef DEBUG		
+	  printf("SAMPLES\n");
+	  for (j=50000;j<50010;j++) {
+	    printf("(%f, %f, %f): %d\n",xvectors_cctbx[j].x,xvectors_cctbx[j].y,xvectors_cctbx[j].z, imdiff_corrected->image[j]);
+	  }
+	  printf("\n");
+#endif		
+	  // Reorder the xvectors (transpose)
+
+	  index = 0;
+
+	  if (xvectors != NULL) free(xvectors);
+
+	  xvectors = (struct xyzcoords *)malloc(num_read);		
+
+	  if (num_read != sizeof(struct xyzcoords)*imdiff->image_length) {
+	    perror("Number of xvectors not equal to image length. Exiting.\n");
+	    exit(1);;
+	  }
+		   
+	  size_t k;
+
+	  for (j=0; j<imdiff->vpixels; j++) {
+	    for (k=0; k<imdiff->hpixels; k++) {
+	      // The following conditional is needed to prevent a segfault-inducing Intel 18.X optimization error:
+	      //		    if (index == 0) printf("");
+	      //		    xvectors[k*imdiff->vpixels + j] = xvectors_cctbx[index];
+	      xvectors[index] = xvectors_cctbx[k*imdiff->vpixels + j];
+	      index++;
+	    }
+	  }
+	}
+
+	// Broadcast the xvectors to other ranks
+	lbcastBufMPI((void *)&num_read,sizeof(size_t),0,imdiff->mpiv);
+	if (imdiff->mpiv->my_id != 0) {
+	  if (xvectors != NULL) free(xvectors);
+	  xvectors = (struct xyzcoords *)malloc(num_read);
+	}
+	lbcastBufMPI((void *)xvectors,num_read,0,imdiff->mpiv);
+	//	      Hlist = (struct xyzcoords *)malloc(num_read);
+	//	      dHlist = (struct xyzcoords *)malloc(num_read);
+	//	      ilist = (IJKCOORDS_DATA *)malloc(num_read);
+	//	      jlist = (IJKCOORDS_DATA *)malloc(num_read);
+	//	      klist = (IJKCOORDS_DATA *)malloc(num_read);
+	imdiff->xvectors = xvectors;
 
 	// Process all of the images
 
@@ -567,59 +619,6 @@ int main(int argc, char *argv[])
 #endif
 	    //	      lbarrierMPI(mpiv);
 	    //	      printf("Barrier 2 passed\n");
-	    // Read the xvectors on rank 0
-	    if (imdiff->mpiv->my_id == 0) {
-	      num_read = lreadbuf((void **)&xvectors_cctbx,xvectors_path);
-	      if (num_read != 3*imdiff->image_length*sizeof(float)) {
-		perror("LUNUS: Number of xvectors differs from number of pixels in image.\n");
-		exit(1);
-	      }
-#ifdef DEBUG		
-	      printf("SAMPLES\n");
-	      for (j=50000;j<50010;j++) {
-		printf("(%f, %f, %f): %d\n",xvectors_cctbx[j].x,xvectors_cctbx[j].y,xvectors_cctbx[j].z, imdiff_corrected->image[j]);
-	      }
-	      printf("\n");
-#endif		
-	      // Reorder the xvectors (transpose)
-
-	      index = 0;
-
-	      if (xvectors != NULL) free(xvectors);
-
-	      xvectors = (struct xyzcoords *)malloc(num_read);		
-
-	      if (num_read != sizeof(struct xyzcoords)*imdiff->image_length) {
-		perror("Number of xvectors not equal to image length. Exiting.\n");
-		exit(1);;
-	      }
-		   
-	      size_t k;
-
-	      for (j=0; j<imdiff->vpixels; j++) {
-		for (k=0; k<imdiff->hpixels; k++) {
-		  // The following conditional is needed to prevent a segfault-inducing Intel 18.X optimization error:
-		  //		    if (index == 0) printf("");
-		  //		    xvectors[k*imdiff->vpixels + j] = xvectors_cctbx[index];
-		  xvectors[index] = xvectors_cctbx[k*imdiff->vpixels + j];
-		  index++;
-		}
-	      }
-	    }
-
-	    // Broadcast the xvectors to other ranks
-	    lbcastBufMPI((void *)&num_read,sizeof(size_t),0,imdiff->mpiv);
-	    if (mpiv->my_id != 0) {
-	      if (xvectors != NULL) free(xvectors);
-	      xvectors = (struct xyzcoords *)malloc(num_read);
-	    }
-	    lbcastBufMPI((void *)xvectors,num_read,0,imdiff->mpiv);
-	    //	      Hlist = (struct xyzcoords *)malloc(num_read);
-	    //	      dHlist = (struct xyzcoords *)malloc(num_read);
-	    //	      ilist = (IJKCOORDS_DATA *)malloc(num_read);
-	    //	      jlist = (IJKCOORDS_DATA *)malloc(num_read);
-	    //	      klist = (IJKCOORDS_DATA *)malloc(num_read);
-	    imdiff->xvectors = xvectors;
 	  }
 	  
 	  // Calculate the image scale factor
@@ -661,32 +660,32 @@ int main(int argc, char *argv[])
 	    dH.x = fabs(H.x - roundf(H.x));
 	    dH.y = fabs(H.y - roundf(H.y));
 	    dH.z = fabs(H.z - roundf(H.z));
-	    if (filterhkl==0 || dH.x>=0.25 || dH.y>=0.25 || dH.z>=0.25) {
-	      ii = (IJKCOORDS_DATA)roundf(H.x*(float)pphkl) + i0;
-	      jj = (IJKCOORDS_DATA)roundf(H.y*(float)pphkl) + j0;
-	      kk = (IJKCOORDS_DATA)roundf(H.z*(float)pphkl) + k0;
+	    if (lat->filterhkl==0 || dH.x>=0.25 || dH.y>=0.25 || dH.z>=0.25) {
+	      ii = (IJKCOORDS_DATA)roundf(H.x*(float)lat->pphkl) + i0;
+	      jj = (IJKCOORDS_DATA)roundf(H.y*(float)lat->pphkl) + j0;
+	      kk = (IJKCOORDS_DATA)roundf(H.z*(float)lat->pphkl) + k0;
 	      if (ii>=0 && ii<lat->xvoxels && jj>=0 && jj<lat->yvoxels &&
 		  kk>=0 && kk<lat->zvoxels && imdiff_scale->image[index]>0 &&
 		  imdiff_scale->image[index]!=imdiff->ignore_tag) {
 		size_t latidx = kk*lat->xyvoxels + jj*lat->xvoxels + ii;
-		if (strcmp(integration_image_type,"raw")==0) {
+		if (strcmp(lat->integration_image_type,"raw")==0) {
 		  lat->lattice[latidx] += 
 		    (LATTICE_DATA_TYPE)(imdiff->image[index]-imdiff->value_offset)
 		    * imdiff->correction[index]
 		    * this_scale_factor;
 		}
-		if (strcmp(integration_image_type,"corrected")==0) {
+		if (strcmp(lat->integration_image_type,"corrected")==0) {
 		  lat->lattice[latidx] += 
 		    (LATTICE_DATA_TYPE)(imdiff_corrected->image[index]-imdiff_corrected->value_offset)
 		    * this_scale_factor;
 		}
-		if (strcmp(integration_image_type,"scale")==0) {
+		if (strcmp(lat->integration_image_type,"scale")==0) {
 		  lat->lattice[latidx] += 
 		    (LATTICE_DATA_TYPE)(imdiff_scale->image[index]-imdiff_scale->value_offset)
 		    * imdiff->correction[index]
 		    * this_scale_factor;
 		}
-		latct[latidx] += 1.;
+		lat->latct[latidx] += 1;
 		data_added += 1;
 	      }
 	    }
@@ -704,10 +703,10 @@ int main(int argc, char *argv[])
 	  float sum_data_points=0.0;
 	  
 	  for (j=0;j<lat->lattice_length;j++) {
-	    if (latct[j] != 0) {
-	      if (lat->lattice[j]/latct[j] < 32767.) {
+	    if (lat->latct[j] != 0) {
+	      if (lat->lattice[j]/(float)lat->latct[j] < 32767.) {
 		num_data_points++;
-		sum_data_points += lat->lattice[j]/latct[j];
+		sum_data_points += lat->lattice[j]/(float)lat->latct[j];
 	      }
 	    }
 	  }
@@ -716,20 +715,21 @@ int main(int argc, char *argv[])
 
 	  // Merge the data and counts
 
-	  LATTICE_DATA_TYPE *latsum, *latctsum;
+	  LATTICE_DATA_TYPE *latsum;
+	  size_t *latctsum;
 	  
 	  latsum = (LATTICE_DATA_TYPE *)calloc(lat->lattice_length,sizeof(LATTICE_DATA_TYPE));
-	  latctsum = (LATTICE_DATA_TYPE *)calloc(lat->lattice_length,sizeof(LATTICE_DATA_TYPE));
+	  latctsum = (size_t *)calloc(lat->lattice_length,sizeof(size_t));
 	  
 	  lreduceSumLatticeMPI(lat->lattice,latsum,lat->lattice_length,0,mpiv);
-	  lreduceSumLatticeMPI(latct,latctsum,lat->lattice_length,0,mpiv);
+	  lreduceSumLatctMPI(lat->latct,latctsum,lat->lattice_length,0,mpiv);
 	  
 	  // Calculate the mean on the root rank and output the result
 	  
 	  if (mpiv->my_id == 0) {
 	    for (j=0; j<lat->lattice_length; j++) {
 	      if (latctsum[j] != 0) {
-		lat->lattice[j] = latsum[j]/latctsum[j];
+		lat->lattice[j] = latsum[j]/(float)latctsum[j];
 		if isnan(lat->lattice[j]) lat->lattice[j] = lat->mask_tag;
 	      } else {
 		lat->lattice[j] = lat->mask_tag;

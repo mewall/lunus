@@ -661,6 +661,7 @@ typedef struct {
   char *lattice_type_str;       /* Lattice type string = (P1,AU) */ 
   struct voxel *map3D;	        /* Pointer to list of voxels */
   LATTICE_DATA_TYPE *lattice;   /* Pointer to lattice */
+  size_t *latct;                /* Counts associated with each lattice point */
   uint32_t xvoxels;		/* Number of x-voxels */
   uint32_t yvoxels;		/* Number of y-voxels */
   uint32_t zvoxels;		/* Number of z-voxels */
@@ -860,6 +861,7 @@ int lreadmap(CCP4MAP *map);
 int lreadrf(DIFFIMAGE *imdiff);
 int lreadvtk(LAT3D *lat);
 int lreadxs(XTALSTRUCT *xs);
+void lreduceSumLatctMPI(size_t *data,size_t *target,size_t datalen, int root, MPIVARS *mpiv);
 void lreduceSumLatticeMPI(LATTICE_DATA_TYPE *data,LATTICE_DATA_TYPE *target,size_t datalen, int root, MPIVARS *mpiv);
 int lresizelt(LAT3D *lat1, LAT3D *lat2);
 int lrevyim(DIFFIMAGE *imdiff);
