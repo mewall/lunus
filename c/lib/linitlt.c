@@ -77,6 +77,7 @@ LAT3D *linitlt(void)
   lat->resolution.min = 100.0;
 
   lat->latct = NULL;
+  lat->procmode = 0;
 
   CloseShop:
 

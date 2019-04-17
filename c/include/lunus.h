@@ -725,6 +725,7 @@ typedef struct {
   int pphkl;                    /* Number of samples per Bragg peak */
   char *params;                 /* Input deck of parameters, bash syntax */
   char *integration_image_type; /* Selects which image to use for integration */
+  int procmode;                 /* Processing mode for lprocimlt() */
 } LAT3D;
 
 // Crystal structure data type

@@ -12,9 +12,9 @@ done
 ts=`date +%s`
 if [ "${LUNUS_MPI}" == "YES" ]; then
   if [ -z ${SLURM_NODELIST+x} ]; then
-    mpirun -n 1 lunus lunus_input_params.sh
+    mpirun -np 4 lunus lunus_input_params.sh
   else
-    srun -n 1 lunus lunus_input_params.sh
+    srun -n 4 lunus lunus_input_params.sh
   fi
 else
   lunus lunus_input_params.sh 
