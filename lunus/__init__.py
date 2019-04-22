@@ -42,7 +42,7 @@ class LunusDriver(object):
                     self.scale_outer_radius = int(value)
                 if (var == "points_per_hkl"):
                     self.pphkl = int(value)
-                if (var == "resolution" || var == "d_min"):
+                if (var == "resolution" or var == "d_min"):
                     self.d_min = float(value)
                 if (var == "xvectors_path"):
                     self.xvectors_path = value
@@ -54,9 +54,9 @@ class LunusDriver(object):
                     self.modeim_bin_size = int(value)
                 if (var == "modeim_kernel_width"):
                     self.modeim_kernel_width = int(value)
-                if (var == "polarim_polarization" || var == "polarization"):
+                if (var == "polarim_polarization" or var == "polarization"):
                     self.polarim_polarization = float(value)
                 if (var == "distance_mm"):
                     self.distance_mm = float(value)
-                if (var == "correction_factor_scale" || var == "overall_scale_factor"):
+                if (var == "correction_factor_scale" or var == "overall_scale_factor"):
                     self.correction_factor_scale = float(value)
