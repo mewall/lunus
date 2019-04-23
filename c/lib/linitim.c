@@ -76,6 +76,7 @@ DIFFIMAGE *linitim(void)
   imdiff->background_subtraction_factor = 1.0;
   imdiff->xvectors = NULL;
   imdiff->mpiv = NULL;
+  imdiff->params = NULL;
 
   /*
    * Allocate memory for arrays:

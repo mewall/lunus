@@ -50,6 +50,11 @@ namespace lunus {
       lwindim(imdiff);
     }
 
+    inline void LunusWindim() {
+      printf("LunusWindim\n");
+      lwindim(imdiff);
+    }
+
     inline void LunusPunchim(short cl, short rl, short cu, short ru) {
       printf("LunusPunchim\n");
       imdiff->punchim_lower.c = cl;
@@ -59,10 +64,20 @@ namespace lunus {
       lpunchim(imdiff);
     }
 
+    inline void LunusPunchim() {
+      printf("LunusPunchim\n");
+      lpunchim(imdiff);
+    }
+
     inline void LunusThrshim(int lower, int upper) {
       printf("LunusThrshim\n");
       imdiff->lower_threshold = (IMAGE_DATA_TYPE)lower;
       imdiff->upper_threshold = (IMAGE_DATA_TYPE)upper;
+      lthrshim(imdiff);
+    }
+
+    inline void LunusThrshim() {
+      printf("LunusThrshim\n");
       lthrshim(imdiff);
     }
 
@@ -90,6 +105,10 @@ namespace lunus {
 
     inline void LunusModeim(std::size_t w) {
       imdiff->mode_width = w;
+      lmodeim(imdiff);
+    }
+
+    inline void LunusModeim() {
       lmodeim(imdiff);
     }
 
@@ -127,6 +146,13 @@ namespace lunus {
       return scale_info;
     }
 	
+    inline void LunusSetparamsim(std::string deck) {
+      deck += '\n';
+      if (imdiff->params != NULL) free(imdiff->params);
+      imdiff->params = (char *)calloc(deck.length()+1,sizeof(char));
+      strcpy(imdiff->params,deck.c_str());
+      lsetparamsim(imdiff);
+    }
 
     inline void set_image(scitbx::af::flex_int data) {
       int* begin=data.begin();
@@ -231,6 +257,14 @@ namespace lunus {
 
     inline ~LunusLAT3D() {
       lfreelt(lat);
+    }
+
+    inline void LunusSetparamslt(std::string deck) {
+      deck += '\n';
+      if (lat->params != NULL) free(lat->params);
+      lat->params = (char *)calloc(deck.length()+1,sizeof(char));
+      strcpy(lat->params,deck.c_str());
+      lsetparamslt(lat);
     }
 
     inline void LunusReadlt(char f[]) {
@@ -350,17 +384,34 @@ namespace boost_python { namespace {
     typedef return_value_policy<return_by_value> rbv;
     typedef default_call_policies dcp;
 
+    void (lunus::LunusDIFFIMAGE::*LunusWindim1)() = &lunus::LunusDIFFIMAGE::LunusWindim;
+    void (lunus::LunusDIFFIMAGE::*LunusWindim2)(short, short, short, short) = &lunus::LunusDIFFIMAGE::LunusWindim;
+
+    void (lunus::LunusDIFFIMAGE::*LunusPunchim1)() = &lunus::LunusDIFFIMAGE::LunusPunchim;
+    void (lunus::LunusDIFFIMAGE::*LunusPunchim2)(short, short, short, short) = &lunus::LunusDIFFIMAGE::LunusPunchim;
+
+    void (lunus::LunusDIFFIMAGE::*LunusThrshim1)() = &lunus::LunusDIFFIMAGE::LunusThrshim;
+    void (lunus::LunusDIFFIMAGE::*LunusThrshim2)(int, int) = &lunus::LunusDIFFIMAGE::LunusThrshim;
+
+    void (lunus::LunusDIFFIMAGE::*LunusModeim1)() = &lunus::LunusDIFFIMAGE::LunusModeim;
+    void (lunus::LunusDIFFIMAGE::*LunusModeim2)(size_t) = &lunus::LunusDIFFIMAGE::LunusModeim;
+
     class_<lunus::LunusDIFFIMAGE>("LunusDIFFIMAGE",init<>())
+      .def("LunusSetparamsim",&lunus::LunusDIFFIMAGE::LunusSetparamsim)
       .def("get_image_data_type_size",&lunus::LunusDIFFIMAGE::get_image_data_type_size)
       .def("set_image",&lunus::LunusDIFFIMAGE::set_image)
       .def("set_reference",&lunus::LunusDIFFIMAGE::set_reference)
       .def("get_image",&lunus::LunusDIFFIMAGE::get_image)
-      .def("LunusPunchim",&lunus::LunusDIFFIMAGE::LunusPunchim)
-      .def("LunusWindim",&lunus::LunusDIFFIMAGE::LunusWindim)
-      .def("LunusThrshim",&lunus::LunusDIFFIMAGE::LunusThrshim)
+      .def("LunusPunchim",LunusPunchim1)
+      .def("LunusPunchim",LunusPunchim2)
+      .def("LunusWindim",LunusWindim1)
+      .def("LunusWindim",LunusWindim2)
+      .def("LunusThrshim",LunusThrshim1)
+      .def("LunusThrshim",LunusThrshim2)
       .def("LunusPolarim",&lunus::LunusDIFFIMAGE::LunusPolarim)
       .def("LunusNormim",&lunus::LunusDIFFIMAGE::LunusNormim)
-      .def("LunusModeim",&lunus::LunusDIFFIMAGE::LunusModeim)
+      .def("LunusModeim",LunusModeim1)
+      .def("LunusModeim",LunusModeim2)
       .def("LunusRadialAvgim",&lunus::LunusDIFFIMAGE::LunusRadialAvgim)
       .def("LunusScaleim",&lunus::LunusDIFFIMAGE::LunusScaleim)
     ;
@@ -376,6 +427,7 @@ namespace boost_python { namespace {
       .def("LunusWritehkl",&lunus::LunusLAT3D::LunusWritehkl)
       .def("LunusSymlt",&lunus::LunusLAT3D::LunusSymlt)
       .def("LunusAnisolt",&lunus::LunusLAT3D::LunusAnisolt)
+      .def("LunusSetparamslt",&lunus::LunusLAT3D::LunusSetparamslt)
     ;
 
     def("foo2",&lunus::foo2);

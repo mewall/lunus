@@ -23,6 +23,7 @@ LAT3D *linitlt(void)
     goto CloseShop;
   }
 
+  lat->params = NULL;
   lat->wavelength = DEFAULT_WAVELENGTH;
   lat->inner_radius = DEFAULT_LAT_INNER_RADIUS;
   lat->outer_radius = DEFAULT_LAT_OUTER_RADIUS;
