@@ -9,13 +9,14 @@
 #include<mwmask.h>
 #include <string.h>
 
-int lprocimlt(LAT3D *lat,DIFFIMAGE *imdiff) 
+int lprocimlt(LAT3D *lat) 
 {
   static int ct = 0;
   static DIFFIMAGE 
     *imdiff_corrected = NULL, *imdiff_scale = NULL, *imdiff_scale_ref = NULL;
   IJKCOORDS_DATA
     i0, j0, k0;
+  DIFFIMAGE *imdiff = lat->imdiff;
 
   // Initialize other images
   

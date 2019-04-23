@@ -726,6 +726,7 @@ typedef struct {
   char *params;                 /* Input deck of parameters, bash syntax */
   char *integration_image_type; /* Selects which image to use for integration */
   int procmode;                 /* Processing mode for lprocimlt() */
+  DIFFIMAGE *imdiff;            /* Image for processing using lprocimlt() */
 } LAT3D;
 
 // Crystal structure data type
@@ -849,7 +850,7 @@ int lpadlt(LAT3D *lat);
 int lparsecelllt(LAT3D *lat);
 int lpeakim(DIFFIMAGE *imdiff);
 int lpolarim(DIFFIMAGE *imdiff);
-int lprocimlt(LAT3D *lat,DIFFIMAGE *imdiff);
+int lprocimlt(LAT3D *lat);
 int lpunch(DIFFIMAGE *imdiff);
 int lpunchim(DIFFIMAGE *imdiff);
 int lratioim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
