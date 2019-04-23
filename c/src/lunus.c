@@ -14,16 +14,6 @@
 
 #include<lunus.h>
 
-int lsetprocmodelt(LAT3D *lat,const int mode)
-{
-  if (mode == 0 || mode == 1) {
-    lat->procmode = mode;
-  } else {
-    perror("Mode must be 0 or 1\n");
-    exit(1);
-  }
-}
-
 int lprocimlt(LAT3D *lat,DIFFIMAGE *imdiff) 
 {
   static int ct = 0;
@@ -647,14 +637,14 @@ int main(int argc, char *argv[])
 
       // Run the processing method in initialization mode (0) supplying the reference image
 
-      lsetprocmodelt(lat,0);
+      lat->procmode = 0;
       lprocimlt(lat,imdiff_ref);
 
     }
 
     // Run the processing method in accumulation mode (1)
 
-    lsetprocmodelt(lat,1);    
+    lat->procmode = 1;    
     lprocimlt(lat,imdiff);
 
   }

@@ -127,6 +127,9 @@ namespace lunus {
       return scale_info;
     }
 	
+    inline void LunusSetparamsim(std::string deck) {
+      lsetparamsim(deck.c_str());
+    }
 
     inline void set_image(scitbx::af::flex_int data) {
       int* begin=data.begin();
@@ -351,6 +354,7 @@ namespace boost_python { namespace {
     typedef default_call_policies dcp;
 
     class_<lunus::LunusDIFFIMAGE>("LunusDIFFIMAGE",init<>())
+      .def("LunusSetparamsim",&lunus::LunusDIFFIMAGE::LunusSetparamsim)
       .def("get_image_data_type_size",&lunus::LunusDIFFIMAGE::get_image_data_type_size)
       .def("set_image",&lunus::LunusDIFFIMAGE::set_image)
       .def("set_reference",&lunus::LunusDIFFIMAGE::set_reference)
