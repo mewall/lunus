@@ -60,7 +60,11 @@ env_base.StaticLibrary(target='#lib/lunus',
       os.path.join(env_etc.lunus_dist,"c","lib","lspline.c"),
       os.path.join(env_etc.lunus_dist,"c","lib","lsetparamsim.c"),
       os.path.join(env_etc.lunus_dist,"c","lib","lsetparamslt.c"),
-      os.path.join(env_etc.lunus_dist,"c","lib","lprocimlt.c")],
+      os.path.join(env_etc.lunus_dist,"c","lib","lprocimlt.c"),
+      os.path.join(env_etc.lunus_dist,"c","lib","lcloneim.c"),
+      os.path.join(env_etc.lunus_dist,"c","lib","lcfim.c"),
+      os.path.join(env_etc.lunus_dist,"c","lib","lwritevtk.c"),
+      os.path.join(env_etc.lunus_dist,"c","lib","lmulcfim.c")],
   CPPPATH=[CPPP] )
 #print "LIBRARY OK"
 

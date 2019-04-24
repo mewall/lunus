@@ -341,6 +341,7 @@ int main(int argc, char *argv[])
   if (imdiff->mpiv->my_id == 0) {
     num_read = lreadbuf((void **)&xvectors_cctbx,xvectors_path);
     if (num_read != 3*imdiff->image_length*sizeof(float)) {
+      printf("%ld,%ld\n",num_read,3*imdiff->image_length*sizeof(float));
       perror("LUNUS: Number of xvectors differs from number of pixels in image.\n");
       exit(1);
     }

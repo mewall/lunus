@@ -79,6 +79,7 @@ LAT3D *linitlt(void)
 
   lat->latct = NULL;
   lat->procmode = 0;
+  lat->imdiff = NULL;
 
   CloseShop:
 

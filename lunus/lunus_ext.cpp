@@ -27,6 +27,233 @@ namespace lunus {
     std::cout<<"HELLO foo2"<<std::endl;
   }
 
+  class Process {
+  protected:
+    DIFFIMAGE *imdiff, *imdiff_ref;
+    LAT3D *lat;
+
+  public:
+    inline Process() {
+      imdiff = linitim();
+      imdiff_ref = linitim();
+      lat = linitlt();
+    }
+
+    inline ~Process() {
+      lfreeim(imdiff);
+      lfreelt(lat);
+    }
+
+    inline void LunusSetparamsim(std::string deck) {
+      deck += '\n';
+      if (imdiff->params != NULL) free(imdiff->params);
+      imdiff->params = (char *)calloc(deck.length()+1,sizeof(char));
+      strcpy(imdiff->params,deck.c_str());
+      lsetparamsim(imdiff);
+    }
+
+    inline void set_imdiff_ref() {
+      lcloneim(imdiff_ref,imdiff);
+    }
+
+    inline void set_image(scitbx::af::flex_int data) {
+      int* begin=data.begin();
+      std::size_t size=data.size();
+      std::size_t slow=data.accessor().focus()[0];
+      std::size_t fast=data.accessor().focus()[1];
+      imdiff->image_length = size;
+      imdiff->hpixels = fast;
+      imdiff->vpixels = slow;
+      imdiff->image = (IMAGE_DATA_TYPE *)realloc(imdiff->image,imdiff->image_length*sizeof(IMAGE_DATA_TYPE));
+      imdiff->value_offset = 0;
+      imdiff->correction = (float *)realloc(imdiff->correction,imdiff->image_length*sizeof(float));
+      std::size_t ct=0;
+      for (int i = 0;i<imdiff->image_length;i++) {
+	if (begin[i]<0) {
+	  imdiff->image[i] = imdiff->ignore_tag;
+	  ct++;
+	} else {
+	  imdiff->image[i] = (IMAGE_DATA_TYPE)begin[i];
+	}
+      }
+      printf("Converted image size %ld,%ld with %ld negative pixel values.\n",fast,slow,ct);
+    }
+
+    inline scitbx::af::flex_int get_image() {
+      std::size_t fast = imdiff->hpixels;
+      std::size_t slow = imdiff->vpixels;
+      scitbx::af::flex_int data(scitbx::af::flex_grid<>(slow,fast));
+      int* begin=data.begin();
+      std::size_t ct=0;
+      for (int i = 0;i<imdiff->image_length;i++) {
+	if (imdiff->image[i] == imdiff->ignore_tag) {
+	  begin[i] = -1;
+	  ct++;
+	} else {
+	  begin[i] = imdiff->image[i];
+	}
+      }
+      printf("Converted image size %ld,%ld with %ld negative pixel values.\n",fast,slow,ct);
+      return data;
+    }
+
+    inline std::size_t get_image_data_type_size() {
+      return sizeof(IMAGE_DATA_TYPE);
+    }
+
+    inline void LunusSetparamslt(std::string deck) {
+      deck += '\n';
+      if (lat->params != NULL) free(lat->params);
+      lat->params = (char *)calloc(deck.length()+1,sizeof(char));
+      strcpy(lat->params,deck.c_str());
+      lsetparamslt(lat);
+    }
+
+    inline void set_lattice(scitbx::af::flex_double data) {
+      double* begin=data.begin();
+      std::size_t size=data.size();
+      std::size_t xvox=data.accessor().focus()[0];
+      std::size_t yvox=data.accessor().focus()[1];
+      std::size_t zvox=data.accessor().focus()[2];
+      lat->lattice_length = size;
+      lat->xvoxels = xvox;
+      lat->yvoxels = yvox;
+      lat->zvoxels = zvox;
+      lat->lattice = (LATTICE_DATA_TYPE *)realloc(lat->lattice,lat->lattice_length*sizeof(LATTICE_DATA_TYPE));
+      std::size_t ct=0;
+      for (int i = 0;i<lat->lattice_length;i++) {
+	if (begin[i]<0) {
+	  lat->lattice[i] = lat->mask_tag;
+	  ct++;
+	} else {
+	  lat->lattice[i] = (LATTICE_DATA_TYPE)begin[i];
+	}
+      }
+      printf("Converted lattice of size (%ld,%ld,%ld) with %ld negative pixel values.\n",xvox,yvox,zvox,ct);
+    }
+
+    inline scitbx::af::flex_double get_lattice() {
+      std::size_t xvox = lat->xvoxels;
+      std::size_t yvox = lat->yvoxels;
+      std::size_t zvox = lat->zvoxels;
+      scitbx::af::flex_double data(scitbx::af::flex_grid<>(xvox,yvox,zvox));
+      double* begin=data.begin();
+      std::size_t ct=0;
+      for (int i = 0;i<lat->lattice_length;i++) {
+	if (lat->lattice[i] == lat->mask_tag) {
+	  begin[i] = -1;
+	  ct++;
+	} else {
+	  begin[i] = lat->lattice[i];
+	}
+      }
+      printf("Converted lattice of size (%ld,%ld,%ld) with %ld negative pixel values.\n",xvox,yvox,zvox,ct);
+      return data;
+    }
+
+    inline scitbx::af::flex_int get_counts() {
+      std::size_t xvox = lat->xvoxels;
+      std::size_t yvox = lat->yvoxels;
+      std::size_t zvox = lat->zvoxels;
+      scitbx::af::flex_int data(scitbx::af::flex_grid<>(xvox,yvox,zvox));
+      int* begin=data.begin();
+      std::size_t ct=0;
+      for (int i = 0;i<lat->lattice_length;i++) {
+	begin[i] = lat->latct[i];
+	if (begin[i] == 0) {
+	  ct++;
+	}
+      }
+      printf("Converted lattice of size (%ld,%ld,%ld) with %ld zero pixel values.\n",xvox,yvox,zvox,ct);
+      return data;
+    }
+
+    inline void divide_by_counts() {
+      for (std::size_t i = 0; i < lat->lattice_length; i++) {
+	if (lat->latct[i] != 0) {
+	  lat->lattice[i] /= (float)lat->latct[i];
+	  if (isnan(lat->lattice[i])) lat->lattice[i] = lat->mask_tag;
+	} else {
+	  lat->lattice[i] = lat->mask_tag;
+	}
+      }
+    }
+
+    inline void set_amatrix(scitbx::af::flex_double amatrix_in) {
+      double* begin=amatrix_in.begin();
+      imdiff->amatrix.xx = (float)begin[0];
+      imdiff->amatrix.xy = (float)begin[1];
+      imdiff->amatrix.xz = (float)begin[2];
+      imdiff->amatrix.yx = (float)begin[3];
+      imdiff->amatrix.yy = (float)begin[4];
+      imdiff->amatrix.yz = (float)begin[5];
+      imdiff->amatrix.zx = (float)begin[6];
+      imdiff->amatrix.zy = (float)begin[7];
+      imdiff->amatrix.zz = (float)begin[8];
+    }
+
+    inline void set_xvectors(scitbx::af::flex_double xvectors_in) {
+      double* begin=xvectors_in.begin();
+      std::size_t size=xvectors_in.size();
+
+      struct xyzcoords *xvectors_cctbx = (struct xyzcoords *)malloc(size*sizeof(float));
+
+      if (imdiff->xvectors == NULL) free(imdiff->xvectors);
+      imdiff->xvectors = (struct xyzcoords *)malloc(size*sizeof(float));
+
+      if (imdiff->image_length != size/3) {
+	perror("set_xvectors: image length differs from size of xvectors. aborting.\n");
+	exit(1);
+      }
+
+
+      float *xvectors_cctbx_float = (float *)xvectors_cctbx;
+
+      for (std::size_t i = 0; i < size; i++) {
+	xvectors_cctbx_float[i] = (float)begin[i];
+      }
+
+      // The xvectors for lunus should be transposed with respect to those coming from cctbx
+
+      size_t index = 0;
+      for (std::size_t j = 0; j < imdiff->vpixels; j++) {
+	for (std::size_t i = 0; i < imdiff->hpixels; i++) {
+	  imdiff->xvectors[index] = xvectors_cctbx[i*imdiff->vpixels + j];
+	  index++;
+	}
+      }
+    }
+
+    inline void LunusProcimlt(int mode) {
+      if (mode != 0 and mode != 1) {
+	perror("LunusProcimlt: mode is not 0 or 1. Exiting.\n");
+	exit(1);
+      }
+      lat->procmode = mode;
+      lat->imdiff = imdiff;
+      lprocimlt(lat);
+    }
+
+    inline void LunusProcimlt() {
+      printf("LunusProcimlt: Processing using mode = %d\n",lat->procmode);
+      lat->imdiff = imdiff;
+      lprocimlt(lat);
+    }
+
+    inline void write_as_vtk(std::string fname) {
+      FILE *f;
+      if ((f = fopen(fname.c_str(),"wb")) == NULL) {
+	perror("write_as_vtk: Can't open output file\n");
+	exit(1);
+      }
+      lat->outfile = f;
+      if (lwritevtk(lat) != 0) {
+	perror("write_as_vtk: Couldn't write file\n");
+	exit(1);
+      }    
+    }
+  };
+
   class LunusDIFFIMAGE {
   protected:
     DIFFIMAGE *imdiff, *imdiff_ref;
@@ -383,6 +610,26 @@ namespace boost_python { namespace {
     using namespace boost::python;
     typedef return_value_policy<return_by_value> rbv;
     typedef default_call_policies dcp;
+
+    void (lunus::Process::*LunusProcimlt1)() = &lunus::Process::LunusProcimlt;
+    void (lunus::Process::*LunusProcimlt2)(int) = &lunus::Process::LunusProcimlt;
+
+    class_<lunus::Process>("Process",init<>())
+      .def("LunusSetparamsim",&lunus::Process::LunusSetparamsim)
+      .def("set_image",&lunus::Process::set_image)
+      .def("get_image",&lunus::Process::get_image)
+      .def("get_lattice",&lunus::Process::get_lattice)
+      .def("get_counts",&lunus::Process::get_counts)
+      .def("divide_by_counts",&lunus::Process::divide_by_counts)
+      .def("write_as_vtk",&lunus::Process::write_as_vtk)
+      .def("set_lattice",&lunus::Process::set_lattice)
+      .def("LunusSetparamslt",&lunus::Process::LunusSetparamslt)
+      .def("set_amatrix",&lunus::Process::set_amatrix)
+      .def("set_xvectors",&lunus::Process::set_xvectors)
+      .def("set_imdiff_ref",&lunus::Process::set_imdiff_ref)
+      .def("LunusProcimlt",LunusProcimlt1)
+      .def("LunusProcimlt",LunusProcimlt2)
+    ;
 
     void (lunus::LunusDIFFIMAGE::*LunusWindim1)() = &lunus::LunusDIFFIMAGE::LunusWindim;
     void (lunus::LunusDIFFIMAGE::*LunusWindim2)(short, short, short, short) = &lunus::LunusDIFFIMAGE::LunusWindim;
