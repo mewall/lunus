@@ -337,56 +337,6 @@ int main(int argc, char *argv[])
 
   imdiff->mpiv = mpiv;
 
-  // Read the xvectors on rank 0
-  if (imdiff->mpiv->my_id == 0) {
-    num_read = lreadbuf((void **)&xvectors_cctbx,xvectors_path);
-    if (num_read != 3*imdiff->image_length*sizeof(float)) {
-      printf("%ld,%ld\n",num_read,3*imdiff->image_length*sizeof(float));
-      perror("LUNUS: Number of xvectors differs from number of pixels in image.\n");
-      exit(1);
-    }
-#ifdef DEBUG		
-    printf("SAMPLES\n");
-    for (j=50000;j<50010;j++) {
-      printf("(%f, %f, %f): %d\n",xvectors_cctbx[j].x,xvectors_cctbx[j].y,xvectors_cctbx[j].z, imdiff_corrected->image[j]);
-    }
-    printf("\n");
-#endif		
-    // Reorder the xvectors (transpose)
-
-    index = 0;
-
-    if (xvectors != NULL) free(xvectors);
-
-    xvectors = (struct xyzcoords *)malloc(num_read);		
-
-    if (num_read != sizeof(struct xyzcoords)*imdiff->image_length) {
-      perror("Number of xvectors not equal to image length. Exiting.\n");
-      exit(1);;
-    }
-		   
-    size_t k;
-
-    for (j=0; j<imdiff->vpixels; j++) {
-      for (k=0; k<imdiff->hpixels; k++) {
-	// The following conditional is needed to prevent a segfault-inducing Intel 18.X optimization error:
-	//		    if (index == 0) printf("");
-	xvectors[index] = xvectors_cctbx[k*imdiff->vpixels + j];
-	index++;
-      }
-    }
-  }
-
-  // Broadcast the xvectors to other ranks
-  lbcastBufMPI((void *)&num_read,sizeof(size_t),0,imdiff->mpiv);
-  if (imdiff->mpiv->my_id != 0) {
-    if (xvectors != NULL) free(xvectors);
-    xvectors = (struct xyzcoords *)malloc(num_read);
-  }
-  lbcastBufMPI((void *)xvectors,num_read,0,imdiff->mpiv);
-
-  imdiff->xvectors = xvectors;
-
   // Process all of the images
 
   int ct=0;
@@ -451,6 +401,60 @@ int main(int argc, char *argv[])
     // If this is the first time through, initialize the processing and set the reference image
 
     if (i == mpiv->my_id + 1) {
+
+      // Read the xvectors on rank 0
+      if (imdiff->mpiv->my_id == 0) {
+	num_read = lreadbuf((void **)&xvectors_cctbx,xvectors_path);
+
+	/*
+	  if (num_read != 3*imdiff->image_length*sizeof(float)) {
+	  printf("%ld,%ld\n",num_read,3*imdiff->image_length*sizeof(float));
+	  perror("LUNUS: Number of xvectors differs from number of pixels in image.\n");
+	  exit(1);
+	  }
+	*/
+#ifdef DEBUG		
+	printf("SAMPLES\n");
+	for (j=50000;j<50010;j++) {
+	  printf("(%f, %f, %f): %d\n",xvectors_cctbx[j].x,xvectors_cctbx[j].y,xvectors_cctbx[j].z, imdiff_corrected->image[j]);
+	}
+	printf("\n");
+#endif		
+	// Reorder the xvectors (transpose)
+
+	index = 0;
+
+	if (xvectors != NULL) free(xvectors);
+
+	xvectors = (struct xyzcoords *)malloc(num_read);		
+
+	/*
+	  if (num_read != sizeof(struct xyzcoords)*imdiff->image_length) {
+	  perror("Number of xvectors not equal to image length. Exiting.\n");
+	  exit(1);;
+	  }
+	*/		   
+	size_t k;
+
+	for (j=0; j<imdiff->vpixels; j++) {
+	  for (k=0; k<imdiff->hpixels; k++) {
+	    // The following conditional is needed to prevent a segfault-inducing Intel 18.X optimization error:
+	    //		    if (index == 0) printf("");
+	    xvectors[index] = xvectors_cctbx[k*imdiff->vpixels + j];
+	    index++;
+	  }
+	}
+      }
+
+      // Broadcast the xvectors to other ranks
+      lbcastBufMPI((void *)&num_read,sizeof(size_t),0,imdiff->mpiv);
+      if (imdiff->mpiv->my_id != 0) {
+	if (xvectors != NULL) free(xvectors);
+	xvectors = (struct xyzcoords *)malloc(num_read);
+      }
+      lbcastBufMPI((void *)xvectors,num_read,0,imdiff->mpiv);
+
+      imdiff->xvectors = xvectors;
 
       // First broadcast the reference image to all ranks
 

@@ -100,6 +100,8 @@ if __name__=="__main__":
     
   DATAsize = np.asarray(detector[0].get_image_size())
 
+  print len(x),DATAsize
+
 #  np.save(xvectors,x)
 #  np.save(datasize,DATAsize)
 
