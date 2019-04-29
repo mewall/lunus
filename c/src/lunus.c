@@ -388,6 +388,7 @@ int main(int argc, char *argv[])
 	printf("Can't open %s.",bkglist[i-1]);
 	exit(0);
       }
+      imdiff_bkg = linitim();
       imdiff_bkg->infile = imagein;
       if (lreadim(imdiff_bkg) != 0) {
 	perror(imdiff_bkg->error_msg);
