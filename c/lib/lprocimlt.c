@@ -25,7 +25,7 @@ int lprocimlt(LAT3D *lat)
   if (imdiff_scale_ref == NULL) imdiff_scale_ref = linitim();
 
   // Apply masks
-  
+
   lpunchim(imdiff);
   lwindim(imdiff);
   lthrshim(imdiff);
@@ -52,6 +52,7 @@ int lprocimlt(LAT3D *lat)
   // Set up common variables on the first pass
 
   if (lat->procmode == 0) {
+    
     // Reference image for scaling
     lcloneim(imdiff_scale_ref,imdiff_scale);
 
@@ -74,6 +75,7 @@ int lprocimlt(LAT3D *lat)
     }
     printf("\n");
 #endif
+
 
     if (strstr(lat->cell_str,"None") != NULL) {
       float a,b,c,alpha,beta,gamma,adotb,adotc,bdotc;

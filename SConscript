@@ -5,6 +5,7 @@
 
 
 
+
 import libtbx.load_env
 import os
 op = os.path
@@ -31,8 +32,17 @@ CPPP = os.path.join(env_etc.lunus_include,"c","include")
 #env = env_base.Clone(
 #  SHLINKFLAGS=env_etc.shlinkflags)
 
+env_lunus = env_base.Clone()
 
-env_base.StaticLibrary(target='#lib/lunus',
+env_lunus.Prepend(CCFLAGS=["-DUSE_OPENMP"])
+
+#env_etc.include_registry.append(
+#  env=env_lunus,
+#  paths=env_etc.lunus_common_includes + [env_etc.python_include])
+
+#env_lunus.Append(LIBS=env_etc.libm+["scitbx_boost_python","boost_python","cctbx"])
+
+env_lunus.StaticLibrary(target='#lib/lunus',
   source = [os.path.join(env_etc.lunus_dist,"c","lib","linitim.c"),
       os.path.join(env_etc.lunus_dist,"c","lib","lfreeim.c"),
       os.path.join(env_etc.lunus_dist,"c","lib","lmodeim.c"),
@@ -68,8 +78,8 @@ env_base.StaticLibrary(target='#lib/lunus',
   CPPPATH=[CPPP] )
 #print "LIBRARY OK"
 
-
 if (not env_etc.no_boost_python):
+
   Import("env_no_includes_boost_python_ext")
   env_lunus = env_no_includes_boost_python_ext.Clone()
 

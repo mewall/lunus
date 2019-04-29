@@ -79,6 +79,20 @@ int lsetparamsim(DIFFIMAGE *imdiff)
 	  imdiff->polarization = lgettagf(deck,"\npolarim_polarization");
 	}
 
+	if (strstr(deck,"\npixel_size_mm") != NULL) {
+	  imdiff->pixel_size_mm = lgettagf(deck,"\npixel_size_mm");
+	}
+
+	if (strstr(deck,"\nbeam_mm_x") != NULL) {
+	  imdiff->beam_mm.x = lgettagf(deck,"\nbeam_mm_x");
+	  imdiff->origin.c = imdiff->beam_mm.x/imdiff->pixel_size_mm + .5;
+	}
+
+	if (strstr(deck,"\nbeam_mm_y") != NULL) {
+	  imdiff->beam_mm.y = lgettagf(deck,"\nbeam_mm_y");
+	  imdiff->origin.r = imdiff->beam_mm.y/imdiff->pixel_size_mm + .5;
+	}
+
 	if (strstr(deck,"\ndistance_mm") != NULL) {
 	  imdiff->distance_mm = lgettagf(deck,"\ndistance_mm");
 	}

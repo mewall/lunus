@@ -99,26 +99,29 @@ if __name__=="__main__":
   from dxtbx.model.experiment_list import ExperimentListFactory
   from dials.array_family import flex
 
-  with open(deck_file) as f:
-    deck = f.read()
-   
-  p = lunus.Process()
-
-  p.LunusSetparamslt(deck)
-  p.LunusSetparamsim(deck)
-
   experiments = ExperimentListFactory.from_json_file(metro, check_format=False)
   beam = experiments[0].beam
   detector = experiments[0].detector
 
-  print "s0 from experiment[0]: ",beam.get_s0()
-  print "wavelength from experiment[0]: ",beam.get_wavelength()
- 
   lab_coordinates = flex.vec3_double()
   for panel in detector: 
     pixels = flex.vec2_double(panel.get_image_size())
     mms = panel.pixel_to_millimeter(pixels)
     lab_coordinates.extend(panel.get_lab_coord(mms))
+    pixel_size_mm = panel.get_pixel_size()[0]
+    beam_mm_x = panel.get_beam_centre(beam.get_s0())[0]
+    beam_mm_y = panel.get_beam_centre(beam.get_s0())[1]
+    distance_mm = panel.get_distance()
+
+  with open(deck_file) as f:
+    deck = f.read()
+   
+  deck += "\npixel_size_mm={0}\nbeam_mm_x={1}\nbeam_mm_y={2}\ndistance_mm={3}\n".format(pixel_size_mm,beam_mm_x,beam_mm_y,distance_mm)
+
+  p = lunus.Process()
+
+  p.LunusSetparamslt(deck)
+  p.LunusSetparamsim(deck)
 
     # generate s1 vectors
   s1 = lab_coordinates.each_normalize() * (1/beam.get_wavelength())
@@ -142,18 +145,10 @@ if __name__=="__main__":
 
       p.set_image(data)
       
-      if (i == 0):
-        p.set_xvectors(x)
-        p.set_imdiff_ref()
-        p.LunusProcimlt(0)
-
       detector = img.get_detector()
       beam = img.get_beam()
       scan = img.get_scan()
       gonio = img.get_goniometer()
-
-      print "s0 from ",imgname,": ",beam.get_s0()
-      print "wavelength from ",imgname,": ",beam.get_wavelength()
 
       crystal = copy.deepcopy(experiments.crystals()[0])
       axis = gonio.get_rotation_axis()
@@ -162,11 +157,15 @@ if __name__=="__main__":
 
       from scitbx import matrix
       A_matrix = matrix.sqr(crystal.get_A()).inverse()
-      print type(A_matrix.as_flex_double_matrix())
       At = np.asarray(A_matrix.transpose()).reshape((3,3))
       At_flex = A_matrix.transpose().as_flex_double_matrix()
 
       p.set_amatrix(At_flex)
+
+      if (i == 0):
+        p.set_xvectors(x)
+        p.set_imdiff_ref()
+        p.LunusProcimlt(0)
 
       p.LunusProcimlt(1)
 

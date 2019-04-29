@@ -76,7 +76,6 @@ namespace lunus {
 	  imdiff->image[i] = (IMAGE_DATA_TYPE)begin[i];
 	}
       }
-      printf("Converted image size %ld,%ld with %ld negative pixel values.\n",fast,slow,ct);
     }
 
     inline scitbx::af::flex_int get_image() {
@@ -93,7 +92,6 @@ namespace lunus {
 	  begin[i] = imdiff->image[i];
 	}
       }
-      printf("Converted image size %ld,%ld with %ld negative pixel values.\n",fast,slow,ct);
       return data;
     }
 
@@ -129,7 +127,6 @@ namespace lunus {
 	  lat->lattice[i] = (LATTICE_DATA_TYPE)begin[i];
 	}
       }
-      printf("Converted lattice of size (%ld,%ld,%ld) with %ld negative pixel values.\n",xvox,yvox,zvox,ct);
     }
 
     inline scitbx::af::flex_double get_lattice() {
@@ -147,7 +144,6 @@ namespace lunus {
 	  begin[i] = lat->lattice[i];
 	}
       }
-      printf("Converted lattice of size (%ld,%ld,%ld) with %ld negative pixel values.\n",xvox,yvox,zvox,ct);
       return data;
     }
 
@@ -164,7 +160,6 @@ namespace lunus {
 	  ct++;
 	}
       }
-      printf("Converted lattice of size (%ld,%ld,%ld) with %ld zero pixel values.\n",xvox,yvox,zvox,ct);
       return data;
     }
 
@@ -182,6 +177,16 @@ namespace lunus {
     inline void set_amatrix(scitbx::af::flex_double amatrix_in) {
       double* begin=amatrix_in.begin();
       imdiff->amatrix.xx = (float)begin[0];
+      imdiff->amatrix.yx = (float)begin[1];
+      imdiff->amatrix.zx = (float)begin[2];
+      imdiff->amatrix.xy = (float)begin[3];
+      imdiff->amatrix.yy = (float)begin[4];
+      imdiff->amatrix.zy = (float)begin[5];
+      imdiff->amatrix.xz = (float)begin[6];
+      imdiff->amatrix.yz = (float)begin[7];
+      imdiff->amatrix.zz = (float)begin[8];
+      /*
+      imdiff->amatrix.xx = (float)begin[0];
       imdiff->amatrix.xy = (float)begin[1];
       imdiff->amatrix.xz = (float)begin[2];
       imdiff->amatrix.yx = (float)begin[3];
@@ -190,13 +195,13 @@ namespace lunus {
       imdiff->amatrix.zx = (float)begin[6];
       imdiff->amatrix.zy = (float)begin[7];
       imdiff->amatrix.zz = (float)begin[8];
-    }
+      */    }
 
     inline void set_xvectors(scitbx::af::flex_double xvectors_in) {
       double* begin=xvectors_in.begin();
       std::size_t size=xvectors_in.size();
 
-      struct xyzcoords *xvectors_cctbx = (struct xyzcoords *)malloc(size*sizeof(float));
+      struct xyzcoords *xvectors_cctbx = (struct xyzcoords *)malloc(size*sizeof(struct xyzcoords));
 
       if (imdiff->xvectors == NULL) free(imdiff->xvectors);
       imdiff->xvectors = (struct xyzcoords *)malloc(size*sizeof(float));
@@ -400,7 +405,6 @@ namespace lunus {
 	  imdiff->image[i] = (IMAGE_DATA_TYPE)begin[i];
 	}
       }
-      printf("Converted image size %ld,%ld with %ld negative pixel values.\n",fast,slow,ct);
     }
 
     inline void set_reference() {
@@ -462,7 +466,6 @@ namespace lunus {
 	  begin[i] = imdiff->image[i];
 	}
       }
-      printf("Converted image size %ld,%ld with %ld negative pixel values.\n",fast,slow,ct);
       return data;
     }
 
@@ -565,14 +568,13 @@ namespace lunus {
       lat->lattice = (LATTICE_DATA_TYPE *)realloc(lat->lattice,lat->lattice_length*sizeof(LATTICE_DATA_TYPE));
       std::size_t ct=0;
       for (int i = 0;i<lat->lattice_length;i++) {
-  if (begin[i]<0) {
-    lat->lattice[i] = lat->mask_tag;
-    ct++;
-  } else {
-    lat->lattice[i] = (LATTICE_DATA_TYPE)begin[i];
-  }
+	if (begin[i]<0) {
+	  lat->lattice[i] = lat->mask_tag;
+	  ct++;
+	} else {
+	  lat->lattice[i] = (LATTICE_DATA_TYPE)begin[i];
+	}
       }
-      printf("Converted lattice of size (%ld,%ld,%ld) with %ld negative pixel values.\n",xvox,yvox,zvox,ct);
     }
 
     inline scitbx::af::flex_int get_lattice() {
@@ -590,7 +592,6 @@ namespace lunus {
     begin[i] = lat->lattice[i];
   }
       }
-      printf("Converted lattice of size (%ld,%ld,%ld) with %ld negative pixel values.\n",xvox,yvox,zvox,ct);
       return data;
     }
 
