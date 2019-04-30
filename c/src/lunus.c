@@ -398,6 +398,7 @@ int main(int argc, char *argv[])
     }
 
     if (needs_bkgsub == 1) lbkgsubim(imdiff,imdiff_bkg);
+    printf("imdiff->value_offset = %d\n",imdiff->value_offset);
 
     // If this is the first time through, initialize the processing and set the reference image
 

@@ -74,6 +74,7 @@ env_lunus.StaticLibrary(target='#lib/lunus',
       os.path.join(env_etc.lunus_dist,"c","lib","lcloneim.c"),
       os.path.join(env_etc.lunus_dist,"c","lib","lcfim.c"),
       os.path.join(env_etc.lunus_dist,"c","lib","lwritevtk.c"),
+      os.path.join(env_etc.lunus_dist,"c","lib","lbkgsubim.c"),
       os.path.join(env_etc.lunus_dist,"c","lib","lmulcfim.c")],
   CPPPATH=[CPPP] )
 #print "LIBRARY OK"

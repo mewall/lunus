@@ -24,11 +24,11 @@ int lfreeim(DIFFIMAGE *imdiff)
   free((RFILE_DATA_TYPE *)imdiff->imoffsetr);
   free((struct rccoords *)imdiff->mask);
   free((IMAGE_DATA_TYPE *)imdiff->image);
+  free(imdiff->correction);
   free((char *)imdiff->header);
+  free(imdiff->footer);
   free((struct rccorrds *)imdiff->overload);
   free((struct xycoords *)imdiff->peak);
   free((WEIGHTS_DATA_TYPE *)imdiff->weights);
-  free(imdiff->correction);
-  //  free(imdiff->footer);
   free((DIFFIMAGE *)imdiff);
 }

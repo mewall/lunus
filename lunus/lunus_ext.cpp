@@ -29,13 +29,14 @@ namespace lunus {
 
   class Process {
   protected:
-    DIFFIMAGE *imdiff, *imdiff_ref;
+    DIFFIMAGE *imdiff, *imdiff_ref, *imdiff_bkg;
     LAT3D *lat;
 
   public:
     inline Process() {
       imdiff = linitim();
       imdiff_ref = linitim();
+      imdiff_bkg = linitim();
       lat = linitlt();
     }
 
@@ -50,9 +51,13 @@ namespace lunus {
       imdiff->params = (char *)calloc(deck.length()+1,sizeof(char));
       strcpy(imdiff->params,deck.c_str());
       lsetparamsim(imdiff);
+      if (imdiff_bkg->params != NULL) free(imdiff_bkg->params);
+      imdiff_bkg->params = (char *)calloc(deck.length()+1,sizeof(char));
+      strcpy(imdiff_bkg->params,deck.c_str());
+      lsetparamsim(imdiff_bkg);
     }
 
-    inline void set_imdiff_ref() {
+    inline void set_image_ref() {
       lcloneim(imdiff_ref,imdiff);
     }
 
@@ -61,12 +66,14 @@ namespace lunus {
       std::size_t size=data.size();
       std::size_t slow=data.accessor().focus()[0];
       std::size_t fast=data.accessor().focus()[1];
-      imdiff->image_length = size;
+      if (imdiff->image_length != size) {
+	imdiff->image_length = size;
+	imdiff->image = (IMAGE_DATA_TYPE *)realloc(imdiff->image,imdiff->image_length*sizeof(IMAGE_DATA_TYPE));
+	imdiff->correction = (float *)realloc(imdiff->correction,imdiff->image_length*sizeof(float));
+      }
       imdiff->hpixels = fast;
       imdiff->vpixels = slow;
-      imdiff->image = (IMAGE_DATA_TYPE *)realloc(imdiff->image,imdiff->image_length*sizeof(IMAGE_DATA_TYPE));
       imdiff->value_offset = 0;
-      imdiff->correction = (float *)realloc(imdiff->correction,imdiff->image_length*sizeof(float));
       std::size_t ct=0;
       for (int i = 0;i<imdiff->image_length;i++) {
 	if (begin[i]<0) {
@@ -76,6 +83,34 @@ namespace lunus {
 	  imdiff->image[i] = (IMAGE_DATA_TYPE)begin[i];
 	}
       }
+    }
+
+    inline void set_background(scitbx::af::flex_int data) {
+      int* begin=data.begin();
+      std::size_t size=data.size();
+      std::size_t slow=data.accessor().focus()[0];
+      std::size_t fast=data.accessor().focus()[1];
+      if (imdiff_bkg->image_length != size) {
+	imdiff_bkg->image_length = size;
+	imdiff_bkg->image = (IMAGE_DATA_TYPE *)realloc(imdiff_bkg->image,imdiff_bkg->image_length*sizeof(IMAGE_DATA_TYPE));
+	imdiff_bkg->correction = (float *)realloc(imdiff_bkg->correction,imdiff_bkg->image_length*sizeof(float));
+      }
+      imdiff_bkg->hpixels = fast;
+      imdiff_bkg->vpixels = slow;
+      imdiff_bkg->value_offset = 0;
+      for (int i = 0;i<imdiff_bkg->image_length;i++) {
+	if (begin[i]<0) {
+	  imdiff_bkg->image[i] = imdiff_bkg->ignore_tag;
+	} else {
+	  imdiff_bkg->image[i] = (IMAGE_DATA_TYPE)begin[i];
+	}
+      }
+    }
+
+    inline void LunusBkgsubim() {
+      lbkgsubim(imdiff,imdiff_bkg);
+      printf("imdiff->background_subtraction_factor = %f\n",imdiff->background_subtraction_factor);
+      printf("imdiff-value_offset = %d\n",imdiff->value_offset);
     }
 
     inline scitbx::af::flex_int get_image() {
@@ -617,7 +652,9 @@ namespace boost_python { namespace {
 
     class_<lunus::Process>("Process",init<>())
       .def("LunusSetparamsim",&lunus::Process::LunusSetparamsim)
+      .def("LunusBkgsubim",&lunus::Process::LunusBkgsubim)
       .def("set_image",&lunus::Process::set_image)
+      .def("set_background",&lunus::Process::set_background)
       .def("get_image",&lunus::Process::get_image)
       .def("get_lattice",&lunus::Process::get_lattice)
       .def("get_counts",&lunus::Process::get_counts)
@@ -627,7 +664,7 @@ namespace boost_python { namespace {
       .def("LunusSetparamslt",&lunus::Process::LunusSetparamslt)
       .def("set_amatrix",&lunus::Process::set_amatrix)
       .def("set_xvectors",&lunus::Process::set_xvectors)
-      .def("set_imdiff_ref",&lunus::Process::set_imdiff_ref)
+      .def("set_image_ref",&lunus::Process::set_image_ref)
       .def("LunusProcimlt",LunusProcimlt1)
       .def("LunusProcimlt",LunusProcimlt2)
     ;
@@ -684,6 +721,7 @@ namespace boost_python { namespace {
 }
 }} // namespace lunus::boost_python::<anonymous>
 
+//
 BOOST_PYTHON_MODULE(lunus_ext)
 {
   lunus::boost_python::lunus_init_module();

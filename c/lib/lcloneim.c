@@ -15,6 +15,10 @@ int lcloneim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2)
 	int 
 		return_value = 0;
 
+	// Need to free arrays that are malloc'd here before copying the struct
+
+	if (imdiff1->image != NULL) free(imdiff1->image);
+	if (imdiff1->rfile != NULL) free(imdiff1->rfile);
 	*imdiff1 = *imdiff2;
 	//	imdiff1->image = NULL;
 	imdiff1->image = (IMAGE_DATA_TYPE *)malloc(imdiff1->image_length*sizeof(IMAGE_DATA_TYPE));
