@@ -74,15 +74,19 @@ namespace lunus {
       imdiff->hpixels = fast;
       imdiff->vpixels = slow;
       imdiff->value_offset = 0;
+      IMAGE_DATA_TYPE max=-32766,min=32766;
       std::size_t ct=0;
       for (int i = 0;i<imdiff->image_length;i++) {
-	if (begin[i]<0) {
+	if (begin[i]<0 || begin[i] >= MAX_IMAGE_DATA_VALUE) {
 	  imdiff->image[i] = imdiff->ignore_tag;
 	  ct++;
 	} else {
 	  imdiff->image[i] = (IMAGE_DATA_TYPE)begin[i];
+	  if (imdiff->image[i]>max) max = imdiff->image[i];
+	  if (imdiff->image[i]<min) min = imdiff->image[i];
 	}
       }
+      //      printf("ct = %ld,max = %d, min = %d\n",ct,max,min);
     }
 
     inline void set_background(scitbx::af::flex_int data) {
@@ -98,19 +102,25 @@ namespace lunus {
       imdiff_bkg->hpixels = fast;
       imdiff_bkg->vpixels = slow;
       imdiff_bkg->value_offset = 0;
+      std::size_t ct = 0;
+      IMAGE_DATA_TYPE max=-32766,min=32766;
       for (int i = 0;i<imdiff_bkg->image_length;i++) {
-	if (begin[i]<0) {
+	if (begin[i]<0 || begin[i] > MAX_IMAGE_DATA_VALUE) {
 	  imdiff_bkg->image[i] = imdiff_bkg->ignore_tag;
+	  ct++;
 	} else {
 	  imdiff_bkg->image[i] = (IMAGE_DATA_TYPE)begin[i];
+	  if (imdiff_bkg->image[i]>max) max = imdiff_bkg->image[i];
+	  if (imdiff_bkg->image[i]<min) min = imdiff_bkg->image[i];
 	}
       }
+      //      printf("ct = %ld,max = %d, min = %d\n",ct,max,min);
     }
 
     inline void LunusBkgsubim() {
       lbkgsubim(imdiff,imdiff_bkg);
-      printf("imdiff->background_subtraction_factor = %f\n",imdiff->background_subtraction_factor);
-      printf("imdiff-value_offset = %d\n",imdiff->value_offset);
+      //      printf("imdiff->background_subtraction_factor = %f\n",imdiff->background_subtraction_factor);
+      //      printf("imdiff-value_offset = %d\n",imdiff->value_offset);
     }
 
     inline scitbx::af::flex_int get_image() {
