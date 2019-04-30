@@ -486,7 +486,7 @@ int main(int argc, char *argv[])
 
     lat->procmode = 1;    
     lat->imdiff = imdiff;
-    lprocimlt(lat,imdiff);
+    lprocimlt(lat);
 
   }
 
