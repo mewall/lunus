@@ -477,13 +477,15 @@ int main(int argc, char *argv[])
       // Run the processing method in initialization mode (0) supplying the reference image
 
       lat->procmode = 0;
-      lprocimlt(lat,imdiff_ref);
+      lat->imdiff = imdiff_ref;
+      lprocimlt(lat);
 
     }
 
     // Run the processing method in accumulation mode (1)
 
     lat->procmode = 1;    
+    lat->imdiff = imdiff;
     lprocimlt(lat,imdiff);
 
   }
