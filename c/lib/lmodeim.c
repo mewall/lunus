@@ -63,7 +63,6 @@ int lmodeim(DIFFIMAGE *imdiff)
   index = 0;
 
   size_t j;
-  size_t monect=0;
 
 #ifdef USE_OPENMP
   //  omp_set_num_threads(16);

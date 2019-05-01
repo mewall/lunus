@@ -34,24 +34,26 @@ int lscaleim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2)
 	printf("imdiff2->scale_inner_radius=%d,imdiff2->scale_outer_radius=%d\n",imdiff2->scale_inner_radius,imdiff2->scale_outer_radius);
 #endif
 	lavgrim(imdiff1);
-	rf1 = (RFILE_DATA_TYPE *)calloc(imdiff1->rfile_length,sizeof(RFILE_DATA_TYPE));
+	rf1 = imdiff1->rfile;
+	//	rf1 = (RFILE_DATA_TYPE *)calloc(imdiff1->rfile_length,sizeof(RFILE_DATA_TYPE));
 	ct = 0;
-	for (i=0; i<imdiff1->rfile_length;i++) {
-	  rf1[i] = imdiff1->rfile[i];
+	//	for (i=0; i<imdiff1->rfile_length;i++) {
+	//	  rf1[i] = imdiff1->rfile[i];
 #ifdef DEBUG
 	  //	  if (i>100 && i<=110)  printf("rf1[%d]=%f,",i,rf1[i]);
 #endif
-	}
+	//	}
 	//	printf("\n");
 	//	memcpy((void *)rf1,(void *)imdiff1->rfile,imdiff1->rfile_length*sizeof(RFILE_DATA_TYPE));
 	lavgrim(imdiff2);
-	rf2 = (RFILE_DATA_TYPE *)calloc(imdiff2->rfile_length,sizeof(RFILE_DATA_TYPE));
-	for (i=0; i<imdiff2->rfile_length;i++) {
-	  rf2[i] = imdiff2->rfile[i];
+	rf2 = imdiff2->rfile;
+	//	rf2 = (RFILE_DATA_TYPE *)calloc(imdiff2->rfile_length,sizeof(RFILE_DATA_TYPE));
+	//	for (i=0; i<imdiff2->rfile_length;i++) {
+	//	  rf2[i] = imdiff2->rfile[i];
 #ifdef DEBUG
 	  //	  if (i>100 && i<=110) printf("rf2[%d]=%f,",i,rf2[i]);
 #endif
-	}
+	//	}
 	//	memcpy((void *)rf2,(void *)imdiff2->rfile,imdiff2->rfile_length*sizeof(RFILE_DATA_TYPE));
 
 	for (i=0;i<imdiff1->rfile_length;i++) {
