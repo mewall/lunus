@@ -95,6 +95,8 @@ int lprocimlt(LAT3D *lat)
       sprintf(lat->cell_str,"%f,%f,%f,%f,%f,%f",a,b,c,alpha,beta,gamma);
     }
     lparsecelllt(lat);
+    sprintf(lat->lattice_type_str,"P1");
+    sprintf(lat->space_group_str,"P1");
     lat->cell.a *= lat->pphkl;
     lat->cell.b *= lat->pphkl;
     lat->cell.c *= lat->pphkl;
@@ -131,6 +133,9 @@ int lprocimlt(LAT3D *lat)
 
   lscaleim(imdiff_scale_ref,imdiff_scale);
   float this_scale_factor = imdiff_scale_ref->rfile[0];
+  float this_scale_error = imdiff_scale_ref->rfile[1];
+
+  printf("(%g,%g)",this_scale_factor,this_scale_error);
 
   // Collect the image data into the lattice
 

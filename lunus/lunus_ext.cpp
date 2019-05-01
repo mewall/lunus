@@ -302,6 +302,46 @@ namespace lunus {
 	exit(1);
       }    
     }
+
+    inline void write_as_hkl(std::string fname) {
+      FILE *f;
+      if ((f = fopen(fname.c_str(),"wb")) == NULL) {
+	perror("write_as_hkl: Can't open output file\n");
+	exit(1);
+      }
+      lat->outfile = f;
+      if (lwritehkl(lat) != 0) {
+	perror("write_as_hkl: Couldn't write file\n");
+	exit(1);
+      }    
+    }
+
+    inline void write_as_cube(std::string fname) {
+      FILE *f;
+      if ((f = fopen(fname.c_str(),"wb")) == NULL) {
+	perror("write_as_cube: Can't open output file\n");
+	exit(1);
+      }
+      lat->outfile = f;
+      if (lwritecube(lat) != 0) {
+	perror("write_as_cube: Couldn't write file\n");
+	exit(1);
+      }    
+    }
+
+    inline void write_as_lat(std::string fname) {
+      FILE *f;
+      if ((f = fopen(fname.c_str(),"wb")) == NULL) {
+	perror("write_as_lat: Can't open output file\n");
+	exit(1);
+      }
+      lat->outfile = f;
+      if (lwritelt(lat) != 0) {
+	perror("write_as_lat: Couldn't write file\n");
+	exit(1);
+      }    
+    }
+
   };
 
   class LunusDIFFIMAGE {
@@ -670,6 +710,9 @@ namespace boost_python { namespace {
       .def("get_counts",&lunus::Process::get_counts)
       .def("divide_by_counts",&lunus::Process::divide_by_counts)
       .def("write_as_vtk",&lunus::Process::write_as_vtk)
+      .def("write_as_hkl",&lunus::Process::write_as_hkl)
+      .def("write_as_cube",&lunus::Process::write_as_cube)
+      .def("write_as_lat",&lunus::Process::write_as_lat)
       .def("set_lattice",&lunus::Process::set_lattice)
       .def("LunusSetparamslt",&lunus::Process::LunusSetparamslt)
       .def("set_amatrix",&lunus::Process::set_amatrix)

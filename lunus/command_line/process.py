@@ -7,7 +7,43 @@ import numpy as np
 import glob, subprocess, shlex
 import lunus
 
-def process_one():
+def get_experiment_params(experiments):
+
+  beam = experiments[0].beam
+  detector = experiments[0].detector
+
+  for panel in detector: 
+    pixel_size_mm = panel.get_pixel_size()[0]
+    beam_mm_x = panel.get_beam_centre(beam.get_s0())[0]
+    beam_mm_y = panel.get_beam_centre(beam.get_s0())[1]
+    distance_mm = panel.get_distance()
+
+  experiment_params = "\npixel_size_mm={0}\nbeam_mm_x={1}\nbeam_mm_y={2}\ndistance_mm={3}\n".format(pixel_size_mm,beam_mm_x,beam_mm_y,distance_mm)
+
+  return(experiment_params)
+
+def get_experiment_xvectors(experiments):
+
+  beam = experiments[0].beam
+  detector = experiments[0].detector
+
+  lab_coordinates = flex.vec3_double()
+
+  for panel in detector: 
+    pixels = flex.vec2_double(panel.get_image_size())
+    mms = panel.pixel_to_millimeter(pixels)
+    lab_coordinates.extend(panel.get_lab_coord(mms))
+
+    # generate s1 vectors
+  s1 = lab_coordinates.each_normalize() * (1/beam.get_wavelength())
+    # Generate x vectors
+  x = (s1 - beam.get_s0()).as_double()
+
+  return(x)
+
+def process_one_glob():
+
+    global fresh_lattice
 
     from dxtbx.imageset import ImageSetFactory
     from dxtbx.model.experiment_list import Experiment, ExperimentList
@@ -39,21 +75,20 @@ def process_one():
 
       p.set_image(data)
       
-      if (subtract_background_images):
+      if (subtract_background_images==True):
         if (len(bkglist) != 1):
           bkg = dxtbx.load(bkglist[i])
           bkg_data = bkg.get_raw_data()
         p.set_background(bkg_data)
         p.LunusBkgsubim()
 
-      detector = img.get_detector()
-      beam = img.get_beam()
       scan = img.get_scan()
+      start_angle, delta_angle = scan.get_oscillation()      
+
       gonio = img.get_goniometer()
+      axis = gonio.get_rotation_axis()
 
       crystal = copy.deepcopy(experiments.crystals()[0])
-      axis = gonio.get_rotation_axis()
-      start_angle, delta_angle = scan.get_oscillation()      
       crystal.rotate_around_origin(axis, start_angle + (delta_angle/2), deg=True)
 
       from scitbx import matrix
@@ -63,10 +98,11 @@ def process_one():
 
       p.set_amatrix(At_flex)
 
-      if (i == 0):
+      if (fresh_lattice==True):
         p.set_xvectors(x)
         p.set_image_ref()
         p.LunusProcimlt(0)
+        fresh_lattice = False
 
       p.LunusProcimlt(1)
 
@@ -81,10 +117,6 @@ if __name__=="__main__":
   usage = ["experiments=<experiments.json file, for metrology info>",
            "images=<glob for images, used for rotation series>"]
 
- # Read command line arguments
-
-  subtract_background_images=False
-
  # Output .vtk file
   try:
     idx = [a.find("vtk")==0 for a in args].index(True)
@@ -92,6 +124,31 @@ if __name__=="__main__":
     vtk_file = "diffuse.vtk"
   else:
     vtk_file = args.pop(idx).split("=")[1]
+
+ # Output .hkl file
+  try:
+    idx = [a.find("hkl")==0 for a in args].index(True)
+  except ValueError:
+    hkl_file = "diffuse.hkl"
+  else:
+    hkl_file = args.pop(idx).split("=")[1]
+
+ # Output .cube file
+  try:
+    idx = [a.find("cube")==0 for a in args].index(True)
+  except ValueError:
+    cube_file = None
+  else:
+    cube_file = args.pop(idx).split("=")[1]
+
+ # Output .lat file
+  try:
+    idx = [a.find("lat")==0 for a in args].index(True)
+  except ValueError:
+    lat_file = "diffuse.lat"
+  else:
+    lat_file = args.pop(idx).split("=")[1]
+
  # Input lunus input deck
   try:
     idx = [a.find("params")==0 for a in args].index(True)
@@ -158,44 +215,50 @@ if __name__=="__main__":
   from dxtbx.model.experiment_list import ExperimentListFactory
   from dials.array_family import flex
 
-  experiments = ExperimentListFactory.from_json_file(metro, check_format=False)
-  beam = experiments[0].beam
-  detector = experiments[0].detector
-
-  lab_coordinates = flex.vec3_double()
-  for panel in detector: 
-    pixels = flex.vec2_double(panel.get_image_size())
-    mms = panel.pixel_to_millimeter(pixels)
-    lab_coordinates.extend(panel.get_lab_coord(mms))
-    pixel_size_mm = panel.get_pixel_size()[0]
-    beam_mm_x = panel.get_beam_centre(beam.get_s0())[0]
-    beam_mm_y = panel.get_beam_centre(beam.get_s0())[1]
-    distance_mm = panel.get_distance()
+  p = lunus.Process()
 
   with open(deck_file) as f:
     deck = f.read()
 
-  extra_params = "\npixel_size_mm={0}\nbeam_mm_x={1}\nbeam_mm_y={2}\ndistance_mm={3}\n".format(pixel_size_mm,beam_mm_x,beam_mm_y,distance_mm)
+  experiments = ExperimentListFactory.from_json_file(metro, check_format=False)
+  experiment_params = get_experiment_params(experiments)
 
-  deck += extra_params
+  deck_and_extras = deck+experiment_params
 
-  p = lunus.Process()
+  p.LunusSetparamslt(deck_and_extras)
 
-  p.LunusSetparamslt(deck)
-  p.LunusSetparamsim(deck)
-
-    # generate s1 vectors
-  s1 = lab_coordinates.each_normalize() * (1/beam.get_wavelength())
-    # Generate x vectors
-  x = (s1 - beam.get_s0()).as_double()
+  fresh_lattice = True
 
   if rotation_series:
     for i in range(len(metro_list)):
+
+      print "Image set ",i+1,":",
+
       metro = metro_list[i]
+
+      experiments = ExperimentListFactory.from_json_file(metro, check_format=False)
+      experiment_params = get_experiment_params(experiments)
+      x = get_experiment_xvectors(experiments)
+
+      deck_and_extras = deck+experiment_params
+
+      p.LunusSetparamsim(deck_and_extras)
+
       image_glob = image_glob_list[i]
-      bkg_glob = bkg_glob_list[i]
-      process_one()
+      if (subtract_background_images):
+        bkg_glob = bkg_glob_list[i]
+
+      process_one_glob()
     
     p.divide_by_counts()
-    p.write_as_vtk(vtk_file)
+
+    if (not vtk_file is None):
+        p.write_as_vtk(vtk_file)
+    if (not hkl_file is None):
+        p.write_as_hkl(hkl_file)
+    if (not cube_file is None):
+        p.write_as_vtk(cube_file)
+    if (not lat_file is None):
+        p.write_as_lat(lat_file)
+    
 

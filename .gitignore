@@ -5,3 +5,5 @@
 .adxv_beam_center
 tmp*
 !tmpdir_common
+\#SConscript\#
+c/src/.\#*
