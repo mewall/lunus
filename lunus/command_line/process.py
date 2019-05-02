@@ -162,7 +162,7 @@ if __name__=="__main__":
   metro_list = []
   while keep_going:
     try:
-      metroidx = [a.find("experiments")==0 for a in args].index(True)
+      metroidx = [(a.find("metrology")==0 or (a.find("experiments")==0)) for a in args].index(True)
     except ValueError:
       keep_going = False
     else:
@@ -178,7 +178,7 @@ if __name__=="__main__":
   rotation_series = False
   while (keep_going):
     try:
-      imageglobidx = [a.find("images")==0 for a in args].index(True)
+      imageglobidx = [(a.find("image_glob")==0 or (a.find("images")==0)) for a in args].index(True)
     except ValueError:
       keep_going = False
     else:
@@ -195,7 +195,7 @@ if __name__=="__main__":
   subtract_background_images = False
   while (keep_going):
     try:
-      bkgglobidx = [a.find("backgrounds")==0 for a in args].index(True)
+      bkgglobidx = [(a.find("bkg_glob")==0 or (a.find("backgrounds")==0)) for a in args].index(True)
     except ValueError:
       keep_going = False
     else:
