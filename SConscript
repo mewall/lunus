@@ -29,7 +29,7 @@ env_etc.lunus_common_includes = [
 CPPP = os.path.join(env_etc.lunus_include,"c","include")
 #print "INCLUDE_PATH-->",CPPP
 
-#env = env_base.Clone(
+#env = env_base.Clone()
 #  SHLINKFLAGS=env_etc.shlinkflags)
 
 env_lunus = env_base.Clone()
