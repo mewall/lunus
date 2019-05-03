@@ -352,6 +352,7 @@ int main(int argc, char *argv[])
      * Read diffraction image:
      */
 	  
+    printf("%s\n",imagelist[i-1]);
     if ( (imagein = fopen(imagelist[i-1],"rb")) == NULL ) {
       printf("Can't open %s.",imagelist[i-1]);
       exit(0);

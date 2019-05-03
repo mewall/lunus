@@ -14,19 +14,19 @@ if __name__=="__main__":
 
  # Read command line arguments
 
-  output_format="binary"
+  output_format="json"
   add_background_images=False
 
  # Input json
   try:
-    metroidx = [a.find("metrology")==0 for a in args].index(True)
+    metroidx = [(a.find("metrology")==0 or (a.find("experiments")==0)) for a in args].index(True)
   except ValueError:
     raise ValueError,"Metrology .json file must be specified using metrology=."
   else:
     metro = args.pop(metroidx).split("=")[1]
  # Image input glob
   try:
-    imageglobidx = [a.find("image_glob")==0 for a in args].index(True)
+    imageglobidx = [(a.find("image_glob")==0 or (a.find("images")==0)) for a in args].index(True)
   except ValueError:
     rotation_series = False
   else:
@@ -34,7 +34,7 @@ if __name__=="__main__":
     rotation_series = True
  # Background image input glob
   try:
-    bkgglobidx = [a.find("bkg_glob")==0 for a in args].index(True)
+    bkgglobidx = [(a.find("bkg_glob")==0 or (a.find("backgrounds")==0)) for a in args].index(True)
   except ValueError:
     add_background_images = False
   else:
@@ -97,6 +97,7 @@ if __name__=="__main__":
   s1 = lab_coordinates.each_normalize() * (1/beam.get_wavelength())
     # Generate x vectors
   x = np.asarray(s1 - beam.get_s0())
+#  x = (s1 - beam.get_s0()).as_double()
     
   DATAsize = np.asarray(detector[0].get_image_size())
 
@@ -126,6 +127,7 @@ if __name__=="__main__":
     if (add_background_images==True):
       bkglist=glob.glob(bkg_glob)
       bkglist.sort()
+      bkgname=bkglist[0]
     for i in range(len(filelist)):
       imgname=filelist[i]
       img = dxtbx.load(imgname)
@@ -150,8 +152,9 @@ if __name__=="__main__":
                                    scan=scan,
                                    crystal=crystal))
         if (add_background_images==True):
-          bkgname=bkglist[i]
-          exp_list[0].imageset.external_lookup.pedestal.filename=os.path.abspath(bkgname)
+          if (len(bkglist) != 1):
+            bkgname=bkglist[i]
+            exp_list[0].imageset.external_lookup.pedestal.filename=os.path.abspath(bkgname)
         dump.experiment_list(exp_list,json_dir+"/experiments_for_lunus_{0:05d}.json".format(imnum))
       else:
         from scitbx import matrix
