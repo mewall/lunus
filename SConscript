@@ -34,9 +34,9 @@ CPPP = os.path.join(env_etc.lunus_include,"c","include")
 
 env_lunus = env_base.Clone()
 
-env_lunus.Prepend(CCFLAGS=["-DUSE_OPENMP","-I/opt/local/include/libomp"])
+env_lunus.Prepend(CCFLAGS=["-DUSE_OPENMP","-I/opt/local/include/libomp","-Xpreprocessor","-fopenmp"])
 env_lunus.Prepend(LIBS=["gomp"])
-env_lunus.Prepend(LIBPATH=["/opt/local/lib/gcc7"])
+env_lunus.Prepend(LIBPATH=["/opt/local/lib/libomp"])
 
 #env_etc.include_registry.append(
 #  env=env_lunus,
