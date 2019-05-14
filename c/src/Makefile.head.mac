@@ -1,21 +1,18 @@
+# This Makefile.head assumes the following ports are installed on their mac:
+#  gcc7 (or equivalent)
+#  fftw-3-single
 VPATH=${C_HOME}/src:${C_HOME}/lib:${C_HOME}/bin:${C_HOME}/include
-#CC=gcc-mp-4.8
-#CC=gcc-mp-5
-CC=gcc
-#CC=cc
-FFTWROOT=/Users/mewall/packages/fftw-3.3.4/inst_dir
-FFTW_DIR=${FFTWROOT}/lib
-FFTW_INC=${FFTWROOT}/include
-#CFLAGS= -g -fopenmp -DUSE_FFTW -DUSE_OPENMP -L${FFTW_DIR} -I${FFTW_INC} -L${C_HOME}/lib -I${C_HOME}/include
-CFLAGS= -g -DUSE_FFTW -L${FFTW_DIR} -I${FFTW_INC} -L${C_HOME}/lib -I${C_HOME}/include
-#CFLAGS= -g -O2 -axcore-avx2,mic-avx512 -qopenmp -DUSE_OPENMP -L${C_HOME}/lib -I${C_HOME}/include
-#CFLAGS= -g -O2 -axcore-avx2,mic-avx512 -L${C_HOME}/lib -I${C_HOME}/include
-#CFLAGS= -g -w -L${C_HOME}/lib -I${C_HOME}/include
+MACPORTS_ROOT=/opt/local
+MACPORTS_INC=${MACPORTS_ROOT}/include
+MACPORTS_LIB=${MACPORTS_ROOT}/lib
+MACPORTS_INC_OMP=${MACPORTS_INC}/libomp
+MACPORTS_LIB_OMP=${MACPORTS_LIB}/libomp
+CC=clang
+CFLAGS= -g -Xpreprocessor -fopenmp -DUSE_OPENMP -DUSE_FFTW -I${C_HOME}/include -I${MACPORTS_INC} -I${MACPORTS_INC_OMP}
 AR=ar
 ARFLAGS=-r
 SHELL=/bin/csh
-LIBS=-lmw -lfftw3f -lm
-#LIBS=-lmw 
+LIBS=-L${C_HOME}/lib -L${MACPORTS_LIB} -L${MACPORTS_LIB_OMP} -lmw -lfftw3f -lm -lgomp
 DEPENDS=mwmask.h libmw.a
 S=${C_HOME}/src
 B=${C_HOME}/bin
