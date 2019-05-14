@@ -1,6 +1,7 @@
 Import("env")
 env = env.Clone()
-env.Prepend(LIBS=["lunus"])
+env.Prepend(LIBS=["lunus","gomp"])
+env.Prepend(LIBPATH=["/opt/local/lib/gcc7"])
 
 env.SharedLibrary(
   target="#lib/lunus_ext",

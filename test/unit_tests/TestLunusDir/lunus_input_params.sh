@@ -1,10 +1,10 @@
 #json input file list
 jsonlist_name=jsonlist.inp
 # integration
-xvectors_path=/projects/lunus/packages/dials_psana/modules/lunus/test/unit_tests/TestLunusDir/raw/tmpdir_common/xvectors.bin
-diffuse_lattice_dir=/projects/lunus/packages/dials_psana/modules/lunus/test/unit_tests/TestLunusDir/lattices
+xvectors_path=/Users/mewall/packages/phenix-installer-1.15.2-3472-source/modules/lunus/test/unit_tests/TestLunusDir/raw/tmpdir_common/xvectors.bin
+diffuse_lattice_dir=/Users/mewall/packages/phenix-installer-1.15.2-3472-source/modules/lunus/test/unit_tests/TestLunusDir/lattices
 diffuse_lattice_prefix=TestLunus
-lunus_image_dir=/projects/lunus/packages/dials_psana/modules/lunus/test/unit_tests/TestLunusDir/proc
+lunus_image_dir=/Users/mewall/packages/phenix-installer-1.15.2-3472-source/modules/lunus/test/unit_tests/TestLunusDir/proc
 resolution=1.6
 points_per_hkl=1
 overall_scale_factor=1.
