@@ -6,7 +6,7 @@ from iotbx.pdb import hierarchy
 
 fiter = 0
 
-def calc_corr(x):
+def calc_corr_llm(x):
     global fiter
     fiter = fiter + 1
     if (x[0]>0 and x[1]>0):
@@ -37,6 +37,40 @@ def calc_corr(x):
     else:
         clist = [0,0]
     print "Function iteration = ",fiter,", (gamma,sigma) = (",x[0],",",x[1],"), overall correlation = ",clist[0],", anisotropic correlation (target) = ",clist[1]
+    sys.stdout.flush()
+    return -float(clist[1])
+
+def calc_corr_rbt(x):
+    global fiter
+    fiter = fiter + 1
+    if (x[0]>0):
+
+        command = 'rbtlt Icalc_sym.lat tmp.lat {0} {1}'.format(cell_str,x[0])
+        call_params = shlex.split(command)
+        subprocess.call(call_params)
+
+        command = 'symlt tmp.lat tmp_sym.lat {0}'.format(symop)
+        call_params = shlex.split(command)
+        subprocess.call(call_params)
+
+        command = 'anisolt tmp_sym.lat tmp_sym_aniso.lat {0}'.format(cell_str)
+        print command
+        call_params = shlex.split(command)
+        subprocess.call(call_params)
+
+        f = open("this_correl.txt","w")
+        command = 'corrlt tmp_sym_aniso.lat {0}'.format(data_file)
+        print command
+        call_params = shlex.split(command)
+        subprocess.call(call_params,stdout=f)
+        f.close()
+
+        f = open("this_correl.txt")
+        clist = [0.0,f.read().splitlines()[-1]]
+        f.close()
+    else:
+        clist = [0,0]
+    print "Function iteration = ",fiter,", (sigma) = (",x[0],"), overall correlation = ",clist[0],", anisotropic correlation (target) = ",clist[1]
     sys.stdout.flush()
     return -float(clist[1])
 
@@ -82,6 +116,15 @@ if __name__=="__main__":
     else:
         data_file = args.pop(idx).split("=")[1]
 
+# Input model type
+
+    try:
+        idx = [a.find("model")==0 for a in args].index(True)
+    except ValueError:
+        model_type = "llm"
+    else:
+        model_type = args.pop(idx).split("=")[1]
+
 # Input symmetry operation for symlt
 
     try:
@@ -119,7 +162,7 @@ if __name__=="__main__":
     call_params = shlex.split(command)
     subprocess.call(call_params)
 
-    command = 'symlt tmp.lat Icalc_sym.lat 0'
+    command = 'symlt tmp.lat Icalc_sym.lat {0}'.format(symop)
     call_params = shlex.split(command)
     subprocess.call(call_params)
 
@@ -129,8 +172,16 @@ if __name__=="__main__":
 
 # Refine the llm model
 
-    x0 = [5.,0.36]
-    res = scipy.optimize.minimize(calc_corr,x0,method='Powell',jac=None,options={'disp': True,'maxiter': 10000})
-    gamma = res.x[0]
-    sigma = res.x[1]
-    print "Refined gamma = ",gamma,", sigma = ",sigma
+    if (model_type == "llm"):
+
+        x0 = [5.,0.36]
+        res = scipy.optimize.minimize(calc_corr_llm,x0,method='Powell',jac=None,options={'disp': True,'maxiter': 10000})
+        gamma = res.x[0]
+        sigma = res.x[1]
+        print "Refined gamma = ",gamma,", sigma = ",sigma
+
+    if (model_type == "rbt"):
+        x0 = [0.36]
+        res = scipy.optimize.minimize(calc_corr_rbt,x0,method='Powell',jac=None,options={'disp': True,'maxiter': 10000})
+        sigma = res.x
+        print "Refined sigma = ",sigma
