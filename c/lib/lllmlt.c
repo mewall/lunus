@@ -129,6 +129,9 @@ int lllmlt(LAT3D *lat)
   fftwf_free(gamma_t);
   CloseShop:
   return(return_value);
+#else
+  perror("LLMLT: Unable to calculate liquid-like motions model. \n  Must build using FFTW with CFLAGS += -DUSE_FFTW\n");
+  exit(1);
 #endif
 }
 
