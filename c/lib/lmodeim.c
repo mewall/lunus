@@ -17,7 +17,7 @@
 #include<omp.h>
 #endif
 
-int lmodeim(DIFFIMAGE *imdiff) 
+int lmodeim(DIFFIMAGE *imdiff_in) 
 {
   
   RCCOORDS_DATA 
@@ -29,7 +29,7 @@ int lmodeim(DIFFIMAGE *imdiff)
     c; 
 
   size_t
-     avg_max_count_count = 0,
+    avg_max_count_count = 0,
     num_max_count_1 = 0,
     index = 0; 
   
@@ -43,8 +43,18 @@ int lmodeim(DIFFIMAGE *imdiff)
     return_value = 0;
 
   int
+    pidx,
     nt;
   
+  DIFFIMAGE *imdiff;
+
+  for (pidx = 0; pidx < imdiff_in->num_panels; pidx++) {
+    imdiff = &imdiff_in[pidx];
+    if (pidx != imdiff->this_panel) {
+      perror("LMODEIM: Image panels are not indexed sequentially\n");
+      exit(1);
+    }
+
   /* 
    * Allocate working image: 
    */ 
@@ -90,7 +100,7 @@ int lmodeim(DIFFIMAGE *imdiff)
       size_t k;
       size_t index;
       index = j*imdiff->hpixels+i;
-      if (imdiff->image[index] != imdiff->ignore_tag && imdiff->image[index]) {
+      if (imdiff->image[index] != imdiff->ignore_tag && imdiff->image[index] != imdiff->overload_tag) {
 	for(n=-half_height; n<=half_height; n++) {
 	  r = j + n;
 	  for(m=-half_width; m<=half_width; m++) {
@@ -160,6 +170,8 @@ int lmodeim(DIFFIMAGE *imdiff)
   //avg_max_count /= (float)avg_max_count_count;
   //  printf("avg_max_count,num_max_count_1 = %f,%d\n\n",avg_max_count,num_max_count_1);/***/
   free((IMAGE_DATA_TYPE *)image);/***/
+  } // for(pidx)
+
   CloseShop:
   return(return_value);
 }

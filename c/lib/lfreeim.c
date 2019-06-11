@@ -18,17 +18,19 @@ int lfreeim(DIFFIMAGE *imdiff)
   /*
    * Free diffraction image:
    */
-  
-  free((RFILE_DATA_TYPE *)imdiff->rfile);
-  free((RFILE_DATA_TYPE *)imdiff->imscaler);
-  free((RFILE_DATA_TYPE *)imdiff->imoffsetr);
-  free((struct rccoords *)imdiff->mask);
-  free((IMAGE_DATA_TYPE *)imdiff->image);
-  free(imdiff->correction);
-  free((char *)imdiff->header);
-  free(imdiff->footer);
-  free((struct rccorrds *)imdiff->overload);
-  free((struct xycoords *)imdiff->peak);
-  free((WEIGHTS_DATA_TYPE *)imdiff->weights);
+
+  for (i=0; i<imdiff->num_panels; i++) {
+    if (imdiff[i].rfile != NULL) free((RFILE_DATA_TYPE *)imdiff->rfile);
+    if (imdiff[i].imscaler != NULL) free((RFILE_DATA_TYPE *)imdiff->imscaler);
+    if (imdiff[i].imoffsetr != NULL) free((RFILE_DATA_TYPE *)imdiff->imoffsetr);
+    if (imdiff[i].mask != NULL) free((struct rccoords *)imdiff->mask);
+    if (imdiff[i].image != NULL) free((IMAGE_DATA_TYPE *)imdiff->image);
+    if (imdiff[i].correction != NULL) free(imdiff->correction);
+    if (imdiff[i].header != NULL) free((char *)imdiff->header);
+    if (imdiff[i].footer != NULL) free(imdiff->footer);
+    if (imdiff[i].overload != NULL) free((struct rccorrds *)imdiff->overload);
+    if (imdiff[i].peak != NULL) free((struct xycoords *)imdiff->peak);
+    if (imdiff[i].weights != NULL) free((WEIGHTS_DATA_TYPE *)imdiff->weights);
+  }
   free((DIFFIMAGE *)imdiff);
 }

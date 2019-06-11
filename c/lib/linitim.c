@@ -28,6 +28,8 @@ DIFFIMAGE *linitim(void)
   }
   
   
+  imdiff->num_panels = DEFAULT_NUM_PANELS;
+  imdiff->this_panel = 0;
   imdiff->big_endian = DOS_BYTE_ORDER;
   imdiff->vpixels = DEFAULT_VSIZE;
   imdiff->hpixels = DEFAULT_HSIZE;

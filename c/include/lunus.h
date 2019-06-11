@@ -69,6 +69,7 @@
 #define MAX_PEAKS 20000			/* Max # of peaks in an image */
 #define MAX_IMAGE_DATA_VALUE 32767	/* Maximum value of pixel in image */
 #define DEFAULT_IMAGE_ORIGIN 512	/* Default x and y for image origin */
+#define DEFAULT_NUM_PANELS 1           /* Number of panels in image */
 
 /*
  * Lattice specifications:
@@ -443,6 +444,8 @@ typedef struct
   FILE *infile;
   FILE *outfile;
   char *params;                 /* String to set parameters (e.g., input deck) */
+  int num_panels;               /* number of panels in image */
+  int this_panel;               /* index of this panel */
   char format[10];              /* Image format */
   char *header;		        /* Image header */
   size_t header_length;	        /* Length of image header (4096 default) */
