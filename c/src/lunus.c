@@ -23,6 +23,7 @@ int lsetprocmodelt(LAT3D *lat,const int mode)
     perror("Mode must be 0 or 1\n");
     exit(1);
   }
+  return(0);
 }
 
 int main(int argc, char *argv[])
@@ -260,7 +261,7 @@ int main(int argc, char *argv[])
 	// Read amatrix
 	    
 	if ((readAmatrix(&at[i],amatrix_format,i+1) == -1)) {
-	  printf("Missing amatrix file %s. Skipping frame %d.\n",amatrix_path,i);
+	  printf("Missing amatrix file %s. Skipping frame %ld.\n",amatrix_path,i);
 	} else {
 	      
 	      
@@ -383,7 +384,7 @@ int main(int argc, char *argv[])
     if (strlen(bkglist[i-1]) > 0) {
 
 #ifdef DEBUG
-      printf("Matched pair:%s,%s\n",imagelist[i-1],bkglist[i-1]);
+      //            printf("Matched pair:%s,%s\n",imagelist[i-1],bkglist[i-1]);
 #endif
       needs_bkgsub = 1;
       if ( (imagein = fopen(bkglist[i-1],"rb")) == NULL ) {
@@ -420,9 +421,10 @@ int main(int argc, char *argv[])
 #ifdef DEBUG		
 	printf("SAMPLES\n");
 	for (j=50000;j<50010;j++) {
-	  printf("(%f, %f, %f): %d\n",xvectors_cctbx[j].x,xvectors_cctbx[j].y,xvectors_cctbx[j].z, imdiff_corrected->image[j]);
+	  printf("xvectors_cctbx: (%f, %f, %f)\n",xvectors_cctbx[j].x,xvectors_cctbx[j].y,xvectors_cctbx[j].z);
 	}
 	printf("\n");
+	
 #endif		
 	// Reorder the xvectors (transpose)
 

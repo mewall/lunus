@@ -57,6 +57,7 @@ int lprocimlt(LAT3D *lat)
     lcloneim(imdiff_scale_ref,imdiff_scale);
 
 #ifdef DEBUG
+    int j;
     int num_nz=0;
     size_t num_ign = 0;
     float sum_vals = 0.0;
@@ -153,7 +154,7 @@ int lprocimlt(LAT3D *lat)
 
 #ifdef DEBUG
     if (j<10) {
-      printf("Image %d, H[%d] = (%f, %f, %f)\n",i,j,H.x,H.y,H.z);
+      printf("Image H[%d] = (%f, %f, %f)\n",j,H.x,H.y,H.z);
     }
 #endif
 
