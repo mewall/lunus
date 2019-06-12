@@ -814,7 +814,7 @@ char * lgettag(const char *target,const char *tag);
 float lgettagf(const char *target,const char *tag);
 int lgettagi(const char *target,const char *tag);
 struct ijkcoords lindexFromS(LAT3D *lat);
-DIFFIMAGE *linitim(void);
+DIFFIMAGE *linitim(size_t n);
 LAT3D *linitlt(void);
 CCP4MAP *linitmap(void);
 void linitMPI(MPIVARS *mpiv);

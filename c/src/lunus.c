@@ -324,7 +324,7 @@ int main(int argc, char *argv[])
    */
 
 
-  if ((imdiff = linitim()) == NULL) {
+  if ((imdiff = linitim(1)) == NULL) {
     perror("Couldn't initialize diffraction image.\n\n");
     exit(0);
   }
@@ -391,7 +391,7 @@ int main(int argc, char *argv[])
 	printf("Can't open %s.",bkglist[i-1]);
 	exit(0);
       }
-      imdiff_bkg = linitim();
+      imdiff_bkg = linitim(1);
       imdiff_bkg->infile = imagein;
       if (lreadim(imdiff_bkg) != 0) {
 	perror(imdiff_bkg->error_msg);
@@ -468,7 +468,7 @@ int main(int argc, char *argv[])
 
       DIFFIMAGE *imdiff_ref;
 
-      imdiff_ref = linitim();
+      imdiff_ref = linitim(1);
       lcloneim(imdiff_ref,imdiff);
 
       lbarrierMPI(imdiff->mpiv);
