@@ -21,7 +21,7 @@ DIFFIMAGE *linitim(size_t n)
   DIFFIMAGE *imdiff, *imdiff_list;
 
   imdiff_list = (DIFFIMAGE *)malloc(sizeof(DIFFIMAGE)*n);
-  if ((!imdiff)) {
+  if ((!imdiff_list)) {
     printf("\nLINITIM:  Unable to allocate all memory (imdiff).\n");
     imdiff = NULL;
     goto CloseShop;
