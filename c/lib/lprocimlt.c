@@ -150,7 +150,7 @@ int lprocimlt(LAT3D *lat)
   k0 = (IJKCOORDS_DATA)(lat->zvoxels/2. - 1.);
   
   for (j=0; j<imdiff->image_length; j++) {
-    H = lmatvecmul(imdiff->amatrix, imdiff->xvectors[j]);
+    H = lmatvecmul(imdiff->amatrix, imdiff->slist[j]);
 
 #ifdef DEBUG
     if (j<10) {

@@ -418,14 +418,6 @@ int main(int argc, char *argv[])
 	  exit(1);
 	  }
 	*/
-#ifdef DEBUG		
-	printf("SAMPLES\n");
-	for (j=50000;j<50010;j++) {
-	  printf("xvectors_cctbx: (%f, %f, %f)\n",xvectors_cctbx[j].x,xvectors_cctbx[j].y,xvectors_cctbx[j].z);
-	}
-	printf("\n");
-	
-#endif		
 	// Reorder the xvectors (transpose)
 
 	index = 0;
@@ -452,6 +444,16 @@ int main(int argc, char *argv[])
 	}
       }
 
+#ifdef DEBUG		
+      if (imdiff->mpiv->my_id == 0) {
+	printf("SAMPLES\n");
+	for (j=50000;j<50010;j++) {
+	  printf("xvectors[%d]: (%f, %f, %f)\n",j,xvectors[j].x,xvectors[j].y,xvectors[j].z);
+	}
+	printf("\n");
+      }
+#endif		
+
       // Broadcast the xvectors to other ranks
       lbcastBufMPI((void *)&num_read,sizeof(size_t),0,imdiff->mpiv);
       if (imdiff->mpiv->my_id != 0) {
@@ -460,7 +462,7 @@ int main(int argc, char *argv[])
       }
       lbcastBufMPI((void *)xvectors,num_read,0,imdiff->mpiv);
 
-      imdiff->xvectors = xvectors;
+      imdiff->slist = xvectors;
 
       // First broadcast the reference image to all ranks
 

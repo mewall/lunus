@@ -76,7 +76,7 @@ DIFFIMAGE *linitim(void)
   imdiff->value_offset = DEFAULT_VALUE_OFFSET;
   imdiff->correction_factor_scale = 1.0;
   imdiff->background_subtraction_factor = 1.0;
-  imdiff->xvectors = NULL;
+  imdiff->slist = NULL;
   imdiff->mpiv = NULL;
   imdiff->params = NULL;
 

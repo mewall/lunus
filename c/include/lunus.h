@@ -521,7 +521,7 @@ typedef struct
   float *correction;             /* Correction factor, pixel by pixel */
   float correction_factor_scale; /* Overall scale factor for correction */
   float background_subtraction_factor;/* Multiplicative factor for lbkgsubim() */
-  struct xyzcoords *xvectors;   /* lab coordinates corresponding to each pixel in the image */
+  struct xyzcoords *slist;   /* scattering vectors for each pixel in the image */
   struct xyzmatrix amatrix;     /* A matrix for mapping lab coords to reciprocal space coords */
   MPIVARS *mpiv;
 } DIFFIMAGE;
@@ -912,6 +912,7 @@ int lsumim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lsumlt(LAT3D *lat1, LAT3D *lat2);
 int lsummap(CCP4MAP *map1, CCP4MAP *map2);
 int lsumrf(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
+int lslistim(DIFFIMAGE *imdiff_in);
 int lsymlt(LAT3D *lat);
 int lsymminlt(LAT3D *lat);
 int ltagim(DIFFIMAGE *imdiff);
