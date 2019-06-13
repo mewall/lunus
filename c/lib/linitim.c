@@ -18,7 +18,7 @@ DIFFIMAGE *linitim(size_t n)
    * Allocate memory:
    */
   
-  DIFFIMAGE *imdiff, *imdiff_list;
+  DIFFIMAGE *imdiff = NULL, *imdiff_list = NULL;
 
   imdiff_list = (DIFFIMAGE *)malloc(sizeof(DIFFIMAGE)*n);
   if ((!imdiff_list)) {

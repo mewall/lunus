@@ -27,13 +27,7 @@ int lprocimlt(LAT3D *lat)
 
   // Initialize other images
 
-  // *** The program appears to fail to honor the static declaration of the above diffimages without the following dummy variable being declared first. I.e. the pointers are NULL upon return. Weird!
-
-  int dummy;
-
-  //  printf("Allocating imdiff lists length %d\n",imdiff_list->num_panels);
   if (imdiff_corrected_list == NULL) {
-
     imdiff_corrected_list = linitim(imdiff_list->num_panels);
   }
   if (imdiff_scale_list == NULL) {
