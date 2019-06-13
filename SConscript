@@ -28,6 +28,12 @@ CPPP = os.path.join(env_etc.lunus_include,"c","include")
 
 env_lunus = env_base.Clone(SHLINKFLAGS=env_etc.shlinkflags)
 
+replacement_ccflags = []
+for f in env_lunus["CCFLAGS"]:
+ if (f not in ["-ffast-math"]):
+   replacement_ccflags.append(f)
+env_lunus.Replace(CCFLAGS = replacement_ccflags)
+
 env_lunus.Prepend(CCFLAGS=["-DUSE_OPENMP","-I/opt/local/include/libomp","-Xpreprocessor","-fopenmp"])
 env_lunus.Prepend(LIBS=["gomp"])
 env_lunus.Prepend(LIBPATH=["/opt/local/lib/libomp"])
