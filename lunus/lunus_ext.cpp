@@ -34,9 +34,9 @@ namespace lunus {
 
   public:
     inline Process() {
-      imdiff = linitim();
-      imdiff_ref = linitim();
-      imdiff_bkg = linitim();
+      imdiff = linitim(1);
+      imdiff_ref = linitim(1);
+      imdiff_bkg = linitim(1);
       lat = linitlt();
     }
 
@@ -248,8 +248,8 @@ namespace lunus {
 
       struct xyzcoords *xvectors_cctbx = (struct xyzcoords *)malloc(size*sizeof(struct xyzcoords));
 
-      if (imdiff->xvectors == NULL) free(imdiff->xvectors);
-      imdiff->xvectors = (struct xyzcoords *)malloc(size*sizeof(float));
+      if (imdiff->slist == NULL) free(imdiff->slist);
+      imdiff->slist = (struct xyzcoords *)malloc(size*sizeof(float));
 
       if (imdiff->image_length != size/3) {
 	perror("set_xvectors: image length differs from size of xvectors. aborting.\n");
@@ -268,7 +268,7 @@ namespace lunus {
       size_t index = 0;
       for (std::size_t j = 0; j < imdiff->vpixels; j++) {
 	for (std::size_t i = 0; i < imdiff->hpixels; i++) {
-	  imdiff->xvectors[index] = xvectors_cctbx[i*imdiff->vpixels + j];
+	  imdiff->slist[index] = xvectors_cctbx[i*imdiff->vpixels + j];
 	  index++;
 	}
       }
@@ -351,7 +351,7 @@ namespace lunus {
   public:
     inline  LunusDIFFIMAGE() {
       printf("in default XXX constr.\n");
-      imdiff = linitim();
+      imdiff = linitim(1);
     }
 
     inline ~LunusDIFFIMAGE() {
@@ -496,7 +496,7 @@ namespace lunus {
       //      if (imdiff_ref != NULL) {
       //	lfreeim(imdiff_ref);
       //      }
-      imdiff_ref = linitim();
+      imdiff_ref = linitim(1);
       imdiff_ref->image_length = imdiff->image_length;
       imdiff_ref->hpixels = imdiff->hpixels;
       imdiff_ref->vpixels = imdiff->vpixels;
