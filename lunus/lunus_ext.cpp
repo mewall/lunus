@@ -212,10 +212,10 @@ namespace lunus {
       for (std::size_t i = 0; i < lat->lattice_length; i++) {
 	if (lat->latct[i] != 0) {
 	  lat->lattice[i] /= (float)lat->latct[i];
-	  if (isnan(lat->lattice[i])) lat->lattice[i] = lat->mask_tag;
 	} else {
 	  lat->lattice[i] = lat->mask_tag;
 	}
+	if (std::isnan(lat->lattice[i])) lat->lattice[i] = lat->mask_tag;
       }
     }
 

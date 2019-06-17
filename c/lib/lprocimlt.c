@@ -11,6 +11,7 @@
 
 int lprocimlt(LAT3D *lat) 
 {
+
   DIFFIMAGE *imdiff_corrected, *imdiff_scale, *imdiff_scale_ref;
 
   IJKCOORDS_DATA
