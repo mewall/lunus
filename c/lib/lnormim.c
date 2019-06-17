@@ -39,11 +39,11 @@ int lnormim(DIFFIMAGE *imdiff_in)
 
   DIFFIMAGE *imdiff;
 
+  if (imdiff_in->slist == NULL) lslistim(imdiff_in);
+
   for (pidx = 0; pidx < imdiff_in->num_panels; pidx++) {
     imdiff = &imdiff_in[pidx];
     index = 0;
-
-    if (imdiff->slist == NULL) lslistim(imdiff);
 
     struct xyzcoords s;
 

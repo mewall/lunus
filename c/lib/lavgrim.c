@@ -31,6 +31,8 @@ int lavgrim(DIFFIMAGE *imdiff_in)
 
   DIFFIMAGE *imdiff;
 
+  if (imdiff_in->slist == NULL) lslistim(imdiff_in);
+
   n = (size_t *)calloc(MAX_RFILE_LENGTH, sizeof(size_t));
   rf = (RFILE_DATA_TYPE *)calloc(MAX_RFILE_LENGTH,sizeof(RFILE_DATA_TYPE));
   imdiff_in->rfile_length = 0;
@@ -39,8 +41,6 @@ int lavgrim(DIFFIMAGE *imdiff_in)
 
     imdiff = &imdiff_in[pidx];
     index = 0;
-
-    if (imdiff->slist == NULL) lslistim(imdiff);
 
     struct xyzcoords s;
 
