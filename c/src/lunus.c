@@ -72,6 +72,13 @@ int main(int argc, char *argv[])
     j,
     num_images;
 
+  struct xyzcoords 
+    fast_vec,
+    slow_vec,
+    origin_vec,
+    beam_vec,
+    polarization_vec;
+
   IJKCOORDS_DATA
     i0, j0, k0;
 
@@ -193,7 +200,7 @@ int main(int argc, char *argv[])
     diffuse_lattice_prefix=lgettag(deck,"\ndiffuse_lattice_prefix");
   }
 
-  // Get file lists and A matrices
+  // Get image panel info, file lists, A matrices
 
   if (mpiv->my_id == 0) {
 
@@ -224,6 +231,18 @@ int main(int argc, char *argv[])
       while ((chars_read = getline(&json_name,&bufsize,f)) != -1) {
 
 	json_name[chars_read-1]=0;
+
+	if (i == 0) {
+	  if ((readBeamJSON(&beam_vec,&polarization_vec,json_name) != 0)) {
+	    printf("Skipping %s, unable to read using readBeamJSON()\n",buf);
+	  }
+	}
+
+	if (i == 0) {
+	  if ((readPanelJSON(&fast_vec,&slow_vec,&origin_vec,json_name) != 0)) {
+	    printf("Skipping %s, unable to read using readPanelJSON()\n",buf);
+	  }
+	}
 
 	if ((readExptJSON(&at[i],&imagelist[i],&bkglist[i],json_name)) != 0) {
 	  printf("Skipping %s, unable to read\n",buf);
@@ -283,6 +302,14 @@ int main(int argc, char *argv[])
     }
   }
 
+  // Broadcast panel info from rank 0 to other MPI ranks
+
+  lbcastBufMPI((void *)&fast_vec,sizeof(struct xyzcoords),0,mpiv);
+  lbcastBufMPI((void *)&slow_vec,sizeof(struct xyzcoords),0,mpiv);
+  lbcastBufMPI((void *)&origin_vec,sizeof(struct xyzcoords),0,mpiv);
+  lbcastBufMPI((void *)&beam_vec,sizeof(struct xyzcoords),0,mpiv);
+  lbcastBufMPI((void *)&polarization_vec,sizeof(struct xyzcoords),0,mpiv);
+
   // Broadcast file lists and A matrices from rank 0 to other MPI ranks
 
   lbcastBufMPI((void *)&num_images,sizeof(size_t),0,mpiv);
@@ -334,6 +361,15 @@ int main(int argc, char *argv[])
   imdiff->params = deck;
 
   lsetparamsim(imdiff);
+
+  // Set the panel variables
+
+  imdiff->fast_vec = fast_vec;
+  imdiff->slow_vec = slow_vec;
+  imdiff->normal_vec = lcrossvec(fast_vec,slow_vec);
+  imdiff->origin_vec = origin_vec;
+  imdiff->beam_vec = beam_vec;
+  imdiff->polarization_vec = polarization_vec;
 
   // Set mpi variables for imdiff
 
@@ -446,9 +482,14 @@ int main(int argc, char *argv[])
 
 #ifdef DEBUG		
       if (imdiff->mpiv->my_id == 0) {
+	struct xyzcoords stmp;
 	printf("SAMPLES\n");
 	for (j=50000;j<50010;j++) {
-	  printf("xvectors[%d]: (%f, %f, %f)\n",j,xvectors[j].x,xvectors[j].y,xvectors[j].z);
+	  printf("xvectors[%ld]: (%f, %f, %f)\n",j,xvectors[j].x,xvectors[j].y,xvectors[j].z);
+	  imdiff->pos.r = j / imdiff->hpixels;
+	  imdiff->pos.c = j % imdiff->hpixels;
+	  stmp = lcalcsim(imdiff);
+	  printf("scalc[%ld]: (%f, %f, %f)\n",j,stmp.x,stmp.y,stmp.z);
 	}
 	printf("\n");
       }

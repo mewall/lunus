@@ -131,8 +131,8 @@ if __name__=="__main__":
     for i in range(len(filelist)):
       imgname=filelist[i]
       img = dxtbx.load(imgname)
-      detector = img.get_detector()
-      beam = img.get_beam()
+#      detector = img.get_detector()
+#      beam = img.get_beam()
       scan = img.get_scan()
       gonio = img.get_goniometer()
 
