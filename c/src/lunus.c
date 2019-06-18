@@ -485,6 +485,19 @@ int main(int argc, char *argv[])
       lat->imdiff = imdiff_ref;
       lprocimlt(lat);
 
+#ifdef DEBUG
+      FILE *imageout;
+      if ( (imageout = fopen("debug.img","wb")) == NULL ) {
+	printf("\nCan't open %s.\n\n","debug.img");
+	exit(1);
+      }
+
+      imdiff_ref->outfile=imageout;
+
+      lwriteim(imdiff_ref);
+
+#endif
+
     }
 
     // Run the processing method in accumulation mode (1)
