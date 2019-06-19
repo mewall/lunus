@@ -79,6 +79,8 @@ int main(int argc, char *argv[])
     beam_vec,
     polarization_vec;
 
+  float wavelength;
+
   IJKCOORDS_DATA
     i0, j0, k0;
 
@@ -233,7 +235,7 @@ int main(int argc, char *argv[])
 	json_name[chars_read-1]=0;
 
 	if (i == 0) {
-	  if ((readBeamJSON(&beam_vec,&polarization_vec,json_name) != 0)) {
+	  if ((readBeamJSON(&beam_vec,&polarization_vec,&wavelength,json_name) != 0)) {
 	    printf("Skipping %s, unable to read using readBeamJSON()\n",buf);
 	  }
 	}
@@ -309,6 +311,7 @@ int main(int argc, char *argv[])
   lbcastBufMPI((void *)&origin_vec,sizeof(struct xyzcoords),0,mpiv);
   lbcastBufMPI((void *)&beam_vec,sizeof(struct xyzcoords),0,mpiv);
   lbcastBufMPI((void *)&polarization_vec,sizeof(struct xyzcoords),0,mpiv);
+  lbcastBufMPI((void *)&wavelength,sizeof(float),0,mpiv);
 
   // Broadcast file lists and A matrices from rank 0 to other MPI ranks
 
@@ -370,6 +373,7 @@ int main(int argc, char *argv[])
   imdiff->origin_vec = origin_vec;
   imdiff->beam_vec = beam_vec;
   imdiff->polarization_vec = polarization_vec;
+  imdiff->wavelength = wavelength;
 
   // Set mpi variables for imdiff
 

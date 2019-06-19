@@ -973,5 +973,5 @@ int lLaue11(LAT3D *lat);
 int readAmatrix(struct xyzmatrix *a,const char *amatrix_format,const size_t i);
 int readExptJSON(struct xyzmatrix *a,char **image_name,char **pedestal_name,const char *json_name);
 int readPanelJSON(struct xyzcoords *fast_vec,struct xyzcoords *slow_vec,struct xyzcoords *origin_vec,const char *json_name);
-int readBeamJSON(struct xyzcoords *beam_vec,struct xyzcoords *polarization_vec,const char *json_name);
+int readBeamJSON(struct xyzcoords *beam_vec,struct xyzcoords *polarization_vec,float *wavelength,const char *json_name);
 #endif

@@ -113,7 +113,7 @@ int readPanelJSON(struct xyzcoords *fast_vec,struct xyzcoords *slow_vec,struct x
 
 }
 
-int readBeamJSON(struct xyzcoords *beam_vec,struct xyzcoords *polarization_vec,const char *json_name) {
+int readBeamJSON(struct xyzcoords *beam_vec,struct xyzcoords *polarization_vec,float *wavelength, const char *json_name) {
 
   char *json_text;
 
@@ -136,9 +136,13 @@ int readBeamJSON(struct xyzcoords *beam_vec,struct xyzcoords *polarization_vec,c
 
   polarization_normal = cJSON_GetObjectItem(beam,"polarization_normal");
 
-  beam_vec->x = cJSON_GetArrayItem(direction,0)->valuedouble;
-  beam_vec->y = cJSON_GetArrayItem(direction,1)->valuedouble;
-  beam_vec->z = cJSON_GetArrayItem(direction,2)->valuedouble;
+  *wavelength = (float)cJSON_GetObjectItem(beam,"wavelength")->valuedouble;
+
+  // Note: the beam direction is apparently opposite to what is in the .json file? Check with Nick and Aaron about this.
+
+  beam_vec->x = - cJSON_GetArrayItem(direction,0)->valuedouble;
+  beam_vec->y = - cJSON_GetArrayItem(direction,1)->valuedouble;
+  beam_vec->z = - cJSON_GetArrayItem(direction,2)->valuedouble;
 
   polarization_vec->x = cJSON_GetArrayItem(polarization_normal,0)->valuedouble;
   polarization_vec->y = cJSON_GetArrayItem(polarization_normal,1)->valuedouble;

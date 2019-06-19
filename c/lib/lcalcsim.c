@@ -42,13 +42,13 @@ struct xyzcoords lcalcsim(DIFFIMAGE *imdiff)
 
   labdist = sqrtf(ldotvec(labpos,labpos));
 
-  labdir.x = - labpos.x / labdist;
-  labdir.y = - labpos.y / labdist;
-  labdir.z = - labpos.z / labdist;
+  labdir.x = labpos.x / labdist;
+  labdir.y = labpos.y / labdist;
+  labdir.z = labpos.z / labdist;
 
-  s.x = (imdiff->beam_vec.x - labdir.x) / imdiff->wavelength;
-  s.y = (imdiff->beam_vec.y - labdir.y)/ imdiff->wavelength;
-  s.z = (imdiff->beam_vec.z - labdir.z)/ imdiff->wavelength;
+  s.x = (labdir.x - imdiff->beam_vec.x) / imdiff->wavelength;
+  s.y = (labdir.y - imdiff->beam_vec.y)/ imdiff->wavelength;
+  s.z = (labdir.z - imdiff->beam_vec.z)/ imdiff->wavelength;
 
   return(s);
 }
