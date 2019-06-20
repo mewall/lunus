@@ -33,6 +33,7 @@ int lcfim(DIFFIMAGE *imdiff_in)
     sin_sq_two_theta,
     cos_two_rho,
     two_rho_offset,
+    cos_incidence,
     maxcorr;
 
   XYZCOORDS_DATA ssq;
@@ -41,7 +42,7 @@ int lcfim(DIFFIMAGE *imdiff_in)
 
   DIFFIMAGE *imdiff;
 
-  if (imdiff_in->slist == NULL) lslistim(imdiff_in);
+  struct xyzcoords normal_vec;
 
   for (pidx = 0; pidx < imdiff_in->num_panels; pidx++) {
     imdiff = &imdiff_in[pidx];
@@ -52,8 +53,10 @@ int lcfim(DIFFIMAGE *imdiff_in)
     scale = imdiff->correction_factor_scale;
     two_rho_offset = 2.*PI/180.*imdiff->polarization_offset;
     for(r=0; r < imdiff->vpixels; r++) {
+      imdiff->pos.r = r;
       for(c=0; c < imdiff->hpixels; c++) {
-	s = imdiff->slist[index];
+	imdiff->pos.c = c;
+	s = lcalcsim(imdiff);
 	ssq = ldotvec(s,s);
 	cos_two_theta = 1. - ssq * imdiff->wavelength *imdiff->wavelength / 2.;
 	cos_sq_two_theta = cos_two_theta * cos_two_theta;
@@ -65,7 +68,12 @@ int lcfim(DIFFIMAGE *imdiff_in)
 						 cos_two_rho *
 						 sin_sq_two_theta));
 	// solid angle normalization
-	imdiff->correction[index] /= cos_two_theta * cos_sq_two_theta;
+
+	cos_incidence = ldotvec(lmulscvec(imdiff->wavelength,laddvec(s,lmulscvec(1./imdiff->wavelength,imdiff->beam_vec))),imdiff->normal_vec);
+
+	//	printf("cos_incidence(%d,%d)=%f\n",c,r,cos_incidence);
+
+	imdiff->correction[index] /= cos_incidence*cos_incidence*cos_incidence;
 	//	  if (imdiff->correction[index]>maxcorr) {
 	//  maxcorr = imdiff->correction[index];
 	//}

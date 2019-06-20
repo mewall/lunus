@@ -361,19 +361,10 @@ int main(int argc, char *argv[])
 
   // Define parameters from input deck
 
-  imdiff->params = deck;
+  //  imdiff->params = deck;
 
-  lsetparamsim(imdiff);
+  //  lsetparamsim(imdiff);
 
-  // Set the panel variables
-
-  imdiff->fast_vec = fast_vec;
-  imdiff->slow_vec = slow_vec;
-  imdiff->normal_vec = lcrossvec(fast_vec,slow_vec);
-  imdiff->origin_vec = origin_vec;
-  imdiff->beam_vec = beam_vec;
-  imdiff->polarization_vec = polarization_vec;
-  imdiff->wavelength = wavelength;
 
   // Set mpi variables for imdiff
 
@@ -417,6 +408,35 @@ int main(int argc, char *argv[])
 
     lsetparamsim(imdiff);
 
+  // Set the panel variables
+
+    if (imdiff->use_json_metrology == 1) {
+
+#ifdef DEBUG
+      printf("Default metrology:\n\n");
+      printf("fast_vec = (%f, %f, %f)\n",imdiff->fast_vec.x,imdiff->fast_vec.y,imdiff->fast_vec.z);
+      printf("slow_vec = (%f, %f, %f)\n",imdiff->slow_vec.x,imdiff->slow_vec.y,imdiff->slow_vec.z);
+      printf("origin_vec = (%f, %f, %f)\n",imdiff->origin_vec.x,imdiff->origin_vec.y,imdiff->origin_vec.z);
+      printf("beam_vec = (%f, %f, %f)\n",imdiff->beam_vec.x,imdiff->beam_vec.y,imdiff->beam_vec.z);
+#endif
+      
+      imdiff->fast_vec = fast_vec;
+      imdiff->slow_vec = slow_vec;
+      imdiff->normal_vec = lcrossvec(fast_vec,slow_vec);
+      imdiff->origin_vec = origin_vec;
+      imdiff->beam_vec = beam_vec;
+      imdiff->polarization_vec = polarization_vec;
+      imdiff->wavelength = wavelength;
+      
+#ifdef DEBUG
+      printf(".json file metrology:\n\n");
+      printf("fast_vec = (%f, %f, %f)\n",imdiff->fast_vec.x,imdiff->fast_vec.y,imdiff->fast_vec.z);
+      printf("slow_vec = (%f, %f, %f)\n",imdiff->slow_vec.x,imdiff->slow_vec.y,imdiff->slow_vec.z);
+      printf("origin_vec = (%f, %f, %f)\n",imdiff->origin_vec.x,imdiff->origin_vec.y,imdiff->origin_vec.z);
+      printf("beam_vec = (%f, %f, %f)\n",imdiff->beam_vec.x,imdiff->beam_vec.y,imdiff->beam_vec.z);
+#endif
+      
+    }
     // Subtract background image if available:
 
     int needs_bkgsub = 0;
@@ -529,19 +549,6 @@ int main(int argc, char *argv[])
       lat->procmode = 0;
       lat->imdiff = imdiff_ref;
       lprocimlt(lat);
-
-#ifdef DEBUG
-      FILE *imageout;
-      if ( (imageout = fopen("debug.img","wb")) == NULL ) {
-	printf("\nCan't open %s.\n\n","debug.img");
-	exit(1);
-      }
-
-      imdiff_ref->outfile=imageout;
-
-      lwriteim(imdiff_ref);
-
-#endif
 
     }
 

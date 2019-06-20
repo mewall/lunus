@@ -141,6 +141,19 @@ int lprocimlt(LAT3D *lat)
     if (lat->latct != NULL) free(lat->latct);
     lat->latct = (size_t *)calloc(lat->lattice_length,sizeof(size_t));
 
+#ifdef DEBUG
+      FILE *imageout;
+      if ( (imageout = fopen("debug.img","wb")) == NULL ) {
+	printf("\nCan't open %s.\n\n","debug.img");
+	exit(1);
+      }
+
+      imdiff_corrected_list->outfile=imageout;
+
+      lwriteim(imdiff_corrected_list);
+
+#endif
+
     return(0);
   }
 	  

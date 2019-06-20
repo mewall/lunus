@@ -529,6 +529,7 @@ typedef struct
   float background_subtraction_factor;/* Multiplicative factor for lbkgsubim() */
   struct xyzcoords *slist;   /* scattering vectors for each pixel in the image */
   struct xyzmatrix amatrix;     /* A matrix for mapping lab coords to reciprocal space coords */
+  int use_json_metrology;
   MPIVARS *mpiv;
 } DIFFIMAGE;
 
@@ -893,6 +894,7 @@ int lscalerfim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lscalelt(LAT3D *lat1, LAT3D *lat2);
 struct xyzcoords lsFromIndex(LAT3D *lat);
 int lsetcbftag(char **t,size_t *target_length, const char *tag,const char *val);
+int lsetmetim(DIFFIMAGE *imdiff_in);
 int lsetparamsim(DIFFIMAGE *imdiff);
 int lsetparamslt(LAT3D *lat);
 int lsettag(char *target,const char *tag,const char *val);

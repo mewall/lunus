@@ -39,21 +39,15 @@ int lslistim(DIFFIMAGE *imdiff_in)
 	malloc(imdiff->image_length*sizeof(struct xyzcoords));
     }
 
-    labpos.z = imdiff->distance_mm;
-
     for(r=0; r < imdiff->vpixels; r++) {
 
-      labpos.y = (float)(r * imdiff->pixel_size_mm - imdiff->beam_mm.y);
+      imdiff->pos.r = r;
 
       for(c=0; c < imdiff->hpixels; c++) {
 
-	labpos.x = (float)(c * imdiff->pixel_size_mm - imdiff->beam_mm.x);
+	imdiff->pos.c = c;
 
-	labdist = sqrtf(labpos.x*labpos.x+labpos.y*labpos.y+labpos.z*labpos.z);
-
-	imdiff->slist[index].x = labpos.x / labdist / imdiff->wavelength;
-	imdiff->slist[index].y = labpos.y / labdist / imdiff->wavelength;
-	imdiff->slist[index].z = - (1. - labpos.z / labdist) / imdiff->wavelength;
+	imdiff->slist[index] = lcalcsim(imdiff);
 
 	index++;
 

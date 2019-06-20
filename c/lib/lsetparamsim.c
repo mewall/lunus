@@ -113,6 +113,16 @@ int lsetparamsim(DIFFIMAGE *imdiff)
 	  imdiff->correction_factor_scale = lgettagf(deck,"\noverall_scale_factor");
 	}
 	  
+	if (strstr(deck,"\nuse_json_metrology") == NULL) {
+	  imdiff->use_json_metrology = 0;
+	} else {
+	  char *use_json_metrology_str = lgettag(deck,"\nuse_json_metrology");
+	  if (strcmp(use_json_metrology_str,"True")==0) {
+	    imdiff->use_json_metrology=1;
+	  } else {
+	    imdiff->use_json_metrology=0;
+	  }
+	} 
 
   return(0);
 }

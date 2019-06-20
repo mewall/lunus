@@ -99,9 +99,14 @@ int readPanelJSON(struct xyzcoords *fast_vec,struct xyzcoords *slow_vec,struct x
   origin_vec->z = cJSON_GetArrayItem(origin,2)->valuedouble;
 
 #ifdef DEBUG
-  printf("fast, slow, and origin:\n");
+  struct xyzcoords normal_vec;
+
+  normal_vec = lcrossvec(*fast_vec,*slow_vec);
+
+  printf("fast, slow, normal, and origin:\n");
   printf("(%f, %f, %f) ",fast_vec->x,fast_vec->y,fast_vec->z);
   printf("(%f, %f, %f) ",slow_vec->x,slow_vec->y,slow_vec->z);
+  printf("(%f, %f, %f) ",normal_vec.x,normal_vec.y,normal_vec.z);
   printf("(%f, %f, %f) ",origin_vec->x,origin_vec->y,origin_vec->z);
   printf("\n");
 #endif		

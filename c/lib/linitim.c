@@ -85,6 +85,8 @@ DIFFIMAGE *linitim(size_t n)
     imdiff->mpiv = NULL;
     imdiff->params = NULL;
 
+    imdiff->use_json_metrology = 0;
+
     // Default rastering directions
 
     imdiff->fast_vec.x = 1.0;
