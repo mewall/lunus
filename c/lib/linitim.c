@@ -85,6 +85,34 @@ DIFFIMAGE *linitim(size_t n)
     imdiff->mpiv = NULL;
     imdiff->params = NULL;
 
+    imdiff->use_json_metrology = 0;
+
+    // Default rastering directions
+
+    imdiff->fast_vec.x = 1.0;
+    imdiff->fast_vec.y = 0.0;
+    imdiff->fast_vec.z = 0.0;
+
+    imdiff->slow_vec.x = 0.0;
+    imdiff->slow_vec.y = -1.0;
+    imdiff->slow_vec.z = 0.0;
+
+    // Default normal direction
+
+    imdiff->normal_vec = lcrossvec(imdiff->fast_vec,imdiff->slow_vec);
+
+    // Default detector origin vector
+
+    imdiff->origin_vec.x = - imdiff->beam_mm.x;
+    imdiff->origin_vec.y = + imdiff->beam_mm.y;
+    imdiff->origin_vec.z = - imdiff->distance_mm;
+
+    // Default beam direction
+
+    imdiff->beam_vec.x = 0.0;
+    imdiff->beam_vec.y = 0.0;
+    imdiff->beam_vec.z = -1.0;
+
     /*
      * Allocate memory for arrays:
      */

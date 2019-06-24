@@ -294,6 +294,10 @@ int lreadim(DIFFIMAGE *imdiff)
     }
   }
    
+  // Set default metrology for this image given the parameters
+
+  lsetmetim(imdiff);
+
   imdiff->correction = (float *)realloc(imdiff->correction,imdiff->image_length*sizeof(float));
   free(buf);
 

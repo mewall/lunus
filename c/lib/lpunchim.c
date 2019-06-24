@@ -24,8 +24,6 @@ int lpunchim(DIFFIMAGE *imdiff_in)
 
   DIFFIMAGE *imdiff;
 
-  if (imdiff_in->slist == NULL) lslistim(imdiff_in);
-
   for (pidx = 0; pidx < imdiff_in->num_panels; pidx++) {
     imdiff = &imdiff_in[pidx];
     index = 0;
@@ -40,20 +38,10 @@ int lpunchim(DIFFIMAGE *imdiff_in)
 
     for(r=0; r < imdiff->vpixels; r++) {
       for(c=0; c < imdiff->hpixels; c++) {
-	s = imdiff->slist[index];
-	ssq = ldotvec(s,s);
-	cos_two_theta = 1. - ssq * imdiff->wavelength * imdiff->wavelength / 2.;
-	rr = imdiff->distance_mm / cos_two_theta; 
-	rvec.x = imdiff->wavelength * s.x * rr;
-	rvec.y = imdiff->wavelength * s.y * rr;
-	pixel.c = (RCCOORDS_DATA)((rvec.x + imdiff->beam_mm.x) / 
-				  imdiff->pixel_size_mm + 0.5);
-	pixel.r = (RCCOORDS_DATA)((rvec.y + imdiff->beam_mm.y) / 
-				  imdiff->pixel_size_mm + 0.5);
-	if ((pixel.r > imdiff->punchim_lower.r) && 
-	    (pixel.r < imdiff->punchim_upper.r) && 
-	    (pixel.c > imdiff->punchim_lower.c) && 
-	    (pixel.c < imdiff->punchim_upper.c)) {
+	if ((r > imdiff->punchim_lower.r) && 
+	    (r < imdiff->punchim_upper.r) && 
+	    (c > imdiff->punchim_lower.c) && 
+	    (c < imdiff->punchim_upper.c)) {
 	  imdiff->image[index] = imdiff->ignore_tag;
 	}
 	index++;

@@ -8,7 +8,7 @@
 
 #include<mwmask.h>
 
-int lcalcsim(DIFFIMAGE *imdiff_in)
+struct xyzcoords lcalcsim(DIFFIMAGE *imdiff)
 {
   size_t 
     index = 0;
@@ -21,54 +21,44 @@ int lcalcsim(DIFFIMAGE *imdiff_in)
     return_value = 0;
 
   struct xyzcoords
-    labpos;
+    labpos, labdir, s, s0;
 
   float
     labdist;
 
   int pidx;
 
-  DIFFIMAGE *imdiff;
+  labpos = laddvec(laddvec(lmulscvec((XYZCOORDS_DATA)imdiff->pos.c*imdiff->pixel_size_mm,imdiff->fast_vec),lmulscvec((XYZCOORDS_DATA)imdiff->pos.r*imdiff->pixel_size_mm,imdiff->slow_vec)),imdiff->origin_vec);
 
-  for (pidx = 0; pidx < imdiff_in->num_panels; pidx++) {
-    imdiff = &imdiff_in[pidx];
-    index = 0;
-
-    if (imdiff->slist == NULL) {
-      imdiff->slist = (struct xyzcoords *)
-	malloc(imdiff->image_length*sizeof(struct xyzcoords));
-    }
-
-    labpos.z = imdiff->distance_mm;
-
-    for(r=0; r < imdiff->vpixels; r++) {
-
-      labpos.y = (float)(r * imdiff->pixel_size_mm - imdiff->beam_mm.y);
-
-      for(c=0; c < imdiff->hpixels; c++) {
-
-	labpos.x = (float)(c * imdiff->pixel_size_mm - imdiff->beam_mm.x);
-
-	labdist = sqrtf(labpos.x*labpos.x+labpos.y*labpos.y+labpos.z*labpos.z);
-
-	imdiff->slist[index].x = labpos.x / labdist / imdiff->wavelength;
-	imdiff->slist[index].y = labpos.y / labdist / imdiff->wavelength;
-	imdiff->slist[index].z = - (1. - labpos.z / labdist) / imdiff->wavelength;
-
-	index++;
-
-      }
-    }
+  /*
+  labpos.x = imdiff->pos.c * imdiff->fast_vec.x * imdiff->pixel_size_mm + imdiff->pos.r * imdiff->slow_vec.x * imdiff->pixel_size_mm + imdiff->origin_vec.x;
+  labpos.y = imdiff->pos.c * imdiff->fast_vec.y * imdiff->pixel_size_mm + imdiff->pos.r * imdiff->slow_vec.y * imdiff->pixel_size_mm + imdiff->origin_vec.y;
+  labpos.z = imdiff->pos.c * imdiff->fast_vec.z * imdiff->pixel_size_mm + imdiff->pos.r * imdiff->slow_vec.z * imdiff->pixel_size_mm + imdiff->origin_vec.z;
+  */
 #ifdef DEBUG
-    int j;
-	printf("SAMPLES\n");
-	for (j=50000;j<50010;j++) {
-	  printf("slist[%d]: (%f, %f, %f)\n",j,imdiff->slist[j].x,imdiff->slist[j].y,imdiff->slist[j].z);
-	}
-	printf("\n");
+
+  //  printf("labpos.xyz = (%f, %f, %f)\n",labpos.x,labpos.y,labpos.z);
+  //  printf("origin.xyz = (%f, %f, %f)\n",imdiff->origin_vec.x,imdiff->origin_vec.y,imdiff->origin_vec.z);
+  //  printf("labpos.xyz = (%f, %f, %f)\n",imdiff->slow_vec.x,imdiff->slow_vec.y,imdiff->slow_vec.z);
+
 #endif
-  }
 
+  labdist = sqrtf(ldotvec(labpos,labpos));
 
-  return(return_value);
+  labdir = lmulscvec(1./labdist,labpos);
+
+  /*
+  labdir.x = labpos.x / labdist;
+  labdir.y = labpos.y / labdist;
+  labdir.z = labpos.z / labdist;
+  */
+
+  s = lmulscvec(1./imdiff->wavelength,lsubvec(labdir,imdiff->beam_vec));
+
+		/*
+  s.x = (labdir.x - imdiff->beam_vec.x) / imdiff->wavelength;
+  s.y = (labdir.y - imdiff->beam_vec.y)/ imdiff->wavelength;
+  s.z = (labdir.z - imdiff->beam_vec.z)/ imdiff->wavelength;
+		*/
+  return(s);
 }
