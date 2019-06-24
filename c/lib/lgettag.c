@@ -141,6 +141,28 @@ float lgettagf(const char *target,const char *tag)
   return(val);
 }
 
+struct xyzcoords lgettagxyz(const char *target,const char *tag)
+{
+  char *pos_begin,*pos_end,*pos_tmp;
+  char *valstr;
+  
+  struct xyzcoords val;
+  int err;
+
+  if ((err = lfindtag(target,tag,&pos_begin,&pos_end)) != 0) {
+    perror("Couldn't find tag in lfindtag().\n");
+    exit(err);
+  }
+
+  int len = pos_end-pos_begin-1;
+  valstr = (char *)calloc(sizeof(char),len+1);
+  memcpy(valstr,pos_begin+1,len);
+  valstr[len]=0;
+  sscanf(valstr,"%f,%f,%f",&val.x,&val.y,&val.z);
+  free(valstr);
+  return(val);
+}
+
 char * lgetcbftag(const char *target,const char *tag)
 {
   char *pos_begin = NULL,*pos_end = NULL,*pos_tmp = NULL;

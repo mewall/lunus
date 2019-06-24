@@ -112,7 +112,26 @@ int lsetparamsim(DIFFIMAGE *imdiff)
 	if (strstr(deck,"\noverall_scale_factor") != NULL) {
 	  imdiff->correction_factor_scale = lgettagf(deck,"\noverall_scale_factor");
 	}
+
+	if (strstr(deck,"\nfast_vec") != NULL) {
+	  imdiff->fast_vec = lgettagxyz(deck,"\nfast_vec");
+	}
+
+	if (strstr(deck,"\nslow_vec") != NULL) {
+	  imdiff->slow_vec = lgettagxyz(deck,"\nslow_vec");
+	}
 	  
+	if (strstr(deck,"\nbeam_vec") != NULL) {
+	  imdiff->beam_vec = lgettagxyz(deck,"\nbeam_vec");
+	}
+	  
+	if (strstr(deck,"\nnormal_vec") != NULL) {
+	  imdiff->normal_vec = lgettagxyz(deck,"\nnormal_vec");
+	}
+
+	if (strstr(deck,"\norigin_vec") != NULL) {
+	  imdiff->origin_vec = lgettagxyz(deck,"\norigin_vec");
+	}
 
   return(0);
 }
