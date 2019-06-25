@@ -34,12 +34,13 @@ for f in env_lunus["CCFLAGS"]:
    replacement_ccflags.append(f)
 env_lunus.Replace(CCFLAGS = replacement_ccflags)
 
-env_lunus.Prepend(CCFLAGS=["-DUSE_OPENMP","-I/opt/local/include/libomp","-Xpreprocessor","-fopenmp"])
+env_lunus.Prepend(CCFLAGS=["-g","-DDEBUG","-DUSE_OPENMP","-I/opt/local/include/libomp","-Xpreprocessor","-fopenmp"])
 env_lunus.Prepend(LIBS=["gomp"])
 env_lunus.Prepend(LIBPATH=["/opt/local/lib/libomp"])
 
 env_lunus.StaticLibrary(target='#lib/lunus',
   source = [os.path.join(env_etc.lunus_dist,"c","lib","linitim.c"),
+      os.path.join(env_etc.lunus_dist,"c","lib","lcalcsim.c"),
       os.path.join(env_etc.lunus_dist,"c","lib","lfreeim.c"),
       os.path.join(env_etc.lunus_dist,"c","lib","lmodeim.c"),
       os.path.join(env_etc.lunus_dist,"c","lib","lpunchim.c"),
