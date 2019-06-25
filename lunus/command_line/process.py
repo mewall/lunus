@@ -34,7 +34,7 @@ def get_experiment_params(experiments):
     fast_vec_params = "\nfast_vec={0},{1},{2}".format(fast_vec[0],fast_vec[1],fast_vec[2])
     slow_vec_params = "\nslow_vec={0},{1},{2}".format(slow_vec[0],slow_vec[1],slow_vec[2])
     origin_vec_params = "\norigin_vec={0},{1},{2}".format(origin_vec[0],origin_vec[1],origin_vec[2])
-    normal_vec_params = "\nfast_vec={0},{1},{2}".format(normal_vec[0],normal_vec[1],normal_vec[2])
+    normal_vec_params = "\nnormal_vec={0},{1},{2}".format(normal_vec[0],normal_vec[1],normal_vec[2])
 
     more_params = "\npixel_size_mm={0}\nbeam_mm_x={1}\nbeam_mm_y={2}\ndistance_mm={3}".format(pixel_size_mm,beam_mm_x,beam_mm_y,distance_mm)
 
@@ -243,9 +243,9 @@ if __name__=="__main__":
   experiments = ExperimentListFactory.from_json_file(metro, check_format=False)
   experiment_params = get_experiment_params(experiments)
 
-  deck_and_extras = deck+experiment_params[0]+"\nuse_json_metrology=False"
+  deck_and_extras = deck+experiment_params[0]
 
-  print deck_and_extras
+#  print deck_and_extras
 
   p.LunusSetparamslt(deck_and_extras)
 
@@ -262,13 +262,23 @@ if __name__=="__main__":
       experiment_params = get_experiment_params(experiments)
       x = get_experiment_xvectors(experiments)
 
-      deck_and_extras = deck+experiment_params[0]+"\nuse_json_metrology=False"
+      deck_and_extras = deck+experiment_params[0]
+
+#      print deck_and_extras
 
       p.LunusSetparamsim(deck_and_extras)
 
       image_glob = image_glob_list[i]
       if (subtract_background_images):
         bkg_glob = bkg_glob_list[i]
+
+# Temporary, set default metrology based on beam center and distance
+
+      p.print_image_params()
+
+#      p.LunusSetmetim()
+
+#      p.print_image_params()
 
       process_one_glob()
     

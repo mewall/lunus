@@ -7,6 +7,7 @@ c=`corrlt lattices/TestLunusProcess_aniso.lat ../../ref/TestLunusRef_aniso.lat`
 cd -
 if (( $(awk -v n1="$c" -v n2="0.999" 'BEGIN {print (n1<n2?"0":"1")}') )); then
   rslt=0
+  echo "Passed correlation test"
 else
   echo "Failed correlation test, c = $c"
   rslt=1

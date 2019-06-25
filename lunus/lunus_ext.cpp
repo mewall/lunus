@@ -57,6 +57,20 @@ namespace lunus {
       lsetparamsim(imdiff_bkg);
     }
 
+    inline void LunusSetmetim() {
+      lsetmetim(imdiff);
+      lsetmetim(imdiff_bkg);
+    }
+
+    inline void print_image_params() {
+      printf("origin.xyz = (%f, %f, %f)\n",imdiff->origin_vec.x,imdiff->origin_vec.y,imdiff->origin_vec.z);
+      printf("fast_vec.xyz = (%f, %f, %f)\n",imdiff->fast_vec.x,imdiff->fast_vec.y,imdiff->fast_vec.z);
+      printf("slow_vec.xyz = (%f, %f, %f)\n",imdiff->slow_vec.x,imdiff->slow_vec.y,imdiff->slow_vec.z);
+      printf("normal_vec.xyz = (%f, %f, %f)\n",imdiff->normal_vec.x,imdiff->normal_vec.y,imdiff->normal_vec.z);
+      printf("beam_vec.xyz = (%f, %f, %f)\n",imdiff->beam_vec.x,imdiff->beam_vec.y,imdiff->beam_vec.z);
+      printf("use_json_metrology = %d\n",imdiff->use_json_metrology);
+    }
+
     inline void set_image_ref() {
       lcloneim(imdiff_ref,imdiff);
     }
@@ -701,6 +715,7 @@ namespace boost_python { namespace {
     void (lunus::Process::*LunusProcimlt2)(int) = &lunus::Process::LunusProcimlt;
 
     class_<lunus::Process>("Process",init<>())
+      .def("LunusSetmetim",&lunus::Process::LunusSetmetim)
       .def("LunusSetparamsim",&lunus::Process::LunusSetparamsim)
       .def("LunusBkgsubim",&lunus::Process::LunusBkgsubim)
       .def("set_image",&lunus::Process::set_image)
@@ -709,6 +724,7 @@ namespace boost_python { namespace {
       .def("get_lattice",&lunus::Process::get_lattice)
       .def("get_counts",&lunus::Process::get_counts)
       .def("divide_by_counts",&lunus::Process::divide_by_counts)
+      .def("print_image_params",&lunus::Process::print_image_params)
       .def("write_as_vtk",&lunus::Process::write_as_vtk)
       .def("write_as_hkl",&lunus::Process::write_as_hkl)
       .def("write_as_cube",&lunus::Process::write_as_cube)

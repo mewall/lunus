@@ -150,7 +150,7 @@ int lprocimlt(LAT3D *lat)
 
       imdiff_corrected_list->outfile=imageout;
 
-      lwriteim(imdiff_corrected_list);
+      //      lwriteim(imdiff_corrected_list);
 
 #endif
 
