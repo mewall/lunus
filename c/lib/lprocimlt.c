@@ -40,10 +40,15 @@ int lprocimlt(LAT3D *lat)
 
   // Apply masks
 
-  lpunchim(imdiff_list);
-  lwindim(imdiff_list);
-  lthrshim(imdiff_list);
+  if (imdiff_list->num_panels == 1) {
+    lpunchim(imdiff_list);
+    lwindim(imdiff_list);
+  } else {
+    // ***Insert multipanel masking method here
+  }
   
+  lthrshim(imdiff_list);
+
   // Mode filter to create image to be used for scaling
 
   lcloneim(imdiff_scale_list,imdiff_list);
@@ -170,6 +175,8 @@ int lprocimlt(LAT3D *lat)
 
   int pidx;
 
+  //  printf("number of panels = %d\n",imdiff_list->num_panels);
+
   for (pidx = 0; pidx < imdiff_list->num_panels; pidx++) {
     imdiff = &imdiff_list[pidx];
     imdiff_corrected = &imdiff_corrected_list[pidx];
@@ -231,6 +238,7 @@ int lprocimlt(LAT3D *lat)
     }
   }
   ct++;
+  //  printf("Done processing image %d\n",ct);
 }
 
 

@@ -39,5 +39,5 @@ int lfreeim(DIFFIMAGE *imdiff_in)
 
   }
 
-  free((DIFFIMAGE *)imdiff);
+  free(imdiff_in);
 }

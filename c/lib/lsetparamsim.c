@@ -132,14 +132,13 @@ int lsetparamsim(DIFFIMAGE *imdiff)
 	if (strstr(deck,"\norigin_vec") != NULL) {
 	  imdiff->origin_vec = lgettagxyz(deck,"\norigin_vec");
 	}
+
 	if (strstr(deck,"\nuse_json_metrology") == NULL) {
 	  imdiff->use_json_metrology = 0;
 	} else {
-	  char *use_json_metrology_str = lgettag(deck,"\nuse_json_metrology");
-	  if (strcmp(use_json_metrology_str,"True")==0) {
+	  char *s = lgettag(deck,"\nuse_json_metrology");
+	  if (strcmp(s,"True")==0) {
 	    imdiff->use_json_metrology=1;
-	  } else {
-	    imdiff->use_json_metrology=0;
 	  }
 	} 
 
