@@ -81,6 +81,9 @@ namespace lunus {
 	printf("image[1001..1010] = ");
 	for (int i=1001;i<=1010;i++) printf("%d ",im->image[i]);
 	printf("\n");
+	printf("slist[1001..1010] = ");
+	for (int i=1001;i<=1010;i++) printf("(%f,%f,%f) ",im->slist[i].x,im->slist[i].y,im->slist[i].z);
+	printf("\n");
       }
       printf("use_json_metrology = %d\n",imdiff->use_json_metrology);
     }
@@ -307,15 +310,17 @@ namespace lunus {
 
     inline void set_amatrix(scitbx::af::flex_double amatrix_in) {
       double* begin=amatrix_in.begin();
-      imdiff->amatrix.xx = (float)begin[0];
-      imdiff->amatrix.yx = (float)begin[1];
-      imdiff->amatrix.zx = (float)begin[2];
-      imdiff->amatrix.xy = (float)begin[3];
-      imdiff->amatrix.yy = (float)begin[4];
-      imdiff->amatrix.zy = (float)begin[5];
-      imdiff->amatrix.xz = (float)begin[6];
-      imdiff->amatrix.yz = (float)begin[7];
-      imdiff->amatrix.zz = (float)begin[8];
+      for (int n = 0; n < imdiff->num_panels; n++) {
+	DIFFIMAGE *im = &imdiff[n];
+	im->amatrix.xx = (float)begin[0];
+	im->amatrix.yx = (float)begin[1];
+	im->amatrix.zx = (float)begin[2];
+	im->amatrix.xy = (float)begin[3];
+	im->amatrix.yy = (float)begin[4];
+	im->amatrix.zy = (float)begin[5];
+	im->amatrix.xz = (float)begin[6];
+	im->amatrix.yz = (float)begin[7];
+	im->amatrix.zz = (float)begin[8];
       /*
       imdiff->amatrix.xx = (float)begin[0];
       imdiff->amatrix.xy = (float)begin[1];
@@ -326,7 +331,9 @@ namespace lunus {
       imdiff->amatrix.zx = (float)begin[6];
       imdiff->amatrix.zy = (float)begin[7];
       imdiff->amatrix.zz = (float)begin[8];
-      */    }
+      */    
+      }
+    }
 
     inline void set_xvectors(scitbx::af::flex_double xvectors_in) {
       double* begin=xvectors_in.begin();

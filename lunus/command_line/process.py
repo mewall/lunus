@@ -124,9 +124,6 @@ def process_one_glob():
         deck_and_extras = deck+experiment_params[pidx]
         p.LunusSetparamsim(pidx,deck_and_extras)
 
-      p.print_image_params()
-
-      
       if (subtract_background_images==True):
         if (len(bkglist) != 1):
           bkg = dxtbx.load(bkglist[i])
@@ -161,7 +158,11 @@ def process_one_glob():
         for pidx in range(len(x)):
           p.set_xvectors(pidx,x[pidx])
         p.set_image_ref()
+
+        p.print_image_params()
+      
         p.LunusProcimlt(0)
+
         fresh_lattice = False
 
       p.LunusProcimlt(1)
@@ -276,10 +277,6 @@ if __name__=="__main__":
   import dxtbx
   from dxtbx.model.experiment_list import ExperimentListFactory
   from dials.array_family import flex
-
-  if (rotation_series):
-    print "Rotation series"
-    exit(0)
 
 # Get a sample experiments file and use it to initialize the processor class
 

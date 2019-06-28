@@ -169,7 +169,7 @@ int lprocimlt(LAT3D *lat)
   float this_scale_factor = imdiff_scale_ref_list->rfile[0];
   float this_scale_error = imdiff_scale_ref_list->rfile[1];
 
-  printf("(%g,%g)",this_scale_factor,this_scale_error);
+  printf("(scale, error) = (%g,%g)",this_scale_factor,this_scale_error);
 
   // Collect the image data into the lattice
 
@@ -191,7 +191,14 @@ int lprocimlt(LAT3D *lat)
     i0 = (IJKCOORDS_DATA)(lat->xvoxels/2. - 1.);
     j0 = (IJKCOORDS_DATA)(lat->yvoxels/2. - 1.);
     k0 = (IJKCOORDS_DATA)(lat->zvoxels/2. - 1.);
+
+    int iii;
+
+    printf("Image %d, slist[1001..1010] = ",pidx);
+    for (iii=1001;iii<=1010;iii++) printf("(%f,%f,%f) ",imdiff->slist[iii].x,imdiff->slist[iii].y,imdiff->slist[iii].z);
+    printf("\n");
   
+
     for (j=0; j<imdiff->image_length; j++) {
       H = lmatvecmul(imdiff->amatrix, imdiff->slist[j]);
 
