@@ -57,9 +57,13 @@ int lavgrlt(LAT3D *lat)
 	lat->index = index;
 	
 	r = (size_t)(sqrtf(lssqrFromIndex(lat) / rscale)+.5);
+	if (isnan(lat->lattice[lat_index])) {
+	  printf("Lattice value is nan at (%d,%d,%d). Aborting\n",index.i,index.j,index.k);
+	  exit(1);
+	}
 	if (lat->lattice[lat_index] != lat->mask_tag) {
 	  //	  if (lat->lattice[index]<0) printf("%d,%f\n",(int)index,lat->lattice[index]);
-	  if (r > lat->rfile_length) lat->rfile_length = r + 1;
+	  if (r >= lat->rfile_length) lat->rfile_length = r + 1;
 	  if (ct[r] == 0) {
 	    lat->rfile[r] = lat->lattice[lat_index];
 	    ct[r] = 1;
@@ -77,6 +81,7 @@ int lavgrlt(LAT3D *lat)
   // If there are no counts at a given radius, mask the value
 
   for (r=0;r<lat->rfile_length;r++) {
+    printf("ct[%d] = %d, rfile[%d] = %f\n",r,ct[r],r,lat->rfile[r]);
     if (ct[r]==0) {
       lat->rfile[r]=lat->mask_tag;
     }
