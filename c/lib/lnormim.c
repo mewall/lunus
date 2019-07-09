@@ -10,7 +10,7 @@
 
 #include<mwmask.h>
 
-int lnormim(DIFFIMAGE *imdiff)
+int lnormim(DIFFIMAGE *imdiff_in)
 {
   size_t 
     index = 0;
@@ -30,24 +30,38 @@ int lnormim(DIFFIMAGE *imdiff)
     correction_factor,
     radius_squared,
     distance,
-    distance_squared;
+    distance_squared,
+    cos_two_theta;
   
-  distance_squared = imdiff->distance_mm*imdiff->distance_mm;
-  for(r=0; r < imdiff->vpixels; r++) {
-    rvec.y = (float)(r*imdiff->pixel_size_mm-imdiff->beam_mm.y);
-    for(c=0; c < imdiff->hpixels; c++) {
-      if ((imdiff->image[index] != imdiff->overload_tag) &&
-	  (imdiff->image[index] != imdiff->ignore_tag)) {
-	rvec.x = (float)(c*imdiff->pixel_size_mm-imdiff->beam_mm.x);
-	radius_squared = ((rvec.x*rvec.x) + (rvec.y*rvec.y));
-	correction_factor = 1. + radius_squared/distance_squared
-	  - 2*PI/180.*(rvec.x*imdiff->cassette.y -
-	     rvec.y*imdiff->cassette.x)/imdiff->distance_mm;
-	imdiff->image[index] -= imdiff->value_offset;
-	imdiff->image[index] *= correction_factor * sqrtf(correction_factor);
-	imdiff->image[index] += imdiff->value_offset;
+  XYZCOORDS_DATA ssq;
+
+  int pidx;
+
+  DIFFIMAGE *imdiff;
+
+  if (imdiff_in->slist == NULL) lslistim(imdiff_in);
+
+  for (pidx = 0; pidx < imdiff_in->num_panels; pidx++) {
+    imdiff = &imdiff_in[pidx];
+    index = 0;
+
+    struct xyzcoords s;
+
+    distance_squared = imdiff->distance_mm*imdiff->distance_mm;
+    for(r=0; r < imdiff->vpixels; r++) {
+      for(c=0; c < imdiff->hpixels; c++) {
+	if ((imdiff->image[index] != imdiff->overload_tag) &&
+	    (imdiff->image[index] != imdiff->ignore_tag)) {
+	  s = imdiff->slist[index];
+	  ssq = ldotvec(s,s);
+	  cos_two_theta = 1. - ssq * imdiff->wavelength *imdiff->wavelength / 2.;
+	  radius_squared = ((rvec.x*rvec.x) + (rvec.y*rvec.y));
+	  imdiff->image[index] -= imdiff->value_offset;
+	  imdiff->image[index] /= cos_two_theta * cos_two_theta * cos_two_theta;
+	  imdiff->image[index] += imdiff->value_offset;
+	}
+	index++;
       }
-      index++;
     }
   }
   return(return_value);

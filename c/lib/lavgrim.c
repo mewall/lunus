@@ -9,49 +9,72 @@
 
 #include<mwmask.h>
 
-int lavgrim(DIFFIMAGE *imdiff)
+int lavgrim(DIFFIMAGE *imdiff_in)
 {
-	size_t
-	  i,
-	  r,
-		c,
-		*n,
-		radius,
-		index = 0;
+  size_t
+    i,
+    r,
+    c,
+    *n,
+    radius,
+    index = 0;
 
-	struct xycoords rvec;
+  struct xycoords rvec;
 
-	RFILE_DATA_TYPE *rf;
+  RFILE_DATA_TYPE *rf;
 
-	index = 0;
-	n = (size_t *)calloc(MAX_RFILE_LENGTH, sizeof(size_t));
-	rf = (RFILE_DATA_TYPE *)calloc(MAX_RFILE_LENGTH,sizeof(RFILE_DATA_TYPE));
-	imdiff->rfile_length = 0;
-	for(r = 0; r < imdiff->vpixels; r++) {
-	  rvec.y = r*imdiff->pixel_size_mm - imdiff->beam_mm.y;
-	  for(c = 0; c < imdiff->hpixels; c++) {
-	      rvec.x = c*imdiff->pixel_size_mm - imdiff->beam_mm.x;
-	      radius = (size_t)(sqrtf(rvec.x*rvec.x + rvec.y*rvec.y)/imdiff->pixel_size_mm+.5);
-	      if ((imdiff->image[index] != imdiff->overload_tag) &&
-		  (imdiff->image[index] != imdiff->ignore_tag)) {
-	        if (radius >= imdiff->rfile_length) 
-			imdiff->rfile_length = radius+1;
-		rf[radius] += (RFILE_DATA_TYPE)(float)(imdiff->image[index]-imdiff->value_offset);
-		n[radius]++;
-	      }
-	    index++;
-	  }
+  XYZCOORDS_DATA ssq,rr;
+
+  float cos_two_theta;
+
+  int pidx;
+
+  DIFFIMAGE *imdiff;
+
+  if (imdiff_in->slist == NULL) lslistim(imdiff_in);
+
+  n = (size_t *)calloc(MAX_RFILE_LENGTH, sizeof(size_t));
+  rf = (RFILE_DATA_TYPE *)calloc(MAX_RFILE_LENGTH,sizeof(RFILE_DATA_TYPE));
+  imdiff_in->rfile_length = 0;
+
+  for (pidx = 0; pidx < imdiff_in->num_panels; pidx++) {
+
+    imdiff = &imdiff_in[pidx];
+    index = 0;
+
+    struct xyzcoords s;
+
+    for(r = 0; r < imdiff->vpixels; r++) {
+      for(c = 0; c < imdiff->hpixels; c++) {
+	s = imdiff->slist[index];
+	ssq = ldotvec(s,s);
+	cos_two_theta = 1. - ssq * imdiff->wavelength * imdiff->wavelength / 2.;
+	rr = imdiff->distance_mm / cos_two_theta; 
+	rvec.x = imdiff->wavelength * s.x * rr;
+	rvec.y = imdiff->wavelength * s.y * rr;
+	//	printf("rvec = (%f,%f)\n",rvec.x,rvec.y);
+	radius = (size_t)(sqrtf(rvec.x*rvec.x + rvec.y*rvec.y)/imdiff->pixel_size_mm+.5);
+	if ((imdiff->image[index] != imdiff->overload_tag) &&
+	    (imdiff->image[index] != imdiff->ignore_tag)) {
+	  if (radius >= imdiff_in->rfile_length) 
+	    imdiff_in->rfile_length = radius+1;
+	  rf[radius] += (RFILE_DATA_TYPE)(float)(imdiff->image[index]-imdiff->value_offset);
+	  n[radius]++;
 	}
-	for(i=0;i<imdiff->rfile_length;i++) {
-	  if (n[i] > 0) {
-	    imdiff->rfile[i] = rf[i]/(RFILE_DATA_TYPE)n[i];
+	index++;
+      }
+    }
+  }
+  for(i=0;i<imdiff_in->rfile_length;i++) {
+    if (n[i] > 0) {
+      imdiff_in->rfile[i] = rf[i]/(RFILE_DATA_TYPE)n[i];
 #ifdef DEBUG
-	    if (i>100 && i<=110) printf("lavgrim rf[%d] = %g,",i,rf[i]);
+      if (i>100 && i<=110) printf("lavgrim rf[%d] = %g,",i,rf[i]);
 #endif
-	  } else {
-	    imdiff->rfile[i] = 0.0;
-	  }
-	}
-	free(n);
-	free(rf);
+    } else {
+      imdiff_in->rfile[i] = 0.0;
+    }
+  }
+  free(n);
+  free(rf);
 }

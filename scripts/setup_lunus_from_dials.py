@@ -93,6 +93,9 @@ if __name__=="__main__":
     mms = panel.pixel_to_millimeter(pixels)
     lab_coordinates.extend(panel.get_lab_coord(mms))
 
+  print "lab_coordinates[0] = ",lab_coordinates[0]
+  print "beam.get_a0 = ",beam.get_s0()
+
     # generate s1 vectors
   s1 = lab_coordinates.each_normalize() * (1/beam.get_wavelength())
     # Generate x vectors
@@ -131,8 +134,8 @@ if __name__=="__main__":
     for i in range(len(filelist)):
       imgname=filelist[i]
       img = dxtbx.load(imgname)
-      detector = img.get_detector()
-      beam = img.get_beam()
+#      detector = img.get_detector()
+#      beam = img.get_beam()
       scan = img.get_scan()
       gonio = img.get_goniometer()
 

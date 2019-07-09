@@ -8,7 +8,7 @@
 
 #include<mwmask.h>
 
-int lpolarim(DIFFIMAGE *imdiff)
+int lpolarim(DIFFIMAGE *imdiff_in)
 {
   size_t 
     index = 0;
@@ -31,34 +31,47 @@ int lpolarim(DIFFIMAGE *imdiff)
     arctan_argument,
     two_theta,
     cos_two_theta,
-    sin_two_theta,
+    cos_sq_two_theta,
+    sin_sq_two_theta,
     cos_two_rho,
     two_rho_offset;
 
-  two_rho_offset = 2.*PI/180.*imdiff->polarization_offset;
-  for(r=0; r < imdiff->vpixels; r++) {
-    rvec.y = (float)(r*imdiff->pixel_size_mm-imdiff->beam_mm.y);
-    for(c=0; c < imdiff->hpixels; c++) {
-      if ((imdiff->image[index] != imdiff->overload_tag) &&
-	  (imdiff->image[index] != imdiff->ignore_tag)) {
-	rvec.x = (float)(c*imdiff->pixel_size_mm-imdiff->beam_mm.x);
-	radius_squared = ((rvec.x*rvec.x) + (rvec.y*rvec.y));
-	radius = sqrtf(radius_squared);
-	arctan_argument = radius / imdiff->distance_mm;
-	if (arctan_argument > POLARIZATION_CORRECTION_THRESHOLD) {
-	  two_theta = atanf(arctan_argument);
-	  cos_two_theta = cosf(two_theta);
-	  sin_two_theta = sinf(two_theta);
-	  cos_two_rho = cos(2*acosf(rvec.x / radius) - two_rho_offset);
+  XYZCOORDS_DATA ssq;
+
+  int pidx;
+
+  DIFFIMAGE *imdiff;
+
+  if (imdiff_in->slist == NULL) lslistim(imdiff_in);
+
+  for (pidx = 0; pidx < imdiff_in->num_panels; pidx++) {
+    imdiff = &imdiff_in[pidx];
+    index = 0;
+
+    struct xyzcoords s;
+
+    two_rho_offset = 2.*PI/180.*imdiff->polarization_offset;
+    for(r=0; r < imdiff->vpixels; r++) {
+      rvec.y = (float)(r*imdiff->pixel_size_mm-imdiff->beam_mm.y);
+      for(c=0; c < imdiff->hpixels; c++) {
+	if ((imdiff->image[index] != imdiff->overload_tag) &&
+	    (imdiff->image[index] != imdiff->ignore_tag)) {
+	  rvec.x = (float)(c*imdiff->pixel_size_mm-imdiff->beam_mm.x);
+	  s = imdiff->slist[index];
+	  ssq = ldotvec(s,s);
+	  cos_two_theta = 1. - ssq * imdiff->wavelength *imdiff->wavelength / 2.;
+	  cos_sq_two_theta = cos_two_theta * cos_two_theta;
+	  sin_sq_two_theta = 1. - cos_sq_two_theta;
+	  cos_two_rho = cosf(2.*acosf(s.x / sqrtf(s.x*s.x+s.y*s.y)) - two_rho_offset);
 	  imdiff->image[index] -= imdiff->value_offset;
 	  imdiff->image[index]=(IMAGE_DATA_TYPE)((float)imdiff->image[index] *
-			       2. / (1. + cos_two_theta*cos_two_theta -
-			       imdiff->polarization*cos_two_rho*
-			         sin_two_theta*sin_two_theta));
+						 2. / (1. + cos_sq_two_theta -
+						       imdiff->polarization*cos_two_rho*
+						       sin_sq_two_theta));
 	  imdiff->image[index] += imdiff->value_offset;
 	}
+	index++;
       }
-      index++;
     }
   }
   return(return_value);

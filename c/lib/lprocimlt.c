@@ -11,39 +11,58 @@
 
 int lprocimlt(LAT3D *lat) 
 {
-  static int ct = 0;
-  static DIFFIMAGE 
-    *imdiff_corrected = NULL, *imdiff_scale = NULL, *imdiff_scale_ref = NULL;
+
+  DIFFIMAGE *imdiff_corrected, *imdiff_scale, *imdiff_scale_ref;
+
   IJKCOORDS_DATA
     i0, j0, k0;
-  DIFFIMAGE *imdiff = lat->imdiff;
+
+  DIFFIMAGE *imdiff_list = lat->imdiff, *imdiff;
+
+  static int ct = 0;
+
+  static DIFFIMAGE 
+    *imdiff_corrected_list = NULL, 
+    *imdiff_scale_list = NULL, 
+    *imdiff_scale_ref_list = NULL;
 
   // Initialize other images
-  
-  if (imdiff_corrected == NULL) imdiff_corrected = linitim();
-  if (imdiff_scale == NULL) imdiff_scale = linitim();
-  if (imdiff_scale_ref == NULL) imdiff_scale_ref = linitim();
+
+  if (imdiff_corrected_list == NULL) {
+    imdiff_corrected_list = linitim(imdiff_list->num_panels);
+  }
+  if (imdiff_scale_list == NULL) {
+    imdiff_scale_list = linitim(imdiff_list->num_panels);
+  }
+  if (imdiff_scale_ref_list == NULL) {
+    imdiff_scale_ref_list = linitim(imdiff_list->num_panels);
+  }
 
   // Apply masks
 
-  lpunchim(imdiff);
-  lwindim(imdiff);
-  lthrshim(imdiff);
+  if (imdiff_list->num_panels == 1) {
+    lpunchim(imdiff_list);
+    lwindim(imdiff_list);
+  } else {
+    // ***Insert multipanel masking method here
+  }
   
+  lthrshim(imdiff_list);
+
   // Mode filter to create image to be used for scaling
 
-  lcloneim(imdiff_scale,imdiff);
+  lcloneim(imdiff_scale_list,imdiff_list);
 
-  lmodeim(imdiff_scale);
+  lmodeim(imdiff_scale_list);
   
   // Calculate correction factor
   
-  lcfim(imdiff);	  
+  lcfim(imdiff_list);	  
   
   // Calculate corrected image
   
-  lcloneim(imdiff_corrected,imdiff);
-  if (lmulcfim(imdiff_corrected) != 0) {
+  lcloneim(imdiff_corrected_list,imdiff_list);
+  if (lmulcfim(imdiff_corrected_list) != 0) {
     perror(imdiff_corrected->error_msg);
     exit(1);
   }
@@ -54,7 +73,7 @@ int lprocimlt(LAT3D *lat)
   if (lat->procmode == 0) {
     
     // Reference image for scaling
-    lcloneim(imdiff_scale_ref,imdiff_scale);
+    lcloneim(imdiff_scale_ref_list,imdiff_scale_list);
 
 #ifdef DEBUG
     int j;
@@ -81,7 +100,7 @@ int lprocimlt(LAT3D *lat)
     if (strstr(lat->cell_str,"None") != NULL) {
       float a,b,c,alpha,beta,gamma,adotb,adotc,bdotc;
       struct xyzmatrix a0;
-      a0 = imdiff->amatrix;
+      a0 = imdiff_list->amatrix;
       a = sqrtf(a0.xx*a0.xx+a0.xy*a0.xy+a0.xz*a0.xz);
       b = sqrtf(a0.yx*a0.yx+a0.yy*a0.yy+a0.yz*a0.yz);
       c = sqrtf(a0.zx*a0.zx+a0.zy*a0.zy+a0.zz*a0.zz);
@@ -127,74 +146,106 @@ int lprocimlt(LAT3D *lat)
     if (lat->latct != NULL) free(lat->latct);
     lat->latct = (size_t *)calloc(lat->lattice_length,sizeof(size_t));
 
+#ifdef DEBUG
+      FILE *imageout;
+      if ( (imageout = fopen("debug.img","wb")) == NULL ) {
+	printf("\nCan't open %s.\n\n","debug.img");
+	exit(1);
+      }
+
+      imdiff_corrected_list->outfile=imageout;
+
+      //      lwriteim(imdiff_corrected_list);
+
+#endif
+
     return(0);
   }
 	  
   // Calculate the image scale factor
 
-  lscaleim(imdiff_scale_ref,imdiff_scale);
-  float this_scale_factor = imdiff_scale_ref->rfile[0];
-  float this_scale_error = imdiff_scale_ref->rfile[1];
+  lscaleim(imdiff_scale_ref_list,imdiff_scale_list);
 
-  printf("(%g,%g)",this_scale_factor,this_scale_error);
+  float this_scale_factor = imdiff_scale_ref_list->rfile[0];
+  float this_scale_error = imdiff_scale_ref_list->rfile[1];
+
+  printf("(scale, error) = (%g,%g)",this_scale_factor,this_scale_error);
 
   // Collect the image data into the lattice
 
-  size_t data_added=0;
-  struct xyzcoords H, dH;
-  IJKCOORDS_DATA ii,jj,kk;
-  size_t index = 0;
-  size_t j;
-  i0 = (IJKCOORDS_DATA)(lat->xvoxels/2. - 1.);
-  j0 = (IJKCOORDS_DATA)(lat->yvoxels/2. - 1.);
-  k0 = (IJKCOORDS_DATA)(lat->zvoxels/2. - 1.);
+  int pidx;
+
+  //  printf("number of panels = %d\n",imdiff_list->num_panels);
+
+  for (pidx = 0; pidx < imdiff_list->num_panels; pidx++) {
+    imdiff = &imdiff_list[pidx];
+    imdiff_corrected = &imdiff_corrected_list[pidx];
+    imdiff_scale = &imdiff_scale_list[pidx];
+    imdiff_scale_ref = &imdiff_scale_ref_list[pidx];
+
+    size_t data_added=0;
+    struct xyzcoords H, dH;
+    IJKCOORDS_DATA ii,jj,kk;
+    size_t index = 0;
+    size_t j;
+    i0 = (IJKCOORDS_DATA)(lat->xvoxels/2. - 1.);
+    j0 = (IJKCOORDS_DATA)(lat->yvoxels/2. - 1.);
+    k0 = (IJKCOORDS_DATA)(lat->zvoxels/2. - 1.);
+
+    int iii;
+
+    printf("Image %d, slist[1001..1010] = ",pidx);
+    for (iii=1001;iii<=1010;iii++) printf("(%f,%f,%f) ",imdiff->slist[iii].x,imdiff->slist[iii].y,imdiff->slist[iii].z);
+    printf("\n");
   
-  for (j=0; j<imdiff->image_length; j++) {
-    H = lmatvecmul(imdiff->amatrix, imdiff->xvectors[j]);
+
+    for (j=0; j<imdiff->image_length; j++) {
+      H = lmatvecmul(imdiff->amatrix, imdiff->slist[j]);
 
 #ifdef DEBUG
-    if (j<10) {
-      printf("Image H[%d] = (%f, %f, %f)\n",j,H.x,H.y,H.z);
-    }
+      if (j<10) {
+	printf("Image H[%d] = (%f, %f, %f)\n",j,H.x,H.y,H.z);
+      }
 #endif
 
-    dH.x = fabs(H.x - roundf(H.x));
-    dH.y = fabs(H.y - roundf(H.y));
-    dH.z = fabs(H.z - roundf(H.z));
+      dH.x = fabs(H.x - roundf(H.x));
+      dH.y = fabs(H.y - roundf(H.y));
+      dH.z = fabs(H.z - roundf(H.z));
 
-    if (lat->filterhkl==0 || dH.x>=0.25 || dH.y>=0.25 || dH.z>=0.25) {
-      ii = (IJKCOORDS_DATA)roundf(H.x*(float)lat->pphkl) + i0;
-      jj = (IJKCOORDS_DATA)roundf(H.y*(float)lat->pphkl) + j0;
-      kk = (IJKCOORDS_DATA)roundf(H.z*(float)lat->pphkl) + k0;
-      if (ii>=0 && ii<lat->xvoxels && jj>=0 && jj<lat->yvoxels &&
-	  kk>=0 && kk<lat->zvoxels && imdiff_scale->image[index]>0 &&
-	  imdiff_scale->image[index]!=imdiff->ignore_tag) {
-	size_t latidx = kk*lat->xyvoxels + jj*lat->xvoxels + ii;
-	if (strcmp(lat->integration_image_type,"raw")==0) {
-	  lat->lattice[latidx] += 
-	    (LATTICE_DATA_TYPE)(imdiff->image[index]-imdiff->value_offset)
-	    * imdiff->correction[index]
-	    * this_scale_factor;
+      if (lat->filterhkl==0 || dH.x>=0.25 || dH.y>=0.25 || dH.z>=0.25) {
+	ii = (IJKCOORDS_DATA)roundf(H.x*(float)lat->pphkl) + i0;
+	jj = (IJKCOORDS_DATA)roundf(H.y*(float)lat->pphkl) + j0;
+	kk = (IJKCOORDS_DATA)roundf(H.z*(float)lat->pphkl) + k0;
+	if (ii>=0 && ii<lat->xvoxels && jj>=0 && jj<lat->yvoxels &&
+	    kk>=0 && kk<lat->zvoxels && imdiff_scale->image[index]>0 &&
+	    imdiff_scale->image[index]!=imdiff->ignore_tag) {
+	  size_t latidx = kk*lat->xyvoxels + jj*lat->xvoxels + ii;
+	  if (strcmp(lat->integration_image_type,"raw")==0) {
+	    lat->lattice[latidx] += 
+	      (LATTICE_DATA_TYPE)(imdiff->image[index]-imdiff->value_offset)
+	      * imdiff->correction[index]
+	      * this_scale_factor;
+	  }
+	  if (strcmp(lat->integration_image_type,"corrected")==0) {
+	    lat->lattice[latidx] += 
+	      (LATTICE_DATA_TYPE)(imdiff_corrected->image[index]-imdiff_corrected->value_offset)
+	      * this_scale_factor;
+	  }
+	  if (strcmp(lat->integration_image_type,"scale")==0) {
+	    lat->lattice[latidx] += 
+	      (LATTICE_DATA_TYPE)(imdiff_scale->image[index]-imdiff_scale->value_offset)
+	      * imdiff->correction[index]
+	      * this_scale_factor;
+	  }
+	  lat->latct[latidx] += 1;
+	  data_added += 1;
 	}
-	if (strcmp(lat->integration_image_type,"corrected")==0) {
-	  lat->lattice[latidx] += 
-	    (LATTICE_DATA_TYPE)(imdiff_corrected->image[index]-imdiff_corrected->value_offset)
-	    * this_scale_factor;
-	}
-	if (strcmp(lat->integration_image_type,"scale")==0) {
-	  lat->lattice[latidx] += 
-	    (LATTICE_DATA_TYPE)(imdiff_scale->image[index]-imdiff_scale->value_offset)
-	    * imdiff->correction[index]
-	    * this_scale_factor;
-	}
-	lat->latct[latidx] += 1;
-	data_added += 1;
       }
+      index++;
     }
-    index++;
   }
-
   ct++;
+  //  printf("Done processing image %d\n",ct);
 }
 
 

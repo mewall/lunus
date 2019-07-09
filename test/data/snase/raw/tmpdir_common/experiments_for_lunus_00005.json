@@ -16,7 +16,7 @@
     {
       "__id__": "ImageSet", 
       "images": [
-        "/projects/lunus/packages/lunus/test/data/snase/raw/snc_newhead_00005.img"
+        "/Users/mewall/Common/packages/lunus/test/data/snase/raw/snc_newhead_00005.img"
       ], 
       "mask": "", 
       "gain": "", 
@@ -29,9 +29,9 @@
   "beam": [
     {
       "direction": [
-        0.0, 
-        0.0, 
-        1.0
+        0.0018792332322281023, 
+        -0.0, 
+        0.9999982342396705
       ], 
       "transmission": 1.0, 
       "polarization_normal": [
@@ -43,7 +43,7 @@
       "polarization_fraction": 0.999, 
       "flux": 0.0, 
       "sigma_divergence": 0.0, 
-      "wavelength": 0.908
+      "wavelength": 0.907999999999999
     }
   ], 
   "detector": [
@@ -85,6 +85,7 @@
         "px_mm_strategy": {
           "type": "SimplePxMmStrategy"
         }, 
+        "pedestal": 0.0, 
         "identifier": "", 
         "type": "", 
         "children": [
@@ -100,14 +101,14 @@
       "panels": [
         {
           "origin": [
-            -42.64, 
-            40.02, 
-            -57.43
+            -42.025803367317415, 
+            40.70403438638866, 
+            -59.577724129754756
           ], 
           "fast_axis": [
-            1.0, 
-            0.0, 
-            0.0
+            0.9998400327518756, 
+            -0.01679879663543797, 
+            0.00614079297236443
           ], 
           "name": "Panel", 
           "raw_image_offset": [
@@ -115,9 +116,9 @@
             0
           ], 
           "slow_axis": [
-            0.0, 
-            -1.0, 
-            0.0
+            -0.017081012374686542, 
+            -0.9986414471033668, 
+            0.049229047761960736
           ], 
           "material": "", 
           "mask": [], 
@@ -125,7 +126,7 @@
           "mu": 0.0, 
           "gain": 1.0, 
           "trusted_range": [
-            -1.0, 
+            1.0, 
             65535.0
           ], 
           "image_size": [
@@ -135,6 +136,7 @@
           "px_mm_strategy": {
             "type": "SimplePxMmStrategy"
           }, 
+          "pedestal": 0.0, 
           "identifier": "", 
           "type": "SENSOR_CCD", 
           "pixel_size": [

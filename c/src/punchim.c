@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
  * Initialize diffraction image:
  */
   
-  if ((imdiff = linitim()) == NULL) {
+  if ((imdiff = linitim(1)) == NULL) {
     perror("Couldn't initialize diffraction image.\n\n");
     exit(0);
   }

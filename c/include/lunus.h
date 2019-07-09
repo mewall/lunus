@@ -456,6 +456,12 @@ typedef struct
   size_t image_length;	        /* Total number of pixels in image */
   short vpixels;		/* Number of vertical pixels */
   short hpixels;		/* Number of horizontal pixels */
+  struct xyzcoords slow_vec;    /* Direction of slow raster axis */
+  struct xyzcoords fast_vec;    /* Direction of fast raster axis */
+  struct xyzcoords normal_vec;  /* Direciton of normal to panel */
+  struct xyzcoords origin_vec;  /* Vector position of image origin */
+  struct xyzcoords beam_vec;    /* Beam direction */
+  struct xyzcoords polarization_vec; /* Beam polarization direction */
   IMAGE_DATA_TYPE ignore_tag;   /* Ignore this pixel value */
   struct rccoords *overload;    /* Pointer to overload coords */
   IMAGE_DATA_TYPE overload_tag; /* Pixel value indicating ovld */
@@ -521,8 +527,9 @@ typedef struct
   float *correction;             /* Correction factor, pixel by pixel */
   float correction_factor_scale; /* Overall scale factor for correction */
   float background_subtraction_factor;/* Multiplicative factor for lbkgsubim() */
-  struct xyzcoords *xvectors;   /* lab coordinates corresponding to each pixel in the image */
+  struct xyzcoords *slist;   /* scattering vectors for each pixel in the image */
   struct xyzmatrix amatrix;     /* A matrix for mapping lab coords to reciprocal space coords */
+  int use_json_metrology;
   MPIVARS *mpiv;
 } DIFFIMAGE;
 
@@ -769,6 +776,7 @@ size_t lbufcompress(const int* values, const size_t sz, char *packed);
 void lbufuncompress(const char* packed, const size_t packed_sz, int* values, size_t values_sz);
 int lbuttim(DIFFIMAGE *imdiff);
 struct fom lcalcrsf(char *hklfname, LAT3D *lat1,LAT3D *lat2);
+struct xyzcoords lcalcsim(DIFFIMAGE *imdiff_in);
 int lccrlt(LAT3D *lat1, LAT3D *lat2);
 int lchbyte(void *ptr, size_t packet_size, size_t list_length);
 int lcloneim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
@@ -812,9 +820,10 @@ int lgetovld(DIFFIMAGE *imdiff);
 int lgetpks(DIFFIMAGE *imdiff);
 char * lgettag(const char *target,const char *tag);
 float lgettagf(const char *target,const char *tag);
+struct xyzcoords lgettagxyz(const char *target,const char *tag);
 int lgettagi(const char *target,const char *tag);
 struct ijkcoords lindexFromS(LAT3D *lat);
-DIFFIMAGE *linitim(void);
+DIFFIMAGE *linitim(size_t n);
 LAT3D *linitlt(void);
 CCP4MAP *linitmap(void);
 void linitMPI(MPIVARS *mpiv);
@@ -886,6 +895,7 @@ int lscalerfim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lscalelt(LAT3D *lat1, LAT3D *lat2);
 struct xyzcoords lsFromIndex(LAT3D *lat);
 int lsetcbftag(char **t,size_t *target_length, const char *tag,const char *val);
+int lsetmetim(DIFFIMAGE *imdiff_in);
 int lsetparamsim(DIFFIMAGE *imdiff);
 int lsetparamslt(LAT3D *lat);
 int lsettag(char *target,const char *tag,const char *val);
@@ -893,6 +903,7 @@ int lshiftlt(LAT3D *lat,struct ijkcoords t);
 int lshiftsflt(LAT3D *lat1,LAT3D *lat2);
 int lshim4lt(LAT3D *lat);
 int lshimlt(LAT3D *lat);
+int lslistim(DIFFIMAGE *imdiff_in);
 int lsmthim(DIFFIMAGE *imdiff);
 int lsolidlt(LAT3D *lat);
 float lspleval(float *break__, float *coef, int *l, int *k, float *x,
@@ -964,4 +975,6 @@ int lLaue10(LAT3D *lat);
 int lLaue11(LAT3D *lat);
 int readAmatrix(struct xyzmatrix *a,const char *amatrix_format,const size_t i);
 int readExptJSON(struct xyzmatrix *a,char **image_name,char **pedestal_name,const char *json_name);
+int readPanelJSON(struct xyzcoords *fast_vec,struct xyzcoords *slow_vec,struct xyzcoords *origin_vec,const char *json_name);
+int readBeamJSON(struct xyzcoords *beam_vec,struct xyzcoords *polarization_vec,float *wavelength,const char *json_name);
 #endif

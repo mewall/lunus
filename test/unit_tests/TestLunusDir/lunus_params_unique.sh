@@ -31,3 +31,5 @@ polarim_polarization=0.93
 #image scale factor parameters, for merge
 scale_inner_radius=100
 scale_outer_radius=500
+#use panel metrology info in .json file
+use_json_metrology=False
