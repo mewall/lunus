@@ -29,10 +29,62 @@ def get_experiment_xvectors(experiments):
 
   return(x)
 
-def procimg_single(Isize1,Isize2,scale,lattice_mask_tag,A_matrix,rvec,D):
+def correction_factor(Isize1,Isize2,experiments,rvec):
+
+  from scitbx.matrix import col
+
+  beam = experiments[0].beam
+  detector = experiments[0].detector
+  p0 = detector[0]
+
+  beam_vec = -col(beam.get_direction())
+  wavelength = beam.get_wavelength()
+#  polarization_vec = beam.get_polarization()
+  polarization_vec = col([0.,1.,0.])
+#  epsilon = beam.get_polarization_fraction()
+  epsilon = 1.
+  normal_vec = col(p0.get_normal())
+
+  cf = np.zeros((Isize1,Isize2))
+  for r in range(Isize1):
+    if (r%10 == 0):
+        print "r = ",r
+    for c in range(Isize2):
+      z = r*Isize2 + c
+      s = col(rvec[z])
+      ssq = s.dot(s)
+      cos_two_theta = 1. - ssq * wavelength * wavelength / 2.
+      cos_sq_two_theta = cos_two_theta * cos_two_theta
+      sin_sq_two_theta = 1. - cos_sq_two_theta
+      k = s + col(beam.get_s0())
+      kp = col([k[0],k[1],0.0])
+      kp.normalize()
+      sin_rho = kp.dot(polarization_vec)
+      cos_two_rho = 1. - 2. * sin_rho * sin_rho
+      # Polarization correction
+      cf[r,c] = (1. + cos_sq_two_theta - epsilon * cos_two_rho * sin_sq_two_theta)/2.
+      cos_incidence = k.normalize().dot(normal_vec)
+      cf[r,c] *= cos_incidence*cos_incidence*cos_incidence
+  return cf
+
+def procimg_single(Isize1,Isize2,scale,lattice_mask_tag,A_matrix,rvec,experiments,D):
   # returns a 3D lattice with integrated data from a chunk of data points
   from scitbx.matrix import col
   # define the lattice indices at which h,k,l = 0,0,0
+
+  beam = experiments[0].beam
+  detector = experiments[0].detector
+  p0 = detector[0]
+
+  s0 = col(beam.get_s0())
+  beam_vec = -col(beam.get_direction())
+  wavelength = beam.get_wavelength()
+#  polarization_vec = beam.get_polarization()
+  polarization_vec = col([0.,1.,0.])
+#  epsilon = beam.get_polarization_fraction()
+  epsilon = 1.
+  normal_vec = col(p0.get_normal())
+
   global image_mask_tag,pphkl
   imp=np.zeros((Isize1,Isize2))
 #  for r in xrange(100): # slow dimension
@@ -44,13 +96,28 @@ def procimg_single(Isize1,Isize2,scale,lattice_mask_tag,A_matrix,rvec,D):
       z = r*Isize2 + c
       tmid = clock()
       # Skip this pixel if the resolution is higher than the cutoff
-      this_rvec_sqr = rvec[z][0]*rvec[z][0]+rvec[z][1]*rvec[z][1]+rvec[z][2]*rvec[z][2]
-      rsn = 1./np.sqrt(this_rvec_sqr)
+      s = col(rvec[z])
+      rsn = 1./abs(s)
       if (rsn < rsn_min):
           imp[r,c] = image_mask_tag
           continue
+      # calculate correction factor
+      ssq = s.dot(s)
+      cos_two_theta = 1. - ssq * wavelength * wavelength / 2.
+      cos_sq_two_theta = cos_two_theta * cos_two_theta
+      sin_sq_two_theta = 1. - cos_sq_two_theta
+      k = s + s0
+      kp = col([k[0],k[1],0.0])
+      kp.normalize()
+      sin_rho = kp.dot(polarization_vec)
+      cos_two_rho = 1. - 2. * sin_rho * sin_rho
+      # Polarization correction
+      cf = (1. + cos_sq_two_theta - epsilon * cos_two_rho * sin_sq_two_theta)/2.
+      cos_incidence = k.normalize().dot(normal_vec)
+      cf *= cos_incidence*cos_incidence*cos_incidence
+
       # calculate h,k,l for this data point
-      H = A_matrix * col(rvec[z]) * pphkl
+      H = A_matrix * col(s) * pphkl
       # Calculate fractional index into diffuse intensity
       isz = len(D)
       jsz = len(D[0])
@@ -82,7 +149,7 @@ def procimg_single(Isize1,Isize2,scale,lattice_mask_tag,A_matrix,rvec,D):
                           imp[r,c]+=D[i+ii][j+jj][k+kk]*this_w
                           wtot += this_w
           if (wtot>0.0):
-              imp[r,c] /= wtot
+              imp[r,c] *= cf/wtot
           else:
               imp[r,c] = image_mask_tag
       else:
@@ -168,6 +235,10 @@ def process_one_glob():
       experiments = ExperimentListFactory.from_json_file(metrolist[0], check_format=False)
       x = get_experiment_xvectors(experiments)
 
+    Isize1,Isize2 = experiments[0].detector[0].get_image_size()
+
+#    cf = correction_factor(Isize1,Isize2,experiments,x[0])
+
     for i in range(len(filelist)):
       print "{0}...".format(i),
       sys.stdout.flush()
@@ -194,8 +265,6 @@ def process_one_glob():
       gonio = img.get_goniometer()
       axis = gonio.get_rotation_axis()
         
-      Isize1,Isize2 = detector[0].get_image_size()
-
       pixel_values = flex.int(range(Isize1*Isize2))
       pixel_values.reshape(flex.grid(Isize2,Isize1))
 
@@ -206,9 +275,9 @@ def process_one_glob():
 
       A_matrix = matrix.sqr(crystal.get_A()).inverse()
 
-      scale = 1.0
+      diffim = procimg_single(Isize1,Isize2,scale,lattice_mask_tag,A_matrix,x[0],experiments,D)
 
-      diffim = procimg_single(Isize1,Isize2,scale,lattice_mask_tag,A_matrix,x[0],D)
+      # Apply correction factor for polarization and solid angle
 
 # Scale pixel values
 
@@ -219,10 +288,12 @@ def process_one_glob():
 #  s = 256./(dmax-dmin)
 
 
-#      for i in range(len(diffim)):
-#          for j in range(len(diffim[i])):
-#              if (diffim[i][j] != image_mask_tag):
-#                  diffim[i][j] = (diffim[i][j]-dmin)*scale
+      for i in range(len(diffim)):
+          for j in range(len(diffim[i])):
+              if (diffim[i][j] != image_mask_tag):
+                  diffim[i][j] = diffim[i][j]*scale
+
+#      diffim *= scale
 
       for j in range(Isize2):
           for i in range(Isize1):
@@ -266,6 +337,13 @@ if __name__=="__main__":
     rsn_min = 1.5
   else:
     rsn_min = float(args.pop(idx).split("=")[1])
+ # scale
+  try:
+    idx = [a.find("scale")==0 for a in args].index(True)
+  except ValueError:
+    scale = 1.0
+  else:
+    scale = float(args.pop(idx).split("=")[1])
  # rotation series mode
   try:
     idx = [a.find("rotation_series")==0 for a in args].index(True)
@@ -337,14 +415,9 @@ if __name__=="__main__":
       mx[i]=int(max(abs(DhklI[:,i])))
   D = np.zeros((mx[0]*2+1,mx[1]*2+1,mx[2]*2+1))
   D[:,:,:] = lattice_mask_tag
-  m = 0.0
   for i in range(len(DhklI)):
       hh,kk,ll=DhklI[i][:3]
       D[int(hh)+mx[0]][int(kk)+mx[1]][int(ll)+mx[2]]=float(DhklI[i][3])
-      if (m > float(DhklI[i][3])):
-          m = float(DhklI[i][3])
-  print "min from read = ",m
-#  fileidx = 0
 
   #Create parallel processing pool
 
