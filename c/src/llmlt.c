@@ -108,11 +108,11 @@ int main(int argc, char *argv[])
   lat->anisoU.xy = 0.0;
   lat->anisoU.xz = 0.0;
   lat->anisoU.yx = 0.0;
-  lat->anisoU.yy = sigma2*sigma2;
+  lat->anisoU.yy = sigma1*sigma1;
   lat->anisoU.yz = 0.0;
   lat->anisoU.zx = 0.0;
   lat->anisoU.zy = 0.0;
-  lat->anisoU.zz = sigma1*sigma1;
+  lat->anisoU.zz = sigma2*sigma2;
   lat->gamma = gamma;
   strcpy(lat->cell_str,cell_str);
   lparsecelllt(lat);

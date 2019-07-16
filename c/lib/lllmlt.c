@@ -117,8 +117,8 @@ int lllmlt(LAT3D *lat)
 	U_times_s = lmatvecmul(lat->anisoU,s);	
 	exparg = 2.*PI*2.*PI*ldotvec(s,U_times_s);
 	dwf = expf(-exparg);
-	//	sf[lat_index] *= (LATTICE_DATA_TYPE)(1.-dwf)*dwf/((LATTICE_DATA_TYPE)lat->lattice_length*sqrtf((LATTICE_DATA_TYPE)lat->lattice_length));
-	sf[lat_index] *= (LATTICE_DATA_TYPE)exparg*dwf/((LATTICE_DATA_TYPE)lat->lattice_length*sqrtf((LATTICE_DATA_TYPE)lat->lattice_length));
+	sf[lat_index] *= (LATTICE_DATA_TYPE)(1.-dwf)*dwf/((LATTICE_DATA_TYPE)lat->lattice_length*sqrtf((LATTICE_DATA_TYPE)lat->lattice_length));
+	//	sf[lat_index] *= (LATTICE_DATA_TYPE)exparg*dwf/((LATTICE_DATA_TYPE)lat->lattice_length*sqrtf((LATTICE_DATA_TYPE)lat->lattice_length));
 	lat_index++;
       }
     }

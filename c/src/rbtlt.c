@@ -5,7 +5,7 @@
    Version: 1.
    
    Usage:
-   		"llmlt <input lattice> <output lattice> <cell_str> <sigma>"
+   		"llmlt <input lattice> <output lattice> <cell_str> <sigma1> <sigma2>"
 
 		Input is I0(hkl) lattice, unit cell, sigma from rigid body translation model.  Output is rigid body translation model of diffuse scattering.
    */
@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
     *lat;
 
   float
-    sigma;
+    sigma1,sigma2;
 
 /*
  * Set input line defaults:
@@ -34,13 +34,15 @@ int main(int argc, char *argv[])
 	
 	latticein = stdin;
 	latticeout = stdout;
-	sigma = 0.0;
+	sigma1 = sigma2 = 0.0;
 /*
  * Read information from input line:
  */
 	switch(argc) {
+	  case 6:
+	  sigma2 = atof(argv[5]);
 	  case 5:
-	  sigma = atof(argv[4]);
+	  sigma1 = atof(argv[4]);
 	  case 4:
 	  strcpy(cell_str,argv[3]);
 	  case 3:
@@ -70,6 +72,10 @@ int main(int argc, char *argv[])
 	  exit(0);
 	}
   
+	if (sigma2 == 0.0) {
+	  sigma2 = sigma1;
+	}
+
   /*
    * Initialize lattices:
    */
@@ -93,16 +99,16 @@ int main(int argc, char *argv[])
    * Calculate liquid-like motions prefactor:
    */
   
-  lat->sigma = sigma;
-  lat->anisoU.xx = sigma*sigma;
+  lat->sigma = sigma1;
+  lat->anisoU.xx = sigma1*sigma1;
   lat->anisoU.xy = 0.0;
   lat->anisoU.xz = 0.0;
   lat->anisoU.yx = 0.0;
-  lat->anisoU.yy = sigma*sigma;
+  lat->anisoU.yy = sigma1*sigma1;
   lat->anisoU.yz = 0.0;
   lat->anisoU.zx = 0.0;
   lat->anisoU.zy = 0.0;
-  lat->anisoU.zz = sigma*sigma;
+  lat->anisoU.zz = sigma2*sigma2;
   strcpy(lat->cell_str,cell_str);
   lparsecelllt(lat);
   lrbtlt(lat);
