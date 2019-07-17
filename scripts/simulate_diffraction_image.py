@@ -351,6 +351,7 @@ if __name__=="__main__":
   else:
     scale = float(args.pop(idx).split("=")[1])
  # rotation series mode
+  rotation_series=True
   try:
     idx = [a.find("rotation_series")==0 for a in args].index(True)
   except ValueError:
