@@ -83,7 +83,10 @@ def procimg_single(Isize1,Isize2,scale,lattice_mask_tag,A_matrix,rvec,experiment
   polarization_vec = col([0.,1.,0.])
 #  epsilon = beam.get_polarization_fraction()
   epsilon = 1.
-  normal_vec = col(p0.get_normal())
+  if (use_json_metrology):
+    normal_vec = col(p0.get_normal())
+  else:
+    normal_vec = col([0.,0.,-1.])
 
   global image_mask_tag,pphkl
   imp=np.zeros((Isize1,Isize2))
@@ -353,6 +356,17 @@ if __name__=="__main__":
     rotation_series_str = args.pop(idx).split("=")[1]
     if (rotation_series_str == "False"):
       rotation_series=False
+
+ # use .json metrology info for correction factor
+  use_json_metrology=False
+  try:
+    idx = [a.find("use_json_metrology")==0 for a in args].index(True)
+  except ValueError:
+    use_json_metrology=False
+  else:
+    use_json_metrology_str = args.pop(idx).split("=")[1]
+    if (use_json_metrology_str == "True"):
+      use_json_metrology=True
 
  # Input json
   keep_going = True

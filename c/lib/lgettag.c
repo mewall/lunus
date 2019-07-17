@@ -86,8 +86,9 @@ char * lgettag(const char *target,const char *tag)
   int err;
 
   if ((err = lfindtag(target,tag,&pos_begin,&pos_end)) != 0) {
-    perror("Couldn't find tag in lfindtag().\n");
-    exit(err);
+    //    perror("Couldn't find tag in lfindtag().\n");
+    //    printf("tag = %s\n",tag);
+    return(NULL);
   }
 
   int len = pos_end-pos_begin-1;
