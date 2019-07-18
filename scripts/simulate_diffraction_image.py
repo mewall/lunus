@@ -305,7 +305,7 @@ def process_one_glob():
           for i in range(Isize1):
               pixel_values[j,i] = np.int(diffim[i,j])
 
-      outname = prefout+"_{0}.cbf".format(imnum)
+      outname = prefout+"_%05d.cbf"%(imnum)
 
       FormatCBFMini.as_file(detector,beam,gonio,scan,pixel_values,outname)
 

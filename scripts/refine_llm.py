@@ -216,10 +216,12 @@ if __name__=="__main__":
         xrs.convert_to_isotropic()
 
     fcalc = xrs.structure_factors(d_min=1.0).f_calc()
+    f_000 = xrs.f_000()
     fc_square = fcalc.as_intensity_array()
     fc_square_p1 = fc_square.expand_to_p1()
 
     f=open("tmp.hkl",'w')
+    print >>f, "%4d %4d %4d   %10.2f" %((0,0,0)+tuple((f_000*f_000,)))
     for hkl,intensity in fc_square_p1:
         print >>f, "%4d %4d %4d   %10.2f" %(hkl+tuple((intensity,)))
     f.close()
