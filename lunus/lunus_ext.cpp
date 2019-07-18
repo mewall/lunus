@@ -796,13 +796,21 @@ namespace lunus {
       scitbx::af::flex_int data(scitbx::af::flex_grid<>(xvox,yvox,zvox));
       int* begin=data.begin();
       std::size_t ct=0;
-      for (int i = 0;i<lat->lattice_length;i++) {
-  if (lat->lattice[i] == lat->mask_tag) {
-    begin[i] = -1;
-    ct++;
-  } else {
-    begin[i] = lat->lattice[i];
-  }
+      std::size_t latidx;
+      std::size_t idx = 0;
+      for (int i = 0;i<lat->xvoxels;i++) {
+	for (int j = 0;j<lat->yvoxels;j++) {
+	  for (int k = 0;k<lat->zvoxels;k++) {
+	    latidx = k*lat->xyvoxels+j*lat->xvoxels+i;
+	    if (lat->lattice[latidx] == lat->mask_tag) {
+	      begin[idx] = lat->mask_tag;
+	      ct++;
+	    } else {
+	      begin[idx] = lat->lattice[latidx];
+	    }
+	    idx++;
+	  }
+	}
       }
       return data;
     }
