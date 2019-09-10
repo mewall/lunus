@@ -149,6 +149,35 @@ namespace lunus {
       //      printf("ct = %ld,max = %d, min = %d\n",ct,max,min);
     }
 
+    inline void set_image(std::size_t n,scitbx::af::flex_double data) {
+      double* begin=data.begin();
+      std::size_t size=data.size();
+      std::size_t slow=data.accessor().focus()[0];
+      std::size_t fast=data.accessor().focus()[1];
+      DIFFIMAGE *im = &imdiff[n];
+      if (im->image_length != size) {
+	im->image_length = size;
+	im->image = (IMAGE_DATA_TYPE *)realloc(im->image,im->image_length*sizeof(IMAGE_DATA_TYPE));
+	im->correction = (float *)realloc(im->correction,im->image_length*sizeof(float));
+      }
+      im->hpixels = fast;
+      im->vpixels = slow;
+      im->value_offset = 0;
+      IMAGE_DATA_TYPE max=32766,min=-32766;
+      std::size_t ct=0;
+      for (int i = 0;i<im->image_length;i++) {
+	if (begin[i]<0.0 || begin[i] >= (double)MAX_IMAGE_DATA_VALUE) {
+	  im->image[i] = im->ignore_tag;
+	  ct++;
+	} else {
+	  im->image[i] = (IMAGE_DATA_TYPE)begin[i];
+	  if (im->image[i]>max) max = im->image[i];
+	  if (im->image[i]<min) min = im->image[i];
+	}
+      }
+      //      printf("ct = %ld,max = %d, min = %d\n",ct,max,min);
+    }
+
     inline void set_background(scitbx::af::flex_int data) {
       int* begin=data.begin();
       std::size_t size=data.size();
@@ -839,6 +868,7 @@ namespace boost_python { namespace {
 
     void (lunus::Process::*set_image1)(scitbx::af::flex_int data) = &lunus::Process::set_image;
     void (lunus::Process::*set_image2)(std::size_t n,scitbx::af::flex_int data) = &lunus::Process::set_image;
+    void (lunus::Process::*set_image3)(std::size_t n,scitbx::af::flex_double data) = &lunus::Process::set_image;
 
     void (lunus::Process::*set_xvectors1)(scitbx::af::flex_double xvectors_in) = &lunus::Process::set_xvectors;
     void (lunus::Process::*set_xvectors2)(std::size_t n,scitbx::af::flex_double xvectors_in) = &lunus::Process::set_xvectors;
@@ -854,6 +884,7 @@ namespace boost_python { namespace {
       .def("LunusBkgsubim",&lunus::Process::LunusBkgsubim)
       .def("set_image",set_image1)
       .def("set_image",set_image2)
+      .def("set_image",set_image3)
       .def("set_background",set_background1)
       .def("set_background",set_background2)
       .def("get_image",&lunus::Process::get_image)
