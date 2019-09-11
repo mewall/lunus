@@ -310,6 +310,23 @@ namespace lunus {
       return data;
     }
 
+    inline void set_counts(scitbx::af::flex_int data) {
+      int* begin=data.begin();
+      std::size_t size=data.size();
+      std::size_t xvox=data.accessor().focus()[0];
+      std::size_t yvox=data.accessor().focus()[1];
+      std::size_t zvox=data.accessor().focus()[2];
+      lat->lattice_length = size;
+      lat->xvoxels = xvox;
+      lat->yvoxels = yvox;
+      lat->zvoxels = zvox;
+      lat->latct = (std::size_t *)realloc(lat->latct,lat->lattice_length*sizeof(std::size_t));
+      std::size_t ct=0;
+      for (int i = 0;i<lat->lattice_length;i++) {
+	lat->latct[i] = (std::size_t)begin[i];
+      }
+    }
+
     inline scitbx::af::flex_int get_counts() {
       std::size_t xvox = lat->xvoxels;
       std::size_t yvox = lat->yvoxels;
@@ -796,8 +813,8 @@ namespace lunus {
       lanisolt(lat);
     }
 
-    inline void set_lattice(scitbx::af::flex_int data) {
-      int* begin=data.begin();
+    inline void set_lattice(scitbx::af::flex_double data) {
+      double* begin=data.begin();
       std::size_t size=data.size();
       std::size_t xvox=data.accessor().focus()[0];
       std::size_t yvox=data.accessor().focus()[1];
@@ -818,12 +835,12 @@ namespace lunus {
       }
     }
 
-    inline scitbx::af::flex_int get_lattice() {
+    inline scitbx::af::flex_double get_lattice() {
       std::size_t xvox = lat->xvoxels;
       std::size_t yvox = lat->yvoxels;
       std::size_t zvox = lat->zvoxels;
-      scitbx::af::flex_int data(scitbx::af::flex_grid<>(xvox,yvox,zvox));
-      int* begin=data.begin();
+      scitbx::af::flex_double data(scitbx::af::flex_grid<>(xvox,yvox,zvox));
+      double* begin=data.begin();
       std::size_t ct=0;
       std::size_t latidx;
       std::size_t idx = 0;
@@ -897,6 +914,7 @@ namespace boost_python { namespace {
       .def("write_as_cube",&lunus::Process::write_as_cube)
       .def("write_as_lat",&lunus::Process::write_as_lat)
       .def("set_lattice",&lunus::Process::set_lattice)
+      .def("set_counts",&lunus::Process::set_counts)
       .def("LunusSetparamslt",&lunus::Process::LunusSetparamslt)
       .def("set_amatrix",&lunus::Process::set_amatrix)
       .def("set_xvectors",set_xvectors1)
