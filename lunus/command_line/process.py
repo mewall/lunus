@@ -42,7 +42,7 @@ def get_experiment_params(experiments):
 
     experiment_params.append(beam_params+fast_vec_params+slow_vec_params+origin_vec_params+normal_vec_params+more_params)
 
-    print "panel_ct = ",panel_ct,origin_vec_params
+#    print "panel_ct = ",panel_ct,origin_vec_params
 
     panel_ct += 1
 
@@ -76,7 +76,9 @@ def process_one_glob():
     from dxtbx.model.experiment_list import Experiment, ExperimentList
     from dxtbx.serialize import dump
 
-    imnum=1
+    imnum=0
+
+    tte = 0.0
 
     metrolist = glob.glob(metro_glob)
     metrolist.sort()
@@ -99,7 +101,7 @@ def process_one_glob():
       x = get_experiment_xvectors(experiments)
 
     for i in range(len(filelist)):
-      print "{0}...".format(i),
+      print "{0} ".format(i),
       sys.stdout.flush()
 
       if (not rotation_series):
@@ -165,11 +167,18 @@ def process_one_glob():
 
         fresh_lattice = False
 
+      bt = time()
       p.LunusProcimlt(1)
+      et = time()
+      te = et - bt
+
+      tte += te
 
       imnum = imnum +1
 
     print
+
+    print "Average time per image (sec) = ",tte/imnum
 
 if __name__=="__main__":
   import sys
