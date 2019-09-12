@@ -58,7 +58,7 @@ def correction_factor(Isize1,Isize2,experiments,rvec):
       sin_sq_two_theta = 1. - cos_sq_two_theta
       k = s + col(beam.get_s0())
       kp = col([k[0],k[1],0.0])
-      kp.normalize()
+      kp = kp.normalize()
       sin_rho = kp.dot(polarization_vec)
       cos_two_rho = 1. - 2. * sin_rho * sin_rho
       # Polarization correction
@@ -111,7 +111,7 @@ def procimg_single(Isize1,Isize2,scale,lattice_mask_tag,A_matrix,rvec,experiment
       sin_sq_two_theta = 1. - cos_sq_two_theta
       k = s + s0
       kp = col([k[0],k[1],0.0])
-      kp.normalize()
+      kp = kp.normalize()
       sin_rho = kp.dot(polarization_vec)
       cos_two_rho = 1. - 2. * sin_rho * sin_rho
       # Polarization correction
