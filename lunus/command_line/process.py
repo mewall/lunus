@@ -130,6 +130,7 @@ def process_one_glob():
     imnum=0
 
     tte = 0.0
+    ttr = 0.0
 
     metrolist = glob.glob(metro_glob)
     metrolist.sort()
@@ -196,6 +197,8 @@ def process_one_glob():
 
       imgname=filelist[i]
 
+      bt = time()
+
       if (get_mpi_rank() == 0 or not fresh_lattice):
         img = dxtbx.load(imgname)
         data = img.get_raw_data()
@@ -210,7 +213,8 @@ def process_one_glob():
         scan = mpi_bcast(scan)
         gonio = mpi_bcast(gonio)
 
-
+      et = time()
+      ttr += et - bt
 #      print "min of data = ",flex.min(data)
 #      print "max of data = ",flex.max(data)
 
@@ -260,7 +264,8 @@ def process_one_glob():
           p.set_xvectors(pidx,x[pidx])
         p.set_image_ref()
 
-        p.print_image_params()
+        if get_mpi_rank() == 0:
+          p.print_image_params()
       
         p.LunusProcimlt(0)
 
@@ -277,7 +282,7 @@ def process_one_glob():
 
     print
 
-    print "Average time per image (sec) = ",tte/imnum
+    print "Rank {0} time spent in read, processing (sec): {1} {2}\n".format(get_mpi_rank(),ttr,tte)
 
 if __name__=="__main__":
   import sys
@@ -437,10 +442,14 @@ if __name__=="__main__":
 # Temporary, set default metrology based on beam center and distance
 
     process_one_glob()
-      
+
+  bt = time()
   p = mpi_reduce_p(p)
+  et = time()
+  tred = et - bt
 
   if get_mpi_rank() == 0:
+    print "Time spent in reduction (sec): ",tred
     p.divide_by_counts()
 
     if (not vtk_file is None):
