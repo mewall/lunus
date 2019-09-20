@@ -192,6 +192,7 @@ int lgetcbftagi(const char *target,const char *tag)
   int err;
 
   if ((err = lfindcbftag(target,tag,&pos_begin,&pos_end)) != 0) {
+    printf("Couldn't find tag %s\n",tag);
     perror("Couldn't find tag in lfindcbftag().\n");
     exit(err);
   }
@@ -214,6 +215,7 @@ long lgetcbftagl(const char *target,const char *tag)
   int err;
 
   if ((err = lfindcbftag(target,tag,&pos_begin,&pos_end)) != 0) {
+    printf("Couldn't find tag %s\n",tag);
     perror("Couldn't find tag in lfindcbftag().\n");
     exit(err);
   }
@@ -236,6 +238,7 @@ float lgetcbftagf(const char *target,const char *tag)
   int err;
 
   if ((err = lfindcbftag(target,tag,&pos_begin,&pos_end)) != 0) {
+    printf("Couldn't find tag %s\n",tag);
     perror("Couldn't find tag in lfindcbftag().\n");
     exit(err);
   }
