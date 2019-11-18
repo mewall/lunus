@@ -76,7 +76,7 @@ void lanisolt(LAT3D *lat)
     }
   }
 
-  printf("LANISOLT: num_zero_counts = %d\n",num_zero_counts);
+  //  printf("LANISOLT: num_zero_counts = %d\n",num_zero_counts);
 
   // subtract isotropic component
 

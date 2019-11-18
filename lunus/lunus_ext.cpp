@@ -149,6 +149,35 @@ namespace lunus {
       //      printf("ct = %ld,max = %d, min = %d\n",ct,max,min);
     }
 
+    inline void set_image(std::size_t n,scitbx::af::flex_double data) {
+      double* begin=data.begin();
+      std::size_t size=data.size();
+      std::size_t slow=data.accessor().focus()[0];
+      std::size_t fast=data.accessor().focus()[1];
+      DIFFIMAGE *im = &imdiff[n];
+      if (im->image_length != size) {
+	im->image_length = size;
+	im->image = (IMAGE_DATA_TYPE *)realloc(im->image,im->image_length*sizeof(IMAGE_DATA_TYPE));
+	im->correction = (float *)realloc(im->correction,im->image_length*sizeof(float));
+      }
+      im->hpixels = fast;
+      im->vpixels = slow;
+      im->value_offset = 0;
+      IMAGE_DATA_TYPE max=32766,min=-32766;
+      std::size_t ct=0;
+      for (int i = 0;i<im->image_length;i++) {
+	if (begin[i]<0.0 || begin[i] >= (double)MAX_IMAGE_DATA_VALUE) {
+	  im->image[i] = im->ignore_tag;
+	  ct++;
+	} else {
+	  im->image[i] = (IMAGE_DATA_TYPE)begin[i];
+	  if (im->image[i]>max) max = im->image[i];
+	  if (im->image[i]<min) min = im->image[i];
+	}
+      }
+      //      printf("ct = %ld,max = %d, min = %d\n",ct,max,min);
+    }
+
     inline void set_background(scitbx::af::flex_int data) {
       int* begin=data.begin();
       std::size_t size=data.size();
@@ -279,6 +308,23 @@ namespace lunus {
 	}
       }
       return data;
+    }
+
+    inline void set_counts(scitbx::af::flex_int data) {
+      int* begin=data.begin();
+      std::size_t size=data.size();
+      std::size_t xvox=data.accessor().focus()[0];
+      std::size_t yvox=data.accessor().focus()[1];
+      std::size_t zvox=data.accessor().focus()[2];
+      lat->lattice_length = size;
+      lat->xvoxels = xvox;
+      lat->yvoxels = yvox;
+      lat->zvoxels = zvox;
+      lat->latct = (std::size_t *)realloc(lat->latct,lat->lattice_length*sizeof(std::size_t));
+      std::size_t ct=0;
+      for (int i = 0;i<lat->lattice_length;i++) {
+	lat->latct[i] = (std::size_t)begin[i];
+      }
     }
 
     inline scitbx::af::flex_int get_counts() {
@@ -767,8 +813,8 @@ namespace lunus {
       lanisolt(lat);
     }
 
-    inline void set_lattice(scitbx::af::flex_int data) {
-      int* begin=data.begin();
+    inline void set_lattice(scitbx::af::flex_double data) {
+      double* begin=data.begin();
       std::size_t size=data.size();
       std::size_t xvox=data.accessor().focus()[0];
       std::size_t yvox=data.accessor().focus()[1];
@@ -789,20 +835,28 @@ namespace lunus {
       }
     }
 
-    inline scitbx::af::flex_int get_lattice() {
+    inline scitbx::af::flex_double get_lattice() {
       std::size_t xvox = lat->xvoxels;
       std::size_t yvox = lat->yvoxels;
       std::size_t zvox = lat->zvoxels;
-      scitbx::af::flex_int data(scitbx::af::flex_grid<>(xvox,yvox,zvox));
-      int* begin=data.begin();
+      scitbx::af::flex_double data(scitbx::af::flex_grid<>(xvox,yvox,zvox));
+      double* begin=data.begin();
       std::size_t ct=0;
-      for (int i = 0;i<lat->lattice_length;i++) {
-  if (lat->lattice[i] == lat->mask_tag) {
-    begin[i] = -1;
-    ct++;
-  } else {
-    begin[i] = lat->lattice[i];
-  }
+      std::size_t latidx;
+      std::size_t idx = 0;
+      for (int i = 0;i<lat->xvoxels;i++) {
+	for (int j = 0;j<lat->yvoxels;j++) {
+	  for (int k = 0;k<lat->zvoxels;k++) {
+	    latidx = k*lat->xyvoxels+j*lat->xvoxels+i;
+	    if (lat->lattice[latidx] == lat->mask_tag) {
+	      begin[idx] = lat->mask_tag;
+	      ct++;
+	    } else {
+	      begin[idx] = lat->lattice[latidx];
+	    }
+	    idx++;
+	  }
+	}
       }
       return data;
     }
@@ -831,6 +885,7 @@ namespace boost_python { namespace {
 
     void (lunus::Process::*set_image1)(scitbx::af::flex_int data) = &lunus::Process::set_image;
     void (lunus::Process::*set_image2)(std::size_t n,scitbx::af::flex_int data) = &lunus::Process::set_image;
+    void (lunus::Process::*set_image3)(std::size_t n,scitbx::af::flex_double data) = &lunus::Process::set_image;
 
     void (lunus::Process::*set_xvectors1)(scitbx::af::flex_double xvectors_in) = &lunus::Process::set_xvectors;
     void (lunus::Process::*set_xvectors2)(std::size_t n,scitbx::af::flex_double xvectors_in) = &lunus::Process::set_xvectors;
@@ -846,6 +901,7 @@ namespace boost_python { namespace {
       .def("LunusBkgsubim",&lunus::Process::LunusBkgsubim)
       .def("set_image",set_image1)
       .def("set_image",set_image2)
+      .def("set_image",set_image3)
       .def("set_background",set_background1)
       .def("set_background",set_background2)
       .def("get_image",&lunus::Process::get_image)
@@ -858,6 +914,7 @@ namespace boost_python { namespace {
       .def("write_as_cube",&lunus::Process::write_as_cube)
       .def("write_as_lat",&lunus::Process::write_as_lat)
       .def("set_lattice",&lunus::Process::set_lattice)
+      .def("set_counts",&lunus::Process::set_counts)
       .def("LunusSetparamslt",&lunus::Process::LunusSetparamslt)
       .def("set_amatrix",&lunus::Process::set_amatrix)
       .def("set_xvectors",set_xvectors1)

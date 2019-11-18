@@ -6,6 +6,25 @@ from time import clock, time
 import numpy as np
 import glob, subprocess, shlex
 import lunus
+import copy, os
+from dials.array_family import flex
+
+def mpi_enabled():
+#  return 'OMPI_COMM_WORLD_SIZE' in os.environ.keys()
+  return True
+
+def mpi_init():
+  global mpi_comm
+  global MPI
+  from mpi4py import MPI as MPI
+  mpi_comm = MPI.COMM_WORLD
+
+def get_mpi_rank():
+  return mpi_comm.Get_rank() if mpi_enabled() else 0
+
+
+def get_mpi_size():
+  return mpi_comm.Get_size() if mpi_enabled() else 1
 
 def get_experiment_params(experiments):
 
@@ -42,7 +61,7 @@ def get_experiment_params(experiments):
 
     experiment_params.append(beam_params+fast_vec_params+slow_vec_params+origin_vec_params+normal_vec_params+more_params)
 
-    print "panel_ct = ",panel_ct,origin_vec_params
+#    print "panel_ct = ",panel_ct,origin_vec_params
 
     panel_ct += 1
 
@@ -68,6 +87,38 @@ def get_experiment_xvectors(experiments):
 
   return(x)
 
+def mpi_bcast(d):
+  if mpi_enabled():
+    db = mpi_comm.bcast(d,root=0)
+
+  return db
+
+def mpi_barrier():
+  if mpi_enabled():
+    mpi_comm.Barrier()
+
+def mpi_reduce_p(p):
+
+  if mpi_enabled():
+    l = p.get_lattice().as_numpy_array()
+    c = p.get_counts().as_numpy_array()
+
+    if get_mpi_rank() == 0:
+      lt = np.zeros_like(l)
+      ct = np.zeros_like(c)
+    else: 
+      lt = None
+      ct = None
+
+    mpi_comm.Reduce(l,lt,op=MPI.SUM,root=0)
+    mpi_comm.Reduce(c,ct,op=MPI.SUM,root=0)
+    
+    if get_mpi_rank() == 0:
+      p.set_lattice(flex.double(lt))
+      p.set_counts(flex.int(ct))
+
+  return p
+
 def process_one_glob():
 
     global fresh_lattice
@@ -76,7 +127,10 @@ def process_one_glob():
     from dxtbx.model.experiment_list import Experiment, ExperimentList
     from dxtbx.serialize import dump
 
-    imnum=1
+    imnum=0
+
+    tte = 0.0
+    ttr = 0.0
 
     metrolist = glob.glob(metro_glob)
     metrolist.sort()
@@ -87,30 +141,80 @@ def process_one_glob():
     if (subtract_background_images==True):
       bkglist=glob.glob(bkg_glob)
       bkglist.sort()
-      if (len(filelist) != len(bkglist) and len(bkglist) != 1):
-        raise ValueError,"Must either be one background or as many as there are images."
+      if get_mpi_rank() == 0:
+        if (len(filelist) != len(bkglist) and len(bkglist) != 1):
+          raise ValueError,"Must either be one background or as many as there are images."
       if (len(bkglist) == 1):
-        bkg = dxtbx.load(bkglist[0])
+        if get_mpi_rank() == 0:
+          bkg = dxtbx.load(bkglist[0])
+        else:
+          bkg = None
+        bkg = mpi_bcast(bkg)
         bkg_data = bkg.get_raw_data()
 
     if (rotation_series):
-      experiments = ExperimentListFactory.from_json_file(metrolist[0], check_format=False)
-      experiment_params = get_experiment_params(experiments)
+      if get_mpi_rank() == 0:
+        experiments = ExperimentListFactory.from_json_file(metrolist[0], check_format=False)
+        experiment_params = get_experiment_params(experiments)
+      else:
+        experiments = None
+        experiment_params = None
+      expriments = mpi_bcast(experiments)
+      experiment_params = mpi_bcast(experiment_params)
+
       x = get_experiment_xvectors(experiments)
 
-    for i in range(len(filelist)):
-      print "{0}...".format(i),
-      sys.stdout.flush()
+    # prepend image 0 to each range.
+
+    i_iter = range(get_mpi_rank(),len(filelist),get_mpi_size())
+
+    i_iter.insert(0,0)
+
+    for i in i_iter:
+      if fresh_lattice:
+        if get_mpi_rank() == 0:
+          print "Reference image ",
+          sys.stdout.flush()
+      else:
+        print "{0} ".format(i),
+        sys.stdout.flush()
+
+      if fresh_lattice:
+        if i != 0:
+          raise ValueError,"Image number must be 0 first time through"
 
       if (not rotation_series):
-        experiments = ExperimentListFactory.from_json_file(metrolist[i], check_format=False)
-        experiment_params = get_experiment_params(experiments)
+        if (get_mpi_rank() == 0 or not fresh_lattice):
+          experiments = ExperimentListFactory.from_json_file(metrolist[i], check_format=False)
+          experiment_params = get_experiment_params(experiments)
+        else:
+          experiments = None
+          experiment_params = None
+        if fresh_lattice:
+          experiments = mpi_bcast(experiments)
+          experiment_params = mpi_bcast(experiment_params)
         x = get_experiment_xvectors(experiments)
 
       imgname=filelist[i]
-      img = dxtbx.load(imgname)
-      data = img.get_raw_data()
 
+      bt = time()
+
+      if (get_mpi_rank() == 0 or not fresh_lattice):
+        img = dxtbx.load(imgname)
+        data = img.get_raw_data()
+        scan = img.get_scan()
+        gonio = img.get_goniometer()
+      else:
+        data = None
+        scan = None
+        gonio = None
+      if fresh_lattice:
+        data = mpi_bcast(data)
+        scan = mpi_bcast(scan)
+        gonio = mpi_bcast(gonio)
+
+      et = time()
+      ttr += et - bt
 #      print "min of data = ",flex.min(data)
 #      print "max of data = ",flex.max(data)
 
@@ -126,7 +230,12 @@ def process_one_glob():
 
       if (subtract_background_images==True):
         if (len(bkglist) != 1):
-          bkg = dxtbx.load(bkglist[i])
+          if (get_mpi_rank() == 0 or not fresh_lattice):
+            bkg = dxtbx.load(bkglist[i])
+          else:
+            bkg = None
+          if fresh_lattice:
+            bkg = mpi_bcast(bkg)
           bkg_data = bkg.get_raw_data()
         if isinstance(data,tuple):
           for pidx in range(len(bkg_data)):
@@ -139,12 +248,8 @@ def process_one_glob():
       crystal = copy.deepcopy(experiments.crystals()[0])
 
       if (rotation_series):
-        scan = img.get_scan()
         start_angle, delta_angle = scan.get_oscillation()      
-
-        gonio = img.get_goniometer()
         axis = gonio.get_rotation_axis()
-        
         crystal.rotate_around_origin(axis, start_angle + (delta_angle/2), deg=True)
 
       from scitbx import matrix
@@ -159,17 +264,25 @@ def process_one_glob():
           p.set_xvectors(pidx,x[pidx])
         p.set_image_ref()
 
-        p.print_image_params()
+        if get_mpi_rank() == 0:
+          p.print_image_params()
       
         p.LunusProcimlt(0)
 
         fresh_lattice = False
-
-      p.LunusProcimlt(1)
-
-      imnum = imnum +1
+      else:
+        bt = time()
+        p.LunusProcimlt(1)
+        et = time()
+        te = et - bt
+        
+        tte += te
+        
+        imnum = imnum +1
 
     print
+
+    print "Rank {0} time spent in read, processing (sec): {1} {2}\n".format(get_mpi_rank(),ttr,tte)
 
 if __name__=="__main__":
   import sys
@@ -268,15 +381,14 @@ if __name__=="__main__":
   if (subtract_background_images):
     bkg_glob = bkg_glob_list[0]
 
+  mpi_init()
 
-  if (len(metro_glob_list) != len(image_glob_list) or (subtract_background_images and len(metro_glob_list) != len(bkg_glob_list))):
-    raise ValueError,"Must specify same number of experiments, images, and backgrounds"
-
-  import copy, os
+  if get_mpi_rank() == 0:
+    if (len(metro_glob_list) != len(image_glob_list) or (subtract_background_images and len(metro_glob_list) != len(bkg_glob_list))):
+      raise ValueError,"Must specify same number of experiments, images, and backgrounds"
 
   import dxtbx
   from dxtbx.model.experiment_list import ExperimentListFactory
-  from dials.array_family import flex
 
 # Get a sample experiments file and use it to initialize the processor class
 
@@ -287,15 +399,26 @@ if __name__=="__main__":
 
   metro = metrolist[0]
 
-  experiments = ExperimentListFactory.from_json_file(metro, check_format=False)
-  experiment_params = get_experiment_params(experiments)
+  if get_mpi_rank() == 0:
+    experiments = ExperimentListFactory.from_json_file(metro, check_format=False)
+    experiment_params = get_experiment_params(experiments)
+  else:
+    experiments = None
+    experiment_params = None
+
+  experiment_params = mpi_bcast(experiment_params)
 
   p = lunus.Process(len(experiment_params))
 
 # Get the input deck and initialize the lattice
 
-  with open(deck_file) as f:
-    deck = f.read()
+  if get_mpi_rank() == 0:
+    with open(deck_file) as f:
+      deck = f.read()
+  else:
+    deck = None
+
+  deck = mpi_bcast(deck)
 
   deck_and_extras = deck+experiment_params[0]
 
@@ -306,8 +429,8 @@ if __name__=="__main__":
   fresh_lattice = True
 
   for i in range(len(metro_glob_list)):
-
-    print "Image set ",i+1,":",
+    if get_mpi_rank() == 0:
+      print "Image set ",i+1,":",
 
     metro_glob = metro_glob_list[i]
     image_glob = image_glob_list[i]
@@ -319,14 +442,21 @@ if __name__=="__main__":
 # Temporary, set default metrology based on beam center and distance
 
     process_one_glob()
-      
-  p.divide_by_counts()
 
-  if (not vtk_file is None):
-    p.write_as_vtk(vtk_file)
-  if (not hkl_file is None):
-    p.write_as_hkl(hkl_file)
-  if (not cube_file is None):
-    p.write_as_vtk(cube_file)
-  if (not lat_file is None):
-    p.write_as_lat(lat_file)
+  bt = time()
+  p = mpi_reduce_p(p)
+  et = time()
+  tred = et - bt
+
+  if get_mpi_rank() == 0:
+    print "Time spent in reduction (sec): ",tred
+    p.divide_by_counts()
+
+    if (not vtk_file is None):
+      p.write_as_vtk(vtk_file)
+    if (not hkl_file is None):
+      p.write_as_hkl(hkl_file)
+    if (not cube_file is None):
+      p.write_as_vtk(cube_file)
+    if (not lat_file is None):
+      p.write_as_lat(lat_file)

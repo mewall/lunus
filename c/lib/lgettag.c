@@ -86,8 +86,9 @@ char * lgettag(const char *target,const char *tag)
   int err;
 
   if ((err = lfindtag(target,tag,&pos_begin,&pos_end)) != 0) {
-    perror("Couldn't find tag in lfindtag().\n");
-    exit(err);
+    //    perror("Couldn't find tag in lfindtag().\n");
+    //    printf("tag = %s\n",tag);
+    return(NULL);
   }
 
   int len = pos_end-pos_begin-1;
@@ -106,6 +107,7 @@ int lgettagi(const char *target,const char *tag)
   int err;
 
   if ((err = lfindtag(target,tag,&pos_begin,&pos_end)) != 0) {
+    printf("Couldn't find tag %s\n",tag);
     perror("Couldn't find tag in lfindtag().\n");
     exit(err);
   }
@@ -128,6 +130,7 @@ float lgettagf(const char *target,const char *tag)
   int err;
 
   if ((err = lfindtag(target,tag,&pos_begin,&pos_end)) != 0) {
+    printf("Couldn't find tag %s\n",tag);
     perror("Couldn't find tag in lfindtag().\n");
     exit(err);
   }
@@ -150,6 +153,7 @@ struct xyzcoords lgettagxyz(const char *target,const char *tag)
   int err;
 
   if ((err = lfindtag(target,tag,&pos_begin,&pos_end)) != 0) {
+    printf("Couldn't find tag %s\n",tag);
     perror("Couldn't find tag in lfindtag().\n");
     exit(err);
   }
@@ -170,6 +174,7 @@ char * lgetcbftag(const char *target,const char *tag)
   int err;
 
   if ((err = lfindcbftag(target,tag,&pos_begin,&pos_end)) != 0) {
+    printf("Couldn't find tag %s\n",tag);
     perror("Couldn't find tag in lfindcbftag().\n");
     exit(err);
   }
@@ -190,6 +195,7 @@ int lgetcbftagi(const char *target,const char *tag)
   int err;
 
   if ((err = lfindcbftag(target,tag,&pos_begin,&pos_end)) != 0) {
+    printf("Couldn't find tag %s\n",tag);
     perror("Couldn't find tag in lfindcbftag().\n");
     exit(err);
   }
@@ -212,6 +218,7 @@ long lgetcbftagl(const char *target,const char *tag)
   int err;
 
   if ((err = lfindcbftag(target,tag,&pos_begin,&pos_end)) != 0) {
+    printf("Couldn't find tag %s\n",tag);
     perror("Couldn't find tag in lfindcbftag().\n");
     exit(err);
   }
@@ -234,6 +241,7 @@ float lgetcbftagf(const char *target,const char *tag)
   int err;
 
   if ((err = lfindcbftag(target,tag,&pos_begin,&pos_end)) != 0) {
+    printf("Couldn't find tag %s\n",tag);
     perror("Couldn't find tag in lfindcbftag().\n");
     exit(err);
   }

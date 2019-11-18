@@ -58,7 +58,7 @@ def correction_factor(Isize1,Isize2,experiments,rvec):
       sin_sq_two_theta = 1. - cos_sq_two_theta
       k = s + col(beam.get_s0())
       kp = col([k[0],k[1],0.0])
-      kp.normalize()
+      kp = kp.normalize()
       sin_rho = kp.dot(polarization_vec)
       cos_two_rho = 1. - 2. * sin_rho * sin_rho
       # Polarization correction
@@ -83,7 +83,10 @@ def procimg_single(Isize1,Isize2,scale,lattice_mask_tag,A_matrix,rvec,experiment
   polarization_vec = col([0.,1.,0.])
 #  epsilon = beam.get_polarization_fraction()
   epsilon = 1.
-  normal_vec = col(p0.get_normal())
+  if (use_json_metrology):
+    normal_vec = col(p0.get_normal())
+  else:
+    normal_vec = col([0.,0.,-1.])
 
   global image_mask_tag,pphkl
   imp=np.zeros((Isize1,Isize2))
@@ -108,7 +111,7 @@ def procimg_single(Isize1,Isize2,scale,lattice_mask_tag,A_matrix,rvec,experiment
       sin_sq_two_theta = 1. - cos_sq_two_theta
       k = s + s0
       kp = col([k[0],k[1],0.0])
-      kp.normalize()
+      kp = kp.normalize()
       sin_rho = kp.dot(polarization_vec)
       cos_two_rho = 1. - 2. * sin_rho * sin_rho
       # Polarization correction
@@ -122,9 +125,12 @@ def procimg_single(Isize1,Isize2,scale,lattice_mask_tag,A_matrix,rvec,experiment
       isz = len(D)
       jsz = len(D[0])
       ksz = len(D[0][0])
-      fi = H[0]+int(isz/2)
-      fj = H[1]+int(jsz/2)
-      fk = H[2]+int(ksz/2)
+#      fi = H[0]+int(isz/2)
+#      fj = H[1]+int(jsz/2)
+#      fk = H[2]+int(ksz/2)
+      fi = H[0] - origin[0]
+      fj = H[1] - origin[1]
+      fk = H[2] - origin[2]
       # calculate reference point integer index into diffuse intensity
       i = int(fi)
       j = int(fj)
@@ -299,7 +305,7 @@ def process_one_glob():
           for i in range(Isize1):
               pixel_values[j,i] = np.int(diffim[i,j])
 
-      outname = prefout+"_{0}.cbf".format(imnum)
+      outname = prefout+"_%05d.cbf"%(imnum)
 
       FormatCBFMini.as_file(detector,beam,gonio,scan,pixel_values,outname)
 
@@ -345,6 +351,7 @@ if __name__=="__main__":
   else:
     scale = float(args.pop(idx).split("=")[1])
  # rotation series mode
+  rotation_series=True
   try:
     idx = [a.find("rotation_series")==0 for a in args].index(True)
   except ValueError:
@@ -353,6 +360,17 @@ if __name__=="__main__":
     rotation_series_str = args.pop(idx).split("=")[1]
     if (rotation_series_str == "False"):
       rotation_series=False
+
+ # use .json metrology info for correction factor
+  use_json_metrology=False
+  try:
+    idx = [a.find("use_json_metrology")==0 for a in args].index(True)
+  except ValueError:
+    use_json_metrology=False
+  else:
+    use_json_metrology_str = args.pop(idx).split("=")[1]
+    if (use_json_metrology_str == "True"):
+      use_json_metrology=True
 
  # Input json
   keep_going = True
@@ -377,20 +395,32 @@ if __name__=="__main__":
       keep_going = False
     else:
       image_glob_list.append(args.pop(imageglobidx).split("=")[1])
-# Points per hkl in the input diffuse .hkl file
+# Points per hkl in the input diffuse data file
   try:
     pphklidx = [a.find("pphkl")==0 for a in args].index(True)
   except ValueError:
     pphkl = 1.
   else:
     pphkl = float(args.pop(pphklidx).split("=")[1])
+# Default input is diffuse.hkl
+  diffusein = "diffuse.hkl"
+  data_type = "hkl"
 # Diffuse .hkl file
   try:
     hklidx = [a.find("input.hkl")==0 for a in args].index(True)
   except ValueError:
-    diffusein = "diffuse.hkl"
+    pass
   else:
     diffusein = (args.pop(hklidx).split("=")[1])
+    data_type = "hkl"
+# Diffuse .lat file
+  try:
+    idx = [a.find("input.lat")==0 for a in args].index(True)
+  except ValueError:
+    pass
+  else:
+    diffusein = (args.pop(idx).split("=")[1])
+    data_type = "lat"
 # Output file name
   try:
     idx = [a.find("output_prefix")==0 for a in args].index(True)
@@ -408,16 +438,30 @@ if __name__=="__main__":
   from dxtbx.model.experiment_list import ExperimentListFactory
   from dials.array_family import flex
 
-  # Read the diffuse lattice in .hkl format
-  DhklI = np.loadtxt(diffusein)
-  mx = np.zeros(3,np.int)
-  for i in range(3):
+  if (data_type == "hkl"):
+    # Read the diffuse lattice in .hkl format
+    DhklI = np.loadtxt(diffusein)
+    mx = np.zeros(3,np.int)
+    for i in range(3):
       mx[i]=int(max(abs(DhklI[:,i])))
-  D = np.zeros((mx[0]*2+1,mx[1]*2+1,mx[2]*2+1))
-  D[:,:,:] = lattice_mask_tag
-  for i in range(len(DhklI)):
+    origin = -mx
+    D = np.zeros((mx[0]*2+1,mx[1]*2+1,mx[2]*2+1))
+    D[:,:,:] = lattice_mask_tag
+    for i in range(len(DhklI)):
       hh,kk,ll=DhklI[i][:3]
-      D[int(hh)+mx[0]][int(kk)+mx[1]][int(ll)+mx[2]]=float(DhklI[i][3])
+      D[int(hh)-origin[0]][int(kk)-origin[1]][int(ll)-origin[2]]=float(DhklI[i][3])
+
+  if (data_type == "lat"):
+    import lunus
+    lat = lunus.LunusLAT3D()
+    lat.LunusReadlt(diffusein)
+    D_flex = lat.get_lattice()
+    D = D_flex.as_numpy_array()
+    sz = D.shape
+    origin = np.zeros(3,np.int)
+    origin[0] = -((sz[0]+1)/2-1)
+    origin[1] = -((sz[1]+1)/2-1)
+    origin[2] = -((sz[2]+1)/2-1)
 
   #Create parallel processing pool
 
