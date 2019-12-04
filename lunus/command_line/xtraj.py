@@ -58,13 +58,12 @@ if __name__=="__main__":
   else:
       d_min = float(args.pop(idx).split("=")[1])
 
-# nsteps
+# nsteps (use in lieu of "last" parameter)
 
   try:
       idx = [a.find("nsteps")==0 for a in args].index(True)
   except ValueError:
-      print "Must provide nsteps"
-      exit(1) 
+      nsteps = 0
   else:
       nsteps = int(args.pop(idx).split("=")[1])
 
@@ -76,6 +75,33 @@ if __name__=="__main__":
       stride = 1
   else:
       stride = int(args.pop(idx).split("=")[1])
+
+# first frame number (numbering starts at 0)
+
+  try:
+      idx = [a.find("first")==0 for a in args].index(True)
+  except ValueError:
+      first = 0
+  else:
+      first = int(args.pop(idx).split("=")[1])
+
+# last frame number
+
+  try:
+      idx = [a.find("last")==0 for a in args].index(True)
+  except ValueError:
+      last = 0
+  else:
+      last = int(args.pop(idx).split("=")[1])
+
+# chunk size (number of frames) for breaking up the trajectory
+
+  try:
+      idx = [a.find("chunk")==0 for a in args].index(True)
+  except ValueError:
+      chunksize = None
+  else:
+      chunksize = int(args.pop(idx).split("=")[1])
 
 # topology file (typically a .pdb file)
 
@@ -166,7 +192,7 @@ if __name__=="__main__":
   else:
       unit_cell_str = args.pop(idx).split("=")[1]
 
-# Space grou, replaces the one in the top file
+# Space group, replaces the one in the top file
 
   try:
       idx = [a.find("space_group")==0 for a in args].index(True)
@@ -174,6 +200,16 @@ if __name__=="__main__":
       space_group_str = None
   else:
       space_group_str = args.pop(idx).split("=")[1]
+
+# Set nsteps if needed
+  
+  if (nsteps == 0):
+    nsteps = last - first + 1
+  elif (last != 0):
+    print "Please specify nsteps or last, but not both."
+    raise ValueError()
+
+  last = first + nsteps - 1
 
 
 # Initialize MPI
@@ -226,125 +262,145 @@ if __name__=="__main__":
 
 # read the MD trajectory and extract coordinates
 
-  chunksize = int(nsteps/mpi_size)
+  if (chunksize is None):
+    nchunks = mpi_size
+    chunksize = int(nsteps/nchunks)
+  else:
+    nchunks = int(nsteps/chunksize)
   chunklist = np.zeros((mpi_size), dtype=np.int)
+  nchunklist = np.zeros((mpi_size),dtype=np.int)
   skiplist = np.zeros((mpi_size), dtype=np.int)
-  leftover = nsteps % mpi_size
+  nchunksize = nchunks/mpi_size
+  leftover = nchunks % mpi_size
   for i in range(mpi_size):
     chunklist[i] = chunksize
+    nchunklist[i] = nchunksize
     if (i < leftover):
-        chunklist[i] += 1
+        nchunklist[i] += 1
     if (i == 0):
-        skiplist[i] = 0
+        skiplist[i] = first
     else:
-        skiplist[i] = skiplist[i-1] + chunklist[i-1]
-
-  ti = md.iterload(traj_file,chunk=chunklist[mpi_rank],top=top_file,skip=skiplist[mpi_rank])
+        skiplist[i] = skiplist[i-1] + chunklist[i-1] * nchunklist[i-1]
 
   if (mpi_rank == 0):               
     stime = time.time()
-
-# Each MPI rank works with its own trajectory chunk t
-
-  for tt in ti:         
-    t = tt
-#    print "skip = ",skiplist[mpi_rank]," chunk = ",len(t.time)," start time = ",t.time[0]," coords of first atom = ",t.xyz[0][0]
-    break
-
-  if mpi_enabled():
-    mpi_comm.Barrier()                                                                          
-  if (mpi_rank == 0): 
-    mtime = time.time()                                                        
-    print "TIMING: md.iterload = ",mtime-stime
-    
-  na = len(t.xyz[0])
-
-# np.around() is needed here to avoid small changes in the coordinates
-#   that accumulate large errors in structure factor calculations. The factor
-#   of 10 is needed as the units from the trajectory are nm, whereas cctbx
-#   needs Angstrom units.
-
-  tsites = np.around(np.array(t.xyz*10.,dtype=np.float64),3)
-
-  if (mpi_rank == 0):
-
-# Get the fractional coords of the reference structure alpha carbons, for translational fit. 
-# MEW Note: only uses all c-alpha atoms in the structure and only does translational fit for now
-
-    sites_frac = xrs.sites_frac().as_double().as_numpy_array().reshape((na,3))
-    sel_indices = t.topology.select('name CA')
-    ref_sites_frac = np.take(sites_frac,sel_indices,axis=0)
-    print "Number of atoms = ",na
-
-  else:
-    ref_sites_frac = None
-    sel_indices = None
-
-# Broadcast arrays used for translational fit
-
-  if mpi_enabled():
-    ref_sites_frac = mpi_comm.bcast(ref_sites_frac,root=0)
-    sel_indices = mpi_comm.bcast(sel_indices,root=0)
-
-# calculate fcalc, diffuse intensity, and (if requested) density trajectory
 
   ct = 0
   sig_fcalc = None
   sig_icalc = None
 
-  if mpi_rank == 0:
-      stime = time.time()
+  if (skiplist[mpi_rank] <= last):
+    skip_calc = False
+  else:
+    skip_calc = True
 
-  map_data = []
-  num_elems = len(t)
+  ti = md.iterload(traj_file,chunk=chunklist[mpi_rank],top=top_file,skip=skiplist[mpi_rank])
 
-  if (num_elems <= 0):
-    num_elems = 0
-    xrs_sel = xrs.select(selection)
-    sig_fcalc = xrs_sel.structure_factors(d_min=d_min).f_calc() * 0.0
-    sig_icalc = abs(sig_fcalc).set_observation_type_xray_amplitude().f_as_f_sq()
-    print "WARNING: Rank ",mpi_rank," is idle"
+# Each MPI rank works with its own trajectory chunk t
 
-  for i in range(num_elems):
+  chunk_ct = 0
 
-# overwrite crystal structure coords with trajectory coords
+  for tt in ti:         
+    t = tt
+#    print "skip = ",skiplist[mpi_rank]," chunk = ",len(t.time)," start time = ",t.time[0]," coords of first atom = ",t.xyz[0][0]
 
-    tmp = flex.vec3_double(tsites[i,:,:])
-    xrs.set_sites_cart(tmp)
+    if mpi_enabled():
+      mpi_comm.Barrier()                                                                          
+    if (mpi_rank == 0): 
+      mtime = time.time()                                                        
+      print "TIMING: md.iterload = ",mtime-stime
 
-# select the atoms for the structure factor calculation
+    na = len(t.xyz[0])
 
-    xrs_sel = xrs.select(selection)
+  # np.around() is needed here to avoid small changes in the coordinates
+  #   that accumulate large errors in structure factor calculations. The factor
+  #   of 10 is needed as the units from the trajectory are nm, whereas cctbx
+  #   needs Angstrom units.
 
-# perform translational fit with respect to the alpha carbons in the topology file
+    tsites = np.around(np.array(t.xyz*10.,dtype=np.float64),3)
 
-    if (translational_fit):
-        sites_frac = xrs_sel.sites_frac().as_double().as_numpy_array().reshape((na,3))
-        x0 = [0.0,0.0,0.0]
-        otime1 = time.time()
-        this_sites_frac = np.take(sites_frac,sel_indices,axis=0)
-        res = scipy.optimize.minimize(calc_msd,x0,method='Powell',jac=None,options={'disp': False,'maxiter': 10000})
-        for j in range(3):
-            sites_frac[:,j] +=res.x[j]        
-        otime2 = time.time()
-        xrs_sel.set_sites_frac(flex.vec3_double(sites_frac))
-#        print ("Time to optimize = ",otime2-otime1)
+    if (mpi_rank == 0):
 
-    fcalc = xrs_sel.structure_factors(d_min=d_min).f_calc()
+  # Get the fractional coords of the reference structure alpha carbons, for translational fit. 
+  # MEW Note: only uses all c-alpha atoms in the structure and only does translational fit for now
 
-# Commented out some density trajectory code
-#    if not (dens_file is None):
-#      this_map = fcalc.fft_map(d_min=d_min, resolution_factor = 0.5)
-#      real_map_np = this_map.real_map_unpadded().as_numpy_array()
-#      map_data.append(real_map_np)
+      sites_frac = xrs.sites_frac().as_double().as_numpy_array().reshape((na,3))
+      sel_indices = t.topology.select('name CA')
+      ref_sites_frac = np.take(sites_frac,sel_indices,axis=0)
+      print "Number of atoms = ",na
 
-    if sig_fcalc is None:
-      sig_fcalc = fcalc
-      sig_icalc = abs(fcalc).set_observation_type_xray_amplitude().f_as_f_sq()
     else:
-      sig_fcalc = sig_fcalc + fcalc
-      sig_icalc = sig_icalc + abs(fcalc).set_observation_type_xray_amplitude().f_as_f_sq()
-    ct = ct + 1
+      ref_sites_frac = None
+      sel_indices = None
+
+  # Broadcast arrays used for translational fit
+
+    if mpi_enabled():
+      ref_sites_frac = mpi_comm.bcast(ref_sites_frac,root=0)
+      sel_indices = mpi_comm.bcast(sel_indices,root=0)
+
+  # calculate fcalc, diffuse intensity, and (if requested) density trajectory
+
+    if mpi_rank == 0:
+        stime = time.time()
+
+    map_data = []
+    num_elems = len(t)
+
+    if (num_elems <= 0 or skip_calc):
+      num_elems = 0
+      xrs_sel = xrs.select(selection)
+      sig_fcalc = xrs_sel.structure_factors(d_min=d_min).f_calc() * 0.0
+      sig_icalc = abs(sig_fcalc).set_observation_type_xray_amplitude().f_as_f_sq()
+      print "WARNING: Rank ",mpi_rank," is idle"
+
+    else:
+
+      for i in range(num_elems):
+
+    # overwrite crystal structure coords with trajectory coords
+
+        tmp = flex.vec3_double(tsites[i,:,:])
+        xrs.set_sites_cart(tmp)
+
+    # select the atoms for the structure factor calculation
+
+        xrs_sel = xrs.select(selection)
+
+    # perform translational fit with respect to the alpha carbons in the topology file
+
+        if (translational_fit):
+            sites_frac = xrs_sel.sites_frac().as_double().as_numpy_array().reshape((na,3))
+            x0 = [0.0,0.0,0.0]
+            otime1 = time.time()
+            this_sites_frac = np.take(sites_frac,sel_indices,axis=0)
+            res = scipy.optimize.minimize(calc_msd,x0,method='Powell',jac=None,options={'disp': False,'maxiter': 10000})
+            for j in range(3):
+                sites_frac[:,j] +=res.x[j]        
+            otime2 = time.time()
+            xrs_sel.set_sites_frac(flex.vec3_double(sites_frac))
+    #        print ("Time to optimize = ",otime2-otime1)
+
+        fcalc = xrs_sel.structure_factors(d_min=d_min).f_calc()
+
+    # Commented out some density trajectory code
+    #    if not (dens_file is None):
+    #      this_map = fcalc.fft_map(d_min=d_min, resolution_factor = 0.5)
+    #      real_map_np = this_map.real_map_unpadded().as_numpy_array()
+    #      map_data.append(real_map_np)
+
+        if sig_fcalc is None:
+          sig_fcalc = fcalc
+          sig_icalc = abs(fcalc).set_observation_type_xray_amplitude().f_as_f_sq()
+        else:
+          sig_fcalc = sig_fcalc + fcalc
+          sig_icalc = sig_icalc + abs(fcalc).set_observation_type_xray_amplitude().f_as_f_sq()
+        ct = ct + 1
+
+    chunk_ct = chunk_ct + 1
+
+    if (chunk_ct >= nchunklist[i]):
+      break
 
 # Commented out some density trajectory code
 #  if not (dens_file is None):
@@ -373,6 +429,9 @@ if __name__=="__main__":
   else:
     tot_sig_fcalc_np = None
     tot_sig_icalc_np = None
+
+  if mpi_enabled():
+    mpi_comm.Barrier()                                                        
 
   if mpi_enabled():
     mpi_comm.Reduce(sig_fcalc_np,tot_sig_fcalc_np,op=MPI.SUM,root=0)
