@@ -111,17 +111,25 @@ int main(int argc, char *argv[])
   * Read diffraction image:
   */
 
+	//	printf("Read first image...");
+
   imdiff1->infile = imagein1;
   if (lreadim(imdiff1) != 0) {
     perror(imdiff1->error_msg);
     goto CloseShop;
   }
 
+  //  printf("done\n");
+
+  //  printf("Read second image...");
+
   imdiff2->infile = imagein2;
   if (lreadim(imdiff2) != 0) {
     perror(imdiff2->error_msg);
     goto CloseShop;
   }
+
+  //  printf("done\n");
 
   imdiff1->background_subtraction_factor = x;
 
@@ -132,6 +140,8 @@ int main(int argc, char *argv[])
 
   // Set the pedestal tag
 
+  //  printf("Setting pedestal tag...");
+
   char pedestal_tag[1000];
     if (strcmp(imdiff1->format,"SMV")==0) {
       sprintf(pedestal_tag,"%04d",imdiff1->value_offset);
@@ -139,13 +149,15 @@ int main(int argc, char *argv[])
     } else {
       if (strcmp(imdiff1->format,"CBF")==0) {
 	sprintf(pedestal_tag,"%04d",imdiff1->value_offset);
-	if (lgetcbftag(imdiff1->header,"Pedestal") == NULL) {
+	if (strstr(imdiff1->header,"Pedestal") == NULL) {
 	  laddcbftag(imdiff1,"Pedestal",pedestal_tag);
 	} else {
 	  lsetcbftag(&imdiff1->header,&imdiff1->header_length,"Pedestal",pedestal_tag);
 	}
       }
     }
+
+    //    printf("done\n");
 
 
 /*

@@ -125,7 +125,7 @@ int lreadim(DIFFIMAGE *imdiff)
       free(imbuf);
     } else {
       if (strstr(buf,"###CBF")!=NULL) {
-	  //	  printf("CBF format\n");
+	//	printf("CBF format\n");
 	// CBF format
 	strcpy(imdiff->format,"CBF");
 	  size_t header_length=0;
@@ -166,6 +166,7 @@ int lreadim(DIFFIMAGE *imdiff)
 	    return(1);
 	  }
 	  imdiff->header[imdiff->header_length] = 0;
+	  //	  printf("%s",imdiff->header);
 	  //	  printf("imdiff->header_length = %ld\n",imdiff->header_length);
 	  //	  imdiff->header[imdiff->header_length]=0;
 	  // Write header
