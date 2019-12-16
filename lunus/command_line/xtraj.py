@@ -337,12 +337,12 @@ if __name__=="__main__":
     if mpi_enabled():
       ref_sites_frac = mpi_comm.bcast(ref_sites_frac,root=0)
       sel_indices = mpi_comm.bcast(sel_indices,root=0)
-      print "Number of atoms in topology file = ",na
 
   # calculate fcalc, diffuse intensity, and (if requested) density trajectory
 
     if mpi_rank == 0:
         stime = time.time()
+        print "Number of atoms in topology file = ",na
 
     map_data = []
     num_elems = len(t)
