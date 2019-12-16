@@ -302,7 +302,7 @@ if __name__=="__main__":
 
   for tt in ti:         
     t = tt
-#    print "skip = ",skiplist[mpi_rank]," chunk = ",len(t.time)," start time = ",t.time[0]," coords of first atom = ",t.xyz[0][0]
+    print "rank =",mpi_rank," skip = ",skiplist[mpi_rank]," chunk = ",chunklist[mpi_rank]," start time = ",t.time[0]," coords of first atom = ",t.xyz[0][0]
 
     if mpi_enabled():
       mpi_comm.Barrier()                                                                          
@@ -327,7 +327,6 @@ if __name__=="__main__":
       sites_frac = xrs.sites_frac().as_double().as_numpy_array().reshape((na,3))
       sel_indices = t.topology.select('name CA')
       ref_sites_frac = np.take(sites_frac,sel_indices,axis=0)
-      print "Number of atoms = ",na
 
     else:
       ref_sites_frac = None
@@ -338,6 +337,7 @@ if __name__=="__main__":
     if mpi_enabled():
       ref_sites_frac = mpi_comm.bcast(ref_sites_frac,root=0)
       sel_indices = mpi_comm.bcast(sel_indices,root=0)
+      print "Number of atoms in topology file = ",na
 
   # calculate fcalc, diffuse intensity, and (if requested) density trajectory
 
@@ -350,8 +350,10 @@ if __name__=="__main__":
     if (num_elems <= 0 or skip_calc):
       num_elems = 0
       xrs_sel = xrs.select(selection)
-      sig_fcalc = xrs_sel.structure_factors(d_min=d_min).f_calc() * 0.0
-      sig_icalc = abs(sig_fcalc).set_observation_type_xray_amplitude().f_as_f_sq()
+      if sig_fcalc is None:
+        sig_fcalc = xrs_sel.structure_factors(d_min=d_min).f_calc() * 0.0
+      if sig_icalc is None:
+        sig_icalc = abs(sig_fcalc).set_observation_type_xray_amplitude().f_as_f_sq()
       print "WARNING: Rank ",mpi_rank," is idle"
 
     else:
@@ -389,6 +391,8 @@ if __name__=="__main__":
     #      real_map_np = this_map.real_map_unpadded().as_numpy_array()
     #      map_data.append(real_map_np)
 
+        print "About to calculate structure factor on rank ",mpi_rank
+        
         if sig_fcalc is None:
           sig_fcalc = fcalc
           sig_icalc = abs(fcalc).set_observation_type_xray_amplitude().f_as_f_sq()
