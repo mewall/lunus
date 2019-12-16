@@ -302,7 +302,7 @@ if __name__=="__main__":
 
   for tt in ti:         
     t = tt
-    print "rank =",mpi_rank," skip = ",skiplist[mpi_rank]," chunk = ",chunklist[mpi_rank]," start time = ",t.time[0]," coords of first atom = ",t.xyz[0][0]
+#    print "rank =",mpi_rank," skip = ",skiplist[mpi_rank]," chunk = ",chunklist[mpi_rank]," start time = ",t.time[0]," coords of first atom = ",t.xyz[0][0]
 
     if mpi_enabled():
       mpi_comm.Barrier()                                                                          
@@ -391,8 +391,6 @@ if __name__=="__main__":
     #      real_map_np = this_map.real_map_unpadded().as_numpy_array()
     #      map_data.append(real_map_np)
 
-        print "About to calculate structure factor on rank ",mpi_rank
-        
         if sig_fcalc is None:
           sig_fcalc = fcalc
           sig_icalc = abs(fcalc).set_observation_type_xray_amplitude().f_as_f_sq()
