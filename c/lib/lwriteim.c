@@ -95,6 +95,7 @@ int lwriteim(DIFFIMAGE *imdiff)
       //      printf("Setting the Binary-Size tag = %s. Header length = %ld\n",tag,imdiff->header_length);
       lsetcbftag(&imdiff->header,&imdiff->header_length,"X-Binary-Size:",tag);
       //      printf("Set the Binary-Size tag. New header length = %ld\n",imdiff->header_length);
+      //      printf("%s",imdiff->header);
       num_wrote = fwrite(imdiff->header, sizeof(char), imdiff->header_length,
 			 imdiff->outfile);
       if (num_wrote != imdiff->header_length) {

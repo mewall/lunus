@@ -90,6 +90,7 @@ def procimg_single(Isize1,Isize2,scale,lattice_mask_tag,A_matrix,rvec,experiment
 
   global image_mask_tag,pphkl
   imp=np.zeros((Isize1,Isize2))
+  time1 = time()
 #  for r in xrange(100): # slow dimension
   for r in xrange(Isize1): # slow dimension
     if (r%10 == 0):
@@ -160,6 +161,7 @@ def procimg_single(Isize1,Isize2,scale,lattice_mask_tag,A_matrix,rvec,experiment
               imp[r,c] = image_mask_tag
       else:
           imp[r,c] = image_mask_tag
+  print("time to compute simulated intensities = ",time()-time1)
   return imp
 
 # WARNING: The following parallel code doesn't work and isn't consistent with above
