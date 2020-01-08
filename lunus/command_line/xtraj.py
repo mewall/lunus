@@ -300,12 +300,14 @@ if __name__=="__main__":
 
   chunk_ct = 0
 
+  itime = time.time()
+  
   for tt in ti:         
     t = tt
-#    print "skip = ",skiplist[mpi_rank]," chunk = ",len(t.time)," start time = ",t.time[0]," coords of first atom = ",t.xyz[0][0]
+#    print "rank =",mpi_rank," skip = ",skiplist[mpi_rank]," chunk = ",chunklist[mpi_rank]," start time = ",t.time[0]," coords of first atom = ",t.xyz[0][0]
 
-    if mpi_enabled():
-      mpi_comm.Barrier()                                                                          
+#    if mpi_enabled():
+#      mpi_comm.Barrier()                                                                          
     if (mpi_rank == 0): 
       mtime = time.time()                                                        
       print "TIMING: md.iterload = ",mtime-stime
@@ -319,30 +321,37 @@ if __name__=="__main__":
 
     tsites = np.around(np.array(t.xyz*10.,dtype=np.float64),3)
 
-    if (mpi_rank == 0):
+  # ***The following code needs modification to prevent the bcast here, as
+  #   it will create a barrier that prevents execution when the number
+  #   of steps is not equal to a multiple of the number of ranks
+    
+    if (translational_fit and chunk_ct == 0):
 
-  # Get the fractional coords of the reference structure alpha carbons, for translational fit. 
-  # MEW Note: only uses all c-alpha atoms in the structure and only does translational fit for now
+      if (mpi_rank == 0):
 
-      sites_frac = xrs.sites_frac().as_double().as_numpy_array().reshape((na,3))
-      sel_indices = t.topology.select('name CA')
-      ref_sites_frac = np.take(sites_frac,sel_indices,axis=0)
-      print "Number of atoms = ",na
+    # Get the fractional coords of the reference structure alpha carbons, for translational fit. 
+    # MEW Note: only uses all c-alpha atoms in the structure and only does translational fit for now
 
-    else:
-      ref_sites_frac = None
-      sel_indices = None
+        sites_frac = xrs.sites_frac().as_double().as_numpy_array().reshape((na,3))
+        sel_indices = t.topology.select('name CA')
+        ref_sites_frac = np.take(sites_frac,sel_indices,axis=0)
 
-  # Broadcast arrays used for translational fit
+      else:
+        ref_sites_frac = None
+        sel_indices = None
 
-    if mpi_enabled():
-      ref_sites_frac = mpi_comm.bcast(ref_sites_frac,root=0)
-      sel_indices = mpi_comm.bcast(sel_indices,root=0)
+    # Broadcast arrays used for translational fit
+
+      if mpi_enabled():
+        ref_sites_frac = mpi_comm.bcast(ref_sites_frac,root=0)
+        sel_indices = mpi_comm.bcast(sel_indices,root=0)
 
   # calculate fcalc, diffuse intensity, and (if requested) density trajectory
 
     if mpi_rank == 0:
         stime = time.time()
+        if chunk_ct == 0:
+          print "Number of atoms in topology file = ",na
 
     map_data = []
     num_elems = len(t)
@@ -350,8 +359,10 @@ if __name__=="__main__":
     if (num_elems <= 0 or skip_calc):
       num_elems = 0
       xrs_sel = xrs.select(selection)
-      sig_fcalc = xrs_sel.structure_factors(d_min=d_min).f_calc() * 0.0
-      sig_icalc = abs(sig_fcalc).set_observation_type_xray_amplitude().f_as_f_sq()
+      if sig_fcalc is None:
+        sig_fcalc = xrs_sel.structure_factors(d_min=d_min).f_calc() * 0.0
+      if sig_icalc is None:
+        sig_icalc = abs(sig_fcalc).set_observation_type_xray_amplitude().f_as_f_sq()
       print "WARNING: Rank ",mpi_rank," is idle"
 
     else:
@@ -363,14 +374,10 @@ if __name__=="__main__":
         tmp = flex.vec3_double(tsites[i,:,:])
         xrs.set_sites_cart(tmp)
 
-    # select the atoms for the structure factor calculation
-
-        xrs_sel = xrs.select(selection)
-
     # perform translational fit with respect to the alpha carbons in the topology file
 
         if (translational_fit):
-            sites_frac = xrs_sel.sites_frac().as_double().as_numpy_array().reshape((na,3))
+            sites_frac = xrs.sites_frac().as_double().as_numpy_array().reshape((na,3))
             x0 = [0.0,0.0,0.0]
             otime1 = time.time()
             this_sites_frac = np.take(sites_frac,sel_indices,axis=0)
@@ -378,8 +385,12 @@ if __name__=="__main__":
             for j in range(3):
                 sites_frac[:,j] +=res.x[j]        
             otime2 = time.time()
-            xrs_sel.set_sites_frac(flex.vec3_double(sites_frac))
+            xrs.set_sites_frac(flex.vec3_double(sites_frac))
     #        print ("Time to optimize = ",otime2-otime1)
+
+    # select the atoms for the structure factor calculation
+
+        xrs_sel = xrs.select(selection)
 
         fcalc = xrs_sel.structure_factors(d_min=d_min).f_calc()
 
@@ -399,9 +410,13 @@ if __name__=="__main__":
 
     chunk_ct = chunk_ct + 1
 
-    if (chunk_ct >= nchunklist[i]):
+    print "Rank ",mpi_rank," processed chunk ",chunk_ct," of ",nchunklist[mpi_rank]
+
+    if (chunk_ct >= nchunklist[mpi_rank]):
       break
 
+
+    
 # Commented out some density trajectory code
 #  if not (dens_file is None):
 #    map_grid = np.concatenate(map_data)
@@ -411,12 +426,15 @@ if __name__=="__main__":
 #    map_grid_3D = np.reshape(map_grid,(len(tsites),Ni,Nj,Nk))
 #    np.save(dens_file,map_grid_3D)                           
 
+  print "Rank ",mpi_rank," is done with individual calculations"
+  sys.stdout.flush()
+
   if mpi_enabled():
     mpi_comm.Barrier()
 
   if (mpi_rank == 0):
     mtime = time.time()
-    print "TIMING: Calculate individual statistics = ",mtime-stime
+    print "TIMING: Calculate individual statistics = ",mtime-itime
 
 # perform reduction of sig_fcalc, sig_icalc, and ct
 
