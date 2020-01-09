@@ -17,7 +17,109 @@
 #include<omp.h>
 #endif
 
-int lmodeim(DIFFIMAGE *imdiff_in) 
+int lmodeim(DIFFIMAGE *imdiff_in)
+{
+  RCCOORDS_DATA 
+    half_height,
+    half_width,
+    r, 
+    c; 
+
+  IMAGE_DATA_TYPE
+    *image,
+    maxval,
+    minval,
+    binsize;
+  
+  size_t
+    *image_bins,
+    num_bins;
+
+  DIFFIMAGE *imdiff;
+
+  int pidx;
+
+  size_t
+    index,
+    i,
+    j,
+    *distn;
+  
+  for (pidx = 0; pidx < imdiff_in->num_panels; pidx++) {
+    imdiff = &imdiff_in[pidx];
+    if (pidx != imdiff->this_panel) {
+      perror("LMODEIM: Image panels are not indexed sequentially. Aborting\n");
+      exit(1);
+    }
+
+    /* 
+     * Allocate working images: 
+     */ 
+  
+    image = (IMAGE_DATA_TYPE *)calloc(imdiff->image_length, 
+				      sizeof(IMAGE_DATA_TYPE));
+    image_mode = (size_t *)calloc(imdiff->image_length,
+				  sizeof(size_t));
+    if (!image || !image_bins) {
+      sprintf(imdiff->error_msg,"\nLMODEIM:  Couldn't allocate arrays.\n\n");
+      return_value = 1;
+      goto CloseShop;
+    }
+
+    // Compute min and max for image
+
+    int got_first_val = 0;
+    
+    for (index = 0; index < imdiff->image_length; index++) {
+      if ((image[index] != imdiff->overload_tag) &&
+	  (image[index] != imdiff->ignore_tag) &&
+	  (image[index] < MAX_IMAGE_DATA_VALUE)) {
+	minval = image[index];
+	maxval = image[index];
+	break;
+      }
+    }
+    
+    for (index = 0; index < imdiff->image_length; index++) {
+      if ((image[index] != imdiff->overload_tag) &&
+	  (image[index] != imdiff->ignore_tag) &&
+	  (image[index] < MAX_IMAGE_DATA_VALUE)) {
+	if (got_first_val != 0) {
+	  if (image[index] < minval) minval = image[index];
+	  if (image[index] > maxval) maxval = image[index];
+	} else {
+	  minval = image[index];
+	  maxval = image[index];
+	  got_first_val = 1;
+	}
+      }
+    }
+
+    // Allocate the distribution
+
+    binsize = imdiff->mode_binsize;
+    num_bins = (size_t)((maxval - minval)/binsize) + 1;
+
+    distn = (size_t)calloc(num_bins,sizeof(size_t));
+
+    // Compute the mode filtered image
+
+    half_height = imdiff->mode_height / 2;
+    half_width = imdiff->mode_width / 2;
+    int hpixels = imdiff->hpixels;
+    int vpixels = imdiff->vpixels;
+
+    for (i = 0; i < hpixels; i++) {
+      for (j = 0; j < vpixels; j++) {
+	
+      if ((image[index] != imdiff->overload_tag) &&
+	  (image[index] != imdiff->ignore_tag) &&
+	  (image[index] < MAX_IMAGE_DATA_VALUE)) {
+	image_bins[index] = 
+      }
+    }
+    
+int lmodeim_old(DIFFIMAGE *imdiff_in) 
 {
   
   RCCOORDS_DATA 
