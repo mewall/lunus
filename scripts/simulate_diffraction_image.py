@@ -462,11 +462,18 @@ def process_one_glob():
 
 #  s = 256./(dmax-dmin)
 
-
+      
       for i in range(len(diffim)):
+        for j in range(len(diffim[i])):
+          if (diffim[i][j] != image_mask_tag):
+            diffim[i][j] *= scale
+
+      if (shift_min):
+        for i in range(len(diffim)):
           for j in range(len(diffim[i])):
-              if (diffim[i][j] != image_mask_tag):
-                  diffim[i][j] = diffim[i][j]*scale
+            if (diffim[i][j] != image_mask_tag):
+              diffim[i][j] -= dmin*scale
+        
 
 #      diffim *= scale
 
@@ -540,6 +547,16 @@ if __name__=="__main__":
     use_json_metrology_str = args.pop(idx).split("=")[1]
     if (use_json_metrology_str == "True"):
       use_json_metrology=True
+ # Shift minimum pixel value to avoid negative pixels
+  shift_min=True
+  try:
+    idx = [a.find("shift_min")==0 for a in args].index(True)
+  except ValueError:
+    shift_min=True
+  else:
+    shift_min_str = args.pop(idx).split("=")[1]
+    if (shift_min_str == "False"):
+      shift_min=False
 
  # Input json
   keep_going = True
