@@ -22,6 +22,8 @@ int lmodeim(DIFFIMAGE *imdiff_in)
   RCCOORDS_DATA 
     half_height,
     half_width,
+    n,
+    m,
     r, 
     c; 
 
@@ -31,8 +33,11 @@ int lmodeim(DIFFIMAGE *imdiff_in)
     minval,
     binsize;
   
+  int
+    return_value = 0;
+
   size_t
-    *image_bins,
+    *image_mode,
     num_bins;
 
   DIFFIMAGE *imdiff;
@@ -43,6 +48,7 @@ int lmodeim(DIFFIMAGE *imdiff_in)
     index,
     i,
     j,
+    k,
     *distn;
   
   for (pidx = 0; pidx < imdiff_in->num_panels; pidx++) {
@@ -52,15 +58,15 @@ int lmodeim(DIFFIMAGE *imdiff_in)
       exit(1);
     }
 
+    image = imdiff->image;
+
     /* 
-     * Allocate working images: 
+     * Allocate working mode filetered image: 
      */ 
   
-    image = (IMAGE_DATA_TYPE *)calloc(imdiff->image_length, 
-				      sizeof(IMAGE_DATA_TYPE));
     image_mode = (size_t *)calloc(imdiff->image_length,
 				  sizeof(size_t));
-    if (!image || !image_bins) {
+    if (!image_mode) {
       sprintf(imdiff->error_msg,"\nLMODEIM:  Couldn't allocate arrays.\n\n");
       return_value = 1;
       goto CloseShop;
@@ -69,16 +75,6 @@ int lmodeim(DIFFIMAGE *imdiff_in)
     // Compute min and max for image
 
     int got_first_val = 0;
-    
-    for (index = 0; index < imdiff->image_length; index++) {
-      if ((image[index] != imdiff->overload_tag) &&
-	  (image[index] != imdiff->ignore_tag) &&
-	  (image[index] < MAX_IMAGE_DATA_VALUE)) {
-	minval = image[index];
-	maxval = image[index];
-	break;
-      }
-    }
     
     for (index = 0; index < imdiff->image_length; index++) {
       if ((image[index] != imdiff->overload_tag) &&
@@ -100,7 +96,7 @@ int lmodeim(DIFFIMAGE *imdiff_in)
     binsize = imdiff->mode_binsize;
     num_bins = (size_t)((maxval - minval)/binsize) + 1;
 
-    distn = (size_t)calloc(num_bins,sizeof(size_t));
+    distn = (size_t *)calloc(num_bins,sizeof(size_t));
 
     // Compute the mode filtered image
 
@@ -109,16 +105,110 @@ int lmodeim(DIFFIMAGE *imdiff_in)
     int hpixels = imdiff->hpixels;
     int vpixels = imdiff->vpixels;
 
-    for (i = 0; i < hpixels; i++) {
-      for (j = 0; j < vpixels; j++) {
-	
-      if ((image[index] != imdiff->overload_tag) &&
-	  (image[index] != imdiff->ignore_tag) &&
-	  (image[index] < MAX_IMAGE_DATA_VALUE)) {
-	image_bins[index] = 
+    for (i = half_width; i < hpixels-half_width; i++) {
+      // Compute the initial j distribution first
+      j = half_height;      
+      int l = 0;
+      for(n=-half_height; n<=half_height; n++) {
+	r = j + n;
+	for(m=-half_width; m<=half_width; m++) {
+	  c = i + m;
+	  index = r*hpixels + c;
+	  if ((image[index] != imdiff->overload_tag) &&
+	      (image[index] != imdiff->ignore_tag) &&
+	      (image[index] < MAX_IMAGE_DATA_VALUE)) {
+	    size_t thisbin = (image[index]-minval)/binsize + 1;
+	    distn[thisbin]++;
+	    l++;
+	  } else distn[0]++;
+	}
+      }
+      if (l == 0) {
+	image_mode[j*hpixels + i] = 0;
+      }
+      else {
+	int mode_ct = 0;
+	size_t mode_value=0, max_count=0;
+	for (k = 1; k <= num_bins; k++) {
+	  if (distn[k] == max_count) {
+	    mode_value += k;
+	    mode_ct++;
+	  } else if (distn[k] > max_count) {
+	    mode_value = k;
+	    max_count = distn[k];
+	    mode_ct = 1;
+	  }
+	}
+	if (mode_ct == 0) {
+	  printf("Exception\n");
+	  exit(1);
+	}
+	image_mode[j*hpixels + i] = (size_t)((float)(mode_value/mode_ct) + .5);
+      }
+      for (j = half_height+1; j < vpixels - half_height; j++) {
+	// Update the distn. Start by removing the points outside the window.
+	r = j - half_height - 1;
+	for(m=-half_width; m<=half_width; m++) {
+	  c = i + m;
+	  index = r*hpixels + c;
+	  if ((image[index] != imdiff->overload_tag) &&
+	      (image[index] != imdiff->ignore_tag) &&
+	      (image[index] < MAX_IMAGE_DATA_VALUE)) {
+	    size_t thisbin = (image[index]-minval)/binsize + 1;
+	    distn[thisbin]--;
+	    l--;
+	  } else distn[0]--;
+	}
+	// Now add the points newly inside the window.
+	r = j + half_height;
+	for(m=-half_width; m<=half_width; m++) {
+	  c = i + m;
+	  index = r*hpixels + c;
+	  if ((image[index] != imdiff->overload_tag) &&
+	      (image[index] != imdiff->ignore_tag) &&
+	      (image[index] < MAX_IMAGE_DATA_VALUE)) {
+	    size_t thisbin = (image[index]-minval)/binsize + 1;
+	    distn[thisbin]++;
+	    l++;
+	  } else distn[0]++;
+	}
+	// Now compute the mode
+	if (l == 0) {
+	  image_mode[j*hpixels + i] = 0;
+	} else {
+	  int mode_ct = 0;
+	  size_t mode_value=0, max_count=0;
+	  for (k = 1; k <= num_bins; k++) {
+	    if (distn[k] == max_count) {
+	      mode_value += k;
+	      mode_ct++;
+	    } else if (distn[k] > max_count) {
+	      mode_value = k;
+	      max_count = distn[k];
+	      mode_ct = 1;
+	    }
+	  }
+	  image_mode[j*hpixels + i] = (size_t)((float)(mode_value/mode_ct) + .5);
+	}
       }
     }
-    
+    // Now image_mode holds the mode filtered values
+    // Convert these values to pixel values and store them in the input image
+    for (j = half_height; j < vpixels - half_height; j++) {
+      for (i = half_width; i < hpixels - half_width; i++) {
+	size_t this_index = j * hpixels + i;
+	if (image_mode[this_index] != 0) {
+	  image[this_index] = (image_mode[this_index]-1)*binsize + minval;
+	} else {
+	  image[this_index] = imdiff->mask_tag;
+	}
+      }
+    }
+  }
+ CloseShop:
+  return(return_value);
+}
+
 int lmodeim_old(DIFFIMAGE *imdiff_in) 
 {
   
