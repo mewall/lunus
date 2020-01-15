@@ -126,7 +126,7 @@ DIFFIMAGE *linitim(size_t n)
     imdiff->mask  = (struct rccoords *)malloc(sizeof(struct rccoords)*
 					      MAX_MASK_PIXELS);
     imdiff->image = (IMAGE_DATA_TYPE *)calloc(imdiff->image_length,
-					      sizeof(IMAGE_DATA_TYPE));
+    					      sizeof(IMAGE_DATA_TYPE));
     imdiff->correction = (float *)calloc(imdiff->image_length,
 					 sizeof(float));
     imdiff->header = (char *)malloc(sizeof(char)*imdiff->header_length);

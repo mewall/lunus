@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
     normim_tilt_y=0.0;
 
   DIFFIMAGE 
-    *imdiff = NULL, *imdiff_bkg = NULL, *imdiff_corrected = NULL, *imdiff_scale = NULL, *imdiff_scale_ref = NULL;
+    *imdiff = NULL, *imdiff_bkg = NULL, *imdiff_corrected = NULL, *imdiff_scale = NULL, *imdiff_scale_ref = NULL, *imdiff_ref = NULL;
 
   LAT3D
     *lat;
@@ -531,8 +531,6 @@ int main(int argc, char *argv[])
 
       // First broadcast the reference image to all ranks
 
-      DIFFIMAGE *imdiff_ref;
-
       imdiff_ref = linitim(1);
       lcloneim(imdiff_ref,imdiff);
 
@@ -633,8 +631,37 @@ int main(int argc, char *argv[])
       }
       lwritevtk(lat);
     }
-  }
-  lfinalMPI(mpiv);
 
+}
+  // Free the static arrays used in lprocimlt()
+
+  lat->procmode = 2;
+  lprocimlt(lat);
+  
+  // Free the various allocated strings
+    
+  if (writevtk_str != NULL) free(writevtk_str);
+  if (imagelist_name != NULL) free(imagelist_name);
+  if (jsonlist_name != NULL) free(jsonlist_name);
+  if (spacegroup != NULL) free(spacegroup);
+  if (xvectors_path != NULL) free(xvectors_path);
+  if (amatrix_format != NULL) free(amatrix_format);
+  if (lattice_dir != NULL) free(lattice_dir);
+  if (diffuse_lattice_prefix != NULL) free(diffuse_lattice_prefix);
+  if (xvectors != NULL) free(xvectors);
+  if (xvectors_cctbx != NULL) free(xvectors_cctbx);
+  if (latsum != NULL) free(latsum);
+  if (latctsum != NULL) free(latctsum);
+  if (deck != NULL) free(deck);
+
+  lfinalMPI(mpiv);
+  free(mpiv);
+  lfreeim(imdiff);
+  lfreeim(imdiff_ref);
+  lfreeim(imdiff_corrected);
+  lfreeim(imdiff_scale);
+  lfreeim(imdiff_scale_ref);
+  lfreeim(imdiff_bkg);
+  lfreelt(lat);
 }
 

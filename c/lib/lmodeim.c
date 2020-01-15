@@ -59,7 +59,10 @@ int lmodeim(DIFFIMAGE *imdiff_in)
     }
 
     image = imdiff->image;
-
+    IMAGE_DATA_TYPE overload_tag = imdiff->overload_tag;
+    IMAGE_DATA_TYPE ignore_tag = imdiff->ignore_tag;
+    size_t image_length = imdiff->image_length;
+    
     /* 
      * Allocate working mode filetered image: 
      */ 
@@ -76,9 +79,10 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 
     int got_first_val = 0;
     
-    for (index = 0; index < imdiff->image_length; index++) {
-      if ((image[index] != imdiff->overload_tag) &&
-	  (image[index] != imdiff->ignore_tag) &&
+    
+    for (index = 0; index < image_length; index++) {
+      if ((image[index] != overload_tag) &&
+	  (image[index] != ignore_tag) &&
 	  (image[index] < MAX_IMAGE_DATA_VALUE)) {
 	if (got_first_val != 0) {
 	  if (image[index] < minval) minval = image[index];
@@ -90,11 +94,10 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 	}
       }
     }
-
     // Allocate the distribution
 
     binsize = imdiff->mode_binsize;
-    num_bins = (size_t)((maxval - minval)/binsize) + 1;
+    num_bins = (size_t)((maxval - minval)/binsize) + 2;
 
     distn = (size_t *)calloc(num_bins,sizeof(size_t));
 
@@ -109,19 +112,24 @@ int lmodeim(DIFFIMAGE *imdiff_in)
     size_t wlen = (hpixels+1)*(vpixels+1);
     
     window = (size_t *)calloc(wlen,sizeof(size_t));
-    
-    for (j = half_height; j < vpixels-half_height; j++) {
-      for (i = half_width; i < hpixels-half_width; i++) {
-	// Compute the initial j distribution first
+
+#pragma omp target data map (tofrom:image[0:image_length])
+#pragma omp target data map (tofrom:image_mode[0:image_length])
+#pragma omp target data map (to:window[0:wlen])
+#pragma omp target data map (to:distn[0:num_bins])
+    //#pragma omp target
+    //#pragma omp teams distribute parallel for collapse(2) private(i,j,k,l,r,c,index)
+    for (j = half_height; j < vpixels - half_height; j++) {
+      for (i = half_width; i < hpixels - half_width; i++) {
 	size_t index_mode = j*hpixels + i;
 	int l = 0;
-	for(n=-half_height; n<=half_height; n++) {
-	  r = j + n;
-	  for(m=-half_width; m<=half_width; m++) {
-	    c = i + m;
+	// Compute the initial j distribution first
+	for(r = j - half_height; r <= j + half_height; r++) {
+	  //	  printf("r = %d\n",r);
+	  for(c = i - half_width; c <= i + half_width; c++) {
 	    index = r*hpixels + c;
-	    if ((image[index] != imdiff->overload_tag) &&
-		(image[index] != imdiff->ignore_tag) &&
+	    if ((image[index] != overload_tag) &&
+		(image[index] != ignore_tag) &&
 		(image[index] < MAX_IMAGE_DATA_VALUE)) {
 	      window[l] = (image[index]-minval)/binsize + 1;
 	      distn[window[l]]++;
@@ -145,10 +153,11 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 	      mode_ct = 1;
 	    }
 	  }
-	  if (mode_ct == 0) {
+	  /*	  if (mode_ct == 0) {
 	    printf("Exception\n");
 	    exit(1);
 	  }
+	  */
 	  image_mode[index_mode] = (size_t)((float)(mode_value/mode_ct) + .5);
 	  for (k = 0; k < l; k++) {
 	    distn[window[k]] = 0;
@@ -158,16 +167,25 @@ int lmodeim(DIFFIMAGE *imdiff_in)
     }
     // Now image_mode holds the mode filtered values
     // Convert these values to pixel values and store them in the input image
+    //#pragma omp target
+    //parallel for				\
+//  shared(half_height,half_width,binsize,minval)	\
+//  private(i)
+    {    
     for (j = half_height; j < vpixels - half_height; j++) {
       for (i = half_width; i < hpixels - half_width; i++) {
 	size_t this_index = j * hpixels + i;
 	if (image_mode[this_index] != 0) {
 	  image[this_index] = (image_mode[this_index]-1)*binsize + minval;
 	} else {
-	  image[this_index] = imdiff->mask_tag;
+	  image[this_index] = ignore_tag;
 	}
       }
     }
+    }
+    free(image_mode);
+    free(distn);
+    free(window);
   }
  CloseShop:
   return(return_value);
@@ -325,7 +343,7 @@ int lmodeim_old(DIFFIMAGE *imdiff_in)
     }
     //avg_max_count /= (float)avg_max_count_count;
     //  printf("avg_max_count,num_max_count_1 = %f,%d\n\n",avg_max_count,num_max_count_1);/***/
-    free((IMAGE_DATA_TYPE *)image);/***/
+    free(image);/***/
   } // for(pidx)
 
  CloseShop:

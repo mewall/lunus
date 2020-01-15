@@ -8,7 +8,7 @@
 
 #include<mwmask.h>
 
-int lfreeim(DIFFIMAGE *imdiff_in)
+int lclearim(DIFFIMAGE *imdiff_in)
 {
   size_t
     i;
@@ -22,22 +22,34 @@ int lfreeim(DIFFIMAGE *imdiff_in)
 
   DIFFIMAGE *imdiff;
 
-  for (pidx = 0; pidx < imdiff_in->num_panels; pidx++) {
-    imdiff = &imdiff_in[pidx];
-
-    if (imdiff->rfile != NULL) free((RFILE_DATA_TYPE *)imdiff->rfile);
-    if (imdiff->imscaler != NULL) free((RFILE_DATA_TYPE *)imdiff->imscaler);
-    if (imdiff->imoffsetr != NULL) free((RFILE_DATA_TYPE *)imdiff->imoffsetr);
-    if (imdiff->mask != NULL) free((struct rccoords *)imdiff->mask);
-    if (imdiff->image != NULL) free((IMAGE_DATA_TYPE *)imdiff->image);
-    if (imdiff->correction != NULL) free(imdiff->correction);
-    if (imdiff->header != NULL) free((char *)imdiff->header);
-    if (imdiff->footer != NULL) free(imdiff->footer);
-    if (imdiff->overload != NULL) free((struct rccorrds *)imdiff->overload);
-    if (imdiff->peak != NULL) free((struct xycoords *)imdiff->peak);
-    if (imdiff->weights != NULL) free((WEIGHTS_DATA_TYPE *)imdiff->weights);
-
+  if (imdiff_in != NULL) {
+  
+    for (pidx = 0; pidx < imdiff_in->num_panels; pidx++) {
+      imdiff = &imdiff_in[pidx];
+      
+      if (imdiff->rfile != NULL) free(imdiff->rfile);
+      if (imdiff->image != NULL) free(imdiff->image);
+      if (imdiff->correction != NULL) free(imdiff->correction);
+      if (imdiff->imscaler != NULL) free(imdiff->imscaler);
+      if (imdiff->imoffsetr != NULL) free(imdiff->imoffsetr);
+      if (imdiff->mask != NULL) free(imdiff->mask);
+      if (imdiff->header != NULL) free(imdiff->header);
+      if (imdiff->footer != NULL) free(imdiff->footer);
+      if (imdiff->overload != NULL) free(imdiff->overload);
+      if (imdiff->peak != NULL) free(imdiff->peak);
+      if (imdiff->weights != NULL) free(imdiff->weights);
+      
+    }
   }
+}
 
-  free(imdiff_in);
+int lfreeim(DIFFIMAGE *imdiff_in)
+{
+  size_t
+    i;
+  int 
+    return_value;
+
+  lclearim(imdiff_in);  
+  if (imdiff_in != NULL) free(imdiff_in);
 }

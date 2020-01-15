@@ -779,6 +779,7 @@ struct fom lcalcrsf(char *hklfname, LAT3D *lat1,LAT3D *lat2);
 struct xyzcoords lcalcsim(DIFFIMAGE *imdiff_in);
 int lccrlt(LAT3D *lat1, LAT3D *lat2);
 int lchbyte(void *ptr, size_t packet_size, size_t list_length);
+int lclearim(DIFFIMAGE *imdiff);
 int lcloneim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lconstim(DIFFIMAGE *imdiff);
 int lconstlt(LAT3D *lat);

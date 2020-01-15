@@ -160,7 +160,13 @@ int lprocimlt(LAT3D *lat)
 #endif
 
     return(0);
+  } else if (lat->procmode == 2) {
+    lfreeim(imdiff_corrected_list);
+    lfreeim(imdiff_scale_list);
+    lfreeim(imdiff_scale_ref_list);
+    return(0);
   }
+    
 	  
   // Calculate the image scale factor
 
