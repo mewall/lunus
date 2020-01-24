@@ -16,6 +16,7 @@
 #ifdef USE_OPENMP
 #include<omp.h>
 #endif
+#include<time.h>
 
 int lmodeim(DIFFIMAGE *imdiff_in)
 {
@@ -140,6 +141,7 @@ int lmodeim(DIFFIMAGE *imdiff_in)
       }
     }
 #pragma omp target update from(team_num[:num_teams[0]],thread_num[:num_teams[0]*num_threads[0]],image_mode[:image_length])
+    /*
     for (k = 0;k < num_teams[0];k++) {
       printf("Team number %ld:\n", team_num[k]);
       for (j = 0; j < num_threads[0];j++) {
@@ -152,6 +154,7 @@ int lmodeim(DIFFIMAGE *imdiff_in)
       }
     }
     fflush(stdout);
+    */
 #pragma omp target exit data map(delete:team_num[:num_teams[0]],thread_num[:num_teams[0]*num_threads[0]])
 #pragma omp target exit data map(delete:num_teams,num_threads)
 
@@ -161,10 +164,14 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 #pragma omp target enter data map(alloc:window[0:wlen*num_teams[0]*num_threads[0]],distn[0:num_bins*num_teams[0]*num_threads[0]])
 #pragma omp target update to(window[0:wlen*num_teams[0]*num_threads[0]],distn[0:num_bins*num_teams[0]*num_threads[0]])
 
+    clock_t start = clock();
+
 #pragma omp target teams distribute parallel for collapse(2)	\
   private(i,k,r,c,index)
-    for (j = half_height; j < vpixels - half_height; j++) {
-      for (i = half_width; i < hpixels - half_width; i++) {
+    //    for (j = half_height; j < vpixels - half_height; j++) {
+    //      for (i = half_width; i < hpixels - half_width; i++) {
+    for (j = half_height; j < 400-half_height; j++) {
+      for (i = half_width; i < 400-half_width; i++) {
 	size_t index_mode = j*hpixels + i;
 	int l = 0;
 	size_t tm = omp_get_team_num();
@@ -210,6 +217,10 @@ int lmodeim(DIFFIMAGE *imdiff_in)
     }
     // Now image_mode holds the mode filtered values
     // Convert these values to pixel values and store them in the input image
+
+    clock_t stop = clock();
+    double tel = ((double)(stop-start))/CLOCKS_PER_SEC;
+    printf("kernel loop took %g seconds\n",tel);
 #pragma omp target
     //parallel for				\
 //  shared(half_height,half_width,binsize,minval)	\
