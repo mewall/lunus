@@ -130,7 +130,7 @@ int lmodeim(DIFFIMAGE *imdiff_in)
     size_t team_num[num_teams[0]];
     size_t thread_num[num_teams[0]*num_threads[0]];
 #pragma omp target enter data map(alloc:team_num[:num_teams[0]],thread_num[:num_teams[0]*num_threads[0]])
-#pragma omp target teams distribute parallel for collapse(2)
+#pragma omp target teams distribute parallel for collapse(2) private(i)
     for (j = half_height; j < vpixels - half_height; j++) {
       for (i = half_width; i < hpixels - half_width; i++) {
 	size_t tm = omp_get_team_num();
@@ -141,20 +141,18 @@ int lmodeim(DIFFIMAGE *imdiff_in)
       }
     }
 #pragma omp target update from(team_num[:num_teams[0]],thread_num[:num_teams[0]*num_threads[0]],image_mode[:image_length])
-    /*
     for (k = 0;k < num_teams[0];k++) {
-      printf("Team number %ld:\n", team_num[k]);
+      //      printf("Team number %ld:\n", team_num[k]);
       for (j = 0; j < num_threads[0];j++) {
-	printf("  Thread number %ld\n",thread_num[k*num_threads[0]+j]);
+	//	printf("  Thread number %ld\n",thread_num[k*num_threads[0]+j]);
       }
     }
     for (j = half_height; j < vpixels - half_height; j++) {
       for (i = half_width; i < hpixels - half_width; i++) {
-	printf("Image index = %ld, thread index = %ld\n",j*hpixels+i,image_mode[j*hpixels+i]);
+	//	printf("Image index = %ld, thread index = %ld\n",j*hpixels+i,image_mode[j*hpixels+i]);
       }
     }
     fflush(stdout);
-    */
 #pragma omp target exit data map(delete:team_num[:num_teams[0]],thread_num[:num_teams[0]*num_threads[0]])
 #pragma omp target exit data map(delete:num_teams,num_threads)
 
