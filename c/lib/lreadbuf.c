@@ -16,7 +16,7 @@ size_t lreadbuf(void **buf,const char *fname)
   if ( (f = fopen(fname,"rb")) == NULL ) {
     printf("LREADBUF: Can't open %s. Returning with value -1.\n",fname);
     return(-1);
-  }
+  } 
 
   this_pos = ftell(f);
   fseek(f, 0, SEEK_END); // seek to end of file
@@ -30,7 +30,8 @@ size_t lreadbuf(void **buf,const char *fname)
     printf("LREADBUF: Could not allocate buffer\n");
     exit(1);
   }
-  num_read = fread(*buf, sizeof(void), buf_length,f);
+//  num_read = fread(*buf, sizeof(void), buf_length,f);
+  num_read = fread(*buf, sizeof(char), buf_length,f);
   if (num_read != buf_length) {
     printf("LREADBUF: number of bytes read differs from length\n");
     exit(1);
