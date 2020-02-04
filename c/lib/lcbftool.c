@@ -180,7 +180,7 @@ void lbufuncompress(const char* packed, const size_t packed_sz, int* values, con
   int current = 0;
   unsigned int j = 0;
   short s;
-  char c;
+  signed char c;
   int i;
   char le;
   size_t k;

@@ -139,9 +139,7 @@ int lmodeim(DIFFIMAGE *imdiff_in)
       }
     }
     
-#ifdef DEBUG
     printf(" Number of teams, threads = %ld, %ld\n",num_teams,num_threads);
-#endif
 
     window = (size_t *)calloc(wlen*num_teams*num_threads,sizeof(size_t));
     distn = (size_t *)calloc(num_bins*num_teams*num_threads,sizeof(size_t));
@@ -258,8 +256,7 @@ int lmodeim(DIFFIMAGE *imdiff_in)
     }
 
 #ifdef USE_OFFLOAD
-#pragma omp target update from(image[0:image_length])
-#pragma omp target exit data map(delete:image[0:image_length],image_mode[0:image_length],window[0:wlen*num_threads*num_teams],distn[0:num_bins*num_teams*num_threads])
+#pragma omp target exit data map(from:image[0:image_length]) map(delete:image_mode[0:image_length],window[0:wlen*num_threads*num_teams],distn[0:num_bins*num_teams*num_threads])
 #endif
 
     free(image_mode);

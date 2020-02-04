@@ -30,7 +30,7 @@ size_t lreadbuf(void **buf,const char *fname)
     printf("LREADBUF: Could not allocate buffer\n");
     exit(1);
   }
-//  num_read = fread(*buf, sizeof(void), buf_length,f);
+  //  num_read = fread(*buf, sizeof(void), buf_length,f);
   num_read = fread(*buf, sizeof(char), buf_length,f);
   if (num_read != buf_length) {
     printf("LREADBUF: number of bytes read differs from length\n");
