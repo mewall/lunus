@@ -173,7 +173,7 @@ int main(int argc, char *argv[])
       fft_data[fft_index+1] = (float)image2[image_index];
       fft_index = fft_index + 2;
     }
-    /*printf("%d,%d,%d: %f\n",i,j,k,fft_data[fft_index-2]);/***/
+    //printf("%d,%d,%d: %f\n",i,j,k,fft_data[fft_index-2]);/***/
   }
 printf("...done.\n");/***/
   /*
@@ -203,7 +203,7 @@ printf("Extracting lattice...\n");/***/
       fft_index = fft_index+2;
     } 
   }
-printf("...done. fft_index = %d,%d\n",fft_index,image_index);
+printf("...done. fft_index = %ld,%ld\n",fft_index,image_index);
 
   /*
    * Write images to output file:

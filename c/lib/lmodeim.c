@@ -131,7 +131,11 @@ int lmodeim(DIFFIMAGE *imdiff_in)
       num_teams = omp_get_num_teams();
 
 #ifdef USE_OPENMP
+#ifdef USE_OFFLOAD
 #pragma omp parallel
+#else
+#pragma omp parallel
+#endif
 #endif
 
       {
@@ -375,7 +379,6 @@ int lmodeim_old(DIFFIMAGE *imdiff_in)
 	      }
 	    }
 	    if (l==0) {
-	      /*	printf("\nl=0 index=%ld\n",index);/***/
 	      image[index]=imdiff->ignore_tag;
 	    }
 	    else {
