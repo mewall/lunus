@@ -132,7 +132,7 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 
 #ifdef USE_OPENMP
 #ifdef USE_OFFLOAD
-#pragma omp parallel
+#pragma omp parallel num_threads(32)
 #else
 #pragma omp parallel
 #endif
@@ -169,7 +169,7 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 
 #ifdef USE_OPENMP
 #ifdef USE_OFFLOAD
-#pragma omp parallel for private(index,k,r,c) schedule(static,1)
+#pragma omp parallel for private(index,k,r,c) schedule(static,1) num_threads(32)
 #else
 #pragma omp parallel for private(index,k,r,c)
 #endif
@@ -243,7 +243,7 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 
 #ifdef USE_OPENMP
 #ifdef USE_OFFLOAD
-#pragma omp parallel for schedule(static,1)
+#pragma omp parallel for schedule(static,1) num_threads(32)
 #else
 #pragma omp parallel for
 #endif
