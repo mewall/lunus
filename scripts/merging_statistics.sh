@@ -1,6 +1,6 @@
 #!/bin/bash
 lat2hkl ${1}.lat tmp.hkl
-anisolt ${1}.lat tmp_aniso.lat $2
+anisolt ${1}.lat tmp_aniso.lat "$2"
 lat2hkl tmp_aniso.lat tmp_aniso.hkl
 m=`awk 'BEGIN{m=0}{if (m>$4) {m=$4}}END{print m}' tmp.hkl`
 echo $m
