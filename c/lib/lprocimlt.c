@@ -80,6 +80,7 @@ int lprocimlt(LAT3D *lat)
     int num_nz=0;
     size_t num_ign = 0;
     float sum_vals = 0.0;
+    imdiff_scale_ref = imdiff_scale_ref_list;
     for (j=0; j<imdiff_scale_ref->image_length; j++) {	      
       if (imdiff_scale_ref->image[j] != imdiff_scale_ref->overload_tag && imdiff_scale_ref->image[j] != 0) {
 	num_nz++;
