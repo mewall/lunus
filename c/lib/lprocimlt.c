@@ -44,6 +44,8 @@ int lprocimlt(LAT3D *lat)
     lpunchim(imdiff_list);
     lwindim(imdiff_list);
   } else {
+    perror("LPROCIMLT: Multipanel image detected. Aborting.\n");
+    exit(1);
     // ***Insert multipanel masking method here
   }
   
