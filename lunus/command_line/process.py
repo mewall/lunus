@@ -154,6 +154,7 @@ def process_one_glob():
 
     if (rotation_series):
       if get_mpi_rank() == 0:
+        print "METROLIST: ",metrolist[0]
         experiments = ExperimentListFactory.from_json_file(metrolist[0], check_format=False)
         experiment_params = get_experiment_params(experiments)
       else:
@@ -340,6 +341,8 @@ if __name__=="__main__":
     rotation_series_str = args.pop(idx).split("=")[1]
     if (rotation_series_str == "False"):
       rotation_series=False
+    else:
+      rotation_series=True
 
  # Input json
   keep_going = True
@@ -407,6 +410,15 @@ if __name__=="__main__":
     experiment_params = None
 
   experiment_params = mpi_bcast(experiment_params)
+
+  if isinstance(experiment_params,tuple):
+    print "experiment_params is a tuple"
+  else:
+    print "experiment_params is not a tuple"
+
+  print "len(experiment_params) = ",len(experiment_params)
+
+  sys.stdout.flush()
 
   p = lunus.Process(len(experiment_params))
 
