@@ -117,7 +117,7 @@ namespace lunus {
 	  if (imdiff->image[i]<min) min = imdiff->image[i];
 	}
       }
-      //      printf("ct = %ld,max = %d, min = %d\n",ct,max,min);
+      //      printf("IMAGE: ct = %ld,max = %d, min = %d\n",ct,max,min);
     }
 
     inline void set_image(std::size_t n,scitbx::af::flex_int data) {
@@ -237,8 +237,8 @@ namespace lunus {
 
     inline void LunusBkgsubim() {
       lbkgsubim(imdiff,imdiff_bkg);
-      //      printf("imdiff->background_subtraction_factor = %f\n",imdiff->background_subtraction_factor);
-      //      printf("imdiff-value_offset = %d\n",imdiff->value_offset);
+      //            printf("imdiff->background_subtraction_factor = %f\n",imdiff->background_subtraction_factor);
+      //            printf("imdiff-value_offset = %d\n",imdiff->value_offset);
     }
 
     inline scitbx::af::flex_int get_image() {

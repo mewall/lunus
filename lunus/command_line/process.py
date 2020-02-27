@@ -244,6 +244,8 @@ def process_one_glob():
           for pidx in range(len(bkg_data)):
             p.set_background(pidx,bkg_data[pidx])
         else:
+#          print "setting background"
+#          print "max(bkg_data) = ",np.amax(bkg_data.as_numpy_array())
           p.set_background(bkg_data)
 
         p.LunusBkgsubim()
