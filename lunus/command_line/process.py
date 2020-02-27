@@ -91,7 +91,9 @@ def mpi_bcast(d):
   if mpi_enabled():
     db = mpi_comm.bcast(d,root=0)
     print "Broadcasting from rank ",get_mpi_rank()
-
+  else:
+    db = d
+    
   return db
 
 def mpi_barrier():
@@ -386,7 +388,8 @@ if __name__=="__main__":
   if (subtract_background_images):
     bkg_glob = bkg_glob_list[0]
 
-  mpi_init()
+  if mpi_enabled():
+    mpi_init()
 
   if get_mpi_rank() == 0:
     if (len(metro_glob_list) != len(image_glob_list) or (subtract_background_images and len(metro_glob_list) != len(bkg_glob_list))):
