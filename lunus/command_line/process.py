@@ -10,8 +10,8 @@ import copy, os
 from dials.array_family import flex
 
 def mpi_enabled():
-#  return 'OMPI_COMM_WORLD_SIZE' in os.environ.keys()
-  return True
+  return 'OMPI_COMM_WORLD_SIZE' in os.environ.keys()
+#  return True
 
 def mpi_init():
   global mpi_comm
@@ -90,6 +90,7 @@ def get_experiment_xvectors(experiments):
 def mpi_bcast(d):
   if mpi_enabled():
     db = mpi_comm.bcast(d,root=0)
+    print "Broadcasting from rank ",get_mpi_rank()
 
   return db
 
@@ -154,7 +155,6 @@ def process_one_glob():
 
     if (rotation_series):
       if get_mpi_rank() == 0:
-        print "METROLIST: ",metrolist[0]
         experiments = ExperimentListFactory.from_json_file(metrolist[0], check_format=False)
         experiment_params = get_experiment_params(experiments)
       else:
@@ -162,6 +162,8 @@ def process_one_glob():
         experiment_params = None
       expriments = mpi_bcast(experiments)
       experiment_params = mpi_bcast(experiment_params)
+
+      print "Rank ",get_mpi_rank()," len(experiments) = ",len(experiments)
 
       x = get_experiment_xvectors(experiments)
 
@@ -238,11 +240,11 @@ def process_one_glob():
           if fresh_lattice:
             bkg = mpi_bcast(bkg)
           bkg_data = bkg.get_raw_data()
-        if isinstance(data,tuple):
+        if isinstance(bkg_data,tuple):
           for pidx in range(len(bkg_data)):
             p.set_background(pidx,bkg_data[pidx])
-          else:
-            p.set_background(bkg_data)
+        else:
+          p.set_background(bkg_data)
 
         p.LunusBkgsubim()
 
@@ -341,8 +343,6 @@ if __name__=="__main__":
     rotation_series_str = args.pop(idx).split("=")[1]
     if (rotation_series_str == "False"):
       rotation_series=False
-    else:
-      rotation_series=True
 
  # Input json
   keep_going = True
@@ -410,15 +410,6 @@ if __name__=="__main__":
     experiment_params = None
 
   experiment_params = mpi_bcast(experiment_params)
-
-  if isinstance(experiment_params,tuple):
-    print "experiment_params is a tuple"
-  else:
-    print "experiment_params is not a tuple"
-
-  print "len(experiment_params) = ",len(experiment_params)
-
-  sys.stdout.flush()
 
   p = lunus.Process(len(experiment_params))
 
