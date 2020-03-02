@@ -10,8 +10,8 @@ import copy, os
 from dials.array_family import flex
 
 def mpi_enabled():
-#  return 'OMPI_COMM_WORLD_SIZE' in os.environ.keys()
-  return True
+  return 'OMPI_COMM_WORLD_SIZE' in os.environ.keys()
+#  return True
 
 def mpi_init():
   global mpi_comm
@@ -90,7 +90,10 @@ def get_experiment_xvectors(experiments):
 def mpi_bcast(d):
   if mpi_enabled():
     db = mpi_comm.bcast(d,root=0)
-
+    print "Broadcasting from rank ",get_mpi_rank()
+  else:
+    db = d
+    
   return db
 
 def mpi_barrier():
@@ -161,6 +164,8 @@ def process_one_glob():
         experiment_params = None
       expriments = mpi_bcast(experiments)
       experiment_params = mpi_bcast(experiment_params)
+
+      print "Rank ",get_mpi_rank()," len(experiments) = ",len(experiments)
 
       x = get_experiment_xvectors(experiments)
 
@@ -237,11 +242,13 @@ def process_one_glob():
           if fresh_lattice:
             bkg = mpi_bcast(bkg)
           bkg_data = bkg.get_raw_data()
-        if isinstance(data,tuple):
+        if isinstance(bkg_data,tuple):
           for pidx in range(len(bkg_data)):
             p.set_background(pidx,bkg_data[pidx])
-          else:
-            p.set_background(bkg_data)
+        else:
+#          print "setting background"
+#          print "max(bkg_data) = ",np.amax(bkg_data.as_numpy_array())
+          p.set_background(bkg_data)
 
         p.LunusBkgsubim()
 
@@ -381,7 +388,8 @@ if __name__=="__main__":
   if (subtract_background_images):
     bkg_glob = bkg_glob_list[0]
 
-  mpi_init()
+  if mpi_enabled():
+    mpi_init()
 
   if get_mpi_rank() == 0:
     if (len(metro_glob_list) != len(image_glob_list) or (subtract_background_images and len(metro_glob_list) != len(bkg_glob_list))):

@@ -4,7 +4,26 @@ from dxtbx.format.FormatCBFMini import FormatCBFMini
 from lunus import LunusDIFFIMAGE
 import os
 
-img = dxtbx.load("g150aich_274_6_1_00001.cbf")
+import sys
+
+args = sys.argv[1:] 
+
+# Input image file
+try:
+    idx = [(a.find("input")==0) for a in args].index(True)
+except ValueError:
+    raise ValueError,"Input image file must be specified using input=."
+else:
+    inp_name = args.pop(idx).split("=")[1]
+# Output image file
+try:
+    idx = [(a.find("output")==0) for a in args].index(True)
+except ValueError:
+    raise ValueError,"Output image file must be specified using output=."
+else:
+    out_name = args.pop(idx).split("=")[1]
+
+img = dxtbx.load(inp_name)
 
 detector = img.get_detector()
 beam = img.get_beam()
@@ -13,6 +32,7 @@ scan = img.get_scan()
 
 A = LunusDIFFIMAGE()
 data = img.get_raw_data()
+print data[0]
 A.set_image(data)
 deck = '''
 #lunus input deck
@@ -38,4 +58,4 @@ A.LunusModeim()
 print "Mode filter finished."
 data2 = A.get_image();
 #dxtbx.format.FormatCBFMini.FormatCBFMini.as_file(detector,beam,gonio,scan,data,path,header_convention="GENERIC_MINI",det_type="GENERIC")
-FormatCBFMini.as_file(detector,beam,gonio,scan,data2,"g150aich_274_6_1_lunus_00001.cbf")
+FormatCBFMini.as_file(detector,beam,gonio,scan,data2,out_name)
