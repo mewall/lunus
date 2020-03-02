@@ -197,7 +197,7 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 	    }
 	  }
 	}
-	if (l == 0) {
+	if (l == 0 || image[index_mode] == ignore_tag || image[index_mode] == overload_tag || image[index_mode] >= MAX_IMAGE_DATA_VALUE) {
 	  image_mode[index_mode] = 0;
 	}
 	else {
