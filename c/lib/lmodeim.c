@@ -197,7 +197,7 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 	    }
 	  }
 	}
-	if (l == 0) {
+	if (l == 0 || image[index_mode] == ignore_tag || image[index_mode] == overload_tag || image[index_mode] >= MAX_IMAGE_DATA_VALUE) {
 	  image_mode[index_mode] = 0;
 	}
 	else {
@@ -239,7 +239,23 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 #endif
 #endif
 
-    for (j = half_height; j < vpixels - half_height; j++) {
+    for (j = 0; j < vpixels; j++) {
+      if (j < half_height || j > (vpixels-half_height)) {
+	for (i = 0; i < hpixels; i++) {
+	  size_t this_index = j * hpixels + i;
+	  image[this_index] = ignore_tag;
+	} 
+      } else {
+
+	for (i = 0; i < half_width; i++) {
+	  size_t this_index = j * hpixels + i;
+	  image[this_index] = ignore_tag;
+	}
+	
+	for (i = hpixels - half_width; i < hpixels; i++) {
+	  size_t this_index = j * hpixels + i;
+	  image[this_index] = ignore_tag;
+	}
 
 #ifdef USE_OPENMP
 #ifdef USE_OFFLOAD
@@ -249,12 +265,13 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 #endif
 #endif
 
-      for (i = half_width; i < hpixels - half_width; i++) {
-	size_t this_index = j * hpixels + i;
-	if (image_mode[this_index] != 0) {
-	  image[this_index] = (image_mode[this_index]-1)*binsize + minval;
-	} else {
-	  image[this_index] = ignore_tag;
+	for (i = half_width; i < hpixels - half_width; i++) {
+	  size_t this_index = j * hpixels + i;
+	  if (image_mode[this_index] != 0) {
+	    image[this_index] = (image_mode[this_index]-1)*binsize + minval;
+	  } else {
+	    image[this_index] = ignore_tag;
+	  }
 	}
       }
     }

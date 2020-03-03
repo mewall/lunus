@@ -845,6 +845,7 @@ int lminrim(DIFFIMAGE *imdiff);
 int lminrlt(LAT3D *lat);
 int lmirrorlt(LAT3D *lat,int axis);
 int lmodeim(DIFFIMAGE *imdiff);
+int lmodeim_old(DIFFIMAGE *imdiff);
 int lmulcfim(DIFFIMAGE *imdiff);
 int lmuldwflt(LAT3D *lat);
 int lmulim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
