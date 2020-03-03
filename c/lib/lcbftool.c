@@ -48,29 +48,29 @@
 //Code contributed by Graeme Winter, Diamond Light Source:
 
 typedef union {
-  char b[2];
+  signed char b[2];
   short s;
 } u_s;
 
 typedef union {
-  char b[4];
+  signed char b[4];
   int i;
 } u_i;
 
 // functions for byte swapping
 
-void byte_swap_short(char * b)
+void byte_swap_short(signed char * b)
 {
-  char c;
+  signed char c;
   c = b[0];
   b[0] = b[1];
   b[1] = c;
   return;
 }
 
-void byte_swap_int(char * b)
+void byte_swap_int(signed char * b)
 {
-  char c;
+  signed char c;
   c = b[0];
   b[0] = b[3];
   b[3] = c;
@@ -85,7 +85,7 @@ void byte_swap_int(char * b)
 char little_endian()
 {
   int i = 0x1;
-  char b = ((u_i *) &i)[0].b[0];
+  signed char b = ((u_i *) &i)[0].b[0];
 
   return b;
 }
@@ -95,15 +95,15 @@ char little_endian()
 
 // return length of packed array
 
-size_t lbufcompress(const int* values, const size_t sz, char *packed)
+size_t lbufcompress(const int* values, const size_t sz, signed char *packed)
 {
   int current = 0;
   int delta, i;
   unsigned int j;
-  char le;
+  signed char le;
   short s;
-  char c;
-  char * b;
+  signed char c;
+  signed char * b;
 
   le = little_endian();
 
@@ -114,7 +114,7 @@ size_t lbufcompress(const int* values, const size_t sz, char *packed)
 
       if ((-127 <= delta) && (delta < 128))
         {
-          c = (char) delta;
+          c = (signed char) delta;
           packed[n++] = c;
           current += delta;
           continue;
@@ -175,14 +175,14 @@ size_t lbufcompress(const int* values, const size_t sz, char *packed)
 
 // Note: values must be allocated to full size.
 
-void lbufuncompress(const char* packed, const size_t packed_sz, int* values, const size_t values_sz)
+void lbufuncompress(const signed char* packed, const size_t packed_sz, int* values, const size_t values_sz)
 {
   int current = 0;
   unsigned int j = 0;
   short s;
   signed char c;
   int i;
-  char le;
+  signed char le;
   size_t k;
 
   le = little_endian();
@@ -208,7 +208,7 @@ void lbufuncompress(const char* packed, const size_t packed_sz, int* values, con
 
       if (le==0)
         {
-          byte_swap_short((char *) &s);
+          byte_swap_short((signed char *) &s);
         }
 
       if (s != -32768)
@@ -226,7 +226,7 @@ void lbufuncompress(const char* packed, const size_t packed_sz, int* values, con
 
       if (le==0)
         {
-          byte_swap_int((char *) &i);
+          byte_swap_int((signed char *) &i);
         }
 
       current += i;
