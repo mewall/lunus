@@ -10,8 +10,8 @@ import copy, os
 from dials.array_family import flex
 
 def mpi_enabled():
-#  return 'OMPI_COMM_WORLD_SIZE' in os.environ.keys()
-  return True
+  return 'OMPI_COMM_WORLD_SIZE' in os.environ.keys()
+#  return True
 
 def mpi_init():
   global mpi_comm
@@ -90,7 +90,10 @@ def get_experiment_xvectors(experiments):
 def mpi_bcast(d):
   if mpi_enabled():
     db = mpi_comm.bcast(d,root=0)
-
+#    print "Broadcasting from rank ",get_mpi_rank()," type(db) = ",type(db)
+  else:
+    db = d
+    
   return db
 
 def mpi_barrier():
@@ -156,13 +159,21 @@ def process_one_glob():
       if get_mpi_rank() == 0:
         experiments = ExperimentListFactory.from_json_file(metrolist[0], check_format=False)
         experiment_params = get_experiment_params(experiments)
+        x = get_experiment_xvectors(experiments)
+        crystal_reference = copy.deepcopy(experiments.crystals()[0])
       else:
         experiments = None
         experiment_params = None
-      expriments = mpi_bcast(experiments)
+        x = None
+        crystal_reference = None
+#      expriments = mpi_bcast(experiments)
       experiment_params = mpi_bcast(experiment_params)
+      x = mpi_bcast(x)
+      crystal_reference = mpi_bcast(crystal_reference)
 
-      x = get_experiment_xvectors(experiments)
+#      print "Rank ",get_mpi_rank()," type(experiments) = ",type(experiments)
+
+#      x = get_experiment_xvectors(experiments)
 
     # prepend image 0 to each range.
 
@@ -187,13 +198,18 @@ def process_one_glob():
         if (get_mpi_rank() == 0 or not fresh_lattice):
           experiments = ExperimentListFactory.from_json_file(metrolist[i], check_format=False)
           experiment_params = get_experiment_params(experiments)
+          x = get_experiment_xvectors(experiments)
+          crystal_reference = copy.deepcopy(experiments.crystals()[0])
         else:
           experiments = None
           experiment_params = None
+          x = None
+          crystal_reference = None
         if fresh_lattice:
-          experiments = mpi_bcast(experiments)
+#          experiments = mpi_bcast(experiments)
           experiment_params = mpi_bcast(experiment_params)
-        x = get_experiment_xvectors(experiments)
+          x = mpi_bcast(x)
+          crystal_reference = mpi_bcast(crystal_reference)
 
       imgname=filelist[i]
 
@@ -237,15 +253,17 @@ def process_one_glob():
           if fresh_lattice:
             bkg = mpi_bcast(bkg)
           bkg_data = bkg.get_raw_data()
-        if isinstance(data,tuple):
+        if isinstance(bkg_data,tuple):
           for pidx in range(len(bkg_data)):
             p.set_background(pidx,bkg_data[pidx])
-          else:
-            p.set_background(bkg_data)
+        else:
+#          print "setting background"
+#          print "max(bkg_data) = ",np.amax(bkg_data.as_numpy_array())
+          p.set_background(bkg_data)
 
         p.LunusBkgsubim()
 
-      crystal = copy.deepcopy(experiments.crystals()[0])
+      crystal = copy.deepcopy(crystal_reference)
 
       if (rotation_series):
         start_angle, delta_angle = scan.get_oscillation()      
@@ -381,7 +399,8 @@ if __name__=="__main__":
   if (subtract_background_images):
     bkg_glob = bkg_glob_list[0]
 
-  mpi_init()
+  if mpi_enabled():
+    mpi_init()
 
   if get_mpi_rank() == 0:
     if (len(metro_glob_list) != len(image_glob_list) or (subtract_background_images and len(metro_glob_list) != len(bkg_glob_list))):
@@ -407,6 +426,8 @@ if __name__=="__main__":
     experiment_params = None
 
   experiment_params = mpi_bcast(experiment_params)
+
+#  print "Rank = ",get_mpi_rank()," type(experiment_params) = ",type(experiment_params)
 
   p = lunus.Process(len(experiment_params))
 
