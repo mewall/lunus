@@ -67,7 +67,7 @@ echo "# Library functions:" >> ${C_HOME}/src/$1
 echo "#" >> ${C_HOME}/src/$1
 #ls -1 *.c | awk '{print substr($0,0,length()-2)".o:"$1" lunus.h"}' >> ${C_HOME}/src/$1
 echo '${L}/%.o: ${L}/%.c lunus.h' >> ${C_HOME}/src/$1
-echo '$(CC) $(CFLAGS) -c -o $@ $<' | awk '{print "\t" $0}' >> ${C_HOME}/src/$1
+echo '$(CC) -c -o $@ $(CFLAGS) $<' | awk '{print "\t" $0}' >> ${C_HOME}/src/$1
 
 #
 # Build mpi methods:
