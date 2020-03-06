@@ -90,7 +90,6 @@ def get_experiment_xvectors(experiments):
 def mpi_bcast(d):
   if mpi_enabled():
     db = mpi_comm.bcast(d,root=0)
-#    print "Broadcasting from rank ",get_mpi_rank()," type(db) = ",type(db)
   else:
     db = d
     
@@ -166,14 +165,10 @@ def process_one_glob():
         experiment_params = None
         x = None
         crystal_reference = None
-#      expriments = mpi_bcast(experiments)
+      experiments = mpi_bcast(experiments)
       experiment_params = mpi_bcast(experiment_params)
       x = mpi_bcast(x)
       crystal_reference = mpi_bcast(crystal_reference)
-
-#      print "Rank ",get_mpi_rank()," type(experiments) = ",type(experiments)
-
-#      x = get_experiment_xvectors(experiments)
 
     # prepend image 0 to each range.
 
