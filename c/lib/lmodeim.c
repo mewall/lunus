@@ -22,6 +22,70 @@
 #pragma omp declare target
 #endif
 
+void swap(size_t *a, size_t * b) 
+{ 
+    int t = *a; 
+    *a = *b; 
+    *b = t; 
+} 
+  
+/* This function is same in both iterative and recursive*/
+int partition(size_t arr[], int l, int h) 
+{ 
+    size_t x = arr[h]; 
+    int i = (l - 1); 
+  
+    for (int j = l; j <= h - 1; j++) { 
+        if (arr[j] <= x) { 
+            i++; 
+            swap(&arr[i], &arr[j]); 
+        } 
+    } 
+    swap(&arr[i + 1], &arr[h]); 
+    return (i + 1); 
+} 
+  
+/* A[] --> Array to be sorted,  
+   l  --> Starting index,  
+   h  --> Ending index */
+void quickSortIterative(size_t arr[], int l, int h) 
+{ 
+    // Create an auxiliary stack 
+    int stack[h - l + 1]; 
+  
+    // initialize top of stack 
+    int top = -1; 
+  
+    // push initial values of l and h to stack 
+    stack[++top] = l; 
+    stack[++top] = h; 
+  
+    // Keep popping from stack while is not empty 
+    while (top >= 0) { 
+        // Pop h and l 
+        h = stack[top--]; 
+        l = stack[top--]; 
+  
+        // Set pivot element at its correct position 
+        // in sorted array 
+        int p = partition(arr, l, h); 
+  
+        // If there are elements on left side of pivot, 
+        // then push left side to stack 
+        if (p - 1 > l) { 
+            stack[++top] = l; 
+            stack[++top] = p - 1; 
+        } 
+  
+        // If there are elements on right side of pivot, 
+        // then push right side to stack 
+        if (p + 1 < h) { 
+            stack[++top] = p + 1; 
+            stack[++top] = h; 
+        } 
+    } 
+}
+
 void insertion_sort(size_t *a,int first,int last) {
     int len;
     int i=1+first;
@@ -62,8 +126,8 @@ void quicksort(size_t *a,int first,int last){
       temp=a[pivot];
       a[pivot]=a[j];
       a[j]=temp;
-      quicksort(a,first,j-1);
-      quicksort(a,j+1,last);
+//      quicksort(a,first,j-1);
+//      quicksort(a,j+1,last);
 
    }
 }
@@ -201,7 +265,11 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 #pragma omp target update to(window[0:wlen*num_teams*num_threads])
 #endif
     
-    clock_t start = clock();
+#ifdef USE_OPENMP
+    double start = omp_get_wtime();
+#else
+    double start = ((double)clock())/CLOCKS_PER_SEC;
+#endif
     printf("Starting clock...\n");
 
 #ifdef USE_OPENMP
@@ -250,8 +318,9 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 	}
 	else {
 //          printf("Starting quicksort for i=%d,j=%ld\n",i,index_mode/hpixels);
-	  insertion_sort(this_window,0,l-1);
+//	  insertion_sort(this_window,0,l-1);
 //	  quicksort(this_window,0,l-1);
+	  quickSortIterative(this_window,0,l-1);
 //          printf("Done with quicksort for i=%d,j=%ld\n",i,index_mode/hpixels);
 	  size_t this_count = 1;
           size_t last_value = this_window[0];
@@ -291,8 +360,12 @@ int lmodeim(DIFFIMAGE *imdiff_in)
     // Now image_mode holds the mode filtered values
     // Convert these values to pixel values and store them in the input image
 
-    clock_t stop = clock();
-    double tel = ((double)(stop-start))/CLOCKS_PER_SEC;
+#ifdef USE_OPENMP
+    double stop = omp_get_wtime();
+#else
+    double stop = ((double)clock())/CLOCKS_PER_SEC;
+#endif
+    double tel = stop-start;
     printf("kernel loop took %g seconds\n",tel);
 
 #ifdef DEBUG
