@@ -18,6 +18,60 @@
 #endif
 #include<time.h>
 
+#ifdef USE_OFFLOAD
+#pragma omp declare target
+#endif
+
+void insertion_sort(size_t *a,int first,int last) {
+    int len;
+    int i=1+first;
+    len = last - first + 1;
+    while (i < len) {
+        size_t x = a[i];
+        int j = i - 1;
+        while (j >= 0 && a[j] > x) {
+            a[j + 1] = a[j];
+            j = j - 1;
+        }
+        a[j+1] = x;
+        i = i + 1;
+    }
+}
+
+void quicksort(size_t *a,int first,int last){
+   int i, j, pivot;
+   size_t temp;
+
+   if(first<last){
+      pivot=first;
+      i=first;
+      j=last;
+
+      while(i<j){
+         while(a[i]<=a[pivot]&&i<last)
+            i++;
+         while(a[j]>a[pivot])
+            j--;
+         if(i<j){
+	   temp=a[i];
+	   a[i]=a[j];
+	   a[j]=temp;
+         }
+      }
+
+      temp=a[pivot];
+      a[pivot]=a[j];
+      a[j]=temp;
+      quicksort(a,first,j-1);
+      quicksort(a,j+1,last);
+
+   }
+}
+
+#ifdef USE_OFFLOAD
+#pragma omp end declare target
+#endif
+
 int lmodeim(DIFFIMAGE *imdiff_in)
 {
   RCCOORDS_DATA 
@@ -32,16 +86,13 @@ int lmodeim(DIFFIMAGE *imdiff_in)
     *image,
     maxval,
     minval,
-    *minval_ptr,
-    binsize,
-    *binsize_ptr;
+    binsize;
   
   int
     return_value = 0;
 
   size_t
-    *image_mode,
-    num_bins;
+    *image_mode;
 
   DIFFIMAGE *imdiff;
 
@@ -52,12 +103,8 @@ int lmodeim(DIFFIMAGE *imdiff_in)
     i,
     j,
     k,
-    *distn,
     *window;
 
-  minval_ptr = &minval;
-  binsize_ptr = &binsize;
-  
   for (pidx = 0; pidx < imdiff_in->num_panels; pidx++) {
     imdiff = &imdiff_in[pidx];
     if (pidx != imdiff->this_panel) {
@@ -104,7 +151,6 @@ int lmodeim(DIFFIMAGE *imdiff_in)
     // Allocate the distribution
 
     binsize = imdiff->mode_binsize;
-    num_bins = (size_t)((maxval - minval)/binsize) + 2;
 
     // Compute the mode filtered image
 
@@ -127,6 +173,7 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 #endif
 #endif
 
+
     for (j = half_height; j < vpixels - half_height; j++) {
       num_teams = omp_get_num_teams();
 
@@ -146,30 +193,33 @@ int lmodeim(DIFFIMAGE *imdiff_in)
     printf(" Number of teams, threads = %ld, %ld\n",num_teams,num_threads);
 
     window = (size_t *)calloc(wlen*num_teams*num_threads,sizeof(size_t));
-    distn = (size_t *)calloc(num_bins*num_teams*num_threads,sizeof(size_t));
     
 #ifdef USE_OFFLOAD
 #pragma omp target enter data map(alloc:image[0:image_length],image_mode[0:image_length])
 #pragma omp target update to(image[0:image_length],image_mode[0:image_length])
-#pragma omp target enter data map(alloc:window[0:wlen*num_teams*num_threads],distn[0:num_bins*num_teams*num_threads])
-#pragma omp target update to(window[0:wlen*num_teams*num_threads],distn[0:num_bins*num_teams*num_threads])
+#pragma omp target enter data map(alloc:window[0:wlen*num_teams*num_threads])
+#pragma omp target update to(window[0:wlen*num_teams*num_threads])
 #endif
     
     clock_t start = clock();
+    printf("Starting clock...\n");
 
 #ifdef USE_OPENMP
 #ifdef USE_OFFLOAD
-#pragma omp target teams distribute map(to:minval,binsize,num_bins,wlen,overload_tag,ignore_tag)
+#pragma omp target map(to:minval,binsize,wlen,overload_tag,ignore_tag) 
+#pragma omp teams
+#pragma omp distribute
 #else
 #pragma omp distribute
 #endif
 #endif
 
     for (j = half_height; j < vpixels-half_height; j++) {
-
+      size_t tm = omp_get_team_num();
+//      printf("Team = %ld, j = %d\n",tm,j);
 #ifdef USE_OPENMP
 #ifdef USE_OFFLOAD
-#pragma omp parallel for private(index,k,r,c) schedule(static,1) num_threads(32)
+#pragma omp parallel for private(index,k,r,c) shared(j) schedule(static,1) num_threads(32)
 #else
 #pragma omp parallel for private(index,k,r,c)
 #endif
@@ -179,12 +229,11 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 	int mode_ct = 0;
 	size_t mode_value=0, max_count=0;
 	size_t index_mode = j*hpixels + i;
-	size_t tm = omp_get_team_num();
 	size_t th = omp_get_thread_num();
 	size_t nt = omp_get_num_threads();
-	size_t *this_distn = &distn[(tm*nt+th)*num_bins];
 	size_t *this_window = &window[(tm*nt+th)*wlen];
 	int l = 0;
+//        printf("Start tm = %ld,th = %ld,i = %d,j = %ld\n",tm,th,i,index_mode/hpixels);
 	for (r = j - half_height; r <= j + half_height; r++) {
 	  for (c = i - half_width; c <= i + half_width; c++) {
 	    index = r*hpixels + c;
@@ -192,7 +241,6 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 		(image[index] != ignore_tag) &&
 		(image[index] < MAX_IMAGE_DATA_VALUE)) {
 	      this_window[l] = (image[index]-minval)/binsize + 1;
-	      this_distn[this_window[l]]++;
 	      l++;
 	    }
 	  }
@@ -201,23 +249,42 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 	  image_mode[index_mode] = 0;
 	}
 	else {
-	  for (k = 0; k < l; k++) {
-	    if (this_distn[this_window[k]] > max_count) {
-	      max_count = this_distn[this_window[k]];
-	    }
+//          printf("Starting quicksort for i=%d,j=%ld\n",i,index_mode/hpixels);
+	  insertion_sort(this_window,0,l-1);
+//	  quicksort(this_window,0,l-1);
+//          printf("Done with quicksort for i=%d,j=%ld\n",i,index_mode/hpixels);
+	  size_t this_count = 1;
+          size_t last_value = this_window[0];
+          max_count = 1;
+	  for (k = 1; k < l; k++) {
+            if (this_window[k] == last_value) {
+              this_count++;
+            } else {
+              last_value = this_window[k];
+              this_count = 1;
+            }
+            if (this_count > max_count) max_count = this_count;
 	  }
+          this_count = 1;
+          last_value = this_window[0];
 	  for (k = 0; k < l; k++) {
-	    if (this_distn[this_window[k]] == max_count) {
+	    if (this_window[k] == last_value) {
+              this_count++;
+            } else {
+              last_value = this_window[k];
+              this_count = 1;
+            }
+            if (this_count == max_count) {
 	      mode_value += this_window[k];
 	      mode_ct++;
 	    }
 	  }
 	  image_mode[index_mode] = (size_t)(((float)mode_value/(float)mode_ct) + .5);
 	  for (k = 0; k < l; k++) {
-	    this_distn[this_window[k]] = 0;
 	    this_window[k] = 0;
 	  }
 	}
+//        printf("Stop tm = %ld,th = %ld,i = %d,j = %d\n",tm,th,i,j);
       }
     }
 
@@ -226,6 +293,7 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 
     clock_t stop = clock();
     double tel = ((double)(stop-start))/CLOCKS_PER_SEC;
+    printf("kernel loop took %g seconds\n",tel);
 
 #ifdef DEBUG
     printf("kernel loop took %g seconds\n",tel);
@@ -277,11 +345,10 @@ int lmodeim(DIFFIMAGE *imdiff_in)
     }
 
 #ifdef USE_OFFLOAD
-#pragma omp target exit data map(from:image[0:image_length]) map(delete:image_mode[0:image_length],window[0:wlen*num_threads*num_teams],distn[0:num_bins*num_teams*num_threads])
+#pragma omp target exit data map(from:image[0:image_length]) map(delete:image_mode[0:image_length],window[0:wlen*num_threads*num_teams])
 #endif
 
     free(image_mode);
-    free(distn);
     free(window);
   }
  CloseShop:
