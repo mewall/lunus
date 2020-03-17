@@ -319,8 +319,8 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 	else {
 //          printf("Starting quicksort for i=%d,j=%ld\n",i,index_mode/hpixels);
 //	  insertion_sort(this_window,0,l-1);
-//	  quicksort(this_window,0,l-1);
-	  quickSortIterative(this_window,0,l-1);
+	  quicksort(this_window,0,l-1);
+//	  quickSortIterative(this_window,0,l-1);
 //          printf("Done with quicksort for i=%d,j=%ld\n",i,index_mode/hpixels);
 	  size_t this_count = 1;
           size_t last_value = this_window[0];
