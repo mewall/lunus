@@ -29,13 +29,13 @@ void swap(size_t *a, size_t * b)
     *b = t; 
 } 
   
-/* This function is same in both iterative and recursive*/
 int partition(size_t arr[], int l, int h) 
 { 
     size_t x = arr[h]; 
     int i = (l - 1); 
-  
-    for (int j = l; j <= h - 1; j++) { 
+    int j;
+
+    for (j = l; j <= h - 1; j++) { 
         if (arr[j] <= x) { 
             i++; 
             swap(&arr[i], &arr[j]); 
@@ -44,15 +44,9 @@ int partition(size_t arr[], int l, int h)
     swap(&arr[i + 1], &arr[h]); 
     return (i + 1); 
 } 
-  
-/* A[] --> Array to be sorted,  
-   l  --> Starting index,  
-   h  --> Ending index */
-void quickSortIterative(size_t arr[], int l, int h) 
+
+void quickSortIterative(size_t arr[], size_t stack[], int l, int h) 
 { 
-    // Create an auxiliary stack 
-    int stack[h - l + 1]; 
-  
     // initialize top of stack 
     int top = -1; 
   
@@ -68,7 +62,8 @@ void quickSortIterative(size_t arr[], int l, int h)
   
         // Set pivot element at its correct position 
         // in sorted array 
-        int p = partition(arr, l, h); 
+        int p;
+        p = partition(arr, l, h); 
   
         // If there are elements on left side of pivot, 
         // then push left side to stack 
@@ -131,7 +126,6 @@ void quicksort(size_t *a,int first,int last){
 
    }
 }
-
 #ifdef USE_OFFLOAD
 #pragma omp end declare target
 #endif
@@ -167,7 +161,8 @@ int lmodeim(DIFFIMAGE *imdiff_in)
     i,
     j,
     k,
-    *window;
+    *window,
+    *stack;
 
   for (pidx = 0; pidx < imdiff_in->num_panels; pidx++) {
     imdiff = &imdiff_in[pidx];
@@ -257,12 +252,13 @@ int lmodeim(DIFFIMAGE *imdiff_in)
     printf(" Number of teams, threads = %ld, %ld\n",num_teams,num_threads);
 
     window = (size_t *)calloc(wlen*num_teams*num_threads,sizeof(size_t));
+    stack = (size_t *)calloc(wlen*num_teams*num_threads,sizeof(size_t));
     
 #ifdef USE_OFFLOAD
 #pragma omp target enter data map(alloc:image[0:image_length],image_mode[0:image_length])
 #pragma omp target update to(image[0:image_length],image_mode[0:image_length])
-#pragma omp target enter data map(alloc:window[0:wlen*num_teams*num_threads])
-#pragma omp target update to(window[0:wlen*num_teams*num_threads])
+#pragma omp target enter data map(alloc:window[0:wlen*num_teams*num_threads],stack[0:wlen*num_teams*num_threads])
+#pragma omp target update to(window[0:wlen*num_teams*num_threads],stack[0:wlen*num_teams*num_threads])
 #endif
     
 #ifdef USE_OPENMP
@@ -300,6 +296,7 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 	size_t th = omp_get_thread_num();
 	size_t nt = omp_get_num_threads();
 	size_t *this_window = &window[(tm*nt+th)*wlen];
+	size_t *this_stack = &stack[(tm*nt+th)*wlen];
 	int l = 0;
 //        printf("Start tm = %ld,th = %ld,i = %d,j = %ld\n",tm,th,i,index_mode/hpixels);
 	for (r = j - half_height; r <= j + half_height; r++) {
@@ -319,8 +316,8 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 	else {
 //          printf("Starting quicksort for i=%d,j=%ld\n",i,index_mode/hpixels);
 //	  insertion_sort(this_window,0,l-1);
-	  quicksort(this_window,0,l-1);
-//	  quickSortIterative(this_window,0,l-1);
+//	  quicksort(this_window,0,l-1);
+	  quickSortIterative(this_window,this_stack,0,l-1);
 //          printf("Done with quicksort for i=%d,j=%ld\n",i,index_mode/hpixels);
 	  size_t this_count = 1;
           size_t last_value = this_window[0];
@@ -418,7 +415,7 @@ int lmodeim(DIFFIMAGE *imdiff_in)
     }
 
 #ifdef USE_OFFLOAD
-#pragma omp target exit data map(from:image[0:image_length]) map(delete:image_mode[0:image_length],window[0:wlen*num_threads*num_teams])
+#pragma omp target exit data map(from:image[0:image_length]) map(delete:image_mode[0:image_length],window[0:wlen*num_threads*num_teams],stack[0:wlen*num_threads*num_teams])
 #endif
 
     free(image_mode);

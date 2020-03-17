@@ -13,6 +13,10 @@
    */
 
 #include<lunus.h>
+#ifdef USE_OPENMP
+#include<omp.h>
+#endif
+#include<time.h>
 
 
 int lsetprocmodelt(LAT3D *lat,const int mode)
@@ -378,6 +382,12 @@ int main(int argc, char *argv[])
 
   // Process the images on this rank yielding a partial sum for the 3D dataset
 
+#ifdef USE_OPENMP
+  double start = omp_get_wtime();
+#else
+  double start = ((double)clock())/CLOCKS_PER_SEC;
+#endif
+
   for (i=mpiv->my_id+1;i<=num_images;i=i+mpiv->num_procs) {
 
     /*
@@ -558,7 +568,26 @@ int main(int argc, char *argv[])
 
   }
 
+//  lbarrierMPI(imdiff->mpiv);
+
+  if (mpiv->my_id == 0) {
+#ifdef USE_OPENMP
+    double stop = omp_get_wtime();
+#else
+    double stop = ((double)clock())/CLOCKS_PER_SEC;
+#endif
+    double tel = stop-start;
+
+    printf("LUNUS: Individual image processing took %g seconds\n",tel);
+  }
+
   // Merge the data and counts
+
+#ifdef USE_OPENMP
+  start = omp_get_wtime();
+#else
+  start = ((double)clock())/CLOCKS_PER_SEC;
+#endif
 
   LATTICE_DATA_TYPE *latsum;
   size_t *latctsum;
@@ -581,6 +610,15 @@ int main(int argc, char *argv[])
       }
     }
 	    
+#ifdef USE_OPENMP
+    double stop = omp_get_wtime();
+#else
+    double stop = ((double)clock())/CLOCKS_PER_SEC;
+#endif
+    double tel = stop-start;
+
+    printf("LUNUS: Merge took %g seconds\n",tel);
+
     // output the result
 	    
     str_length = snprintf(NULL,0,"%s/%s.lat",lattice_dir,diffuse_lattice_prefix);
