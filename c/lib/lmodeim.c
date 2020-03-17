@@ -126,8 +126,8 @@ void quicksort(size_t *a,int first,int last){
       temp=a[pivot];
       a[pivot]=a[j];
       a[j]=temp;
-//      quicksort(a,first,j-1);
-//      quicksort(a,j+1,last);
+      quicksort(a,first,j-1);
+      quicksort(a,j+1,last);
 
    }
 }
@@ -283,11 +283,10 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 #endif
 
     for (j = half_height; j < vpixels-half_height; j++) {
-      size_t tm = omp_get_team_num();
 //      printf("Team = %ld, j = %d\n",tm,j);
 #ifdef USE_OPENMP
 #ifdef USE_OFFLOAD
-#pragma omp parallel for private(index,k,r,c) shared(j) schedule(static,1) num_threads(32)
+#pragma omp parallel for private(index,k,r,c) schedule(static,1) num_threads(32)
 #else
 #pragma omp parallel for private(index,k,r,c)
 #endif
@@ -297,6 +296,7 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 	int mode_ct = 0;
 	size_t mode_value=0, max_count=0;
 	size_t index_mode = j*hpixels + i;
+	size_t tm = omp_get_team_num();
 	size_t th = omp_get_thread_num();
 	size_t nt = omp_get_num_threads();
 	size_t *this_window = &window[(tm*nt+th)*wlen];
