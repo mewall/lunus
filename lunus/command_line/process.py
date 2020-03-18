@@ -227,8 +227,8 @@ def process_one_glob():
 
       et = time()
       ttr += et - bt
-#      print "min of data = ",flex.min(data)
-#      print "max of data = ",flex.max(data)
+      print("min of data = ",flex.min(data))
+      print("max of data = ",flex.max(data))
 
       if isinstance(data,tuple):
         for pidx in range(len(data)):
