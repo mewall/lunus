@@ -2,7 +2,8 @@
 #
 # LIBTBX_SET_DISPATCHER_NAME lunus.process
 
-from time import clock, time
+import time
+from time import time
 import numpy as np
 import glob, subprocess, shlex
 import lunus
@@ -33,7 +34,7 @@ def get_experiment_params(experiments):
   beam = experiments[0].beam
   detector = experiments[0].detector
 
-  beam_direction = col(beam.get_direction())
+  beam_direction = col(beam.get_sample_to_source_direction())
   wavelength = beam.get_wavelength()
 
   beam_params = "\nbeam_vec={0},{1},{2}\nwavelength={3}".format(-beam_direction[0],-beam_direction[1],-beam_direction[2],wavelength)
@@ -145,7 +146,7 @@ def process_one_glob():
       bkglist.sort()
       if get_mpi_rank() == 0:
         if (len(filelist) != len(bkglist) and len(bkglist) != 1):
-          raise ValueError,"Must either be one background or as many as there are images."
+          raise(ValueError,"Must either be one background or as many as there are images.")
       if (len(bkglist) == 1):
         if get_mpi_rank() == 0:
           bkg = dxtbx.load(bkglist[0])
@@ -172,22 +173,22 @@ def process_one_glob():
 
     # prepend image 0 to each range.
 
-    i_iter = range(get_mpi_rank(),len(filelist),get_mpi_size())
+    i_iter = list(range(get_mpi_rank(),len(filelist),get_mpi_size()))
 
     i_iter.insert(0,0)
 
     for i in i_iter:
       if fresh_lattice:
         if get_mpi_rank() == 0:
-          print "Reference image ",
+          print("Reference image ",end=" ")
           sys.stdout.flush()
       else:
-        print "{0} ".format(i),
+        print("{0} ".format(i),end=" ")
         sys.stdout.flush()
 
       if fresh_lattice:
         if i != 0:
-          raise ValueError,"Image number must be 0 first time through"
+          raise(ValueError,"Image number must be 0 first time through")
 
       if (not rotation_series):
         if (get_mpi_rank() == 0 or not fresh_lattice):
@@ -293,9 +294,9 @@ def process_one_glob():
         
         imnum = imnum +1
 
-    print
+    print()
 
-    print "Rank {0} time spent in read, processing (sec): {1} {2}\n".format(get_mpi_rank(),ttr,tte)
+    print("Rank {0} time spent in read, processing (sec): {1} {2}\n".format(get_mpi_rank(),ttr,tte))
 
 if __name__=="__main__":
   import sys
@@ -340,7 +341,7 @@ if __name__=="__main__":
   try:
     idx = [a.find("params")==0 for a in args].index(True)
   except ValueError:
-    raise ValueError,"Processing parameters must be specified using params="
+    raise(ValueError,"Processing parameters must be specified using params=")
   else:
     deck_file = args.pop(idx).split("=")[1]
 
@@ -365,7 +366,7 @@ if __name__=="__main__":
     else:
       metro_glob_list.append(args.pop(metroidx).split("=")[1])
   if (len(metro_glob_list) == 0):
-    raise ValueError,"Experiments .json file must be specified using experiments="
+    raise(ValueError,"Experiments .json file must be specified using experiments=")
   
  # Image input glob
   keep_going = True
@@ -399,7 +400,7 @@ if __name__=="__main__":
 
   if get_mpi_rank() == 0:
     if (len(metro_glob_list) != len(image_glob_list) or (subtract_background_images and len(metro_glob_list) != len(bkg_glob_list))):
-      raise ValueError,"Must specify same number of experiments, images, and backgrounds"
+      raise(ValueError,"Must specify same number of experiments, images, and backgrounds")
 
   import dxtbx
   from dxtbx.model.experiment_list import ExperimentListFactory
@@ -409,6 +410,8 @@ if __name__=="__main__":
   metro_glob = metro_glob_list[0]
 
   metrolist = glob.glob(metro_glob)
+  print("type(metrolist) = ",type(metrolist))
+  print(metrolist)
   metrolist.sort()
 
   metro = metrolist[0]
@@ -446,7 +449,7 @@ if __name__=="__main__":
 
   for i in range(len(metro_glob_list)):
     if get_mpi_rank() == 0:
-      print "Image set ",i+1,":",
+      print("Image set ",i+1,":",end=" ")
 
     metro_glob = metro_glob_list[i]
     image_glob = image_glob_list[i]
@@ -465,7 +468,7 @@ if __name__=="__main__":
   tred = et - bt
 
   if get_mpi_rank() == 0:
-    print "Time spent in reduction (sec): ",tred
+    print("Time spent in reduction (sec): ",tred)
     p.divide_by_counts()
 
     if (not vtk_file is None):
