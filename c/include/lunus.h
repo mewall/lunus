@@ -325,6 +325,15 @@ typedef int CBF_DATA_TYPE;
 typedef short SMV_DATA_TYPE;
 typedef float WEIGHTS_DATA_TYPE;
 
+struct timers {
+  double mode;
+  double scale;
+  double map;
+  double mask;
+  double correction;
+  double setup;
+};
+
 // MPI
 
 typedef struct {
@@ -737,6 +746,7 @@ typedef struct {
   char *integration_image_type; /* Selects which image to use for integration */
   int procmode;                 /* Processing mode for lprocimlt() */
   DIFFIMAGE *imdiff;            /* Image for processing using lprocimlt() */
+  struct timers timer;
 } LAT3D;
 
 // Crystal structure data type
@@ -930,6 +940,7 @@ int ltagim(DIFFIMAGE *imdiff);
 int ltaglt(LAT3D *lat);
 int lthrshim(DIFFIMAGE *imdiff);
 int lthrshlt(LAT3D *lat);
+double ltime();
 int ltranslt(LAT3D *lat1, struct ijkcoords t);
 int ltransmap(CCP4MAP *map);
 int lupdbd(LAT3D *lat);

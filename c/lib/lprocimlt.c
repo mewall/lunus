@@ -26,6 +26,8 @@ int lprocimlt(LAT3D *lat)
     *imdiff_scale_list = NULL, 
     *imdiff_scale_ref_list = NULL;
 
+  double start,stop;
+
   // Initialize other images
 
   if (imdiff_corrected_list == NULL) {
@@ -40,6 +42,8 @@ int lprocimlt(LAT3D *lat)
 
   // Apply masks
 
+  lat->timer.mask = ltime();
+
   if (imdiff_list->num_panels == 1) {
     lpunchim(imdiff_list);
     lwindim(imdiff_list);
@@ -51,14 +55,22 @@ int lprocimlt(LAT3D *lat)
   
   lthrshim(imdiff_list);
 
+  lat->timer.mask = ltime() - lat->timer.mask;
+
   // Mode filter to create image to be used for scaling
+
+  lat->timer.mode = ltime();
 
   lcloneim(imdiff_scale_list,imdiff_list);
 
   lmodeim(imdiff_scale_list);
+
+  lat->timer.mode = ltime() - lat->timer.mode;
   
   // Calculate correction factor
   
+  lat->timer.correction = ltime();
+
   lcfim(imdiff_list);	  
   
   // Calculate corrected image
@@ -69,11 +81,14 @@ int lprocimlt(LAT3D *lat)
     exit(1);
   }
   
+  lat->timer.correction = ltime() - lat->timer.correction;
 	    
   // Set up common variables on the first pass
 
   if (lat->procmode == 0) {
     
+    lat->timer.setup = ltime();
+
     // Reference image for scaling
     lcloneim(imdiff_scale_ref_list,imdiff_scale_list);
 
@@ -162,6 +177,8 @@ int lprocimlt(LAT3D *lat)
 
 #endif
 
+    lat->timer.setup = ltime() - lat->timer.setup;
+  
     return(0);
   } else if (lat->procmode == 2) {
     lfreeim(imdiff_corrected_list);
@@ -173,18 +190,26 @@ int lprocimlt(LAT3D *lat)
 	  
   // Calculate the image scale factor
 
+  start = ltime();
+
   lscaleim(imdiff_scale_ref_list,imdiff_scale_list);
+
+  stop = ltime();
+  lat->timer.scale = stop - start;
 
   float this_scale_factor = imdiff_scale_ref_list->rfile[0];
   float this_scale_error = imdiff_scale_ref_list->rfile[1];
 
   printf("%g %g\n",this_scale_factor,this_scale_error);
+  fflush(stdout);
 
   // Collect the image data into the lattice
 
   int pidx;
 
   //  printf("number of panels = %d\n",imdiff_list->num_panels);
+
+  start = ltime();
 
   for (pidx = 0; pidx < imdiff_list->num_panels; pidx++) {
     imdiff = &imdiff_list[pidx];
@@ -253,6 +278,10 @@ int lprocimlt(LAT3D *lat)
       index++;
     }
   }
+
+  stop = ltime();
+  lat->timer.map = stop - start;
+
   ct++;
   //  printf("Done processing image %d\n",ct);
 }

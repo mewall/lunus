@@ -16,7 +16,6 @@
 #ifdef USE_OPENMP
 #include<omp.h>
 #endif
-#include<time.h>
 
 
 int lsetprocmodelt(LAT3D *lat,const int mode)
@@ -105,6 +104,16 @@ int main(int argc, char *argv[])
   MPIVARS
     *mpiv;
 
+  double start, stop, tel, tread = 0.0;
+
+  struct timers timer;
+
+  timer.scale = 0.0;
+  timer.mode = 0.0;
+  timer.map = 0.0;
+  timer.mask = 0.0;
+  timer.correction = 0.0;
+  timer.setup = 0.0;
 
   // Initialize MPI
 
@@ -382,19 +391,19 @@ int main(int argc, char *argv[])
 
   // Process the images on this rank yielding a partial sum for the 3D dataset
 
-#ifdef USE_OPENMP
-  double start = omp_get_wtime();
-#else
-  double start = ((double)clock())/CLOCKS_PER_SEC;
-#endif
+
+  start = ltime();
 
   for (i=mpiv->my_id+1;i<=num_images;i=i+mpiv->num_procs) {
 
     /*
      * Read diffraction image:
      */
-	  
+	
+    tel = ltime();
+
     printf("%s\n",imagelist[i-1]);
+    fflush(stdout);
     if ( (imagein = fopen(imagelist[i-1],"rb")) == NULL ) {
       printf("Can't open %s.",imagelist[i-1]);
       exit(0);
@@ -407,6 +416,9 @@ int main(int argc, char *argv[])
     }
 
     fclose(imagein);
+
+    tel = ltime() - tel;
+    tread += tel;
 
     // Associate an A matrix with this image
 
@@ -557,6 +569,7 @@ int main(int argc, char *argv[])
       lat->procmode = 0;
       lat->imdiff = imdiff_ref;
       lprocimlt(lat);
+      timer.setup += lat->timer.setup;
 
     }
 
@@ -566,28 +579,27 @@ int main(int argc, char *argv[])
     lat->imdiff = imdiff;
     lprocimlt(lat);
 
+    timer.scale += lat->timer.scale;
+    timer.mode += lat->timer.mode;
+    timer.map += lat->timer.map;
+    timer.mask += lat->timer.mask;
+    timer.correction += lat->timer.correction;
+
   }
 
-//  lbarrierMPI(imdiff->mpiv);
+  //  lbarrierMPI(imdiff->mpiv);
 
   if (mpiv->my_id == 0) {
-#ifdef USE_OPENMP
-    double stop = omp_get_wtime();
-#else
-    double stop = ((double)clock())/CLOCKS_PER_SEC;
-#endif
-    double tel = stop-start;
+    stop = ltime();
+    tel = stop-start;
 
     printf("LUNUS: Individual image processing took %g seconds\n",tel);
+    printf("LUNUS: Individual image reads took %g seconds\n",tread);
   }
 
   // Merge the data and counts
 
-#ifdef USE_OPENMP
-  start = omp_get_wtime();
-#else
-  start = ((double)clock())/CLOCKS_PER_SEC;
-#endif
+  start = ltime();
 
   LATTICE_DATA_TYPE *latsum;
   size_t *latctsum;
@@ -610,13 +622,14 @@ int main(int argc, char *argv[])
       }
     }
 	    
-#ifdef USE_OPENMP
-    double stop = omp_get_wtime();
-#else
-    double stop = ((double)clock())/CLOCKS_PER_SEC;
-#endif
-    double tel = stop-start;
+    stop = ltime();
+    tel = stop-start;
 
+    printf("LUNUS: Setup took %g seconds\n",timer.setup);
+    printf("LUNUS: Masking and thresholding took %g seconds\n",timer.mask);
+    printf("LUNUS: Solid angle and polarization correction took %g seconds\n",timer.correction);
+    printf("LUNUS: Mode filtering took %g seconds\n",timer.mode);
+    printf("LUNUS: Mapping took %g seconds\n",timer.map);
     printf("LUNUS: Merge took %g seconds\n",tel);
 
     // output the result

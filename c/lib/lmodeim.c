@@ -266,7 +266,6 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 #else
     double start = ((double)clock())/CLOCKS_PER_SEC;
 #endif
-    printf("Starting clock...\n");
 
 #ifdef USE_OPENMP
 #ifdef USE_OFFLOAD
@@ -363,7 +362,7 @@ int lmodeim(DIFFIMAGE *imdiff_in)
     double stop = ((double)clock())/CLOCKS_PER_SEC;
 #endif
     double tel = stop-start;
-    printf("kernel loop took %g seconds\n",tel);
+    fflush(stdout);
 
 #ifdef DEBUG
     printf("kernel loop took %g seconds\n",tel);
