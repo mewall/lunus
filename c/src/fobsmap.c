@@ -161,7 +161,7 @@ int main(int argc, char *argv[])
       //      r = h; s = l; c = k;
       //       r = h; s = k; c = l;
     } else {
-      printf("\nUnrecognized CCP4 map x,y,z definitions (MAPC,MAPR,MAPS) = (%d,%d,%d)\n\n",map->mapc,map->mapr,map->maps);
+      printf("\nUnrecognized CCP4 map x,y,z definitions (MAPC,MAPR,MAPS) = (%ld,%ld,%ld)\n\n",map->mapc,map->mapr,map->maps);
       exit(4);
     }
     if (s>-map->ns/2 && s <= map->ns/2 && r>-map->nr/2 && r <= map->nr/2 && c>-map->nc/2 && c <= map->nc/2) {

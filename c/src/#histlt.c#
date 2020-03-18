@@ -29,8 +29,6 @@ int main(int argc, char *argv[])
   int
     binsize = 1;
 
-  long
-    val;
 
   size_t
     index = 0,

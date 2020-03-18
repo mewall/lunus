@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
 	 lat->xbound.min,lat->xbound.max,
 	 lat->ybound.min,lat->ybound.max,
 	 lat->zbound.min,lat->zbound.max);
-  printf("ORIGIN: (%d,%d,%d)\n",lat->origin.i,lat->origin.j,lat->origin.k);
+  printf("ORIGIN: (%ld,%ld,%ld)\n",lat->origin.i,lat->origin.j,lat->origin.k);
   printf("VOXEL SCALE: %f %f %f\n",(float)lat->xscale,(float)lat->yscale,
 	 (float)lat->zscale);
   /* printf("VOXEL DIAGONAL: %f\n",sqrtf((double)(lat->xscale*lat->xscale + */

@@ -13,6 +13,9 @@
    */
 
 #include<lunus.h>
+#ifdef USE_OPENMP
+#include<omp.h>
+#endif
 
 
 int lsetprocmodelt(LAT3D *lat,const int mode)
@@ -89,7 +92,7 @@ int main(int argc, char *argv[])
     normim_tilt_y=0.0;
 
   DIFFIMAGE 
-    *imdiff = NULL, *imdiff_bkg = NULL, *imdiff_corrected = NULL, *imdiff_scale = NULL, *imdiff_scale_ref = NULL;
+    *imdiff = NULL, *imdiff_bkg = NULL, *imdiff_corrected = NULL, *imdiff_scale = NULL, *imdiff_scale_ref = NULL, *imdiff_ref = NULL;
 
   LAT3D
     *lat;
@@ -101,6 +104,16 @@ int main(int argc, char *argv[])
   MPIVARS
     *mpiv;
 
+  double start, stop, tel, tread = 0.0;
+
+  struct timers timer;
+
+  timer.scale = 0.0;
+  timer.mode = 0.0;
+  timer.map = 0.0;
+  timer.mask = 0.0;
+  timer.correction = 0.0;
+  timer.setup = 0.0;
 
   // Initialize MPI
 
@@ -378,13 +391,19 @@ int main(int argc, char *argv[])
 
   // Process the images on this rank yielding a partial sum for the 3D dataset
 
+
+  start = ltime();
+
   for (i=mpiv->my_id+1;i<=num_images;i=i+mpiv->num_procs) {
 
     /*
      * Read diffraction image:
      */
-	  
+	
+    tel = ltime();
+
     printf("%s\n",imagelist[i-1]);
+    fflush(stdout);
     if ( (imagein = fopen(imagelist[i-1],"rb")) == NULL ) {
       printf("Can't open %s.",imagelist[i-1]);
       exit(0);
@@ -397,6 +416,9 @@ int main(int argc, char *argv[])
     }
 
     fclose(imagein);
+
+    tel = ltime() - tel;
+    tread += tel;
 
     // Associate an A matrix with this image
 
@@ -531,8 +553,6 @@ int main(int argc, char *argv[])
 
       // First broadcast the reference image to all ranks
 
-      DIFFIMAGE *imdiff_ref;
-
       imdiff_ref = linitim(1);
       lcloneim(imdiff_ref,imdiff);
 
@@ -549,6 +569,7 @@ int main(int argc, char *argv[])
       lat->procmode = 0;
       lat->imdiff = imdiff_ref;
       lprocimlt(lat);
+      timer.setup += lat->timer.setup;
 
     }
 
@@ -558,9 +579,27 @@ int main(int argc, char *argv[])
     lat->imdiff = imdiff;
     lprocimlt(lat);
 
+    timer.scale += lat->timer.scale;
+    timer.mode += lat->timer.mode;
+    timer.map += lat->timer.map;
+    timer.mask += lat->timer.mask;
+    timer.correction += lat->timer.correction;
+
+  }
+
+  //  lbarrierMPI(imdiff->mpiv);
+
+  if (mpiv->my_id == 0) {
+    stop = ltime();
+    tel = stop-start;
+
+    printf("LUNUS: Individual image processing took %g seconds\n",tel);
+    printf("LUNUS: Individual image reads took %g seconds\n",tread);
   }
 
   // Merge the data and counts
+
+  start = ltime();
 
   LATTICE_DATA_TYPE *latsum;
   size_t *latctsum;
@@ -583,6 +622,16 @@ int main(int argc, char *argv[])
       }
     }
 	    
+    stop = ltime();
+    tel = stop-start;
+
+    printf("LUNUS: Setup took %g seconds\n",timer.setup);
+    printf("LUNUS: Masking and thresholding took %g seconds\n",timer.mask);
+    printf("LUNUS: Solid angle and polarization correction took %g seconds\n",timer.correction);
+    printf("LUNUS: Mode filtering took %g seconds\n",timer.mode);
+    printf("LUNUS: Mapping took %g seconds\n",timer.map);
+    printf("LUNUS: Merge took %g seconds\n",tel);
+
     // output the result
 	    
     str_length = snprintf(NULL,0,"%s/%s.lat",lattice_dir,diffuse_lattice_prefix);
@@ -633,8 +682,37 @@ int main(int argc, char *argv[])
       }
       lwritevtk(lat);
     }
-  }
-  lfinalMPI(mpiv);
 
+}
+  // Free the static arrays used in lprocimlt()
+
+  lat->procmode = 2;
+  lprocimlt(lat);
+  
+  // Free the various allocated strings
+    
+  if (writevtk_str != NULL) free(writevtk_str);
+  if (imagelist_name != NULL) free(imagelist_name);
+  if (jsonlist_name != NULL) free(jsonlist_name);
+  if (spacegroup != NULL) free(spacegroup);
+  if (xvectors_path != NULL) free(xvectors_path);
+  if (amatrix_format != NULL) free(amatrix_format);
+  if (lattice_dir != NULL) free(lattice_dir);
+  if (diffuse_lattice_prefix != NULL) free(diffuse_lattice_prefix);
+  if (xvectors != NULL) free(xvectors);
+  if (xvectors_cctbx != NULL) free(xvectors_cctbx);
+  if (latsum != NULL) free(latsum);
+  if (latctsum != NULL) free(latctsum);
+  if (deck != NULL) free(deck);
+
+  lfinalMPI(mpiv);
+  free(mpiv);
+  lfreeim(imdiff);
+  lfreeim(imdiff_ref);
+  lfreeim(imdiff_corrected);
+  lfreeim(imdiff_scale);
+  lfreeim(imdiff_scale_ref);
+  lfreeim(imdiff_bkg);
+  lfreelt(lat);
 }
 

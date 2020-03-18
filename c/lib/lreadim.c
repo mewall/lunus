@@ -299,7 +299,8 @@ int lreadim(DIFFIMAGE *imdiff)
 
   lsetmetim(imdiff);
 
-  imdiff->correction = (float *)realloc(imdiff->correction,imdiff->image_length*sizeof(float));
+  if (imdiff->correction != NULL) free(imdiff->correction);
+  imdiff->correction = (float *)calloc(imdiff->image_length,sizeof(float));
   free(buf);
 
   return(0);

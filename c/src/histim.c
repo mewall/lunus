@@ -157,7 +157,7 @@ int main(int argc, char *argv[])
 
   for(i=0;i<=65535;i=i+binsize) {
     if (histogram[i]>0) {
-      fprintf(histout,"%d %d\n",(int)i-32768,histogram[i]);
+      fprintf(histout,"%d %ld\n",(int)i-32768,histogram[i]);
     }
   }
 

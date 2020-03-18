@@ -139,7 +139,7 @@ int main(int argc, char *argv[])
       fft_data[fft_index+1] = 0;
       fft_index = fft_index + 2;
     }
-    /*printf("%d,%d,%d: %f\n",i,j,k,fft_data[fft_index-2]);/***/
+    //printf("%d,%d,%d: %f\n",i,j,k,fft_data[fft_index-2]);/***/
   }
   printf("...done.\n");/***/
   /*
@@ -168,7 +168,7 @@ int main(int argc, char *argv[])
       fft_index = fft_index+2;
     } 
   }
-printf("...done. fft_index = %d,%d\n",fft_index,image_index);
+printf("...done. fft_index = %ld,%ld\n",fft_index,image_index);
 
   /*
    * Window the FFT:
@@ -204,7 +204,7 @@ printf("Window...\n");
       fft_data[fft_index+1] = fimage2[image_index];
       fft_index = fft_index + 2;
     }
-    /*printf("%d,%d,%d: %f\n",i,j,k,fft_data[fft_index-2]);/***/
+    //printf("%d,%d,%d: %f\n",i,j,k,fft_data[fft_index-2]);/***/
   }
   printf("...done.\n");/***/
   
@@ -235,7 +235,7 @@ printf("Window...\n");
       fft_index = fft_index+2;
     } 
   }
-  printf("...done. fft_index = %d,%d\n",fft_index,image_index);
+  printf("...done. fft_index = %ld,%ld\n",fft_index,image_index);
   
   /*
    * Write image to output file:
