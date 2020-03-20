@@ -2,6 +2,7 @@
 #
 # LIBTBX_SET_DISPATCHER_NAME lunus.process
 
+from __future__ import print_function
 import time
 from time import time
 import numpy as np
@@ -9,10 +10,11 @@ import glob, subprocess, shlex
 import lunus
 import copy, os
 from dials.array_family import flex
+import future,six
 
 def mpi_enabled():
   return 'OMPI_COMM_WORLD_SIZE' in os.environ.keys()
-#  return True
+#  return False
 
 def mpi_init():
   global mpi_comm
@@ -176,7 +178,14 @@ def process_one_glob():
     i_iter = list(range(get_mpi_rank(),len(filelist),get_mpi_size()))
 
     i_iter.insert(0,0)
-
+    
+    tmode = 0.0
+    tscale = 0.0
+    tmap = 0.0
+    tmask = 0.0
+    tcorrection = 0.0
+    tsetup = 0.0
+    
     for i in i_iter:
       if fresh_lattice:
         if get_mpi_rank() == 0:
@@ -291,12 +300,28 @@ def process_one_glob():
         te = et - bt
         
         tte += te
-        
+
+        timers = p.get_lattice_timers()
+
+        tmode += timers[0]
+        tscale += timers[1]
+        tmap += timers[2]
+        tmask += timers[3]
+        tcorrection += timers[4]
+        tsetup += timers[5]
+
         imnum = imnum +1
 
     print()
 
-    print("Rank {0} time spent in read, processing (sec): {1} {2}\n".format(get_mpi_rank(),ttr,tte))
+    print("Rank {0} time spent in read, processing (sec): {1} {2}".format(get_mpi_rank(),ttr,tte))
+
+    if (get_mpi_rank() == 0):
+      print("LUNUS.PROCESS: Setup took {0} seconds".format(tsetup))
+      print("LUNUS.PROCESS: Masking and thresholding took {0} seconds".format(tmask))
+      print("LUNUS.PROCESS: Solid angle and polarization correction took {0} seconds".format(tcorrection))
+      print("LUNUS.PROCESS: Mode filtering took {0} seconds".format(tmode))
+      print("LUNUS.PROCESS: Mapping took {0} seconds".format(tmap))
 
 if __name__=="__main__":
   import sys
@@ -450,6 +475,7 @@ if __name__=="__main__":
   for i in range(len(metro_glob_list)):
     if get_mpi_rank() == 0:
       print("Image set ",i+1,":",end=" ")
+      sys.stdout.flush()
 
     metro_glob = metro_glob_list[i]
     image_glob = image_glob_list[i]

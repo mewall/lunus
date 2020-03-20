@@ -2,8 +2,6 @@
     // Date: 6/15/2017
     // Lat3D class, RadialAvgim, Normim, & Polarim methods wrapped by Alex Wolff (9/22/2017).
 
-
-
 #include <cctbx/boost_python/flex_fwd.h>
 #include <boost/python/module.hpp>
 #include <boost/python/class.hpp>
@@ -239,6 +237,15 @@ namespace lunus {
       lbkgsubim(imdiff,imdiff_bkg);
       //            printf("imdiff->background_subtraction_factor = %f\n",imdiff->background_subtraction_factor);
       //            printf("imdiff-value_offset = %d\n",imdiff->value_offset);
+    }
+
+    inline scitbx::af::flex_double get_lattice_timers() {
+      std::size_t ntimers = sizeof(struct timers)/sizeof(double);
+      scitbx::af::flex_double timer_array(ntimers);
+      for (int i = 0; i < ntimers; i++) {
+	timer_array[i] = ((double *)&(lat->timer))[i];
+      }
+      return timer_array;
     }
 
     inline scitbx::af::flex_int get_image() {
@@ -907,6 +914,7 @@ namespace boost_python { namespace {
       .def("get_image",&lunus::Process::get_image)
       .def("get_lattice",&lunus::Process::get_lattice)
       .def("get_counts",&lunus::Process::get_counts)
+      .def("get_lattice_timers",&lunus::Process::get_lattice_timers)
       .def("divide_by_counts",&lunus::Process::divide_by_counts)
       .def("print_image_params",&lunus::Process::print_image_params)
       .def("write_as_vtk",&lunus::Process::write_as_vtk)
