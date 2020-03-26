@@ -105,6 +105,10 @@ def mpi_barrier():
 def mpi_reduce_p(p):
 
   if mpi_enabled():
+#    if get_mpi_rank() == 0:
+#      print("LUNUS.PROCESS: Convertinf flex arrays to numpy arrays")
+#      sys.stdout.flush()
+
     l = p.get_lattice().as_numpy_array()
     c = p.get_counts().as_numpy_array()
 
@@ -115,10 +119,12 @@ def mpi_reduce_p(p):
       lt = None
       ct = None
 
+
     mpi_comm.Reduce(l,lt,op=MPI.SUM,root=0)
     mpi_comm.Reduce(c,ct,op=MPI.SUM,root=0)
     
     if get_mpi_rank() == 0:
+#      print("LUNUS.PROCESS: Converting numpy arrays to flex arrays")
       p.set_lattice(flex.double(lt))
       p.set_counts(flex.int(ct))
 
@@ -236,8 +242,8 @@ def process_one_glob():
 
       et = time()
       ttr += et - bt
-      print("min of data = ",flex.min(data))
-      print("max of data = ",flex.max(data))
+#      print("min of data = ",flex.min(data))
+#      print("max of data = ",flex.max(data))
 
       if isinstance(data,tuple):
         for pidx in range(len(data)):
@@ -294,10 +300,13 @@ def process_one_glob():
 
         fresh_lattice = False
       else:
+#        print("LUNUS.PROCESS: Rank {0} STARTING processing image number {1}".format(get_mpi_rank(),imnum))
+#        sys.stdout.flush()
         bt = time()
         p.LunusProcimlt(1)
         et = time()
         te = et - bt
+#        print("LUNUS.PROCESS: Rank {0} FINISHED processing image number {1}".format(get_mpi_rank(),imnum))
         
         tte += te
 
@@ -314,7 +323,7 @@ def process_one_glob():
 
     print()
 
-    print("Rank {0} time spent in read, processing (sec): {1} {2}".format(get_mpi_rank(),ttr,tte))
+    print("LUNUS.PROCESS: Rank {0} time spent in read, processing (sec): {1} {2}".format(get_mpi_rank(),ttr,tte))
 
     if (get_mpi_rank() == 0):
       print("LUNUS.PROCESS: Setup took {0} seconds".format(tsetup))
@@ -487,6 +496,10 @@ if __name__=="__main__":
 # Temporary, set default metrology based on beam center and distance
 
     process_one_glob()
+
+  if get_mpi_rank() == 0:
+    print("LUNUS.PROCESS: Done processing individual globs")
+    sys.stdout.flush()
 
   bt = time()
   p = mpi_reduce_p(p)
