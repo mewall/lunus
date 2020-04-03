@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
   MPIVARS
     *mpiv;
 
-  double start, stop, tel, tread = 0.0;
+  double start, stop, tel, tread, tbc = 0.0;
 
   struct timers timer;
 
@@ -541,6 +541,12 @@ int main(int argc, char *argv[])
       }
 #endif		
 
+      tbc = ltime();
+      if (mpiv->my_id == 0) { 
+	printf("Beginning broadcast of shared information.\n");
+	fflush(stdout);
+      }
+
       // Broadcast the xvectors to other ranks
       lbcastBufMPI((void *)&num_read,sizeof(size_t),0,imdiff->mpiv);
       if (imdiff->mpiv->my_id != 0) {
@@ -564,7 +570,16 @@ int main(int argc, char *argv[])
       // Broadcast the pedestal as well -- this is critical
       lbcastBufMPI((void *)&imdiff_ref->value_offset,sizeof(IMAGE_DATA_TYPE),0,imdiff->mpiv);
 
+      tbc = ltime() - tbc;
+
+      if (mpiv->my_id == 0) {
+	printf("LUNUS: Broadcasting shared information took %g seconds\n",tbc);
+	fflush(stdout);
+      }
+
       // Run the processing method in initialization mode (0) supplying the reference image
+
+
 
       lat->procmode = 0;
       lat->imdiff = imdiff_ref;
