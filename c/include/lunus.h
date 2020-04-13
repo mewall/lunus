@@ -463,8 +463,8 @@ typedef struct
   IMAGE_DATA_TYPE *image;	/* Pointer to image */
   char big_endian;              /* byte order, 1 = big_endian, 0 = other */
   size_t image_length;	        /* Total number of pixels in image */
-  short vpixels;		/* Number of vertical pixels */
-  short hpixels;		/* Number of horizontal pixels */
+  int vpixels;		        /* Number of vertical pixels */
+  int hpixels;		        /* Number of horizontal pixels */
   struct xyzcoords slow_vec;    /* Direction of slow raster axis */
   struct xyzcoords fast_vec;    /* Direction of fast raster axis */
   struct xyzcoords normal_vec;  /* Direciton of normal to panel */
@@ -540,6 +540,7 @@ typedef struct
   struct xyzmatrix amatrix;     /* A matrix for mapping lab coords to reciprocal space coords */
   int use_json_metrology;
   MPIVARS *mpiv;
+  int reentry;
 } DIFFIMAGE;
 
 /*

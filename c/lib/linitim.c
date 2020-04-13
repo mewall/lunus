@@ -113,6 +113,10 @@ DIFFIMAGE *linitim(size_t n)
     imdiff->beam_vec.y = 0.0;
     imdiff->beam_vec.z = -1.0;
 
+    // Variable used to indicate reentry into a routine, e.g., modeim()
+
+    imdiff->reentry = 0;
+
     /*
      * Allocate memory for arrays:
      */

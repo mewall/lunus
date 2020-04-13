@@ -10,6 +10,11 @@
    Input is ascii coordinates file.  Output is 16-bit 
    image of specified size (1024 x 1024 default).
 
+   Reentry codes (imdiff->reentry):
+     0 = Enter fresh without intent for future reentry (initialize and free)
+     1 = Enter fresh with intent for future reentry (initialize without free)
+     2 = Reentry with intent for future reentry (no initialize, no free)
+     3 = Reentry without intent for future reentry (no initialize, but do free)
    */
 
 #include<mwmask.h>
@@ -141,7 +146,7 @@ int lmodeim(DIFFIMAGE *imdiff_in)
     c; 
 
   IMAGE_DATA_TYPE
-    *image,
+    *image = NULL,
     maxval,
     minval,
     binsize;
@@ -150,21 +155,94 @@ int lmodeim(DIFFIMAGE *imdiff_in)
     return_value = 0;
 
   static size_t
-    *image_mode,
-    *window,
-    *stack;
+    *image_mode = NULL,
+    *window = NULL,
+    *stack = NULL;
 
   DIFFIMAGE *imdiff;
 
-  static int reentry = 0;
+  int reentry = imdiff_in->reentry;
 
+  size_t wlen = (imdiff_in->mode_height+1)*(imdiff_in->mode_width+1);
+    
   int pidx;
 
   size_t
+    num_teams,
+    num_threads,
     index,
     i,
     j,
     k;
+
+  static size_t 
+    image_length = 0,
+    hpixels = 0,
+    vpixels = 0;
+
+  imdiff = &imdiff_in[0];
+
+  if (reentry == 2 || reentry == 3) {
+    if (hpixels != imdiff->hpixels || vpixels != imdiff->vpixels) {
+      perror("LMODEIM: Image panel size changed on reentry. Aborting\n");
+      exit(1);
+    }
+  }
+
+  half_height = imdiff->mode_height / 2;
+  half_width = imdiff->mode_width / 2;
+  hpixels = imdiff->hpixels;
+  vpixels = imdiff->vpixels;
+
+#ifdef USE_OPENMP
+#ifdef USE_OFFLOAD
+#pragma omp target teams distribute map(from:num_teams,num_threads)
+#else
+#pragma omp distribute
+#endif
+#endif
+
+  for (j = half_height; j < vpixels - half_height; j++) {
+    num_teams = omp_get_num_teams();
+
+#ifdef USE_OPENMP
+#ifdef USE_OFFLOAD
+#pragma omp parallel num_threads(32)
+#else
+#pragma omp parallel
+#endif
+#endif
+
+    {
+      num_threads = omp_get_num_threads();
+    }
+  }
+    
+  printf(" Number of teams, threads = %ld, %ld\n",num_teams,num_threads);
+
+  if (reentry == 0 || reentry == 1) {
+
+    image = (IMAGE_DATA_TYPE *)calloc(image_length,sizeof(IMAGE_DATA_TYPE));
+    image_mode = (size_t *)calloc(image_length,sizeof(size_t));
+    window = (size_t *)calloc(wlen*num_teams*num_threads,sizeof(size_t));
+    stack = (size_t *)calloc(wlen*num_teams*num_threads,sizeof(size_t));
+
+    /* 
+     * Allocate working mode filetered image: 
+     */ 
+  
+    if (!image || !image_mode || !window || !stack) {
+      sprintf(imdiff->error_msg,"\nLMODEIM:  Couldn't allocate arrays.\n\n");
+      return_value = 1;
+      goto CloseShop;
+    }
+
+#ifdef USE_OFFLOAD
+#pragma omp target enter data map(alloc:image[0:image_length],image_mode[0:image_length])
+#pragma omp target enter data map(alloc:window[0:wlen*num_teams*num_threads],stack[0:wlen*num_teams*num_threads])
+#endif
+
+  } 
 
   for (pidx = 0; pidx < imdiff_in->num_panels; pidx++) {
     imdiff = &imdiff_in[pidx];
@@ -172,23 +250,16 @@ int lmodeim(DIFFIMAGE *imdiff_in)
       perror("LMODEIM: Image panels are not indexed sequentially. Aborting\n");
       exit(1);
     }
+    if (hpixels != imdiff->hpixels || vpixels != imdiff->vpixels) {
+      perror("LMODEIM: Image panels are not identically formatted. Aborting\n");
+      exit(1);
+    }
 
-    image = imdiff->image;
+    memcpy(image, imdiff->image, image_length*sizeof(IMAGE_DATA_TYPE));
+
     IMAGE_DATA_TYPE overload_tag = imdiff->overload_tag;
     IMAGE_DATA_TYPE ignore_tag = imdiff->ignore_tag;
-    size_t image_length = imdiff->image_length;
     
-    /* 
-     * Allocate working mode filetered image: 
-     */ 
-  
-
-
-    if (!image_mode) {
-      sprintf(imdiff->error_msg,"\nLMODEIM:  Couldn't allocate arrays.\n\n");
-      return_value = 1;
-      goto CloseShop;
-    }
 
     // Compute min and max for image
 
@@ -215,59 +286,6 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 
     // Compute the mode filtered image
 
-    half_height = imdiff->mode_height / 2;
-    half_width = imdiff->mode_width / 2;
-    int hpixels = imdiff->hpixels;
-    int vpixels = imdiff->vpixels;
-
-    size_t wlen = (imdiff->mode_height+1)*(imdiff->mode_width+1);
-    
-
-    size_t num_teams;
-    size_t num_threads;
-
-#ifdef USE_OPENMP
-#ifdef USE_OFFLOAD
-#pragma omp target teams distribute map(from:num_teams,num_threads)
-#else
-#pragma omp distribute
-#endif
-#endif
-
-
-    for (j = half_height; j < vpixels - half_height; j++) {
-      num_teams = omp_get_num_teams();
-
-#ifdef USE_OPENMP
-#ifdef USE_OFFLOAD
-#pragma omp parallel num_threads(32)
-#else
-#pragma omp parallel
-#endif
-#endif
-
-      {
-	num_threads = omp_get_num_threads();
-      }
-    }
-    
-    printf(" Number of teams, threads = %ld, %ld\n",num_teams,num_threads);
-
-#ifdef USE_OFFLOAD
-    if (reentry == 0) {
-#endif    
-
-      image_mode = (size_t *)calloc(imdiff->image_length,sizeof(size_t));
-      window = (size_t *)calloc(wlen*num_teams*num_threads,sizeof(size_t));
-      stack = (size_t *)calloc(wlen*num_teams*num_threads,sizeof(size_t));
-
-#ifdef USE_OFFLOAD
-#pragma omp target enter data map(alloc:image[0:image_length],image_mode[0:image_length])
-#pragma omp target enter data map(alloc:window[0:wlen*num_teams*num_threads],stack[0:wlen*num_teams*num_threads])
-
-      reentry = 1;
-    }
-#endif
 
 #ifdef USE_OFFLOAD
 #pragma omp target update to(image[0:image_length],image_mode[0:image_length])
@@ -282,7 +300,7 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 
 #ifdef USE_OPENMP
 #ifdef USE_OFFLOAD
-#pragma omp target map(to:minval,binsize,wlen,overload_tag,ignore_tag) 
+#pragma omp target map(to:minval,binsize,wlen,overload_tag,ignore_tag,num_teams,num_threads) 
 #pragma omp teams
 #pragma omp distribute
 #else
@@ -307,6 +325,11 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 	size_t tm = omp_get_team_num();
 	size_t th = omp_get_thread_num();
 	size_t nt = omp_get_num_threads();
+	size_t ntm = omp_get_num_teams();
+	if (ntm != num_teams || nt != num_threads) {
+	  printf("Number of teams, threads %ld, %ld differs from assumed numbers %ld, %ld\n",ntm,nt,num_teams,num_threads);
+	  exit(1);
+	}
 	size_t *this_window = &window[(tm*nt+th)*wlen];
 	size_t *this_stack = &stack[(tm*nt+th)*wlen];
 	int l = 0;
@@ -425,14 +448,21 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 	}
       }
     }
-
+	  
 #ifdef USE_OFFLOAD
 #pragma omp target update from(image[0:image_length]) 
-    //map(delete:image_mode[0:image_length],window[0:wlen*num_threads*num_teams],stack[0:wlen*num_threads*num_teams])
 #endif
+    memcpy(imdiff->image,image,image_length*sizeof(IMAGE_DATA_TYPE));
 
-    free(image_mode);
-    free(window);
+    if (reentry == 0) {
+#ifdef USE_OFFLOAD
+#pragma omp target exit data map(delete:image[0:image_length],image_mode[0:image_length],window[0:wlen*num_threads*num_teams],stack[0:wlen*num_threads*num_teams])
+#endif
+      free(image);
+      free(image_mode);
+      free(window);
+      free(stack);
+    }
   }
  CloseShop:
   return(return_value);
