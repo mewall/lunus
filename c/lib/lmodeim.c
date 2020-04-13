@@ -149,10 +149,14 @@ int lmodeim(DIFFIMAGE *imdiff_in)
   int
     return_value = 0;
 
-  size_t
-    *image_mode;
+  static size_t
+    *image_mode,
+    *window,
+    *stack;
 
   DIFFIMAGE *imdiff;
+
+  static int reentry = 0;
 
   int pidx;
 
@@ -160,9 +164,7 @@ int lmodeim(DIFFIMAGE *imdiff_in)
     index,
     i,
     j,
-    k,
-    *window,
-    *stack;
+    k;
 
   for (pidx = 0; pidx < imdiff_in->num_panels; pidx++) {
     imdiff = &imdiff_in[pidx];
@@ -180,8 +182,8 @@ int lmodeim(DIFFIMAGE *imdiff_in)
      * Allocate working mode filetered image: 
      */ 
   
-    image_mode = (size_t *)calloc(imdiff->image_length,
-				  sizeof(size_t));
+
+
     if (!image_mode) {
       sprintf(imdiff->error_msg,"\nLMODEIM:  Couldn't allocate arrays.\n\n");
       return_value = 1;
@@ -251,13 +253,24 @@ int lmodeim(DIFFIMAGE *imdiff_in)
     
     printf(" Number of teams, threads = %ld, %ld\n",num_teams,num_threads);
 
-    window = (size_t *)calloc(wlen*num_teams*num_threads,sizeof(size_t));
-    stack = (size_t *)calloc(wlen*num_teams*num_threads,sizeof(size_t));
-    
+#ifdef USE_OFFLOAD
+    if (reentry == 0) {
+#endif    
+
+      image_mode = (size_t *)calloc(imdiff->image_length,sizeof(size_t));
+      window = (size_t *)calloc(wlen*num_teams*num_threads,sizeof(size_t));
+      stack = (size_t *)calloc(wlen*num_teams*num_threads,sizeof(size_t));
+
 #ifdef USE_OFFLOAD
 #pragma omp target enter data map(alloc:image[0:image_length],image_mode[0:image_length])
-#pragma omp target update to(image[0:image_length],image_mode[0:image_length])
 #pragma omp target enter data map(alloc:window[0:wlen*num_teams*num_threads],stack[0:wlen*num_teams*num_threads])
+
+      reentry = 1;
+    }
+#endif
+
+#ifdef USE_OFFLOAD
+#pragma omp target update to(image[0:image_length],image_mode[0:image_length])
 #pragma omp target update to(window[0:wlen*num_teams*num_threads],stack[0:wlen*num_teams*num_threads])
 #endif
     
@@ -414,7 +427,8 @@ int lmodeim(DIFFIMAGE *imdiff_in)
     }
 
 #ifdef USE_OFFLOAD
-#pragma omp target exit data map(from:image[0:image_length]) map(delete:image_mode[0:image_length],window[0:wlen*num_threads*num_teams],stack[0:wlen*num_threads*num_teams])
+#pragma omp target update from(image[0:image_length]) 
+    //map(delete:image_mode[0:image_length],window[0:wlen*num_threads*num_teams],stack[0:wlen*num_threads*num_teams])
 #endif
 
     free(image_mode);
