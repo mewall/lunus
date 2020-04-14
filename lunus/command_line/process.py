@@ -323,7 +323,7 @@ def process_one_glob():
 
     print()
 
-    print("LUNUS.PROCESS: Rank {0} time spent in read, processing (sec): {1} {2}".format(get_mpi_rank(),ttr,tte))
+    print("LUNUS.PROCESS: Rank {0} time spent in read, processing (sec): {1}, {2}".format(get_mpi_rank(),ttr,tte))
 
     if (get_mpi_rank() == 0):
       print("LUNUS.PROCESS: Setup took {0} seconds".format(tsetup))
@@ -444,8 +444,8 @@ if __name__=="__main__":
   metro_glob = metro_glob_list[0]
 
   metrolist = glob.glob(metro_glob)
-  print("type(metrolist) = ",type(metrolist))
-  print(metrolist)
+#  print("type(metrolist) = ",type(metrolist))
+#  print(metrolist)
   metrolist.sort()
 
   metro = metrolist[0]
