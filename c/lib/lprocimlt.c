@@ -63,6 +63,12 @@ int lprocimlt(LAT3D *lat)
 
   lcloneim(imdiff_scale_list,imdiff_list);
 
+  if (lat->procmode == 0) {
+    imdiff_scale_list->reentry = 1;
+  } else {
+    imdiff_scale_list->reentry = 2;
+  }
+  
   lmodeim(imdiff_scale_list);
 
   lat->timer.mode = ltime() - lat->timer.mode;

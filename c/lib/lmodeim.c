@@ -145,8 +145,10 @@ int lmodeim(DIFFIMAGE *imdiff_in)
     r, 
     c; 
 
+  static IMAGE_DATA_TYPE
+    *image = NULL;
+
   IMAGE_DATA_TYPE
-    *image = NULL,
     maxval,
     minval,
     binsize;
@@ -191,6 +193,7 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 
   half_height = imdiff->mode_height / 2;
   half_width = imdiff->mode_width / 2;
+  image_length = imdiff->image_length;
   hpixels = imdiff->hpixels;
   vpixels = imdiff->vpixels;
 
@@ -289,8 +292,11 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 
 #ifdef USE_OFFLOAD
 #pragma omp target update to(image[0:image_length],image_mode[0:image_length])
-#pragma omp target update to(window[0:wlen*num_teams*num_threads],stack[0:wlen*num_teams*num_threads])
+    //#pragma omp target update to(window[0:wlen*num_teams*num_threads],stack[0:wlen*num_teams*num_threads])
 #endif
+
+    //    printf("Entering omp offload region\n");
+    //    fflush(stdout);
     
 #ifdef USE_OPENMP
     double start = omp_get_wtime();
@@ -332,6 +338,9 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 	}
 	size_t *this_window = &window[(tm*nt+th)*wlen];
 	size_t *this_stack = &stack[(tm*nt+th)*wlen];
+	for (k = 0; k < wlen; k++) {
+	  this_window[k] = 0;
+	}
 	int l = 0;
 //        printf("Start tm = %ld,th = %ld,i = %d,j = %ld\n",tm,th,i,index_mode/hpixels);
 	for (r = j - half_height; r <= j + half_height; r++) {
@@ -381,9 +390,6 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 	    }
 	  }
 	  image_mode[index_mode] = (size_t)(((float)mode_value/(float)mode_ct) + .5);
-	  for (k = 0; k < l; k++) {
-	    this_window[k] = 0;
-	  }
 	}
 //        printf("Stop tm = %ld,th = %ld,i = %d,j = %d\n",tm,th,i,j);
       }
@@ -454,7 +460,7 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 #endif
     memcpy(imdiff->image,image,image_length*sizeof(IMAGE_DATA_TYPE));
 
-    if (reentry == 0) {
+    if (reentry == 0 || reentry == 3) {
 #ifdef USE_OFFLOAD
 #pragma omp target exit data map(delete:image[0:image_length],image_mode[0:image_length],window[0:wlen*num_threads*num_teams],stack[0:wlen*num_threads*num_teams])
 #endif
