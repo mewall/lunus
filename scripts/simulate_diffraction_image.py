@@ -474,10 +474,14 @@ def process_one_glob():
               diffim[i][j] -= dmin*scale
 
 #      diffim *= scale
+              
+      int_mask_tag = int(image_mask_tag)
 
       for j in range(Isize2):
           for i in range(Isize1):
-              pixel_values[j,i] = np.int(diffim[i,j])
+              pixel_values[j,i] = np.int(diffim[i,j])              
+              if (pixel_values[j,i] == int_mask_tag):
+                pixel_values[j,i] = -1
 
       outname = prefout+"_%05d.cbf"%(imnum)
 
