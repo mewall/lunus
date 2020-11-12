@@ -12,10 +12,22 @@ See dials.stills_process. This version adds lunus processing in the integration 
 
 from dials.util import show_mail_on_error
 from libtbx.phil import parse
+from scitbx import matrix
+import numpy as np
+import lunus
+
 control_phil_str = '''
+lunus {
+  deck_file = None
+    .type = path
+}
 '''
 
 from dials.command_line.stills_process import dials_phil_str, program_defaults_phil_str, Script as DialsScript, control_phil_str as dials_control_phil_str, Processor as DialsProcessor
+
+program_defaults_phil_str += """
+input.cache_reference_image = True
+"""
 
 phil_scope = parse(dials_control_phil_str + control_phil_str + dials_phil_str,  process_includes=True).fetch(parse(program_defaults_phil_str))
 
@@ -30,11 +42,55 @@ class LunusProcessor(DialsProcessor):
   def integrate(self, experiments, indexed):
     integrated = super(LunusProcessor, self).integrate(experiments, indexed)
 
-    experiment_params = get_experiment_params(experiments)
-    x = get_experiment_xvectors(experiments)
+    if not hasattr(self, 'reference_experiment_params'):
+      self.reference_experiment_params = get_experiment_params(self.reference_experiments)
+      self.lunus_processor = lunus.Process(len(self.reference_experiment_params))
+      with open(self.params.lunus.deck_file) as f:
+        self.deck = f.read()
 
+      deck_and_extras = self.deck+self.reference_experiment_params[0]
+      self.lunus_processor.LunusSetparamslt(deck_and_extras)
+
+      self.lunus_integrate(self.reference_experiments, is_reference = True)
+
+    if len(experiments) > 1:
+      print("Skipping lunus integration: more than 1 lattice was indexed")
+    else:
+      self.lunus_integrate(experiments)
 
     return integrated
+
+  def lunus_integrate(self, experiments, is_reference = False):
+    assert len(experiments) == 1
+
+    experiment_params = get_experiment_params(experiments)
+    p = self.lunus_processor
+
+    data = self.reference_experiments[0].imageset[0]
+    if not isinstance(data, tuple):
+      data = data,
+    for panel_idx, panel in enumerate(data):
+      self.lunus_processor.set_image(panel_idx, panel)
+
+    for pidx in range(len(experiment_params)):
+      deck_and_extras = self.deck+experiment_params[pidx]
+      p.LunusSetparamsim(pidx,deck_and_extras)
+
+    if is_reference:
+      x = get_experiment_xvectors(experiments)
+      for pidx in range(len(x)):
+        p.set_xvectors(pidx,x[pidx])
+
+      p.LunusProcimlt(0)
+    else:
+      crystal = experiments[0].crystal
+      A_matrix = matrix.sqr(crystal.get_A()).inverse()
+      At = np.asarray(A_matrix.transpose()).reshape((3,3))
+      At_flex = A_matrix.transpose().as_flex_double_matrix()
+
+      p.set_amatrix(At_flex)
+
+      p.LunusProcimlt(1)
 
 class Script(DialsScript):
   '''A class for running the script.'''
