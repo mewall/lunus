@@ -397,7 +397,7 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 	  double p = (double)this_count/(double)l;
 	  entropy -=  p * log(p);
 	  medval = this_window[kmed];
-	  image_mode[index_mode] = (size_t)(((float)mode_value/(float)mode_ct) + .5);
+	  //	  image_mode[index_mode] = (size_t)(((float)mode_value/(float)mode_ct) + .5);
 	  if (entropy > log(10.)) {
 	    if (mode_ct > 1) {
 	      image_mode[index_mode] = (size_t)(((float)mode_value/(float)mode_ct) + .5);
