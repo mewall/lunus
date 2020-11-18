@@ -394,15 +394,19 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 	      mode_ct++;
 	    }
 	  }
+	  double p = (double)this_count/(double)l;
+	  entropy -=  p * log(p);
+	  medval = this_window[kmed];
+	  image_mode[index_mode] = (size_t)(((float)mode_value/(float)mode_ct) + .5);
 	  if (entropy > log(10.)) {
-	    if (mode_ct > 10) {
+	    if (mode_ct > 1) {
 	      image_mode[index_mode] = (size_t)(((float)mode_value/(float)mode_ct) + .5);
 	    } else {
  	      mode_value = this_window[(size_t)(0.5*(double)l)];
 	      image_mode[index_mode] = (size_t)(((float)mode_value/(float)mode_ct) + .5);
 	    }
 	  } else {
-	    if (mode_value < medval) {
+	    if (image_mode[index_mode] < (size_t)(((float)medval/(float)mode_ct) + .5)) {
 	      image_mode[index_mode] = image[index_mode];
 	    } else {
 	      mode_value = this_window[(size_t)((0.9*(double)rand())/(double)RAND_MAX*(double)l)];
