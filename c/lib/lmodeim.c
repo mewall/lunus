@@ -377,10 +377,15 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 	  }
           this_count = 1;
           last_value = this_window[0];
-	  for (k = 0; k < l; k++) {
+	  double entropy = 0.0;
+	  int kmed = (int)(0.9*l);
+	  size_t medval = 0;
+	  for (k = 1; k < l; k++) {
 	    if (this_window[k] == last_value) {
               this_count++;
             } else {
+	      double p = (double)this_count/(double)l;
+	      entropy -=  p * log(p);
               last_value = this_window[k];
               this_count = 1;
             }
@@ -389,7 +394,21 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 	      mode_ct++;
 	    }
 	  }
-	  image_mode[index_mode] = (size_t)(((float)mode_value/(float)mode_ct) + .5);
+	  if (entropy > log(10.)) {
+	    if (mode_ct > 10) {
+	      image_mode[index_mode] = (size_t)(((float)mode_value/(float)mode_ct) + .5);
+	    } else {
+ 	      mode_value = this_window[(size_t)(0.5*(double)l)];
+	      image_mode[index_mode] = (size_t)(((float)mode_value/(float)mode_ct) + .5);
+	    }
+	  } else {
+	    if (mode_value < medval) {
+	      image_mode[index_mode] = image[index_mode];
+	    } else {
+	      mode_value = this_window[(size_t)((0.9*(double)rand())/(double)RAND_MAX*(double)l)];
+	      image_mode[index_mode] = (size_t)(((float)mode_value/(float)mode_ct) + .5);
+	    }
+	  }
 	}
 //        printf("Stop tm = %ld,th = %ld,i = %d,j = %d\n",tm,th,i,j);
       }
