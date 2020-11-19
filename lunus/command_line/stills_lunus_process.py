@@ -92,6 +92,32 @@ class LunusProcessor(DialsProcessor):
 
       p.LunusProcimlt(1)
 
+  def finalize(self):
+    # TODO: barrier or Barrier?
+    comm.barrier() # Need to synchronize at this point so that all the server/client ranks finish
+    p = self.lunus_processor
+
+    l = p.get_lattice().as_numpy_array()
+    c = p.get_counts().as_numpy_array()
+
+    if rank == 0:
+      lt = np.zeros_like(l)
+      ct = np.zeros_like(c)
+    else:
+      lt = None
+      ct = None
+
+
+    # TODO: libtbx mpi4py doesn't implement Reduce
+    comm.Reduce(l,lt,op=MPI.SUM,root=0)
+    comm.Reduce(c,ct,op=MPI.SUM,root=0)
+
+    if rank == 0:
+      p.set_lattice(flex.double(lt))
+      p.set_counts(flex.int(ct))
+      p.divide_by_counts()
+      p.write_as_hkl('results.hkl')
+
 class Script(DialsScript):
   '''A class for running the script.'''
   def __init__(self):
