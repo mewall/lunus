@@ -366,7 +366,9 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 //          printf("Done with quicksort for i=%d,j=%ld\n",i,index_mode/hpixels);
 	  // Get the median
 	  int kmed = l/2;
+	  int k90 = l*9/10;
 	  size_t median_value = this_window[kmed];
+	  size_t med90_value = this_window[k90];
 
 	  // Get the mode
 	  size_t this_count = 1;
@@ -406,10 +408,10 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 	      mode_value = median_value;
 	    }
 	  } else {
-	    if (this_value < median_value) {
+	    if (this_value < med90_value) {
 	      mode_value = this_value;
 	    } else {
-	      mode_value = this_window[(size_t)(((double)kmed*(double)rand())/(double)RAND_MAX)];
+	      mode_value = this_window[(size_t)(((double)k90*(double)rand())/(double)RAND_MAX)];
 	      //	      printf("%d %ld %ld\n",kmed,mode_value,median_value);
 	      //	      mode_value = median_value;
 	    }
