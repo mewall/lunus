@@ -332,6 +332,7 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 	size_t th = omp_get_thread_num();
 	size_t nt = omp_get_num_threads();
 	size_t ntm = omp_get_num_teams();
+	size_t this_value = (image[index_mode]-minval)/binsize + 1;
 	if (ntm != num_teams || nt != num_threads) {
 	  printf("Number of teams, threads %ld, %ld differs from assumed numbers %ld, %ld\n",ntm,nt,num_teams,num_threads);
 	  exit(1);
@@ -363,6 +364,11 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 //	  quicksort(this_window,0,l-1);
 	  quickSortIterative(this_window,this_stack,0,l-1);
 //          printf("Done with quicksort for i=%d,j=%ld\n",i,index_mode/hpixels);
+	  // Get the median
+	  int kmed = l/2;
+	  size_t median_value = this_window[kmed];
+
+	  // Get the mode
 	  size_t this_count = 1;
           size_t last_value = this_window[0];
           max_count = 1;
@@ -378,8 +384,6 @@ int lmodeim(DIFFIMAGE *imdiff_in)
           this_count = 1;
           last_value = this_window[0];
 	  double entropy = 0.0;
-	  int kmed = (int)(0.9*l);
-	  size_t medval = 0;
 	  for (k = 1; k < l; k++) {
 	    if (this_window[k] == last_value) {
               this_count++;
@@ -396,23 +400,21 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 	  }
 	  double p = (double)this_count/(double)l;
 	  entropy -=  p * log(p);
-	  medval = this_window[kmed];
 	  //	  image_mode[index_mode] = (size_t)(((float)mode_value/(float)mode_ct) + .5);
 	  if (entropy > log(10.)) {
-	    if (mode_ct > 1) {
-	      image_mode[index_mode] = (size_t)(((float)mode_value/(float)mode_ct) + .5);
-	    } else {
- 	      mode_value = this_window[(size_t)(0.5*(double)l)];
-	      image_mode[index_mode] = (size_t)(((float)mode_value/(float)mode_ct) + .5);
+	    if (mode_ct == 1) {
+	      mode_value = median_value;
 	    }
 	  } else {
-	    if (image_mode[index_mode] < (size_t)(((float)medval/(float)mode_ct) + .5)) {
-	      image_mode[index_mode] = image[index_mode];
+	    if (this_value < median_value) {
+	      mode_value = this_value;
 	    } else {
-	      mode_value = this_window[(size_t)((0.9*(double)rand())/(double)RAND_MAX*(double)l)];
-	      image_mode[index_mode] = (size_t)(((float)mode_value/(float)mode_ct) + .5);
+	      mode_value = this_window[(size_t)(((double)kmed*(double)rand())/(double)RAND_MAX)];
+	      //	      printf("%d %ld %ld\n",kmed,mode_value,median_value);
+	      //	      mode_value = median_value;
 	    }
 	  }
+	  image_mode[index_mode] = (size_t)(((float)mode_value/(float)mode_ct) + .5);
 	}
 //        printf("Stop tm = %ld,th = %ld,i = %d,j = %d\n",tm,th,i,j);
       }
