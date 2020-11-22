@@ -100,19 +100,19 @@ int lprocimlt(LAT3D *lat)
 
 #ifdef DEBUG
     int j;
-    int num_nz=0;
+    int num_pixels=0;
     size_t num_ign = 0;
     float sum_vals = 0.0;
     imdiff_scale_ref = imdiff_scale_ref_list;
     for (j=0; j<imdiff_scale_ref->image_length; j++) {	      
-      if (imdiff_scale_ref->image[j] != imdiff_scale_ref->overload_tag && imdiff_scale_ref->image[j] != 0) {
-	num_nz++;
-	sum_vals += imdiff_scale_ref->image[j];
+      if (imdiff_scale_ref->image[j] != imdiff_scale_ref->overload_tag && imdiff_scale_ref->image[j] != imdiff_scale_ref->ignore_tag) {
+	num_pixels++;
+	sum_vals += (float)imdiff_scale_ref->image[j];
 	//	      printf("image[%d]=%d,",j,imdiff_scale_ref->image[j]);
       } else num_ign ++;
       //	      if (num_nz>10) break;
     }
-    printf("num_ign = %ld,avg = %g,",num_ign,sum_vals/(float)num_nz);
+    printf("num_ign = %ld,avg = %g,",num_ign,sum_vals/(float)num_pixels);
     lavgrim(imdiff_scale_ref);
     for (j=100; j<110;j++) {
       if (j>100 && j<=110)  printf("rf[%d]=%f,",j,imdiff_scale_ref->rfile[j]);
