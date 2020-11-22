@@ -406,9 +406,11 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 	  double p = (double)this_count/(double)l;
 	  entropy -=  p * log(p);
 	  //	  image_mode[index_mode] = (size_t)(((float)mode_value/(float)mode_ct) + .5);
+#ifdef DEBUG
 	  if (j == 2200 && i == 1800) {
 	    printf("entropy = %g, mode_ct = %d, mode_value = %ld, median_value = %ld, range_value = %ld, this_value = %ld, med90_value = %ld, kmed = %d, k90 = %d\n",entropy,mode_ct,mode_value,median_value,range_value,this_value,med90_value,kmed,k90);
-	  }  
+	  } 
+#endif 
 	  if (entropy > log(10.)) {
 	    if (mode_ct == 1) {
 	      mode_value = median_value;
