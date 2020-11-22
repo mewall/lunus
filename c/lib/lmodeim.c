@@ -367,6 +367,9 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 	  // Get the median
 	  int kmed = l/2;
 	  int k90 = l*9/10;
+	  size_t min_value = this_window[0];
+	  size_t max_value = this_window[l-1];
+	  size_t range_value = max_value - min_value;
 	  size_t median_value = this_window[kmed];
 	  size_t med90_value = this_window[k90];
 
@@ -403,12 +406,17 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 	  double p = (double)this_count/(double)l;
 	  entropy -=  p * log(p);
 	  //	  image_mode[index_mode] = (size_t)(((float)mode_value/(float)mode_ct) + .5);
+	  if (j == 2200 && i == 1800) {
+	    printf("entropy = %g, mode_ct = %d, mode_value = %ld, median_value = %ld, range_value = %ld, this_value = %ld, med90_value = %ld, kmed = %d, k90 = %d\n",entropy,mode_ct,mode_value,median_value,range_value,this_value,med90_value,kmed,k90);
+	  }  
 	  if (entropy > log(10.)) {
 	    if (mode_ct == 1) {
 	      mode_value = median_value;
 	    }
+	  } else if (range_value <= 2) {
+	    mode_value = this_value;
 	  } else {
-	    if (this_value < med90_value) {
+	    if (this_value <= med90_value) {
 	      mode_value = this_value;
 	    } else {
 	      mode_value = this_window[(size_t)(((double)k90*(double)rand())/(double)RAND_MAX)];
