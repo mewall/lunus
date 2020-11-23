@@ -19,7 +19,7 @@ import os
 import lunus
 
 def mpi_enabled():
-  return 'OMPI_COMM_WORLD_SIZE' in os.environ.keys()
+  return 'MPI_LOCALRANKID' in os.environ.keys()
 #  return False
 
 def mpi_init():
@@ -47,7 +47,7 @@ def mpi_barrier():
   if mpi_enabled():
     mpi_comm.Barrier()
 
-def mpi_reduce_p(p):
+def mpi_reduce_p(p, root=0):
 
   if mpi_enabled():
 #    if get_mpi_rank() == 0:
@@ -57,7 +57,7 @@ def mpi_reduce_p(p):
     l = p.get_lattice().as_numpy_array()
     c = p.get_counts().as_numpy_array()
 
-    if get_mpi_rank() == 0:
+    if get_mpi_rank() == root:
       lt = np.zeros_like(l)
       ct = np.zeros_like(c)
     else: 
@@ -65,13 +65,13 @@ def mpi_reduce_p(p):
       ct = None
 
 
-    mpi_comm.Reduce(l,lt,op=MPI.SUM,root=0)
-    mpi_comm.Reduce(c,ct,op=MPI.SUM,root=0)
+    mpi_comm.Reduce(l,lt,op=MPI.SUM,root=root)
+    mpi_comm.Reduce(c,ct,op=MPI.SUM,root=root)
     
-#    if get_mpi_rank() == 0:
-#      print("LUNUS.PROCESS: Converting numpy arrays to flex arrays")
-#      p.set_lattice(flex.double(lt))
-#      p.set_counts(flex.int(ct))
+    if get_mpi_rank() == root:
+      print("LUNUS.PROCESS: Converting numpy arrays to flex arrays")
+      p.set_lattice(flex.double(lt))
+      p.set_counts(flex.int(ct))
 
   return p
 
@@ -160,15 +160,25 @@ class LunusProcessor(DialsProcessor):
       p.LunusProcimlt(1)
 
   def finalize(self):
-    # TODO: barrier or Barrier?
     mpi_barrier() # Need to synchronize at this point so that all the server/client ranks finish
-    p = self.lunus_processor
 
-    mpi_reduce_p(p)
+    print("STARTING FINALIZE, rank %d, size %d"%(get_mpi_rank(), get_mpi_size()))
 
-    if get_mpi_rank() == 0:
-      p.divide_by_counts()
-      p.write_as_hkl('results.hkl')
+    if get_mpi_size() > 2:
+      if get_mpi_rank() > 0:
+        p = self.lunus_processor
+        mpi_reduce_p(p, root=1)
+
+        if get_mpi_rank() == 1:
+          p.divide_by_counts()
+          p.write_as_hkl('results.hkl')
+    else:
+      p = self.lunus_processor
+      mpi_reduce_p(p, root=0)
+
+      if get_mpi_rank() == 0:
+        p.divide_by_counts()
+        p.write_as_hkl('results.hkl')
 
 class Script(DialsScript):
   '''A class for running the script.'''
