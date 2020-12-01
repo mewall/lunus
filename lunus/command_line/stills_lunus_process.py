@@ -17,6 +17,9 @@ from dials.array_family import flex
 import numpy as np
 import os
 import lunus
+import logging
+
+logger = logging.getLogger("dials.command_line.stills_process")
 
 def mpi_enabled():
   return 'MPI_LOCALRANKID' in os.environ.keys()
@@ -40,7 +43,7 @@ def mpi_bcast(d):
     db = mpi_comm.bcast(d,root=0)
   else:
     db = d
-    
+
   return db
 
 def mpi_barrier():
@@ -60,16 +63,16 @@ def mpi_reduce_p(p, root=0):
     if get_mpi_rank() == root:
       lt = np.zeros_like(l)
       ct = np.zeros_like(c)
-    else: 
+    else:
       lt = None
       ct = None
 
 
     mpi_comm.Reduce(l,lt,op=MPI.SUM,root=root)
     mpi_comm.Reduce(c,ct,op=MPI.SUM,root=root)
-    
+
     if get_mpi_rank() == root:
-      print("LUNUS.PROCESS: Converting numpy arrays to flex arrays")
+      logger.info("LUNUS.PROCESS: Converting numpy arrays to flex arrays")
       p.set_lattice(flex.double(lt))
       p.set_counts(flex.int(ct))
 
@@ -97,7 +100,7 @@ phil_scope = parse(dials_control_phil_str + control_phil_str + dials_phil_str,  
 
 if mpi_enabled():
   mpi_init()
-  
+
 from lunus.command_line.process import get_experiment_params, get_experiment_xvectors
 
 class LunusProcessor(DialsProcessor):
@@ -116,7 +119,7 @@ class LunusProcessor(DialsProcessor):
       self.lunus_integrate(self.reference_experiments, is_reference = True)
 
     if len(experiments) > 1:
-      print("Skipping lunus integration: more than 1 lattice was indexed")
+      logger.info("Skipping lunus integration: more than 1 lattice was indexed")
     else:
       self.lunus_integrate(experiments)
 
@@ -138,21 +141,27 @@ class LunusProcessor(DialsProcessor):
       deck_and_extras = self.deck+experiment_params[pidx]
       p.LunusSetparamsim(pidx,deck_and_extras)
 
-    print("LUNUS: Processing image")
+    logger.info("LUNUS: Processing image")
 
     if is_reference:
       x = get_experiment_xvectors(experiments)
       for pidx in range(len(x)):
         p.set_xvectors(pidx,x[pidx])
 
-   # We need an amatrix for the next call, to set up the lattice size
-      print("LUNUS: Entering lprocimlt()")
+      # We need an amatrix for the next call, to set up the lattice size
+      uc = self.params.indexing.known_symmetry.unit_cell
+      assert uc is not None, "Lunus needs a target unit cell"
+      A_matrix = matrix.sqr(uc.orthogonalization_matrix())
+      At_flex = A_matrix.transpose().as_flex_double_matrix()
+
+      p.set_amatrix(At_flex)
+
+      logger.info("LUNUS: Entering lprocimlt()")
       p.LunusProcimlt(0)
-      print("LUNUS: Done with lprocimlt()")
+      logger.info("LUNUS: Done with lprocimlt()")
     else:
       crystal = experiments[0].crystal
       A_matrix = matrix.sqr(crystal.get_A()).inverse()
-      At = np.asarray(A_matrix.transpose()).reshape((3,3))
       At_flex = A_matrix.transpose().as_flex_double_matrix()
 
       p.set_amatrix(At_flex)
@@ -162,7 +171,7 @@ class LunusProcessor(DialsProcessor):
   def finalize(self):
     mpi_barrier() # Need to synchronize at this point so that all the server/client ranks finish
 
-    print("STARTING FINALIZE, rank %d, size %d"%(get_mpi_rank(), get_mpi_size()))
+    logger.info("STARTING FINALIZE, rank %d, size %d"%(get_mpi_rank(), get_mpi_size()))
 
     if get_mpi_size() > 2:
       if get_mpi_rank() > 0:
