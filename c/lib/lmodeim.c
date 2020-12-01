@@ -141,9 +141,7 @@ int lmodeim(DIFFIMAGE *imdiff_in)
     half_height,
     half_width,
     n,
-    m,
-    r, 
-    c; 
+    m; 
 
   static IMAGE_DATA_TYPE
     *image = NULL;
@@ -170,17 +168,16 @@ int lmodeim(DIFFIMAGE *imdiff_in)
   int pidx;
 
   size_t
-    num_teams,
-    num_threads,
-    index,
     i,
-    j,
-    k;
+    j;
 
   static size_t 
     image_length = 0,
     hpixels = 0,
     vpixels = 0;
+
+  size_t num_teams = 32;
+  size_t num_threads = 256;
 
   imdiff = &imdiff_in[0];
 
@@ -196,32 +193,6 @@ int lmodeim(DIFFIMAGE *imdiff_in)
   image_length = imdiff->image_length;
   hpixels = imdiff->hpixels;
   vpixels = imdiff->vpixels;
-
-#ifdef USE_OPENMP
-#ifdef USE_OFFLOAD
-#pragma omp target teams distribute map(from:num_teams,num_threads)
-#else
-#pragma omp distribute
-#endif
-#endif
-
-  for (j = half_height; j < vpixels - half_height; j++) {
-    num_teams = omp_get_num_teams();
-
-#ifdef USE_OPENMP
-#ifdef USE_OFFLOAD
-#pragma omp parallel num_threads(32)
-#else
-#pragma omp parallel
-#endif
-#endif
-
-    {
-      num_threads = omp_get_num_threads();
-    }
-  }
-    
-  printf(" Number of teams, threads = %ld, %ld\n",num_teams,num_threads);
 
   if (reentry == 0 || reentry == 1) {
 
@@ -269,7 +240,7 @@ int lmodeim(DIFFIMAGE *imdiff_in)
     int got_first_val = 0;
     
     
-    for (index = 0; index < image_length; index++) {
+    for (size_t index = 0; index < image_length; index++) {
       if ((image[index] != overload_tag) &&
 	  (image[index] != ignore_tag) &&
 	  (image[index] < MAX_IMAGE_DATA_VALUE)) {
@@ -308,30 +279,22 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 #ifdef USE_OFFLOAD
 #pragma omp target map(to:minval,binsize,wlen,overload_tag,ignore_tag,num_teams,num_threads) 
 #pragma omp teams
-#pragma omp distribute
+#pragma omp distribute parallel for collapse(2) schedule(static,1)
 #else
-#pragma omp distribute
+#pragma omp distribute parallel for collapse(2)
 #endif
 #endif
 
-    for (j = half_height; j < vpixels-half_height; j++) {
-//      printf("Team = %ld, j = %d\n",tm,j);
-#ifdef USE_OPENMP
-#ifdef USE_OFFLOAD
-#pragma omp parallel for private(index,k,r,c) schedule(static,1) num_threads(32)
-#else
-#pragma omp parallel for private(index,k,r,c)
-#endif
-#endif
+    for (size_t tm = 0;tm < num_teams; tm++) {
 
-      for (i = half_width; i < hpixels-half_width; i++) {
+      for (size_t th = 0; th < num_threads; th++) {
+    for (size_t j = half_height+tm; j < vpixels-half_height; j=j+num_teams) {
+      for (size_t i = half_width+th; i < hpixels-half_width; i=i+num_threads) {
 	int mode_ct = 0;
 	size_t mode_value=0, max_count=0;
 	size_t index_mode = j*hpixels + i;
-	size_t tm = omp_get_team_num();
-	size_t th = omp_get_thread_num();
-	size_t nt = omp_get_num_threads();
-	size_t ntm = omp_get_num_teams();
+	size_t nt = num_threads;
+	size_t ntm = num_teams;
 	size_t this_value = (image[index_mode]-minval)/binsize + 1;
 	if (ntm != num_teams || nt != num_threads) {
 	  printf("Number of teams, threads %ld, %ld differs from assumed numbers %ld, %ld\n",ntm,nt,num_teams,num_threads);
@@ -339,14 +302,14 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 	}
 	size_t *this_window = &window[(tm*nt+th)*wlen];
 	size_t *this_stack = &stack[(tm*nt+th)*wlen];
-	for (k = 0; k < wlen; k++) {
+	for (size_t k = 0; k < wlen; k++) {
 	  this_window[k] = 0;
 	}
 	int l = 0;
 //        printf("Start tm = %ld,th = %ld,i = %d,j = %ld\n",tm,th,i,index_mode/hpixels);
-	for (r = j - half_height; r <= j + half_height; r++) {
-	  for (c = i - half_width; c <= i + half_width; c++) {
-	    index = r*hpixels + c;
+	for (RCCOORDS_DATA r = j - half_height; r <= j + half_height; r++) {
+	  for (RCCOORDS_DATA c = i - half_width; c <= i + half_width; c++) {
+	    size_t index = r*hpixels + c;
 	    if ((image[index] != overload_tag) &&
 		(image[index] != ignore_tag) &&
 		(image[index] < MAX_IMAGE_DATA_VALUE)) {
@@ -377,7 +340,7 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 	  size_t this_count = 1;
           size_t last_value = this_window[0];
           max_count = 1;
-	  for (k = 1; k < l; k++) {
+	  for (size_t k = 1; k < l; k++) {
             if (this_window[k] == last_value) {
               this_count++;
             } else {
@@ -389,7 +352,7 @@ int lmodeim(DIFFIMAGE *imdiff_in)
           this_count = 1;
           last_value = this_window[0];
 	  double entropy = 0.0;
-	  for (k = 1; k < l; k++) {
+	  for (size_t k = 1; k < l; k++) {
 	    if (this_window[k] == last_value) {
               this_count++;
             } else {
@@ -429,6 +392,8 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 	  image_mode[index_mode] = (size_t)(((float)mode_value/(float)mode_ct) + .5);
 	}
 //        printf("Stop tm = %ld,th = %ld,i = %d,j = %d\n",tm,th,i,j);
+      }
+    }
       }
     }
 
@@ -475,7 +440,7 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 
 #ifdef USE_OPENMP
 #ifdef USE_OFFLOAD
-#pragma omp parallel for schedule(static,1) num_threads(32)
+#pragma omp parallel for schedule(static,1)
 #else
 #pragma omp parallel for
 #endif
