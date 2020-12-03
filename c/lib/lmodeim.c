@@ -239,8 +239,9 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 
     int got_first_val = 0;
     
-    
-    for (size_t index = 0; index < image_length; index++) {
+    size_t index; 
+
+    for (index = 0; index < image_length; index++) {
       if ((image[index] != overload_tag) &&
 	  (image[index] != ignore_tag) &&
 	  (image[index] < MAX_IMAGE_DATA_VALUE)) {
@@ -284,12 +285,12 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 #pragma omp distribute parallel for collapse(2)
 #endif
 #endif
+    size_t tm, th, j, i;
+    for (tm = 0;tm < num_teams; tm++) {
 
-    for (size_t tm = 0;tm < num_teams; tm++) {
-
-      for (size_t th = 0; th < num_threads; th++) {
-    for (size_t j = half_height+tm; j < vpixels-half_height; j=j+num_teams) {
-      for (size_t i = half_width+th; i < hpixels-half_width; i=i+num_threads) {
+      for (th = 0; th < num_threads; th++) {
+    for (j = half_height+tm; j < vpixels-half_height; j=j+num_teams) {
+      for (i = half_width+th; i < hpixels-half_width; i=i+num_threads) {
 	int mode_ct = 0;
 	size_t mode_value=0, max_count=0;
 	size_t index_mode = j*hpixels + i;
@@ -302,13 +303,15 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 	}
 	size_t *this_window = &window[(tm*nt+th)*wlen];
 	size_t *this_stack = &stack[(tm*nt+th)*wlen];
-	for (size_t k = 0; k < wlen; k++) {
+	size_t k;
+	for (k = 0; k < wlen; k++) {
 	  this_window[k] = 0;
 	}
 	int l = 0;
 //        printf("Start tm = %ld,th = %ld,i = %d,j = %ld\n",tm,th,i,index_mode/hpixels);
-	for (RCCOORDS_DATA r = j - half_height; r <= j + half_height; r++) {
-	  for (RCCOORDS_DATA c = i - half_width; c <= i + half_width; c++) {
+	RCCOORDS_DATA r, c;
+	for (r = j - half_height; r <= j + half_height; r++) {
+	  for (c = i - half_width; c <= i + half_width; c++) {
 	    size_t index = r*hpixels + c;
 	    if ((image[index] != overload_tag) &&
 		(image[index] != ignore_tag) &&
@@ -340,7 +343,8 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 	  size_t this_count = 1;
           size_t last_value = this_window[0];
           max_count = 1;
-	  for (size_t k = 1; k < l; k++) {
+	  size_t k;
+	  for (k = 1; k < l; k++) {
             if (this_window[k] == last_value) {
               this_count++;
             } else {
@@ -352,7 +356,7 @@ int lmodeim(DIFFIMAGE *imdiff_in)
           this_count = 1;
           last_value = this_window[0];
 	  double entropy = 0.0;
-	  for (size_t k = 1; k < l; k++) {
+	  for (k = 1; k < l; k++) {
 	    if (this_window[k] == last_value) {
               this_count++;
             } else {
