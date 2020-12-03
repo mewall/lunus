@@ -262,6 +262,8 @@ int lmodeim(DIFFIMAGE *imdiff_in)
     // Compute the mode filtered image
 
 
+    size_t tm, th, j, i;
+
 #ifdef USE_OFFLOAD
 #pragma omp target update to(image[0:image_length],image_mode[0:image_length])
     //#pragma omp target update to(window[0:wlen*num_teams*num_threads],stack[0:wlen*num_teams*num_threads])
@@ -270,11 +272,7 @@ int lmodeim(DIFFIMAGE *imdiff_in)
     //    printf("Entering omp offload region\n");
     //    fflush(stdout);
     
-#ifdef USE_OPENMP
-    double start = omp_get_wtime();
-#else
-    double start = ((double)clock())/CLOCKS_PER_SEC;
-#endif
+    double start = ltime();
 
 #ifdef USE_OPENMP
 #ifdef USE_OFFLOAD
@@ -285,9 +283,7 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 #pragma omp distribute parallel for collapse(2)
 #endif
 #endif
-    size_t tm, th, j, i;
     for (tm = 0;tm < num_teams; tm++) {
-
       for (th = 0; th < num_threads; th++) {
     for (j = half_height+tm; j < vpixels-half_height; j=j+num_teams) {
       for (i = half_width+th; i < hpixels-half_width; i=i+num_threads) {
@@ -404,11 +400,8 @@ int lmodeim(DIFFIMAGE *imdiff_in)
     // Now image_mode holds the mode filtered values
     // Convert these values to pixel values and store them in the input image
 
-#ifdef USE_OPENMP
-    double stop = omp_get_wtime();
-#else
-    double stop = ((double)clock())/CLOCKS_PER_SEC;
-#endif
+    double stop = ltime();
+
     double tel = stop-start;
     fflush(stdout);
 
