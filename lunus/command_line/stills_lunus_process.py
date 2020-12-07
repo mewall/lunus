@@ -22,7 +22,7 @@ import logging
 logger = logging.getLogger("dials.command_line.stills_process")
 
 def mpi_enabled():
-  return 'MPI_LOCALRANKID' in os.environ.keys()
+  return ('MPI_LOCALRANKID' in os.environ.keys() or 'OMPI_COMM_WORLD_RANK' in os.environ.keys())
 #  return False
 
 def mpi_init():
@@ -38,9 +38,17 @@ def get_mpi_rank():
 def get_mpi_size():
   return mpi_comm.Get_size() if mpi_enabled() else 1
 
-def mpi_bcast(d):
+def mpi_send(d,dest):
   if mpi_enabled():
-    db = mpi_comm.bcast(d,root=0)
+    mpi_comm.Send(d,dest=dest)
+
+def mpi_recv(d,source):
+  if mpi_enabled():
+    mpi_comm.Recv(d,source=source)
+
+def mpi_bcast(d,root=0):
+  if mpi_enabled():
+    db = mpi_comm.bcast(d,root=root)
   else:
     db = d
 
@@ -50,8 +58,13 @@ def mpi_barrier():
   if mpi_enabled():
     mpi_comm.Barrier()
 
-def mpi_reduce_p(p, root=0):
+def mpi_sum(d, dt, root=0):
+  if mpi_enabled():
+    mpi_comm.Reduce(d,dt,op=MPI.SUM,root=root)
+  else:
+    dt = d
 
+def mpi_reduce_p(p, root=0):
   if mpi_enabled():
 #    if get_mpi_rank() == 0:
 #      print("LUNUS.PROCESS: Convertinf flex arrays to numpy arrays")
@@ -173,14 +186,43 @@ class LunusProcessor(DialsProcessor):
 
     logger.info("STARTING FINALIZE, rank %d, size %d"%(get_mpi_rank(), get_mpi_size()))
 
-    if get_mpi_size() > 2:
-      if get_mpi_rank() > 0:
-        p = self.lunus_processor
-        mpi_reduce_p(p, root=1)
+    if (get_mpi_rank() != 0):
+      p = self.lunus_processor
+    else:
+      p = None
 
-        if get_mpi_rank() == 1:
-          p.divide_by_counts()
-          p.write_as_hkl('results.hkl')
+    if get_mpi_size() > 2:
+      if get_mpi_rank() == 1:
+        lt = np.zeros_like(p.get_lattice().as_numpy_array())
+        ct = np.zeros_like(p.get_counts().as_numpy_array())
+      else:
+        lt = None
+        ct = None
+
+      lt = mpi_bcast(lt,root=1)
+      ct = mpi_bcast(ct,root=1)
+
+      if get_mpi_rank() != 0:
+        l = p.get_lattice().as_numpy_array()
+        c = p.get_counts().as_numpy_array()
+      else:
+        from copy import deepcopy
+        l = deepcopy(lt)
+        c = deepcopy(ct)
+
+      mpi_sum(l,lt,root=1)
+      mpi_sum(c,ct,root=1)
+      mpi_barrier()
+
+      if get_mpi_rank() == 1:
+        p.set_lattice(flex.double(lt))
+        p.set_counts(flex.int(ct))
+        
+        logger.info("Writing LUNUS results...")
+        p.divide_by_counts()
+        p.write_as_hkl('results.hkl')
+        p.write_as_vtk('results.vtk')
+        logger.info("...done")
     else:
       p = self.lunus_processor
       mpi_reduce_p(p, root=0)
@@ -188,6 +230,7 @@ class LunusProcessor(DialsProcessor):
       if get_mpi_rank() == 0:
         p.divide_by_counts()
         p.write_as_hkl('results.hkl')
+        p.write_as_vtk('results.vtk')
 
 class Script(DialsScript):
   '''A class for running the script.'''
