@@ -179,6 +179,8 @@ int lmodeim(DIFFIMAGE *imdiff_in)
   size_t num_teams = 32;
   size_t num_threads = 256;
 
+  //  printf("omp_get_num_teams() = %d, omp_get_num_threads() = %d\n",omp_get_num_teams(), omp_get_num_threads());
+
   imdiff = &imdiff_in[0];
 
   if (reentry == 2 || reentry == 3) {

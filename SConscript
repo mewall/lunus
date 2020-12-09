@@ -35,7 +35,7 @@ for f in env_lunus["CCFLAGS"]:
 env_lunus.Replace(CCFLAGS = replacement_ccflags)
 
 #env_lunus.Prepend(CCFLAGS=["-g","-DUSE_OPENMP","-I/opt/local/include/libomp","-Xpreprocessor","-fopenmp"])
-env_lunus.Prepend(CCFLAGS=["-g","-O3","-fopenmp","-DUSE_OPENMP","-DUSE_OFFLOAD","-Xpreprocessor"])
+env_lunus.Prepend(CCFLAGS=["-g","-O2","-fopenmp","-DUSE_OPENMP","-Xpreprocessor"])
 #env_lunus.Prepend(CCFLAGS=["-g","-O3","-fopenmp","-DUSE_OPENMP","-DUSE_OFFLOAD","-foffload=nvptx-none","-foffload=-lm","-foffload=-fPIC","-Xpreprocessor"])
 env_lunus.Prepend(LIBS=["gomp"])
 #env_lunus.Prepend(LIBS=["gomp","cudart"])
