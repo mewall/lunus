@@ -21,9 +21,11 @@ int lprocimlt(LAT3D *lat)
 
   static int ct = 0;
 
+  DIFFIMAGE 
+    *imdiff_corrected_list = NULL,
+    *imdiff_scale_list = NULL;
+   
   static DIFFIMAGE 
-    *imdiff_corrected_list = NULL, 
-    *imdiff_scale_list = NULL, 
     *imdiff_scale_ref_list = NULL;
 
   double start,stop;
@@ -82,6 +84,13 @@ int lprocimlt(LAT3D *lat)
   // Calculate corrected image
   
   lcloneim(imdiff_corrected_list,imdiff_list);
+
+  // Detect and correct for constant offset in image
+
+  lofstim(imdiff_corrected_list);
+
+  printf("LPROCIMLT: offset = %f\n",imdiff_corrected_list->correction_offset);
+
   if (lmulcfim(imdiff_corrected_list) != 0) {
     perror(imdiff_corrected->error_msg);
     exit(1);
@@ -185,11 +194,12 @@ int lprocimlt(LAT3D *lat)
 
     lat->timer.setup = ltime() - lat->timer.setup;
   
+    lclearim(imdiff_corrected_list);
+    lclearim(imdiff_scale_list);
+
     return(0);
   } else if (lat->procmode == 2) {
-    lfreeim(imdiff_corrected_list);
-    lfreeim(imdiff_scale_list);
-    lfreeim(imdiff_scale_ref_list);
+    lclearim(imdiff_scale_ref_list);
     return(0);
   }
     
@@ -206,7 +216,7 @@ int lprocimlt(LAT3D *lat)
   float this_scale_factor = imdiff_scale_ref_list->rfile[0];
   float this_scale_error = imdiff_scale_ref_list->rfile[1];
 
-  printf("%g %g\n",this_scale_factor,this_scale_error);
+  printf("LPROCIMLT: (scale, error) = %g %g\n",this_scale_factor,this_scale_error);
   fflush(stdout);
 
   // Collect the image data into the lattice
@@ -262,7 +272,7 @@ int lprocimlt(LAT3D *lat)
 	  size_t latidx = kk*lat->xyvoxels + jj*lat->xvoxels + ii;
 	  if (strcmp(lat->integration_image_type,"raw")==0) {
 	    lat->lattice[latidx] += 
-	      (LATTICE_DATA_TYPE)(imdiff->image[index]-imdiff->value_offset)
+	      (LATTICE_DATA_TYPE)(imdiff->image[index]-imdiff->value_offset-imdiff_corrected_list->correction_offset)
 	      * imdiff->correction[index]
 	      * this_scale_factor;
 	  }

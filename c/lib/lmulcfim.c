@@ -27,6 +27,9 @@ int lmulcfim(DIFFIMAGE *imdiff_in)
     imdiff = &imdiff_in[pidx];
     index = 0;
 
+    float *image_float;
+    image_float = (float *)calloc(imdiff->image_length,sizeof(float));
+
     if (imdiff->slist == NULL) lslistim(imdiff);
 
     struct xyzcoords s;
@@ -36,6 +39,7 @@ int lmulcfim(DIFFIMAGE *imdiff_in)
 	if ((imdiff->image[index] != imdiff->overload_tag) &&
 	    (imdiff->image[index] != imdiff->ignore_tag)) {
 	  //	      imdiff->image[index] = (imdiff->image[index]-imdiff->value_offset)*imdiff->correction[index]+imdiff->value_offset;
+	  /*
 	  if (imdiff->image[index] != 0) {
 	    imdiff->image[index] = (imdiff->image[index]-imdiff->value_offset)*imdiff->correction[index]+imdiff->value_offset;
 	  } else {
@@ -62,10 +66,36 @@ int lmulcfim(DIFFIMAGE *imdiff_in)
 	    }
 	  }
 	  if (imdiff->image[index] == 0) {imdiff->image[index] = imdiff->ignore_tag;}
+	  */
+	  image_float[index] = ((float)(imdiff->image[index]-imdiff->value_offset) - imdiff->correction_offset)*imdiff->correction[index];
+	  
 	}
       }
-    }
+    } 
+      IMAGE_DATA_TYPE max=-32766,min=32766;
+      for (i = 0;i<imdiff->image_length;i++) {
+	if (image_float[i] >= (float)MAX_IMAGE_DATA_VALUE) {
+	  imdiff->image[i] = imdiff->ignore_tag;
+	  ct++;
+	} else {
+	  if ((IMAGE_DATA_TYPE)image_float[i] > max) max = (IMAGE_DATA_TYPE)image_float[i];
+	  if ((IMAGE_DATA_TYPE)image_float[i] < min) min = (IMAGE_DATA_TYPE)image_float[i];
+	}
+      }
+      if (min<0) {
+	imdiff->value_offset = -min;
+      } else {
+	imdiff->value_offset = 0;
+      }
+      for (i = 0;i<imdiff->image_length;i++) {
+	if (image_float[i] < (float)MAX_IMAGE_DATA_VALUE) {
+	  imdiff->image[i] = (IMAGE_DATA_TYPE)image_float[i] + imdiff->value_offset;
+	}
+      }
+
+  free(image_float);
   }
+
   return(return_value);
 
 }

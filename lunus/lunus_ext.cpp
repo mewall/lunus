@@ -115,7 +115,7 @@ namespace lunus {
 	  if (imdiff->image[i]<min) min = imdiff->image[i];
 	}
       }
-      //      printf("IMAGE: ct = %ld,max = %d, min = %d\n",ct,max,min);
+      printf("LUNUS_EXT: IMAGE: ct = %ld,max = %d, min = %d\n",ct,max,min);
     }
 
     inline void set_image(std::size_t n,scitbx::af::flex_int data) {
@@ -144,7 +144,7 @@ namespace lunus {
 	  if (im->image[i]<min) min = im->image[i];
 	}
       }
-      //      printf("ct = %ld,max = %d, min = %d\n",ct,max,min);
+      printf("LUNUS_EXT: IMAGE: ct = %ld,max = %d, min = %d\n",ct,max,min);
     }
 
     inline void set_image(std::size_t n,scitbx::af::flex_double data) {
@@ -161,19 +161,63 @@ namespace lunus {
       im->hpixels = fast;
       im->vpixels = slow;
       im->value_offset = 0;
-      IMAGE_DATA_TYPE max=32766,min=-32766;
+      IMAGE_DATA_TYPE max=-32766,min=32766;
       std::size_t ct=0;
       for (int i = 0;i<im->image_length;i++) {
-	if (begin[i]<0.0 || begin[i] >= (double)MAX_IMAGE_DATA_VALUE) {
+	if (begin[i] >= (double)MAX_IMAGE_DATA_VALUE) {
 	  im->image[i] = im->ignore_tag;
 	  ct++;
 	} else {
-	  im->image[i] = (IMAGE_DATA_TYPE)begin[i];
-	  if (im->image[i]>max) max = im->image[i];
-	  if (im->image[i]<min) min = im->image[i];
+	  if ((IMAGE_DATA_TYPE)begin[i] > max) max = (IMAGE_DATA_TYPE)begin[i];
+	  if ((IMAGE_DATA_TYPE)begin[i] < min) min = (IMAGE_DATA_TYPE)begin[i];
 	}
       }
-      //      printf("ct = %ld,max = %d, min = %d\n",ct,max,min);
+      if (min<0) im->value_offset = -min;
+      for (int i = 0;i<im->image_length;i++) {
+	if (begin[i] < (double)MAX_IMAGE_DATA_VALUE) {
+	  im->image[i] = (IMAGE_DATA_TYPE)begin[i] + im->value_offset;
+	}
+      }
+
+      printf("LUNUS: IMAGE: ct = %ld,max = %d, min = %d\n",ct,max,min);
+
+#ifdef DEBUG
+
+      printf("HISTOGRAM:\n");
+
+/*
+ * Allocate memory for histogram:
+ */
+
+      IMAGE_DATA_TYPE *histogram;
+      histogram = (IMAGE_DATA_TYPE *)calloc(65536,sizeof(IMAGE_DATA_TYPE));
+      if (!histogram) {
+	perror("Couldn't allocate histogram.\n\n");
+	exit(0);
+      }
+
+/*
+ * Select pixels in the patch and histogram them:
+ */
+
+      std::size_t index = 0;
+      for(int j=0;j<im->vpixels;j++) {
+	for(int i=0;i<im->hpixels;i++) {
+	histogram[im->image[index] + 32768]++;
+      index++;
+    }
+  }
+
+/*
+ * Write the output file:
+ */
+
+      for(int i=0;i<=65535;i=i+1) {
+    if (histogram[i]>0) {
+      printf("%d %d\n",(int)i-32768,histogram[i]);
+    }
+  }
+#endif
     }
 
     inline void set_background(scitbx::af::flex_int data) {

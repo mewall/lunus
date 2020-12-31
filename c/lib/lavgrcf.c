@@ -1,15 +1,15 @@
-/* LAVGRIM.C - Calculate the average intensity vs. radius for an
-		input image.
+/* LAVGRCF.C - Calculate the average intensity vs. radius for an
+		input image correction factor.
    
    Author: Mike Wall   
-   Date: 4/3/93
+   Date: 12/31/2020
    Version: 1.
    
    */
 
 #include<mwmask.h>
 
-int lavgrim(DIFFIMAGE *imdiff_in)
+int lavgrcf(DIFFIMAGE *imdiff_in)
 {
   size_t
     i,
@@ -58,7 +58,7 @@ int lavgrim(DIFFIMAGE *imdiff_in)
 	    (imdiff->image[index] != imdiff->ignore_tag)) {
 	  if (radius >= imdiff_in->rfile_length) 
 	    imdiff_in->rfile_length = radius+1;
-	  rf[radius] += (RFILE_DATA_TYPE)(float)(imdiff->image[index]-imdiff->value_offset);
+	  rf[radius] += (RFILE_DATA_TYPE)(imdiff->correction[index]);
 	  n[radius]++;
 	}
 	index++;

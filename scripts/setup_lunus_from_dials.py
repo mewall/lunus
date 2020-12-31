@@ -21,7 +21,7 @@ if __name__=="__main__":
   try:
     metroidx = [(a.find("metrology")==0 or (a.find("experiments")==0)) for a in args].index(True)
   except ValueError:
-    raise ValueError,"Metrology .json file must be specified using metrology=."
+    raise(ValueError,"Metrology .json file must be specified using metrology=.")
   else:
     metro = args.pop(metroidx).split("=")[1]
  # Image input glob
@@ -72,7 +72,7 @@ if __name__=="__main__":
     amatrix_dir_prefix = args.pop(amatrixdiridx).split("=")[1]
 
   if (not (rotation_series or stills_process)):
-    raise ValueError,"Must specify image_glob (for rotation series) or index_glob (for stills)."
+    raise(ValueEror,"Must specify image_glob (for rotation series) or index_glob (for stills).")
 
   import copy, os
 
@@ -84,8 +84,8 @@ if __name__=="__main__":
   beam = experiments[0].beam
   detector = experiments[0].detector
 
-  print "s0 from experiment[0]: ",beam.get_s0()
-  print "wavelength from experiment[0]: ",beam.get_wavelength()
+  print("s0 from experiment[0]: ",beam.get_s0())
+  print("wavelength from experiment[0]: ",beam.get_wavelength())
  
   lab_coordinates = flex.vec3_double()
   for panel in detector: 
@@ -93,8 +93,8 @@ if __name__=="__main__":
     mms = panel.pixel_to_millimeter(pixels)
     lab_coordinates.extend(panel.get_lab_coord(mms))
 
-  print "lab_coordinates[0] = ",lab_coordinates[0]
-  print "beam.get_a0 = ",beam.get_s0()
+  print("lab_coordinates[0] = ",lab_coordinates[0])
+  print("beam.get_a0 = ",beam.get_s0())
 
     # generate s1 vectors
   s1 = lab_coordinates.each_normalize() * (1/beam.get_wavelength())
@@ -104,7 +104,7 @@ if __name__=="__main__":
     
   DATAsize = np.asarray(detector[0].get_image_size())
 
-  print len(x),DATAsize
+  print(len(x),DATAsize)
 
 #  np.save(xvectors,x)
 #  np.save(datasize,DATAsize)
@@ -123,7 +123,7 @@ if __name__=="__main__":
   if rotation_series:
     from dxtbx.imageset import ImageSetFactory
     from dxtbx.model.experiment_list import Experiment, ExperimentList
-    from dxtbx.serialize import dump
+#    from dxtbx.serialize import dump
     imnum=1
     filelist=glob.glob(image_glob)
     filelist.sort()
@@ -139,8 +139,8 @@ if __name__=="__main__":
       scan = img.get_scan()
       gonio = img.get_goniometer()
 
-      print "s0 from ",imgname,": ",beam.get_s0()
-      print "wavelength from ",imgname,": ",beam.get_wavelength()
+      print("s0 from ",imgname,": ",beam.get_s0())
+      print("wavelength from ",imgname,": ",beam.get_wavelength())
 
       crystal = copy.deepcopy(experiments.crystals()[0])
       axis = gonio.get_rotation_axis()
@@ -160,12 +160,12 @@ if __name__=="__main__":
           else:
             bkgname=bkglist[0]
           exp_list[0].imageset.external_lookup.pedestal.filename=os.path.abspath(bkgname)
-        dump.experiment_list(exp_list,json_dir+"/experiments_for_lunus_{0:05d}.json".format(imnum))
+        exp_list.as_file(json_dir+"/experiments_for_lunus_{0:05d}.json".format(imnum))
       else:
         from scitbx import matrix
         A_matrix = matrix.sqr(crystal.get_A()).inverse()
         At = np.asarray(A_matrix.transpose()).reshape((3,3))
-        print At
+        print(At)
 
         workdir=amatrix_dir_prefix+"{0}".format(imnum)
         if (not os.path.isdir(workdir)):

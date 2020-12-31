@@ -8,14 +8,15 @@
 
 #ifdef USE_OPENMP
 #include<omp.h>
-#endif
+#else
 #include<time.h>
+#endif
 
 double ltime() {
   double t;
 #ifdef USE_OPENMP
-  //  t = omp_get_wtime();
-  t = 0.0;
+  t = omp_get_wtime();
+  //  t = 0.0;
 #else
   t = ((double)clock())/CLOCKS_PER_SEC;
 #endif

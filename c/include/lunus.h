@@ -535,6 +535,7 @@ typedef struct
   struct irange rfirange;       /* Range of rfile index values */
   float *correction;             /* Correction factor, pixel by pixel */
   float correction_factor_scale; /* Overall scale factor for correction */
+  float correction_offset;
   float background_subtraction_factor;/* Multiplicative factor for lbkgsubim() */
   struct xyzcoords *slist;   /* scattering vectors for each pixel in the image */
   struct xyzmatrix amatrix;     /* A matrix for mapping lab coords to reciprocal space coords */
@@ -772,6 +773,7 @@ void lanisolt(LAT3D *lat);
 int lavgim(DIFFIMAGE *imdiff);
 int lavgr(LAT3D *lat);
 int lavgrf(DIFFIMAGE *imdiff1);
+int lavgrcf(DIFFIMAGE *imdiff_in);
 int lavgrim(DIFFIMAGE *imdiff);
 int lavgrlt(LAT3D *lat);
 int lavgpolim(DIFFIMAGE *imdiff);
@@ -790,6 +792,7 @@ struct fom lcalcrsf(char *hklfname, LAT3D *lat1,LAT3D *lat2);
 struct xyzcoords lcalcsim(DIFFIMAGE *imdiff_in);
 int lccrlt(LAT3D *lat1, LAT3D *lat2);
 int lchbyte(void *ptr, size_t packet_size, size_t list_length);
+int lclearim(DIFFIMAGE *imdiff_in);
 int lcloneim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lconstim(DIFFIMAGE *imdiff);
 int lconstlt(LAT3D *lat);
@@ -870,6 +873,7 @@ int lnign(DIFFIMAGE *imdiff);
 int lnoiseim(DIFFIMAGE *imdiff);
 int lnormim(DIFFIMAGE *imdiff);
 int lnormlt(LAT3D *lat);
+int lofstim(DIFFIMAGE *imdiff1);
 int lpadlt(LAT3D *lat);
 int lparsecelllt(LAT3D *lat);
 int lpeakim(DIFFIMAGE *imdiff);

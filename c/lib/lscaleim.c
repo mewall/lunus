@@ -40,7 +40,8 @@ int lscaleim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2)
 	//	for (i=0; i<imdiff1->rfile_length;i++) {
 	//	  rf1[i] = imdiff1->rfile[i];
 #ifdef DEBUG
-	  //	  if (i>100 && i<=110)  printf("rf1[%d]=%f,",i,rf1[i]);
+	printf("LSCALEIM: RF1: \n");
+	for (i=0;i<imdiff1->rfile_length;i++) printf("%d %f\n",i,rf1[i]);
 #endif
 	//	}
 	//	printf("\n");
@@ -51,14 +52,16 @@ int lscaleim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2)
 	//	for (i=0; i<imdiff2->rfile_length;i++) {
 	//	  rf2[i] = imdiff2->rfile[i];
 #ifdef DEBUG
-	  //	  if (i>100 && i<=110) printf("rf2[%d]=%f,",i,rf2[i]);
+	printf("LSCALEIM: RF2: \n");
+	for (i=0;i<imdiff2->rfile_length;i++) printf("%d %f\n",i,rf2[i]);
 #endif
 	//	}
 	//	memcpy((void *)rf2,(void *)imdiff2->rfile,imdiff2->rfile_length*sizeof(RFILE_DATA_TYPE));
+	size_t rfile_length = (imdiff1->rfile_length < imdiff2->rfile_length) ? imdiff1->rfile_length : imdiff2->rfile_length;
 
-	for (i=0;i<imdiff1->rfile_length;i++) {
-	  if (rf1[i] != imdiff1->overload_tag && rf1[i] != imdiff1->ignore_tag &&
-	      rf2[i] != imdiff1->overload_tag && rf2[i] != imdiff1->ignore_tag) {
+	for (i=0;i<rfile_length;i++) {
+	  if (rf1[i] != imdiff1->overload_tag && rf1[i] != imdiff1->ignore_tag && rf1[i] != 0.0 &&
+	      rf2[i] != imdiff1->overload_tag && rf2[i] != imdiff1->ignore_tag && rf2[i] != 0.0) {
 	    if ((imdiff1->scale_inner_radius == 0 && imdiff1->scale_outer_radius == 0) || (i > imdiff1->scale_inner_radius && i < imdiff1->scale_outer_radius)) {
 	    float x,y;
 	    x = (float)rf1[i];
@@ -78,9 +81,19 @@ int lscaleim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2)
 	avg_xy /= (float)ct;
 	avg_yy /= (float)ct;
 
+#ifdef DEBUG
+	printf("LSCALEIM: avg_xx = %f, avg_xy = %f, avg_yy = %f\n",avg_xx,avg_xy,avg_yy);
+#endif
 
 	imdiff1->rfile[0] = (RFILE_DATA_TYPE)avg_xx/avg_xy;
-	imdiff1->rfile[1] = (RFILE_DATA_TYPE)sqrtf(avg_xx+avg_yy*imdiff1->rfile[0]*imdiff1->rfile[0]-2.*imdiff1->rfile[0]*avg_xy)/sqrtf(avg_xx);
+	float num = (avg_yy*avg_xx/avg_xy/avg_xy-1.);
+	// sometimes num can be < 0 due to numerical errors, fix
+	num = (num<0) ? 0.0 : num;
+	imdiff1->rfile[1] = (RFILE_DATA_TYPE)sqrtf(num/avg_xx);
+
+#ifdef DEBUG
+	printf("LSCALEIM: ct = %d,avg_xx = %f,scale = %f, error = %f\n",ct,avg_xx,imdiff1->rfile[0],imdiff1->rfile[1]);
+#endif
 
    return(return_value);
 }

@@ -592,7 +592,11 @@ int main(int argc, char *argv[])
 
     lat->procmode = 1;    
     lat->imdiff = imdiff;
+    printf("LUNUS: Rank %d starting to process image number %d\n",mpiv->my_id,i);
+    fflush(stdout);
     lprocimlt(lat);
+    printf("LUNUS: Rank %d done processing image number %d\n",mpiv->my_id,i);
+    fflush(stdout);
 
     timer.scale += lat->timer.scale;
     timer.mode += lat->timer.mode;
@@ -602,7 +606,7 @@ int main(int argc, char *argv[])
 
   }
 
-  //  lbarrierMPI(imdiff->mpiv);
+  lbarrierMPI(imdiff->mpiv);
 
   if (mpiv->my_id == 0) {
     stop = ltime();
