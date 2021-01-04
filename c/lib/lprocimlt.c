@@ -87,7 +87,7 @@ int lprocimlt(LAT3D *lat)
 
   // Detect and correct for constant offset in image
 
-  lofstim(imdiff_corrected_list);
+  if (imdiff_corrected_list->correct_offset == 1) lofstim(imdiff_corrected_list);
 
   printf("LPROCIMLT: offset = %f\n",imdiff_corrected_list->correction_offset);
 

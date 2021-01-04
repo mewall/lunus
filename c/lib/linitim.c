@@ -81,6 +81,7 @@ DIFFIMAGE *linitim(size_t n)
     imdiff->value_offset = DEFAULT_VALUE_OFFSET;
     imdiff->correction_factor_scale = 1.0;
     imdiff->correction_offset = 0.0;
+    imdiff->correct_offset = 0;
     imdiff->background_subtraction_factor = 1.0;
     imdiff->slist = NULL;
     imdiff->mpiv = NULL;
