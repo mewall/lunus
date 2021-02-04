@@ -149,6 +149,7 @@ class LunusProcessor(DialsProcessor):
       data = data,
     for panel_idx, panel in enumerate(data):
       self.lunus_processor.set_image(panel_idx, panel)
+      self.logger.log("LUNUS_INTEGRATE: panel_idx %d panel[0:10] = " % (experiments[0].imageset.paths()[0],experiments[0].imageset.indices()[0]),panel[0:10])
 
     for pidx in range(len(experiment_params)):
       deck_and_extras = self.deck+experiment_params[pidx]
