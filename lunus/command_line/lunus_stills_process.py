@@ -144,12 +144,12 @@ class LunusProcessor(DialsProcessor):
     experiment_params = get_experiment_params(experiments)
     p = self.lunus_processor
 
-    data = self.reference_experiments[0].imageset[0]
+    data = experiments[0].imageset[0]
     if not isinstance(data, tuple):
       data = data,
     for panel_idx, panel in enumerate(data):
       self.lunus_processor.set_image(panel_idx, panel)
-      self.logger.log("LUNUS_INTEGRATE: panel_idx %d panel[0:10] = " % (experiments[0].imageset.paths()[0],experiments[0].imageset.indices()[0]),panel[0:10])
+#      logger.info("LUNUS_INTEGRATE: file %s panel_idx %d panel[0:10] = %s " % (experiments[0].imageset.paths()[0],panel_idx,str(list(panel[0:10]))))
 
     for pidx in range(len(experiment_params)):
       deck_and_extras = self.deck+experiment_params[pidx]
