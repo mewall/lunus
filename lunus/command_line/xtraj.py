@@ -10,10 +10,11 @@
 # Version 0.2a, October 2019
 #
 # This script depends on CCTBX. Launch using mpirun for parallel execution.
- 
+
 from iotbx.pdb import hierarchy
 from cctbx.array_family import flex
 import mmtbx.utils
+from cctbx import maptbx
 import copy
 import mdtraj as md
 import time
@@ -23,16 +24,17 @@ import os
 from libtbx.utils import Keep
 from cctbx import crystal
 import cctbx.sgtbx
+import future
 
 def mpi_enabled():
   return 'OMPI_COMM_WORLD_SIZE' in os.environ.keys()
 
 def calc_msd(x):
-    d = np.zeros(this_sites_frac.shape)
-    msd = 0
-    for k in range(3):
-      d[:,k] = (this_sites_frac[:,k] - ref_sites_frac[:,k] + x[k] + 0.5)%1.0 - 0.5
-      msd += np.sum(d[:,k] * d[:,k])
+  d = np.zeros(this_sites_frac.shape)
+  msd = 0
+  for k in range(3):
+    d[:,k] = (this_sites_frac[:,k] - ref_sites_frac[:,k] + x[k] + 0.5)%1.0 - 0.5
+    msd += np.sum(d[:,k] * d[:,k])
     return msd
 
 if __name__=="__main__":
@@ -43,170 +45,179 @@ if __name__=="__main__":
 # selection                                                              
 
   try:
-      idx = [a.find("selection")==0 for a in args].index(True)
+    idx = [a.find("selection")==0 for a in args].index(True)
   except ValueError:
-      selection_text = "all"
+    selection_text = "all"
   else:
-      selection_text = args.pop(idx).split("=")[1]
+    selection_text = args.pop(idx).split("=")[1]
 
 # d_min
 
   try:
-      idx = [a.find("d_min")==0 for a in args].index(True)
+    idx = [a.find("d_min")==0 for a in args].index(True)
   except ValueError:
-      d_min = 1.6
+    d_min = 1.6
   else:
-      d_min = float(args.pop(idx).split("=")[1])
+    d_min = float(args.pop(idx).split("=")[1])
 
 # nsteps (use in lieu of "last" parameter)
 
   try:
-      idx = [a.find("nsteps")==0 for a in args].index(True)
+    idx = [a.find("nsteps")==0 for a in args].index(True)
   except ValueError:
-      nsteps = 0
+    nsteps = 0
   else:
-      nsteps = int(args.pop(idx).split("=")[1])
+    nsteps = int(args.pop(idx).split("=")[1])
 
 # stride
 
   try:
-      idx = [a.find("stride")==0 for a in args].index(True)
+    idx = [a.find("stride")==0 for a in args].index(True)
   except ValueError:
-      stride = 1
+    stride = 1
   else:
-      stride = int(args.pop(idx).split("=")[1])
+    stride = int(args.pop(idx).split("=")[1])
 
 # first frame number (numbering starts at 0)
 
   try:
-      idx = [a.find("first")==0 for a in args].index(True)
+    idx = [a.find("first")==0 for a in args].index(True)
   except ValueError:
-      first = 0
+    first = 0
   else:
-      first = int(args.pop(idx).split("=")[1])
+    first = int(args.pop(idx).split("=")[1])
 
 # last frame number
 
   try:
-      idx = [a.find("last")==0 for a in args].index(True)
+    idx = [a.find("last")==0 for a in args].index(True)
   except ValueError:
-      last = 0
+    last = 0
   else:
-      last = int(args.pop(idx).split("=")[1])
+    last = int(args.pop(idx).split("=")[1])
 
 # chunk size (number of frames) for breaking up the trajectory
 
   try:
-      idx = [a.find("chunk")==0 for a in args].index(True)
+    idx = [a.find("chunk")==0 for a in args].index(True)
   except ValueError:
-      chunksize = None
+    chunksize = None
   else:
-      chunksize = int(args.pop(idx).split("=")[1])
+    chunksize = int(args.pop(idx).split("=")[1])
 
 # topology file (typically a .pdb file)
 
   try:
-      idx = [a.find("top")==0 for a in args].index(True)
+    idx = [a.find("top")==0 for a in args].index(True)
   except ValueError:
-      top_file = "top.pdb"
+    top_file = "top.pdb"
   else:
-      top_file = args.pop(idx).split("=")[1]
+    top_file = args.pop(idx).split("=")[1]
 
 # trajectory file (mpirun works with .xtc but not .pdb)
 
   try:
-      idx = [a.find("traj")==0 for a in args].index(True)
+    idx = [a.find("traj")==0 for a in args].index(True)
   except ValueError:
-      traj_file = "traj.xtc"
+    traj_file = "traj.xtc"
   else:
-      traj_file = args.pop(idx).split("=")[1]
+    traj_file = args.pop(idx).split("=")[1]
 
 # density_traj (does nothing right now)
 
   try:
-      idx = [a.find("density_traj")==0 for a in args].index(True)
+    idx = [a.find("density_traj")==0 for a in args].index(True)
   except ValueError:
-      dens_file = None
+    dens_file = None
   else:
-      dens_file = args.pop(idx).split("=")[1]
+    dens_file = args.pop(idx).split("=")[1]
 
 # diffuse
 
   try:
-      idx = [a.find("diffuse")==0 for a in args].index(True)
+    idx = [a.find("diffuse")==0 for a in args].index(True)
   except ValueError:
-      diffuse_file = "diffuse.hkl"
+    diffuse_file = "diffuse.hkl"
   else:
-      diffuse_file = args.pop(idx).split("=")[1]
+    diffuse_file = args.pop(idx).split("=")[1]
 
 # fcalc
 
   try:
-      idx = [a.find("fcalc")==0 for a in args].index(True)
+    idx = [a.find("fcalc")==0 for a in args].index(True)
   except ValueError:
-      fcalc_file = "fcalc.mtz"
+    fcalc_file = "fcalc.mtz"
   else:
-      fcalc_file = args.pop(idx).split("=")[1]
+    fcalc_file = args.pop(idx).split("=")[1]
 
 # icalc
 
   try:
-      idx = [a.find("icalc")==0 for a in args].index(True)
+    idx = [a.find("icalc")==0 for a in args].index(True)
   except ValueError:
-      icalc_file = "icalc.mtz"
+    icalc_file = "icalc.mtz"
   else:
-      icalc_file = args.pop(idx).split("=")[1]
+    icalc_file = args.pop(idx).split("=")[1]
+
+# density map
+
+#  try:
+#    idx = [a.find("density")==0 for a in args].index(True)
+#  except ValueError:
+#    density_file = "density.ccp4"
+#  else:
+#    density_file = args.pop(idx).split("=")[1]
 
 # partial_sum (don't divide by nsteps at the end)
 
   try:
-      idx = [a.find("partial_sum")==0 for a in args].index(True)
+    idx = [a.find("partial_sum")==0 for a in args].index(True)
   except ValueError:
-      partial_sum_mode = False
+    partial_sum_mode = False
   else:
-      partial_sum_str = args.pop(idx).split("=")[1]
-      if partial_sum_str == "True":
-	partial_sum_mode = True
-      else:
-	partial_sum_mode = False
+    partial_sum_str = args.pop(idx).split("=")[1]
+    if partial_sum_str == "True":
+      partial_sum_mode = True
+    else:
+      partial_sum_mode = False
 
 # translational fit (align using fractional coordinates)
 
   try:
-      idx = [a.find("fit")==0 for a in args].index(True)
+    idx = [a.find("fit")==0 for a in args].index(True)
   except ValueError:
-      translational_fit = False
+    translational_fit = False
   else:
-      fit_str = args.pop(idx).split("=")[1]
-      if fit_str == "True":
-	translational_fit = True
-      else:
-	translational_fit = False
+    fit_str = args.pop(idx).split("=")[1]
+    if fit_str == "True":
+      translational_fit = True
+    else:
+      translational_fit = False
 
 # Unit cell, replaces the one in the top file
 
   try:
-      idx = [a.find("unit_cell")==0 for a in args].index(True)
+    idx = [a.find("unit_cell")==0 for a in args].index(True)
   except ValueError:
-      unit_cell_str = None
+    unit_cell_str = None
   else:
-      unit_cell_str = args.pop(idx).split("=")[1]
+    unit_cell_str = args.pop(idx).split("=")[1]
 
 # Space group, replaces the one in the top file
 
   try:
-      idx = [a.find("space_group")==0 for a in args].index(True)
+    idx = [a.find("space_group")==0 for a in args].index(True)
   except ValueError:
-      space_group_str = None
+    space_group_str = None
   else:
-      space_group_str = args.pop(idx).split("=")[1]
+    space_group_str = args.pop(idx).split("=")[1]
 
 # Set nsteps if needed
   
   if (nsteps == 0):
     nsteps = last - first + 1
   elif (last != 0):
-    print "Please specify nsteps or last, but not both."
+    print("Please specify nsteps or last, but not both.")
     raise ValueError()
 
   last = first + nsteps - 1
@@ -246,9 +257,9 @@ if __name__=="__main__":
     xrs = None
     
   if mpi_enabled():
-      pdb_in = mpi_comm.bcast(pdb_in,root=0)
-      xrs = mpi_comm.bcast(xrs,root=0)
-      
+    pdb_in = mpi_comm.bcast(pdb_in,root=0)
+    xrs = mpi_comm.bcast(xrs,root=0)
+    
   selection_cache = pdb_in.hierarchy.atom_selection_cache()
   selection = selection_cache.selection(selection_text)
   xrs.convert_to_isotropic()
@@ -256,7 +267,9 @@ if __name__=="__main__":
   xrs.set_occupancies(1.0)
   xrs_sel = xrs.select(selection)
   fcalc = xrs_sel.structure_factors(d_min=d_min).f_calc()
-
+  f_000 = mmtbx.utils.f_000(xray_structure=xrs_sel)
+  volume = xrs_sel.unit_cell().volume()
+  print("f_000 = %g, volume = %g" % (f_000.f_000,volume))
   if (mpi_rank == 0):
     fcalc.as_mtz_dataset('FWT').mtz_object().write(file_name="reference.mtz")
 
@@ -276,11 +289,11 @@ if __name__=="__main__":
     chunklist[i] = chunksize
     nchunklist[i] = nchunksize
     if (i < leftover):
-        nchunklist[i] += 1
+      nchunklist[i] += 1
     if (i == 0):
-        skiplist[i] = first
+      skiplist[i] = first
     else:
-        skiplist[i] = skiplist[i-1] + chunklist[i-1] * nchunklist[i-1]
+      skiplist[i] = skiplist[i-1] + chunklist[i-1] * nchunklist[i-1]
 
   if (mpi_rank == 0):               
     stime = time.time()
@@ -310,7 +323,7 @@ if __name__=="__main__":
 #      mpi_comm.Barrier()                                                                          
     if (mpi_rank == 0): 
       mtime = time.time()                                                        
-      print "TIMING: md.iterload = ",mtime-stime
+      print("TIMING: md.iterload = ",mtime-stime)
 
     na = len(t.xyz[0])
 
@@ -329,8 +342,8 @@ if __name__=="__main__":
 
       if (mpi_rank == 0):
 
-    # Get the fractional coords of the reference structure alpha carbons, for translational fit. 
-    # MEW Note: only uses all c-alpha atoms in the structure and only does translational fit for now
+        # Get the fractional coords of the reference structure alpha carbons, for translational fit. 
+        # MEW Note: only uses all c-alpha atoms in the structure and only does translational fit for now
 
         sites_frac = xrs.sites_frac().as_double().as_numpy_array().reshape((na,3))
         sel_indices = t.topology.select('name CA')
@@ -349,9 +362,9 @@ if __name__=="__main__":
   # calculate fcalc, diffuse intensity, and (if requested) density trajectory
 
     if mpi_rank == 0:
-        stime = time.time()
-        if chunk_ct == 0:
-          print "Number of atoms in topology file = ",na
+      stime = time.time()
+      if chunk_ct == 0:
+        print("Number of atoms in topology file = ",na)
 
     map_data = []
     num_elems = len(t)
@@ -363,13 +376,13 @@ if __name__=="__main__":
         sig_fcalc = xrs_sel.structure_factors(d_min=d_min).f_calc() * 0.0
       if sig_icalc is None:
         sig_icalc = abs(sig_fcalc).set_observation_type_xray_amplitude().f_as_f_sq()
-      print "WARNING: Rank ",mpi_rank," is idle"
+      print("WARNING: Rank ",mpi_rank," is idle")
 
     else:
 
       for i in range(num_elems):
 
-    # overwrite crystal structure coords with trajectory coords
+        # overwrite crystal structure coords with trajectory coords
 
         tmp = flex.vec3_double(tsites[i,:,:])
         xrs.set_sites_cart(tmp)
@@ -377,13 +390,13 @@ if __name__=="__main__":
     # perform translational fit with respect to the alpha carbons in the topology file
 
         if (translational_fit):
-            sites_frac = xrs.sites_frac().as_double().as_numpy_array().reshape((na,3))
-            x0 = [0.0,0.0,0.0]
-            otime1 = time.time()
-            this_sites_frac = np.take(sites_frac,sel_indices,axis=0)
-            res = scipy.optimize.minimize(calc_msd,x0,method='Powell',jac=None,options={'disp': False,'maxiter': 10000})
-            for j in range(3):
-                sites_frac[:,j] +=res.x[j]        
+          sites_frac = xrs.sites_frac().as_double().as_numpy_array().reshape((na,3))
+          x0 = [0.0,0.0,0.0]
+          otime1 = time.time()
+          this_sites_frac = np.take(sites_frac,sel_indices,axis=0)
+          res = scipy.optimize.minimize(calc_msd,x0,method='Powell',jac=None,options={'disp': False,'maxiter': 10000})
+          for j in range(3):
+            sites_frac[:,j] +=res.x[j]        
             otime2 = time.time()
             xrs.set_sites_frac(flex.vec3_double(sites_frac))
     #        print ("Time to optimize = ",otime2-otime1)
@@ -410,7 +423,7 @@ if __name__=="__main__":
 
     chunk_ct = chunk_ct + 1
 
-    print "Rank ",mpi_rank," processed chunk ",chunk_ct," of ",nchunklist[mpi_rank]
+    print("Rank ",mpi_rank," processed chunk ",chunk_ct," of ",nchunklist[mpi_rank])
 
     if (chunk_ct >= nchunklist[mpi_rank]):
       break
@@ -426,7 +439,7 @@ if __name__=="__main__":
 #    map_grid_3D = np.reshape(map_grid,(len(tsites),Ni,Nj,Nk))
 #    np.save(dens_file,map_grid_3D)                           
 
-  print "Rank ",mpi_rank," is done with individual calculations"
+  print("Rank ",mpi_rank," is done with individual calculations")
   sys.stdout.flush()
 
   if mpi_enabled():
@@ -434,7 +447,7 @@ if __name__=="__main__":
 
   if (mpi_rank == 0):
     mtime = time.time()
-    print "TIMING: Calculate individual statistics = ",mtime-itime
+    print("TIMING: Calculate individual statistics = ",mtime-itime)
 
 # perform reduction of sig_fcalc, sig_icalc, and ct
 
@@ -474,11 +487,11 @@ if __name__=="__main__":
     sq_avg_fcalc_data = sq_avg_fcalc.data()
     diffuse_data = diffuse_array.data()
 #    print ("diffuse_data[0] = ",diffuse_data[0])
-    for x in xrange(0,diffuse_data.size()):
+    for x in range(0,diffuse_data.size()):
       diffuse_data[x]=diffuse_data[x]-sq_avg_fcalc_data[x]
     etime = time.time()
-    print "TIMING: Reduction = ",etime-mtime
-    print "TIMING: Total diffuse calculation = ",etime-stime
+    print("TIMING: Reduction = ",etime-mtime)
+    print("TIMING: Total diffuse calculation = ",etime-stime)
 
 # write fcalc
 
@@ -487,12 +500,21 @@ if __name__=="__main__":
     else:
       sig_fcalc.as_mtz_dataset('FWTsum').mtz_object().write(file_name=fcalc_file)
 
+# write density map
+
+#    if not partial_sum_mode:
+#      symmetry_flags = maptbx.use_space_group_symmetry
+#      dmap = avg_fcalc.fft_map(d_min=d_min,resolution_factor=0.5,symmetry_flags=symmetry_flags)
+#      dmap.apply_volume_scaling()
+#      dmap = avg_fcalc.fft_map(f_000=f_000.f_000)
+#      dmap.as_ccp4_map(file_name=density_file)
+
 # write icalc
 
-    print "Average Icalc:"
+    print("Average Icalc:")
     count=0
     for hkl,intensity in avg_icalc:
-      print  "%4d %4d %4d   %10.2f" %(hkl+tuple((intensity,)))
+      print("%4d %4d %4d   %10.2f" %(hkl+tuple((intensity,))))
       count+=1
       if count>10: break
     if not partial_sum_mode:
@@ -502,13 +524,13 @@ if __name__=="__main__":
 
 # write diffuse
 
-    print "Diffuse:"
+    print("Diffuse:")
     count=0
     for hkl,intensity in diffuse_array:
-      print  "%4d %4d %4d   %10.2f" %(hkl+tuple((intensity,)))
+      print("%4d %4d %4d   %10.2f" %(hkl+tuple((intensity,))))
       count+=1
       if count>10: break
     f=open(diffuse_file,'w')
     for hkl,intensity in diffuse_array:
-      print >>f, "%4d %4d %4d   %10.2f" %(hkl+tuple((intensity,)))
+      print("%4d %4d %4d   %10.2f" %(hkl+tuple((intensity,))),file=f)
     f.close()
