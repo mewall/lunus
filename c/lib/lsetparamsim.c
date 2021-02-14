@@ -142,6 +142,15 @@ int lsetparamsim(DIFFIMAGE *imdiff)
 	  }
 	} 
 
+	if (strstr(deck,"\ncorrect_offset") == NULL) {
+	  imdiff->correct_offset = 0;
+	} else {
+	  char *s = lgettag(deck,"\ncorrect_offset");
+	  if (strcmp(s,"True")==0) {
+	    imdiff->correct_offset=1;
+	  }
+	} 
+
   return(0);
 }
 

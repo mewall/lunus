@@ -542,6 +542,7 @@ typedef struct
   int use_json_metrology;
   MPIVARS *mpiv;
   int reentry;
+  int correct_offset;
 } DIFFIMAGE;
 
 /*
