@@ -54,6 +54,14 @@ int lsetparamsim(DIFFIMAGE *imdiff)
 	  imdiff->scale_outer_radius = lgettagi(deck,"\nscale_outer_radius");
 	}
 
+	if (strstr(deck,"\ncorrect_offset_inner_radius") != NULL) {
+	  imdiff->correct_offset_inner_radius = lgettagi(deck,"\ncorrect_offset_inner_radius");
+	}
+
+	if (strstr(deck,"\ncorrect_offset_outer_radius") != NULL) {
+	  imdiff->correct_offset_outer_radius = lgettagi(deck,"\ncorrect_offset_outer_radius");
+	}
+
 	if (strstr(deck,"\nthrshim_max") != NULL) {
 	  imdiff->upper_threshold = lgettagi(deck,"\nthrshim_max");
 	}
@@ -142,12 +150,15 @@ int lsetparamsim(DIFFIMAGE *imdiff)
 	  }
 	} 
 
-	if (strstr(deck,"\ncorrect_offset") == NULL) {
+	if (strstr(deck,"\ncorrect_offset_flag") == NULL) {
 	  imdiff->correct_offset = 0;
 	} else {
-	  char *s = lgettag(deck,"\ncorrect_offset");
+	  char *s = lgettag(deck,"\ncorrect_offset_flag");
+	  printf("LSETPARAMSIM: correct_offset_flag=%s\n",s);
 	  if (strcmp(s,"True")==0) {
 	    imdiff->correct_offset=1;
+	  } else {
+	    imdiff->correct_offset=0;
 	  }
 	} 
 
