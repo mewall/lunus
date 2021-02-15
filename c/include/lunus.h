@@ -485,6 +485,8 @@ typedef struct
   short mask_outer_radius;      /* Outer radius of annular mask */
   short scale_inner_radius;      /* Inner radius of scale data */
   short scale_outer_radius;      /* Outer radius of scale data */
+  short correct_offset_inner_radius; /* Inner radius of offset correction data */
+  short correct_offset_outer_radius; /* Outer radius of offset correction data */
   IMAGE_DATA_TYPE mask_tag;     /* Value which mask puts in image */
   IMAGE_DATA_TYPE punch_tag;
   struct rccoords pos;	        /* Coordinates of current pixel */
@@ -536,13 +538,13 @@ typedef struct
   float *correction;             /* Correction factor, pixel by pixel */
   float correction_factor_scale; /* Overall scale factor for correction */
   float correction_offset;
+  int correct_offset;
   float background_subtraction_factor;/* Multiplicative factor for lbkgsubim() */
   struct xyzcoords *slist;   /* scattering vectors for each pixel in the image */
   struct xyzmatrix amatrix;     /* A matrix for mapping lab coords to reciprocal space coords */
   int use_json_metrology;
   MPIVARS *mpiv;
   int reentry;
-  int correct_offset;
 } DIFFIMAGE;
 
 /*
