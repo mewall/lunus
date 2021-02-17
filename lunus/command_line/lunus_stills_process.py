@@ -152,6 +152,7 @@ class LunusProcessor(DialsProcessor):
 #      logger.info("LUNUS_INTEGRATE: file %s panel_idx %d panel[0:10] = %s " % (experiments[0].imageset.paths()[0],panel_idx,str(list(panel[0:10]))))
 
     for pidx in range(len(experiment_params)):
+      logger.info("LUNUS_INTEGRATE: file %s experiment_params[%d] = %s " % (experiments[0].imageset.paths()[0],pidx,experiment_params[pidx]))
       deck_and_extras = self.deck+experiment_params[pidx]
       p.LunusSetparamsim(pidx,deck_and_extras)
 

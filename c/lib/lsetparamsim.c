@@ -117,6 +117,12 @@ int lsetparamsim(DIFFIMAGE *imdiff)
 	  imdiff->correction_factor_scale = lgettagf(deck,"\ncorrection_factor_scale");
 	}
 
+	if (strstr(deck,"\nwavelength") == NULL) {
+	  printf("LSETPARAMSIM: Warning, no wavelength found in parameters\n");;
+	} else {
+	  imdiff->wavelength = lgettagf(deck,"\nwavelength");
+	}
+
 	if (strstr(deck,"\noverall_scale_factor") != NULL) {
 	  imdiff->correction_factor_scale = lgettagf(deck,"\noverall_scale_factor");
 	}

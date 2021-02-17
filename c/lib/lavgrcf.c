@@ -27,6 +27,8 @@ int lavgrcf(DIFFIMAGE *imdiff_in)
 
   float cos_two_theta;
 
+  float rvec_mag;
+
   int pidx;
 
   DIFFIMAGE *imdiff;
@@ -36,6 +38,7 @@ int lavgrcf(DIFFIMAGE *imdiff_in)
   n = (size_t *)calloc(MAX_RFILE_LENGTH, sizeof(size_t));
   rf = (RFILE_DATA_TYPE *)calloc(MAX_RFILE_LENGTH,sizeof(RFILE_DATA_TYPE));
   imdiff_in->rfile_length = 0;
+
 
   for (pidx = 0; pidx < imdiff_in->num_panels; pidx++) {
 
@@ -52,8 +55,8 @@ int lavgrcf(DIFFIMAGE *imdiff_in)
 	rr = imdiff->distance_mm / cos_two_theta; 
 	rvec.x = imdiff->wavelength * s.x * rr;
 	rvec.y = imdiff->wavelength * s.y * rr;
-	//	printf("rvec = (%f,%f)\n",rvec.x,rvec.y);
-	radius = (size_t)(sqrtf(rvec.x*rvec.x + rvec.y*rvec.y)/imdiff->pixel_size_mm+.5);
+	rvec_mag = sqrtf(rvec.x*rvec.x + rvec.y*rvec.y);
+	radius = (size_t)(rvec_mag/imdiff->pixel_size_mm+.5);
 	if ((imdiff->image[index] != imdiff->overload_tag) &&
 	    (imdiff->image[index] != imdiff->ignore_tag)) {
 	  if (radius >= imdiff_in->rfile_length) 
@@ -75,6 +78,7 @@ int lavgrcf(DIFFIMAGE *imdiff_in)
       imdiff_in->rfile[i] = 0.0;
     }
   }
+
   free(n);
   free(rf);
 }
