@@ -438,7 +438,7 @@ namespace lunus {
 
       struct xyzcoords *xvectors_cctbx = (struct xyzcoords *)malloc(size*sizeof(struct xyzcoords));
 
-      if (imdiff->slist == NULL) free(imdiff->slist);
+      if (imdiff->slist != NULL) free(imdiff->slist);
       imdiff->slist = (struct xyzcoords *)malloc(size*sizeof(float));
 
       if (imdiff->image_length != size/3) {

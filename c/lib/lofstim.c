@@ -28,7 +28,7 @@ int lofstim(DIFFIMAGE *imdiff1)
 	RFILE_DATA_TYPE *rf1, *rf2;
 
 	struct xycoords r_mm;
-
+	
 	lavgrim(imdiff1);
 	rf1 = (RFILE_DATA_TYPE *)calloc(imdiff1->rfile_length,sizeof(RFILE_DATA_TYPE));
 	ct = 0;
@@ -54,7 +54,7 @@ int lofstim(DIFFIMAGE *imdiff1)
 	size_t rfile_length = imdiff1->rfile_length;
 
 	if (imdiff1->correct_offset == 1) {
-	  short inner_radius, outer_radius;
+	  int inner_radius, outer_radius;
 	  if (imdiff1->correct_offset_inner_radius == 0 && imdiff1->correct_offset_outer_radius == 0) {
 	    inner_radius = rfile_length - 100;
 	    outer_radius = rfile_length - 1;
@@ -62,6 +62,8 @@ int lofstim(DIFFIMAGE *imdiff1)
 	    inner_radius = imdiff1->correct_offset_inner_radius;
 	    outer_radius = imdiff1->correct_offset_outer_radius;
 	  }
+
+	  printf("LOFSTIM: inner_radius = %d, outer_radius = %d\n",inner_radius,outer_radius);
 
 	  if (outer_radius >= rfile_length) {
 	    printf("LOFSTIM: imdiff1->correct_offset_outer_radius=%d is greater than rfile length=%d, aborting.\n",outer_radius,rfile_length);
