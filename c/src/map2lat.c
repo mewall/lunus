@@ -213,7 +213,7 @@ int main(int argc, char *argv[])
 	    (LATTICE_DATA_TYPE)(((float)ct[index]*lat->lattice[index] + 
 				 voxel_data->value)
 				/(float)(ct[index]+1.));
-/*printf("%d %d %d : %f %f %f : %f\n",i,j,k,voxel_data->pos.x,voxel_data->pos.y,voxel_data->pos.z,voxel_data->value);/***/
+	  //printf("%d %d %d : %f %f %f : %f\n",i,j,k,voxel_data->pos.x,voxel_data->pos.y,voxel_data->pos.z,voxel_data->value);/***/
 	  ct[index]++;
 	}
       }

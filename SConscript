@@ -29,24 +29,40 @@ CPPP = os.path.join(env_etc.lunus_include,"c","include")
 env_lunus = env_base.Clone(SHLINKFLAGS=env_etc.shlinkflags)
 
 replacement_ccflags = []
-for f in env_lunus["CCFLAGS"]:
+for f in env_lunus["SHCCFLAGS"]:
  if (f not in ["-ffast-math"]):
    replacement_ccflags.append(f)
-env_lunus.Replace(CCFLAGS = replacement_ccflags)
+env_lunus.Replace(SHCCFLAGS = replacement_ccflags)
 
-env_lunus.Prepend(CCFLAGS=["-g","-DUSE_OPENMP","-I/opt/local/include/libomp","-Xpreprocessor","-fopenmp"])
+#replacement_cflags = []
+#for f in env_lunus["SHCFLAGS"]:
+# if (f not in ["-ffast-math"]):
+#   replacement_cflags.append(f)
+#env_lunus.Replace(CFLAGS = replacement_cflags)
+
+#for f in ["-g","-DUSE_OPENMP","-I/opt/local/include/libomp","-Xpreprocessor"#,"-fopenmp"]:
+#  replacement_ccflags.append(f)
+
+#env_lunus.Prepend(CCFLAGS=["-g","-DUSE_OPENMP","-I/opt/local/include/libomp","-Xpreprocessor","-fopenmp"])
+#env_lunus.Prepend(SHCCFLAGS=["-g","-O2","-fopenmp","-DUSE_OPENMP","-Xpreprocessor"])
+env_lunus.Prepend(CCFLAGS=["-g","-O2","-fopenmp","-DUSE_OPENMP","-Xpreprocessor"])
+#env_lunus.Prepend(CCFLAGS=["-g","-O3","-fopenmp","-DUSE_OPENMP","-DUSE_OFFLOAD","-foffload=nvptx-none","-foffload=-lm","-foffload=-fPIC","-Xpreprocessor"])
 env_lunus.Prepend(LIBS=["gomp"])
-env_lunus.Prepend(LIBPATH=["/opt/local/lib/libomp"])
+#env_lunus.Prepend(LIBS=["gomp","cudart"])
+#env_lunus.Prepend(LIBPATH=["/opt/local/lib/libomp","/opt/cudatoolkit/10.0/lib64"])
+#env_lunus.Prepend(LIBPATH=["/opt/cudatoolkit/10.0/lib64"])
 
 env_lunus.StaticLibrary(target='#lib/lunus',
   source = [os.path.join(env_etc.lunus_dist,"c","lib","linitim.c"),
       os.path.join(env_etc.lunus_dist,"c","lib","lcalcsim.c"),
       os.path.join(env_etc.lunus_dist,"c","lib","lfreeim.c"),
       os.path.join(env_etc.lunus_dist,"c","lib","lmodeim.c"),
+      os.path.join(env_etc.lunus_dist,"c","lib","lofstim.c"),
       os.path.join(env_etc.lunus_dist,"c","lib","lpunchim.c"),
       os.path.join(env_etc.lunus_dist,"c","lib","lnormim.c"),
       os.path.join(env_etc.lunus_dist,"c","lib","lpolarim.c"),
       os.path.join(env_etc.lunus_dist,"c","lib","lscaleim.c"),
+      os.path.join(env_etc.lunus_dist,"c","lib","lavgrcf.c"),
       os.path.join(env_etc.lunus_dist,"c","lib","lavgrim.c"),
       os.path.join(env_etc.lunus_dist,"c","lib","lwindim.c"),
       os.path.join(env_etc.lunus_dist,"c","lib","lthrshim.c"),
@@ -68,6 +84,7 @@ env_lunus.StaticLibrary(target='#lib/lunus',
       os.path.join(env_etc.lunus_dist,"c","lib","lspline.c"),
       os.path.join(env_etc.lunus_dist,"c","lib","lsetparamsim.c"),
       os.path.join(env_etc.lunus_dist,"c","lib","lsetparamslt.c"),
+      os.path.join(env_etc.lunus_dist,"c","lib","ltime.c"),
       os.path.join(env_etc.lunus_dist,"c","lib","lprocimlt.c"),
       os.path.join(env_etc.lunus_dist,"c","lib","lcloneim.c"),
       os.path.join(env_etc.lunus_dist,"c","lib","lcfim.c"),
@@ -85,6 +102,7 @@ if (not env_etc.no_boost_python):
   env_etc.include_registry.append(
     env=env_lunus,
     paths=env_etc.lunus_common_includes + [env_etc.python_include])
+
 
   env_lunus.Append(LIBS=env_etc.libm+["scitbx_boost_python","boost_python","cctbx"])
 

@@ -88,9 +88,8 @@ int main(int argc, char *argv[])
 	  }
 	  break;
 	  default:
-	  printf("\n Usage: polarim <image in> <image out> "
-		 "<x origin> <y origin> <distance [mm]> <polarization> "
-		 "<offset angle>\n\n");
+	    printf("\n Usage: cfim <image in> <correction out>",
+		   "<distance[mm]> <polarization> <offset angle> <scale>\n\n");
 	  exit(0);
 	}
   

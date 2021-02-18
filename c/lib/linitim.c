@@ -80,6 +80,10 @@ DIFFIMAGE *linitim(size_t n)
     imdiff->pitch = DEFAULT_PITCH;
     imdiff->value_offset = DEFAULT_VALUE_OFFSET;
     imdiff->correction_factor_scale = 1.0;
+    imdiff->correction_offset = 0.0;
+    imdiff->correct_offset = 0;
+    imdiff->correct_offset_inner_radius = 0;
+    imdiff->correct_offset_outer_radius = 0;
     imdiff->background_subtraction_factor = 1.0;
     imdiff->slist = NULL;
     imdiff->mpiv = NULL;
@@ -113,6 +117,10 @@ DIFFIMAGE *linitim(size_t n)
     imdiff->beam_vec.y = 0.0;
     imdiff->beam_vec.z = -1.0;
 
+    // Variable used to indicate reentry into a routine, e.g., modeim()
+
+    imdiff->reentry = 0;
+
     /*
      * Allocate memory for arrays:
      */
@@ -126,7 +134,7 @@ DIFFIMAGE *linitim(size_t n)
     imdiff->mask  = (struct rccoords *)malloc(sizeof(struct rccoords)*
 					      MAX_MASK_PIXELS);
     imdiff->image = (IMAGE_DATA_TYPE *)calloc(imdiff->image_length,
-					      sizeof(IMAGE_DATA_TYPE));
+    					      sizeof(IMAGE_DATA_TYPE));
     imdiff->correction = (float *)calloc(imdiff->image_length,
 					 sizeof(float));
     imdiff->header = (char *)malloc(sizeof(char)*imdiff->header_length);

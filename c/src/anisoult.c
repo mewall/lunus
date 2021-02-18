@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
   lat->anisoU.zy = anisoU.zy;
   lat->anisoU.zz = anisoU.zz;
   */
-  memcpy(&lat->anisoU,&anisoU,sizeof(struct xyzmatrix)*9);
+  memcpy(&lat->anisoU,&anisoU,sizeof(struct xyzmatrix));
 
   //  printf("lat->anisoU.xx = %f\n",lat->anisoU.xx);
 

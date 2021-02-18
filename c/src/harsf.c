@@ -192,7 +192,7 @@ int main(int argc, char *argv[])
   // Read in all partitions
 
   for (i=0;i<xs->natoms;i++) {
-    sprintf(fname,"%s_%d/part_sf_real.lat",droot,i);
+    sprintf(fname,"%s_%ld/part_sf_real.lat",droot,i);
     if ( (partreal[i]->infile = fopen(fname,"rb")) == NULL ) {
       printf("\nCan't open %s.\n\n",fname);
       exit(0);
@@ -211,7 +211,7 @@ int main(int argc, char *argv[])
       exit(0);
     }
     fclose(workreal[i]->infile);
-    sprintf(fname,"%s_%d/part_sf_imag.lat",droot,i);
+    sprintf(fname,"%s_%ld/part_sf_imag.lat",droot,i);
     if ( (partimag[i]->infile = fopen(fname,"rb")) == NULL ) {
       printf("\nCan't open %s.\n\n",fname);
       exit(0);

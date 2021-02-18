@@ -33,14 +33,23 @@ int lavgrim(DIFFIMAGE *imdiff_in)
 
   if (imdiff_in->slist == NULL) lslistim(imdiff_in);
 
+
   n = (size_t *)calloc(MAX_RFILE_LENGTH, sizeof(size_t));
   rf = (RFILE_DATA_TYPE *)calloc(MAX_RFILE_LENGTH,sizeof(RFILE_DATA_TYPE));
   imdiff_in->rfile_length = 0;
+
+#ifdef DEBUG
+  printf("LAVGRIM: wavelength = %g, distance_mm = %g\n",imdiff_in->wavelength,imdiff_in->distance_mm);
+#endif
 
   for (pidx = 0; pidx < imdiff_in->num_panels; pidx++) {
 
     imdiff = &imdiff_in[pidx];
     index = 0;
+
+#ifdef DEBUG
+    for (i = 0;i <10; i++) printf("LAVGRIM: panel %d, s[%ld] = %g\n",pidx,i,sqrtf(ldotvec(imdiff->slist[i],imdiff->slist[i])));
+#endif 
 
     struct xyzcoords s;
 
@@ -52,7 +61,6 @@ int lavgrim(DIFFIMAGE *imdiff_in)
 	rr = imdiff->distance_mm / cos_two_theta; 
 	rvec.x = imdiff->wavelength * s.x * rr;
 	rvec.y = imdiff->wavelength * s.y * rr;
-	//	printf("rvec = (%f,%f)\n",rvec.x,rvec.y);
 	radius = (size_t)(sqrtf(rvec.x*rvec.x + rvec.y*rvec.y)/imdiff->pixel_size_mm+.5);
 	if ((imdiff->image[index] != imdiff->overload_tag) &&
 	    (imdiff->image[index] != imdiff->ignore_tag)) {
@@ -65,16 +73,20 @@ int lavgrim(DIFFIMAGE *imdiff_in)
       }
     }
   }
+#ifdef DEBUG
+  printf("LAVGRIM: imdiff_in->rfile_length = %d\n",imdiff_in->rfile_length);
+#endif
   for(i=0;i<imdiff_in->rfile_length;i++) {
     if (n[i] > 0) {
       imdiff_in->rfile[i] = rf[i]/(RFILE_DATA_TYPE)n[i];
 #ifdef DEBUG
-      if (i>100 && i<=110) printf("lavgrim rf[%d] = %g,",i,rf[i]);
+      if (i>100 && i<=110) printf("lavgrim rf[%d] = %g,",i,imdiff_in->rfile[i]);
 #endif
     } else {
       imdiff_in->rfile[i] = 0.0;
     }
   }
+
   free(n);
   free(rf);
 }

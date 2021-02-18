@@ -180,7 +180,7 @@ int main(int argc, char *argv[])
 	if (fft_data[fft_index+1] == (float)lat->mask_tag)
 	  fft_data[fft_index+1] = 0;
 	fft_index = fft_index + 2;
-	/*printf("%d,%d,%d: %f\n",i,j,k,fft_data[fft_index-2]);/***/
+	//printf("%d,%d,%d: %f\n",i,j,k,fft_data[fft_index-2]);/***/
       }
     } 
   }

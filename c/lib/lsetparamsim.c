@@ -54,6 +54,14 @@ int lsetparamsim(DIFFIMAGE *imdiff)
 	  imdiff->scale_outer_radius = lgettagi(deck,"\nscale_outer_radius");
 	}
 
+	if (strstr(deck,"\ncorrect_offset_inner_radius") != NULL) {
+	  imdiff->correct_offset_inner_radius = lgettagi(deck,"\ncorrect_offset_inner_radius");
+	}
+
+	if (strstr(deck,"\ncorrect_offset_outer_radius") != NULL) {
+	  imdiff->correct_offset_outer_radius = lgettagi(deck,"\ncorrect_offset_outer_radius");
+	}
+
 	if (strstr(deck,"\nthrshim_max") != NULL) {
 	  imdiff->upper_threshold = lgettagi(deck,"\nthrshim_max");
 	}
@@ -109,6 +117,12 @@ int lsetparamsim(DIFFIMAGE *imdiff)
 	  imdiff->correction_factor_scale = lgettagf(deck,"\ncorrection_factor_scale");
 	}
 
+	if (strstr(deck,"\nwavelength") == NULL) {
+	  printf("LSETPARAMSIM: Warning, no wavelength found in parameters\n");;
+	} else {
+	  imdiff->wavelength = lgettagf(deck,"\nwavelength");
+	}
+
 	if (strstr(deck,"\noverall_scale_factor") != NULL) {
 	  imdiff->correction_factor_scale = lgettagf(deck,"\noverall_scale_factor");
 	}
@@ -139,6 +153,18 @@ int lsetparamsim(DIFFIMAGE *imdiff)
 	  char *s = lgettag(deck,"\nuse_json_metrology");
 	  if (strcmp(s,"True")==0) {
 	    imdiff->use_json_metrology=1;
+	  }
+	} 
+
+	if (strstr(deck,"\ncorrect_offset_flag") == NULL) {
+	  imdiff->correct_offset = 0;
+	} else {
+	  char *s = lgettag(deck,"\ncorrect_offset_flag");
+	  printf("LSETPARAMSIM: correct_offset_flag=%s\n",s);
+	  if (strcmp(s,"True")==0) {
+	    imdiff->correct_offset=1;
+	  } else {
+	    imdiff->correct_offset=0;
 	  }
 	} 
 

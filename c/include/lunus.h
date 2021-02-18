@@ -325,6 +325,15 @@ typedef int CBF_DATA_TYPE;
 typedef short SMV_DATA_TYPE;
 typedef float WEIGHTS_DATA_TYPE;
 
+struct timers {
+  double mode;
+  double scale;
+  double map;
+  double mask;
+  double correction;
+  double setup;
+};
+
 // MPI
 
 typedef struct {
@@ -454,8 +463,8 @@ typedef struct
   IMAGE_DATA_TYPE *image;	/* Pointer to image */
   char big_endian;              /* byte order, 1 = big_endian, 0 = other */
   size_t image_length;	        /* Total number of pixels in image */
-  short vpixels;		/* Number of vertical pixels */
-  short hpixels;		/* Number of horizontal pixels */
+  int vpixels;		        /* Number of vertical pixels */
+  int hpixels;		        /* Number of horizontal pixels */
   struct xyzcoords slow_vec;    /* Direction of slow raster axis */
   struct xyzcoords fast_vec;    /* Direction of fast raster axis */
   struct xyzcoords normal_vec;  /* Direciton of normal to panel */
@@ -476,6 +485,8 @@ typedef struct
   short mask_outer_radius;      /* Outer radius of annular mask */
   short scale_inner_radius;      /* Inner radius of scale data */
   short scale_outer_radius;      /* Outer radius of scale data */
+  short correct_offset_inner_radius; /* Inner radius of offset correction data */
+  short correct_offset_outer_radius; /* Outer radius of offset correction data */
   IMAGE_DATA_TYPE mask_tag;     /* Value which mask puts in image */
   IMAGE_DATA_TYPE punch_tag;
   struct rccoords pos;	        /* Coordinates of current pixel */
@@ -526,11 +537,14 @@ typedef struct
   struct irange rfirange;       /* Range of rfile index values */
   float *correction;             /* Correction factor, pixel by pixel */
   float correction_factor_scale; /* Overall scale factor for correction */
+  float correction_offset;
+  int correct_offset;
   float background_subtraction_factor;/* Multiplicative factor for lbkgsubim() */
   struct xyzcoords *slist;   /* scattering vectors for each pixel in the image */
   struct xyzmatrix amatrix;     /* A matrix for mapping lab coords to reciprocal space coords */
   int use_json_metrology;
   MPIVARS *mpiv;
+  int reentry;
 } DIFFIMAGE;
 
 /*
@@ -737,6 +751,7 @@ typedef struct {
   char *integration_image_type; /* Selects which image to use for integration */
   int procmode;                 /* Processing mode */
   DIFFIMAGE *imdiff;            /* Image for processing using lprocimlt() */
+  struct timers timer;
 } LAT3D;
 
 // Crystal structure data type
@@ -761,6 +776,7 @@ void lanisolt(LAT3D *lat);
 int lavgim(DIFFIMAGE *imdiff);
 int lavgr(LAT3D *lat);
 int lavgrf(DIFFIMAGE *imdiff1);
+int lavgrcf(DIFFIMAGE *imdiff_in);
 int lavgrim(DIFFIMAGE *imdiff);
 int lavgrlt(LAT3D *lat);
 int lavgpolim(DIFFIMAGE *imdiff);
@@ -779,6 +795,7 @@ struct fom lcalcrsf(char *hklfname, LAT3D *lat1,LAT3D *lat2);
 struct xyzcoords lcalcsim(DIFFIMAGE *imdiff_in);
 int lccrlt(LAT3D *lat1, LAT3D *lat2);
 int lchbyte(void *ptr, size_t packet_size, size_t list_length);
+int lclearim(DIFFIMAGE *imdiff_in);
 int lcloneim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lconstim(DIFFIMAGE *imdiff);
 int lconstlt(LAT3D *lat);
@@ -845,6 +862,7 @@ int lminrim(DIFFIMAGE *imdiff);
 int lminrlt(LAT3D *lat);
 int lmirrorlt(LAT3D *lat,int axis);
 int lmodeim(DIFFIMAGE *imdiff);
+int lmodeim_old(DIFFIMAGE *imdiff);
 int lmulcfim(DIFFIMAGE *imdiff);
 int lmuldwflt(LAT3D *lat);
 int lmulim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
@@ -858,6 +876,7 @@ int lnign(DIFFIMAGE *imdiff);
 int lnoiseim(DIFFIMAGE *imdiff);
 int lnormim(DIFFIMAGE *imdiff);
 int lnormlt(LAT3D *lat);
+int lofstim(DIFFIMAGE *imdiff1);
 int lpadlt(LAT3D *lat);
 int lparsecelllt(LAT3D *lat);
 int lpeakim(DIFFIMAGE *imdiff);
@@ -929,6 +948,7 @@ int ltagim(DIFFIMAGE *imdiff);
 int ltaglt(LAT3D *lat);
 int lthrshim(DIFFIMAGE *imdiff);
 int lthrshlt(LAT3D *lat);
+double ltime();
 int ltranslt(LAT3D *lat1, struct ijkcoords t);
 int ltransmap(CCP4MAP *map);
 int lupdbd(LAT3D *lat);

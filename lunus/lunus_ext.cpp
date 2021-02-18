@@ -2,8 +2,6 @@
     // Date: 6/15/2017
     // Lat3D class, RadialAvgim, Normim, & Polarim methods wrapped by Alex Wolff (9/22/2017).
 
-
-
 #include <cctbx/boost_python/flex_fwd.h>
 #include <boost/python/module.hpp>
 #include <boost/python/class.hpp>
@@ -117,7 +115,7 @@ namespace lunus {
 	  if (imdiff->image[i]<min) min = imdiff->image[i];
 	}
       }
-      //      printf("IMAGE: ct = %ld,max = %d, min = %d\n",ct,max,min);
+      printf("LUNUS_EXT: IMAGE: ct = %ld,max = %d, min = %d\n",ct,max,min);
     }
 
     inline void set_image(std::size_t n,scitbx::af::flex_int data) {
@@ -146,7 +144,7 @@ namespace lunus {
 	  if (im->image[i]<min) min = im->image[i];
 	}
       }
-      //      printf("ct = %ld,max = %d, min = %d\n",ct,max,min);
+      printf("LUNUS_EXT: IMAGE: ct = %ld,max = %d, min = %d\n",ct,max,min);
     }
 
     inline void set_image(std::size_t n,scitbx::af::flex_double data) {
@@ -163,19 +161,63 @@ namespace lunus {
       im->hpixels = fast;
       im->vpixels = slow;
       im->value_offset = 0;
-      IMAGE_DATA_TYPE max=32766,min=-32766;
+      IMAGE_DATA_TYPE max=-32766,min=32766;
       std::size_t ct=0;
       for (int i = 0;i<im->image_length;i++) {
-	if (begin[i]<0.0 || begin[i] >= (double)MAX_IMAGE_DATA_VALUE) {
+	if (begin[i] >= (double)MAX_IMAGE_DATA_VALUE) {
 	  im->image[i] = im->ignore_tag;
 	  ct++;
 	} else {
-	  im->image[i] = (IMAGE_DATA_TYPE)begin[i];
-	  if (im->image[i]>max) max = im->image[i];
-	  if (im->image[i]<min) min = im->image[i];
+	  if ((IMAGE_DATA_TYPE)begin[i] > max) max = (IMAGE_DATA_TYPE)begin[i];
+	  if ((IMAGE_DATA_TYPE)begin[i] < min) min = (IMAGE_DATA_TYPE)begin[i];
 	}
       }
-      //      printf("ct = %ld,max = %d, min = %d\n",ct,max,min);
+      if (min<0) im->value_offset = -min;
+      for (int i = 0;i<im->image_length;i++) {
+	if (begin[i] < (double)MAX_IMAGE_DATA_VALUE) {
+	  im->image[i] = (IMAGE_DATA_TYPE)begin[i] + im->value_offset;
+	}
+      }
+
+      printf("LUNUS: IMAGE: ct = %ld,max = %d, min = %d\n",ct,max,min);
+
+#ifdef DEBUG
+
+      printf("HISTOGRAM:\n");
+
+/*
+ * Allocate memory for histogram:
+ */
+
+      IMAGE_DATA_TYPE *histogram;
+      histogram = (IMAGE_DATA_TYPE *)calloc(65536,sizeof(IMAGE_DATA_TYPE));
+      if (!histogram) {
+	perror("Couldn't allocate histogram.\n\n");
+	exit(0);
+      }
+
+/*
+ * Select pixels in the patch and histogram them:
+ */
+
+      std::size_t index = 0;
+      for(int j=0;j<im->vpixels;j++) {
+	for(int i=0;i<im->hpixels;i++) {
+	histogram[im->image[index] + 32768]++;
+      index++;
+    }
+  }
+
+/*
+ * Write the output file:
+ */
+
+      for(int i=0;i<=65535;i=i+1) {
+    if (histogram[i]>0) {
+      printf("%d %d\n",(int)i-32768,histogram[i]);
+    }
+  }
+#endif
     }
 
     inline void set_background(scitbx::af::flex_int data) {
@@ -239,6 +281,15 @@ namespace lunus {
       lbkgsubim(imdiff,imdiff_bkg);
       //            printf("imdiff->background_subtraction_factor = %f\n",imdiff->background_subtraction_factor);
       //            printf("imdiff-value_offset = %d\n",imdiff->value_offset);
+    }
+
+    inline scitbx::af::flex_double get_lattice_timers() {
+      std::size_t ntimers = sizeof(struct timers)/sizeof(double);
+      scitbx::af::flex_double timer_array(ntimers);
+      for (int i = 0; i < ntimers; i++) {
+	timer_array[i] = ((double *)&(lat->timer))[i];
+      }
+      return timer_array;
     }
 
     inline scitbx::af::flex_int get_image() {
@@ -387,7 +438,7 @@ namespace lunus {
 
       struct xyzcoords *xvectors_cctbx = (struct xyzcoords *)malloc(size*sizeof(struct xyzcoords));
 
-      if (imdiff->slist == NULL) free(imdiff->slist);
+      if (imdiff->slist != NULL) free(imdiff->slist);
       imdiff->slist = (struct xyzcoords *)malloc(size*sizeof(float));
 
       if (imdiff->image_length != size/3) {
@@ -523,7 +574,7 @@ namespace lunus {
 
   public:
     inline  LunusDIFFIMAGE() {
-      printf("in default XXX constr.\n");
+      //      printf("in default XXX constr.\n");
       imdiff = linitim(1);
     }
 
@@ -739,7 +790,7 @@ namespace lunus {
 
   public:
     inline  LunusLAT3D() {
-      printf("in default XXX constr.\n");
+      //      printf("in default XXX constr.\n");
       lat = linitlt();
     }
 
@@ -907,6 +958,7 @@ namespace boost_python { namespace {
       .def("get_image",&lunus::Process::get_image)
       .def("get_lattice",&lunus::Process::get_lattice)
       .def("get_counts",&lunus::Process::get_counts)
+      .def("get_lattice_timers",&lunus::Process::get_lattice_timers)
       .def("divide_by_counts",&lunus::Process::divide_by_counts)
       .def("print_image_params",&lunus::Process::print_image_params)
       .def("write_as_vtk",&lunus::Process::write_as_vtk)

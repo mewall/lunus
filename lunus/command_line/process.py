@@ -2,16 +2,19 @@
 #
 # LIBTBX_SET_DISPATCHER_NAME lunus.process
 
-from time import clock, time
+from __future__ import print_function
+import time
+from time import time
 import numpy as np
 import glob, subprocess, shlex
 import lunus
 import copy, os
 from dials.array_family import flex
+import future,six
 
 def mpi_enabled():
   return 'OMPI_COMM_WORLD_SIZE' in os.environ.keys()
-#  return True
+#  return False
 
 def mpi_init():
   global mpi_comm
@@ -33,7 +36,7 @@ def get_experiment_params(experiments):
   beam = experiments[0].beam
   detector = experiments[0].detector
 
-  beam_direction = col(beam.get_direction())
+  beam_direction = col(beam.get_sample_to_source_direction())
   wavelength = beam.get_wavelength()
 
   beam_params = "\nbeam_vec={0},{1},{2}\nwavelength={3}".format(-beam_direction[0],-beam_direction[1],-beam_direction[2],wavelength)
@@ -102,6 +105,10 @@ def mpi_barrier():
 def mpi_reduce_p(p):
 
   if mpi_enabled():
+#    if get_mpi_rank() == 0:
+#      print("LUNUS.PROCESS: Convertinf flex arrays to numpy arrays")
+#      sys.stdout.flush()
+
     l = p.get_lattice().as_numpy_array()
     c = p.get_counts().as_numpy_array()
 
@@ -112,10 +119,12 @@ def mpi_reduce_p(p):
       lt = None
       ct = None
 
+
     mpi_comm.Reduce(l,lt,op=MPI.SUM,root=0)
     mpi_comm.Reduce(c,ct,op=MPI.SUM,root=0)
     
     if get_mpi_rank() == 0:
+#      print("LUNUS.PROCESS: Converting numpy arrays to flex arrays")
       p.set_lattice(flex.double(lt))
       p.set_counts(flex.int(ct))
 
@@ -145,7 +154,7 @@ def process_one_glob():
       bkglist.sort()
       if get_mpi_rank() == 0:
         if (len(filelist) != len(bkglist) and len(bkglist) != 1):
-          raise ValueError,"Must either be one background or as many as there are images."
+          raise(ValueError,"Must either be one background or as many as there are images.")
       if (len(bkglist) == 1):
         if get_mpi_rank() == 0:
           bkg = dxtbx.load(bkglist[0])
@@ -172,22 +181,29 @@ def process_one_glob():
 
     # prepend image 0 to each range.
 
-    i_iter = range(get_mpi_rank(),len(filelist),get_mpi_size())
+    i_iter = list(range(get_mpi_rank(),len(filelist),get_mpi_size()))
 
     i_iter.insert(0,0)
-
+    
+    tmode = 0.0
+    tscale = 0.0
+    tmap = 0.0
+    tmask = 0.0
+    tcorrection = 0.0
+    tsetup = 0.0
+    
     for i in i_iter:
       if fresh_lattice:
         if get_mpi_rank() == 0:
-          print "Reference image ",
+          print("Reference image ",end=" ")
           sys.stdout.flush()
       else:
-        print "{0} ".format(i),
+        print("{0} ".format(i),end=" ")
         sys.stdout.flush()
 
       if fresh_lattice:
         if i != 0:
-          raise ValueError,"Image number must be 0 first time through"
+          raise(ValueError,"Image number must be 0 first time through")
 
       if (not rotation_series):
         if (get_mpi_rank() == 0 or not fresh_lattice):
@@ -226,8 +242,8 @@ def process_one_glob():
 
       et = time()
       ttr += et - bt
-#      print "min of data = ",flex.min(data)
-#      print "max of data = ",flex.max(data)
+#      print("min of data = ",flex.min(data))
+#      print("max of data = ",flex.max(data))
 
       if isinstance(data,tuple):
         for pidx in range(len(data)):
@@ -284,18 +300,37 @@ def process_one_glob():
 
         fresh_lattice = False
       else:
+#        print("LUNUS.PROCESS: Rank {0} STARTING processing image number {1}".format(get_mpi_rank(),imnum))
+#        sys.stdout.flush()
         bt = time()
         p.LunusProcimlt(1)
         et = time()
         te = et - bt
+#        print("LUNUS.PROCESS: Rank {0} FINISHED processing image number {1}".format(get_mpi_rank(),imnum))
         
         tte += te
-        
+
+        timers = p.get_lattice_timers()
+
+        tmode += timers[0]
+        tscale += timers[1]
+        tmap += timers[2]
+        tmask += timers[3]
+        tcorrection += timers[4]
+        tsetup += timers[5]
+
         imnum = imnum +1
 
-    print
+    print()
 
-    print "Rank {0} time spent in read, processing (sec): {1} {2}\n".format(get_mpi_rank(),ttr,tte)
+    print("LUNUS.PROCESS: Rank {0} time spent in read, processing (sec): {1}, {2}".format(get_mpi_rank(),ttr,tte))
+
+    if (get_mpi_rank() == 0):
+      print("LUNUS.PROCESS: Setup took {0} seconds".format(tsetup))
+      print("LUNUS.PROCESS: Masking and thresholding took {0} seconds".format(tmask))
+      print("LUNUS.PROCESS: Solid angle and polarization correction took {0} seconds".format(tcorrection))
+      print("LUNUS.PROCESS: Mode filtering took {0} seconds".format(tmode))
+      print("LUNUS.PROCESS: Mapping took {0} seconds".format(tmap))
 
 if __name__=="__main__":
   import sys
@@ -340,7 +375,7 @@ if __name__=="__main__":
   try:
     idx = [a.find("params")==0 for a in args].index(True)
   except ValueError:
-    raise ValueError,"Processing parameters must be specified using params="
+    raise(ValueError,"Processing parameters must be specified using params=")
   else:
     deck_file = args.pop(idx).split("=")[1]
 
@@ -365,7 +400,7 @@ if __name__=="__main__":
     else:
       metro_glob_list.append(args.pop(metroidx).split("=")[1])
   if (len(metro_glob_list) == 0):
-    raise ValueError,"Experiments .json file must be specified using experiments="
+    raise(ValueError,"Experiments .json file must be specified using experiments=")
   
  # Image input glob
   keep_going = True
@@ -399,7 +434,7 @@ if __name__=="__main__":
 
   if get_mpi_rank() == 0:
     if (len(metro_glob_list) != len(image_glob_list) or (subtract_background_images and len(metro_glob_list) != len(bkg_glob_list))):
-      raise ValueError,"Must specify same number of experiments, images, and backgrounds"
+      raise(ValueError,"Must specify same number of experiments, images, and backgrounds")
 
   import dxtbx
   from dxtbx.model.experiment_list import ExperimentListFactory
@@ -409,6 +444,8 @@ if __name__=="__main__":
   metro_glob = metro_glob_list[0]
 
   metrolist = glob.glob(metro_glob)
+#  print("type(metrolist) = ",type(metrolist))
+#  print(metrolist)
   metrolist.sort()
 
   metro = metrolist[0]
@@ -446,7 +483,8 @@ if __name__=="__main__":
 
   for i in range(len(metro_glob_list)):
     if get_mpi_rank() == 0:
-      print "Image set ",i+1,":",
+      print("Image set ",i+1,":",end=" ")
+      sys.stdout.flush()
 
     metro_glob = metro_glob_list[i]
     image_glob = image_glob_list[i]
@@ -459,13 +497,17 @@ if __name__=="__main__":
 
     process_one_glob()
 
+  if get_mpi_rank() == 0:
+    print("LUNUS.PROCESS: Done processing individual globs")
+    sys.stdout.flush()
+
   bt = time()
   p = mpi_reduce_p(p)
   et = time()
   tred = et - bt
 
   if get_mpi_rank() == 0:
-    print "Time spent in reduction (sec): ",tred
+    print("Time spent in reduction (sec): ",tred)
     p.divide_by_counts()
 
     if (not vtk_file is None):
