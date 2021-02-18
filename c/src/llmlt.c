@@ -116,6 +116,7 @@ int main(int argc, char *argv[])
   lat->gamma = gamma;
   strcpy(lat->cell_str,cell_str);
   lparsecelllt(lat);
+  lat->llm_order=1;
   lllmlt(lat);
   
   /*

@@ -752,6 +752,7 @@ typedef struct {
   int procmode;                 /* Processing mode */
   DIFFIMAGE *imdiff;            /* Image for processing using lprocimlt() */
   struct timers timer;
+  int llm_order;
 } LAT3D;
 
 // Crystal structure data type

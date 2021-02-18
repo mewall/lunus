@@ -81,6 +81,8 @@ LAT3D *linitlt(void)
   lat->procmode = 0;
   lat->imdiff = NULL;
 
+  lat->llm_order = 1;
+  
   CloseShop:
 
   return(lat);
