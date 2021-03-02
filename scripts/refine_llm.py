@@ -218,7 +218,7 @@ if __name__=="__main__":
 
 #    scat = xrs.scatterers()
 #    print("Length of scatterers array = ",len(scat))
-    xrs.set_occupancies(1.0)
+#    xrs.set_occupancies(1.0)
     fcalc = xrs.structure_factors(d_min=1.0).f_calc()
     f_000 = xrs.f_000()
 #    if (f_000*f_000 == 0.0):
