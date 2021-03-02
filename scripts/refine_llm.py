@@ -4,6 +4,7 @@ import subprocess, shlex
 import sys
 from iotbx.pdb import hierarchy
 import future
+import tempfile
 
 fiter = 0
 
@@ -207,7 +208,24 @@ if __name__=="__main__":
 
     pdb_in = hierarchy.input(file_name=pdb_file)
 
-    xrs = pdb_in.input.xray_structure_simple()
+# Where there are alternate conformations, select the A conformation and delete the rest
+    for model in pdb_in.hierarchy.models():
+      for chain in model.chains():
+        for rg in chain.residue_groups():
+          if (len(rg.atom_groups())>1):
+            for ag in rg.atom_groups():
+              if (ag.altloc != "A" and ag.altloc != ""):
+                print("  removing alternative conformation %s for residue %s" % (ag.altloc,ag.resname))
+                for atom in ag.atoms():
+                  ag.remove_atom(atom=atom)
+                  
+    with tempfile.TemporaryDirectory() as tmpdirname:
+        ftmp=open(tmpdirname+"/tmp.pdb","w")
+        ftmp.write(pdb_in.hierarchy.as_pdb_string(crystal_symmetry=pdb_in.input.crystal_symmetry()))
+        ftmp.close()
+        pdb_in_tmp = hierarchy.input(file_name=tmpdirname+"/tmp.pdb")
+    xrs = pdb_in_tmp.input.xray_structure_simple()
+    xrs.set_occupancies(1.0)
 
     if (bfacs == "zero"):
         xrs.convert_to_isotropic()
@@ -218,7 +236,6 @@ if __name__=="__main__":
 
 #    scat = xrs.scatterers()
 #    print("Length of scatterers array = ",len(scat))
-#    xrs.set_occupancies(1.0)
     fcalc = xrs.structure_factors(d_min=1.0).f_calc()
     f_000 = xrs.f_000()
 #    if (f_000*f_000 == 0.0):
