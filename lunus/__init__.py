@@ -1,6 +1,7 @@
 from __future__ import division
-import boost.python
-ext = boost.python.import_ext("lunus_ext")
+import boost_adaptbx.boost.python as bp
+#import boost.python
+ext = bp.import_ext("lunus_ext")
 from lunus_ext import *
 
 class LunusDriver(object):

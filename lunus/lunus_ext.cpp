@@ -716,6 +716,108 @@ namespace lunus {
       }
     }
 
+    inline void set_image(std::size_t n,scitbx::af::flex_int data) {
+      int* begin=data.begin();
+      std::size_t size=data.size();
+      std::size_t slow=data.accessor().focus()[0];
+      std::size_t fast=data.accessor().focus()[1];
+      DIFFIMAGE *im = &imdiff[n];
+      if (im->image_length != size) {
+	im->image_length = size;
+	im->image = (IMAGE_DATA_TYPE *)realloc(im->image,im->image_length*sizeof(IMAGE_DATA_TYPE));
+	im->correction = (float *)realloc(im->correction,im->image_length*sizeof(float));
+      }
+      im->hpixels = fast;
+      im->vpixels = slow;
+      im->value_offset = 0;
+      IMAGE_DATA_TYPE max=-32766,min=32766;
+      std::size_t ct=0;
+      for (int i = 0;i<im->image_length;i++) {
+	if (begin[i]<0 || begin[i] >= MAX_IMAGE_DATA_VALUE) {
+	  im->image[i] = im->ignore_tag;
+	  ct++;
+	} else {
+	  im->image[i] = (IMAGE_DATA_TYPE)begin[i];
+	  if (im->image[i]>max) max = im->image[i];
+	  if (im->image[i]<min) min = im->image[i];
+	}
+      }
+      printf("LUNUS_EXT: IMAGE: ct = %ld,max = %d, min = %d\n",ct,max,min);
+    }
+
+    inline void set_image(std::size_t n,scitbx::af::flex_double data) {
+      double* begin=data.begin();
+      std::size_t size=data.size();
+      std::size_t slow=data.accessor().focus()[0];
+      std::size_t fast=data.accessor().focus()[1];
+      DIFFIMAGE *im = &imdiff[n];
+      if (im->image_length != size) {
+	im->image_length = size;
+	im->image = (IMAGE_DATA_TYPE *)realloc(im->image,im->image_length*sizeof(IMAGE_DATA_TYPE));
+	im->correction = (float *)realloc(im->correction,im->image_length*sizeof(float));
+      }
+      im->hpixels = fast;
+      im->vpixels = slow;
+      im->value_offset = 0;
+      IMAGE_DATA_TYPE max=-32766,min=32766;
+      std::size_t ct=0;
+      for (int i = 0;i<im->image_length;i++) {
+	if (begin[i] >= (double)MAX_IMAGE_DATA_VALUE) {
+	  im->image[i] = im->ignore_tag;
+	  ct++;
+	} else {
+	  if ((IMAGE_DATA_TYPE)begin[i] > max) max = (IMAGE_DATA_TYPE)begin[i];
+	  if ((IMAGE_DATA_TYPE)begin[i] < min) min = (IMAGE_DATA_TYPE)begin[i];
+	}
+      }
+      if (min<0) im->value_offset = -min;
+      for (int i = 0;i<im->image_length;i++) {
+	if (begin[i] < (double)MAX_IMAGE_DATA_VALUE) {
+	  im->image[i] = (IMAGE_DATA_TYPE)begin[i] + im->value_offset;
+	}
+      }
+
+      printf("LUNUS: IMAGE: ct = %ld,max = %d, min = %d\n",ct,max,min);
+
+#ifdef DEBUG
+
+      printf("HISTOGRAM:\n");
+
+/*
+ * Allocate memory for histogram:
+ */
+
+      IMAGE_DATA_TYPE *histogram;
+      histogram = (IMAGE_DATA_TYPE *)calloc(65536,sizeof(IMAGE_DATA_TYPE));
+      if (!histogram) {
+	perror("Couldn't allocate histogram.\n\n");
+	exit(0);
+      }
+
+/*
+ * Select pixels in the patch and histogram them:
+ */
+
+      std::size_t index = 0;
+      for(int j=0;j<im->vpixels;j++) {
+	for(int i=0;i<im->hpixels;i++) {
+	histogram[im->image[index] + 32768]++;
+      index++;
+    }
+  }
+
+/*
+ * Write the output file:
+ */
+
+      for(int i=0;i<=65535;i=i+1) {
+    if (histogram[i]>0) {
+      printf("%d %d\n",(int)i-32768,histogram[i]);
+    }
+  }
+#endif
+    }
+
     inline void set_reference() {
       //      if (imdiff_ref != NULL) {
       //	lfreeim(imdiff_ref);
@@ -979,6 +1081,10 @@ namespace boost_python { namespace {
     void (lunus::LunusDIFFIMAGE::*LunusWindim1)() = &lunus::LunusDIFFIMAGE::LunusWindim;
     void (lunus::LunusDIFFIMAGE::*LunusWindim2)(short, short, short, short) = &lunus::LunusDIFFIMAGE::LunusWindim;
 
+    void (lunus::LunusDIFFIMAGE::*set_image_b1)(scitbx::af::flex_int data) = &lunus::LunusDIFFIMAGE::set_image;
+    void (lunus::LunusDIFFIMAGE::*set_image_b2)(std::size_t n,scitbx::af::flex_int data) = &lunus::LunusDIFFIMAGE::set_image;
+    void (lunus::LunusDIFFIMAGE::*set_image_b3)(std::size_t n,scitbx::af::flex_double data) = &lunus::LunusDIFFIMAGE::set_image;
+
     void (lunus::LunusDIFFIMAGE::*LunusPunchim1)() = &lunus::LunusDIFFIMAGE::LunusPunchim;
     void (lunus::LunusDIFFIMAGE::*LunusPunchim2)(short, short, short, short) = &lunus::LunusDIFFIMAGE::LunusPunchim;
 
@@ -991,7 +1097,9 @@ namespace boost_python { namespace {
     class_<lunus::LunusDIFFIMAGE>("LunusDIFFIMAGE",init<>())
       .def("LunusSetparamsim",&lunus::LunusDIFFIMAGE::LunusSetparamsim)
       .def("get_image_data_type_size",&lunus::LunusDIFFIMAGE::get_image_data_type_size)
-      .def("set_image",&lunus::LunusDIFFIMAGE::set_image)
+      .def("set_image",set_image_b1)
+      .def("set_image",set_image_b2)
+      .def("set_image",set_image_b3)
       .def("set_reference",&lunus::LunusDIFFIMAGE::set_reference)
       .def("get_image",&lunus::LunusDIFFIMAGE::get_image)
       .def("LunusPunchim",LunusPunchim1)
