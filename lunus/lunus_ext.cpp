@@ -179,7 +179,7 @@ namespace lunus {
 	}
       }
 
-      printf("LUNUS: IMAGE: ct = %ld,max = %d, min = %d\n",ct,max,min);
+      //      printf("LUNUS: IMAGE: ct = %ld,max = %d, min = %d\n",ct,max,min);
 
 #ifdef DEBUG
 
@@ -652,7 +652,8 @@ namespace lunus {
     }
 
     inline void LunusModeim() {
-      imdiff->reentry = 1;
+      if (imdiff->reentry == 1) imdiff->reentry = 2;
+      if (imdiff->reentry == 0) imdiff->reentry = 1;
       lmodeim(imdiff);
     }
 
@@ -789,7 +790,7 @@ namespace lunus {
 	}
       }
 
-      printf("LUNUS: IMAGE: ct = %ld,max = %d, min = %d\n",ct,max,min);
+      //      printf("LUNUS: IMAGE: ct = %ld,max = %d, min = %d\n",ct,max,min);
 
 #ifdef DEBUG
 

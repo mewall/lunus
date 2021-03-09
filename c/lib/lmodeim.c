@@ -400,7 +400,6 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 	      } 
 #endif 
 	      // Depending on the distribution, use alternative values other than the mode
-	      /*
 		if (range_value <= 2) {
 		  image_mode[index_mode]  = this_value;
 		  num_this_values++;
@@ -415,8 +414,7 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 		  //	      mode_value = median_value;
 		  }
 		}
-	      */
-	      if (entropy > log(10.)) {
+		/*	      if (entropy > log(10.)) {
 		if (mode_ct == 1) {
 		  image_mode[index_mode] = median_value;
 		  num_median_values++;
@@ -440,6 +438,7 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 		  }
 		}
 	      }
+		*/
 	    }
 	    //        printf("Stop tm = %ld,th = %ld,i = %d,j = %d\n",tm,th,i,j);
 	  }
@@ -455,9 +454,9 @@ int lmodeim(DIFFIMAGE *imdiff_in)
     double tel = stop-start;
     fflush(stdout);
 
-    //#ifdef DEBUG
+#ifdef DEBUG
     printf("LMODEIM: %g seconds, num_mode_values=%ld,num_median_values=%ld,num_this_values=%ld,num_med90_values=%ld\n",tel,num_mode_values,num_median_values,num_this_values,num_med90_values);
-    //#endif
+#endif
     
 #ifdef USE_OPENMP
 #ifdef USE_OFFLOAD

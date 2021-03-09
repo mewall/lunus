@@ -9,12 +9,18 @@ import os
 import numpy as np
 import sys
 import argparse
+import time
 
-def get_detector_params(detector):
+def get_image_params(beam,detector):
 
   from scitbx.matrix import col
 
-  detector_params = []
+  image_params = []
+
+  beam_direction = col(beam.get_sample_to_source_direction())
+  wavelength = beam.get_wavelength()
+
+  beam_params = "\nbeam_vec={0},{1},{2}\nwavelength={3}".format(-beam_direction[0],-beam_direction[1],-beam_direction[2],wavelength)
 
   panel_ct = 0
 
@@ -35,13 +41,13 @@ def get_detector_params(detector):
 
     more_params = "\npixel_size_mm={0}\nbeam_mm_x={1}\nbeam_mm_y={2}\ndistance_mm={3}".format(pixel_size_mm,beam_mm_x,beam_mm_y,distance_mm)
 
-    detector_params.append(fast_vec_params+slow_vec_params+origin_vec_params+normal_vec_params+more_params)
+    image_params.append(beam_params+fast_vec_params+slow_vec_params+origin_vec_params+normal_vec_params+more_params)
 
 #    print "panel_ct = ",panel_ct,origin_vec_params
 
     panel_ct += 1
 
-  return(detector_params)
+  return(image_params)
 
 if __name__=="__main__":
 
@@ -55,13 +61,14 @@ if __name__=="__main__":
 
     args=parser.parse_args()
 
+    ts = time.time()
     writer = FullCBFWriter(filename=args.infile)
     cbf = writer.get_cbf_handle()
     data = writer.imageset[0]
-    if not isinstance(data, tuple):
-      data = (data,)
-    data = list(data)
 
+    print("Took %g seconds to get CBF handle and read data" % (time.time() - ts))
+
+    ts = time.time()
     img = dxtbx.load(args.infile)
 
     detector = img.get_detector()
@@ -70,6 +77,12 @@ if __name__=="__main__":
     scan = img.get_scan()
 
 #    data = img.get_raw_data()
+
+    print("Took %g seconds to get image metadata" % (time.time() - ts))
+
+    if not isinstance(data, tuple):
+      data = (data,)
+    data = list(data)
 
     A = LunusDIFFIMAGE(len(data))
 
@@ -94,12 +107,12 @@ if __name__=="__main__":
 modeim_bin_size=1
 modeim_kernel_width=15
 '''
-    print("Get detector params")
+    print("Get image params")
     sys.stdout.flush()
-    detector_params = get_detector_params(detector)
+    image_params = get_image_params(beam,detector)
 
-    for pidx in range(len(detector_params)):
-        deck_and_extras = deck+detector_params[pidx]
+    for pidx in range(len(image_params)):
+        deck_and_extras = deck+image_params[pidx]
         A.LunusSetparamsim(pidx,deck_and_extras)
 #    data_np = data.as_numpy_array()
 #    hist=np.histogram(data,range=(0,50),bins=50,density=False)
