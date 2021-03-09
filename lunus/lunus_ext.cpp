@@ -578,6 +578,8 @@ namespace lunus {
       imdiff = linitim(1);
     }
 
+    inline LunusDIFFIMAGE(std::size_t n): imdiff(linitim(n)) { }
+
     inline ~LunusDIFFIMAGE() {
       lfreeim(imdiff);
     }
@@ -650,6 +652,7 @@ namespace lunus {
     }
 
     inline void LunusModeim() {
+      imdiff->reentry = 1;
       lmodeim(imdiff);
     }
 
@@ -693,6 +696,15 @@ namespace lunus {
       imdiff->params = (char *)calloc(deck.length()+1,sizeof(char));
       strcpy(imdiff->params,deck.c_str());
       lsetparamsim(imdiff);
+    }
+
+    inline void LunusSetparamsim(std::size_t n,std::string deck) {
+      deck += '\n';
+      DIFFIMAGE *im = &imdiff[n];
+      if (im->params != NULL) free(im->params);
+      im->params = (char *)calloc(deck.length()+1,sizeof(char));
+      strcpy(im->params,deck.c_str());
+      lsetparamsim(im);
     }
 
     inline void set_image(scitbx::af::flex_int data) {
@@ -875,6 +887,42 @@ namespace lunus {
 	  ct++;
 	} else {
 	  begin[i] = imdiff->image[i];
+	}
+      }
+      return data;
+    }
+
+    inline scitbx::af::flex_int get_image(std::size_t n) {
+      std::size_t fast = imdiff->hpixels;
+      std::size_t slow = imdiff->vpixels;
+      scitbx::af::flex_int data(scitbx::af::flex_grid<>(slow,fast));
+      int* begin=data.begin();
+      DIFFIMAGE *im = &imdiff[n];
+      std::size_t ct=0;
+      for (int i = 0;i<im->image_length;i++) {
+	if (im->image[i] == im->ignore_tag) {
+	  begin[i] = -1;
+	  ct++;
+	} else {
+	  begin[i] = im->image[i];
+	}
+      }
+      return data;
+    }
+
+    inline scitbx::af::flex_double get_image_double(std::size_t n) {
+      std::size_t fast = imdiff->hpixels;
+      std::size_t slow = imdiff->vpixels;
+      scitbx::af::flex_double data(scitbx::af::flex_grid<>(slow,fast));
+      double* begin=data.begin();
+      DIFFIMAGE *im = &imdiff[n];
+      std::size_t ct=0;
+      for (int i = 0;i<im->image_length;i++) {
+	if (im->image[i] == im->ignore_tag) {
+	  begin[i] = (double)-1;
+	  ct++;
+	} else {
+	  begin[i] = (double)(im->image[i] - im->value_offset);
 	}
       }
       return data;
@@ -1078,12 +1126,18 @@ namespace boost_python { namespace {
       .def("LunusProcimlt",LunusProcimlt2)
     ;
 
+    void (lunus::LunusDIFFIMAGE::*LunusSetparamsim_b1)(std::string deck) = &lunus::LunusDIFFIMAGE::LunusSetparamsim;
+    void (lunus::LunusDIFFIMAGE::*LunusSetparamsim_b2)(std::size_t n,std::string deck) = &lunus::LunusDIFFIMAGE::LunusSetparamsim;
+
     void (lunus::LunusDIFFIMAGE::*LunusWindim1)() = &lunus::LunusDIFFIMAGE::LunusWindim;
     void (lunus::LunusDIFFIMAGE::*LunusWindim2)(short, short, short, short) = &lunus::LunusDIFFIMAGE::LunusWindim;
 
     void (lunus::LunusDIFFIMAGE::*set_image_b1)(scitbx::af::flex_int data) = &lunus::LunusDIFFIMAGE::set_image;
     void (lunus::LunusDIFFIMAGE::*set_image_b2)(std::size_t n,scitbx::af::flex_int data) = &lunus::LunusDIFFIMAGE::set_image;
     void (lunus::LunusDIFFIMAGE::*set_image_b3)(std::size_t n,scitbx::af::flex_double data) = &lunus::LunusDIFFIMAGE::set_image;
+
+    scitbx::af::flex_int  (lunus::LunusDIFFIMAGE::*get_image_b1)() = &lunus::LunusDIFFIMAGE::get_image;
+    scitbx::af::flex_int  (lunus::LunusDIFFIMAGE::*get_image_b2)(std::size_t n) = &lunus::LunusDIFFIMAGE::get_image;
 
     void (lunus::LunusDIFFIMAGE::*LunusPunchim1)() = &lunus::LunusDIFFIMAGE::LunusPunchim;
     void (lunus::LunusDIFFIMAGE::*LunusPunchim2)(short, short, short, short) = &lunus::LunusDIFFIMAGE::LunusPunchim;
@@ -1095,13 +1149,17 @@ namespace boost_python { namespace {
     void (lunus::LunusDIFFIMAGE::*LunusModeim2)(size_t) = &lunus::LunusDIFFIMAGE::LunusModeim;
 
     class_<lunus::LunusDIFFIMAGE>("LunusDIFFIMAGE",init<>())
-      .def("LunusSetparamsim",&lunus::LunusDIFFIMAGE::LunusSetparamsim)
+      .def(init<std::size_t>())
+      .def("LunusSetparamsim",LunusSetparamsim_b1)
+      .def("LunusSetparamsim",LunusSetparamsim_b2)
       .def("get_image_data_type_size",&lunus::LunusDIFFIMAGE::get_image_data_type_size)
       .def("set_image",set_image_b1)
       .def("set_image",set_image_b2)
       .def("set_image",set_image_b3)
       .def("set_reference",&lunus::LunusDIFFIMAGE::set_reference)
-      .def("get_image",&lunus::LunusDIFFIMAGE::get_image)
+      .def("get_image",get_image_b1)
+      .def("get_image",get_image_b2)
+      .def("get_image_double",&lunus::LunusDIFFIMAGE::get_image_double)
       .def("LunusPunchim",LunusPunchim1)
       .def("LunusPunchim",LunusPunchim2)
       .def("LunusWindim",LunusWindim1)

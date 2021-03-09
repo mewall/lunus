@@ -203,6 +203,8 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 
   if (reentry == 0 || reentry == 1) {
 
+    //    printf("MODEIM: Allocating arrays\n");
+
     image = (IMAGE_DATA_TYPE *)calloc(image_length,sizeof(IMAGE_DATA_TYPE));
     image_mode = (size_t *)calloc(image_length,sizeof(size_t));
     window = (size_t *)calloc(wlen*num_teams*num_threads,sizeof(size_t));
@@ -225,7 +227,10 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 
   } 
 
+  //  printf("LMODEIM: mode_height = %d, mode_width = %d, num_panels = %d\n",imdiff_in->mode_height,imdiff_in->mode_width,imdiff_in->num_panels);
+
   for (pidx = 0; pidx < imdiff_in->num_panels; pidx++) {
+    size_t num_mode_values=0, num_median_values=0, num_med90_values=0, num_this_values=0;
     imdiff = &imdiff_in[pidx];
     if (pidx != imdiff->this_panel) {
       perror("LMODEIM: Image panels are not indexed sequentially. Aborting\n");
@@ -385,30 +390,56 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 		  mode_ct++;
 		}
 	      }
+	      mode_value = (size_t)(((float)mode_value/(float)mode_ct) + .5);
 	      double p = (double)this_count/(double)l;
 	      entropy -=  p * log(p);
 	      //	  image_mode[index_mode] = (size_t)(((float)mode_value/(float)mode_ct) + .5);
 #ifdef DEBUG
 	      if (j == 2200 && i == 1800) {
-		printf("entropy = %g, mode_ct = %d, mode_value = %ld, median_value = %ld, range_value = %ld, this_value = %ld, med90_value = %ld, kmed = %d, k90 = %d\n",entropy,mode_ct,mode_value,median_value,range_value,this_value,med90_value,kmed,k90);
+		printf("LMODEIM: entropy = %g, mode_ct = %d, mode_value = %ld, median_value = %ld, range_value = %ld, this_value = %ld, med90_value = %ld, kmed = %d, k90 = %d\n",entropy,mode_ct,mode_value,median_value,range_value,this_value,med90_value,kmed,k90);
 	      } 
 #endif 
-	      if (entropy > log(10.)) {
-		if (mode_ct == 1) {
-		  mode_value = median_value;
-		}
-	      } else if (range_value <= 2) {
-		mode_value = this_value;
-	      } else {
-		if (this_value <= med90_value) {
-		  mode_value = this_value;
+	      // Depending on the distribution, use alternative values other than the mode
+	      /*
+		if (range_value <= 2) {
+		  image_mode[index_mode]  = this_value;
+		  num_this_values++;
 		} else {
-		  mode_value = this_window[(size_t)(((double)k90*(double)rand())/(double)RAND_MAX)];
+		  if (this_value <= med90_value) {
+		    image_mode[index_mode] = this_value;
+		    num_this_values++;
+		  } else {
+		    image_mode[index_mode] = this_window[(size_t)(((double)k90*(double)rand())/(double)RAND_MAX)];
+		    num_med90_values++;
 		  //	      printf("%d %ld %ld\n",kmed,mode_value,median_value);
 		  //	      mode_value = median_value;
+		  }
+		}
+	      */
+	      if (entropy > log(10.)) {
+		if (mode_ct == 1) {
+		  image_mode[index_mode] = median_value;
+		  num_median_values++;
+		} else {
+		  image_mode[index_mode] = mode_value;
+		  num_mode_values++;
+		}
+	      } else {
+		if (range_value <= 2) {
+		  image_mode[index_mode]  = this_value;
+		  num_this_values++;
+		} else {
+		  if (this_value <= med90_value) {
+		    image_mode[index_mode] = this_value;
+		    num_this_values++;
+		  } else {
+		    image_mode[index_mode] = this_window[(size_t)(((double)k90*(double)rand())/(double)RAND_MAX)];
+		    num_med90_values++;
+		  //	      printf("%d %ld %ld\n",kmed,mode_value,median_value);
+		  //	      mode_value = median_value;
+		  }
 		}
 	      }
-	      image_mode[index_mode] = (size_t)(((float)mode_value/(float)mode_ct) + .5);
 	    }
 	    //        printf("Stop tm = %ld,th = %ld,i = %d,j = %d\n",tm,th,i,j);
 	  }
@@ -424,9 +455,9 @@ int lmodeim(DIFFIMAGE *imdiff_in)
     double tel = stop-start;
     fflush(stdout);
 
-#ifdef DEBUG
-    printf("kernel loop took %g seconds\n",tel);
-#endif
+    //#ifdef DEBUG
+    printf("LMODEIM: %g seconds, num_mode_values=%ld,num_median_values=%ld,num_this_values=%ld,num_med90_values=%ld\n",tel,num_mode_values,num_median_values,num_this_values,num_med90_values);
+    //#endif
     
 #ifdef USE_OPENMP
 #ifdef USE_OFFLOAD
@@ -482,6 +513,7 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 #ifdef USE_OFFLOAD
 #pragma omp target exit data map(delete:image[0:image_length],image_mode[0:image_length],window[0:wlen*num_threads*num_teams],stack[0:wlen*num_threads*num_teams])
 #endif
+      //      printf("MODEIM: Freeing arrays\n");
       free(image);
       free(image_mode);
       free(window);
