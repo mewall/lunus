@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+#
+# LIBTBX_SET_DISPATCHER_NAME lunus.filter_peaks
+
 from __future__ import print_function
 import future,six
 import lunus
@@ -58,7 +62,9 @@ if __name__=="__main__":
 
     parser.add_argument("--infile",help="Input file name",required=True)
 
-    parser.add_argument("--outfile",help="Output file name",default="mode.cbf")
+    parser.add_argument("--outfile",help="Output file name",default="filtered.cbf")
+
+    parser.add_argument("--timer",help="Output file name",type=bool,default=False)
 
     args=parser.parse_args()
 
@@ -73,10 +79,6 @@ if __name__=="__main__":
 
     data = imageset[0]
 
-    print("Took %g seconds to get CBF handle and read data" % (time.time() - ts))
-
-    ts = time.time()
-
     if not isinstance(data, tuple):
       data = (data,)
     data = list(data)
@@ -86,9 +88,6 @@ if __name__=="__main__":
     A = LunusDIFFIMAGE(len(data))
 
 # Populate the image with multipanel data
-
-    print("Set up images")
-    sys.stdout.flush()
 
     for pidx in range(len(data)):
       A.set_image(pidx,data[pidx])
@@ -110,9 +109,6 @@ if __name__=="__main__":
 modeim_bin_size=1
 modeim_kernel_width=15
 '''
-    print("Get image params")
-    sys.stdout.flush()
-
     image_params = get_image_params(imageset)
 
 # Set the LUNUS image parameters
@@ -121,14 +117,8 @@ modeim_kernel_width=15
         deck_and_extras = deck+image_params[pidx]
         A.LunusSetparamsim(pidx,deck_and_extras)
 
-# Bragg filter
-
-    print("About to perform Bragg filter")
-    sys.stdout.flush()
-
     A.LunusModeim()
 
-    print("Bragg filter finished.")
 
 # Get the processed image
 
@@ -140,3 +130,6 @@ modeim_kernel_width=15
     writer.add_data_to_cbf(cbf, data=tuple(data))
 
     writer.write_cbf(args.outfile, cbf=cbf)
+
+    if args.timer:
+      print("FILTER: Took %g seconds to process %s" % (time.time() - ts,args.infile))
