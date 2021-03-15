@@ -166,7 +166,6 @@ namespace lunus {
       for (int i = 0;i<im->image_length;i++) {
 	if (begin[i] >= (double)MAX_IMAGE_DATA_VALUE) {
 	  im->image[i] = im->ignore_tag;
-	  ct++;
 	} else {
 	  if ((IMAGE_DATA_TYPE)begin[i] > max) max = (IMAGE_DATA_TYPE)begin[i];
 	  if ((IMAGE_DATA_TYPE)begin[i] < min) min = (IMAGE_DATA_TYPE)begin[i];
@@ -174,8 +173,11 @@ namespace lunus {
       }
       if (min<0) im->value_offset = -min;
       for (int i = 0;i<im->image_length;i++) {
-	if (begin[i] < (double)MAX_IMAGE_DATA_VALUE) {
+	if (begin[i] < (double)MAX_IMAGE_DATA_VALUE - im->value_offset) {
 	  im->image[i] = (IMAGE_DATA_TYPE)begin[i] + im->value_offset;
+	} else {
+	  im->image[i] = im->ignore_tag;
+	  ct++;
 	}
       }
 
@@ -372,7 +374,6 @@ namespace lunus {
       lat->yvoxels = yvox;
       lat->zvoxels = zvox;
       lat->latct = (std::size_t *)realloc(lat->latct,lat->lattice_length*sizeof(std::size_t));
-      std::size_t ct=0;
       for (int i = 0;i<lat->lattice_length;i++) {
 	lat->latct[i] = (std::size_t)begin[i];
       }
@@ -777,7 +778,6 @@ namespace lunus {
       for (int i = 0;i<im->image_length;i++) {
 	if (begin[i] >= (double)MAX_IMAGE_DATA_VALUE) {
 	  im->image[i] = im->ignore_tag;
-	  ct++;
 	} else {
 	  if ((IMAGE_DATA_TYPE)begin[i] > max) max = (IMAGE_DATA_TYPE)begin[i];
 	  if ((IMAGE_DATA_TYPE)begin[i] < min) min = (IMAGE_DATA_TYPE)begin[i];
@@ -785,10 +785,17 @@ namespace lunus {
       }
       if (min<0) im->value_offset = -min;
       for (int i = 0;i<im->image_length;i++) {
-	if (begin[i] < (double)MAX_IMAGE_DATA_VALUE) {
+	if (begin[i] < (double)MAX_IMAGE_DATA_VALUE - im->value_offset) {
 	  im->image[i] = (IMAGE_DATA_TYPE)begin[i] + im->value_offset;
+	} else {
+	  im->image[i] = im->ignore_tag;
+	  ct++;
 	}
       }
+
+      //      if (n == 23) {
+      //	printf("begin[37566] = %g,im->image[37566] = %d\n",begin[37566],im->image[37566]);
+      //      }
 
       //      printf("LUNUS: IMAGE: ct = %ld,max = %d, min = %d\n",ct,max,min);
 
@@ -920,7 +927,7 @@ namespace lunus {
       std::size_t ct=0;
       for (int i = 0;i<im->image_length;i++) {
 	if (im->image[i] == im->ignore_tag) {
-	  begin[i] = (double)-1;
+	  begin[i] = -1.;
 	  ct++;
 	} else {
 	  begin[i] = (double)(im->image[i] - im->value_offset);

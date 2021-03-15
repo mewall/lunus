@@ -64,30 +64,37 @@ if __name__=="__main__":
     ts = time.time()
     writer = FullCBFWriter(filename=args.infile)
     cbf = writer.get_cbf_handle()
-    data = writer.imageset[0]
+    imageset = writer.imageset
+
+    detector = imageset.get_detector()
+    beam = imageset.get_beam()
+    gonio = imageset.get_goniometer()
+    scan = imageset.get_scan()
+
+    data = imageset[0]
 
     print("Took %g seconds to get CBF handle and read data" % (time.time() - ts))
 
     ts = time.time()
-    img = dxtbx.load(args.infile)
-
-    detector = img.get_detector()
-    beam = img.get_beam()
-    gonio = img.get_goniometer()
-    scan = img.get_scan()
-
-#    data = img.get_raw_data()
-
-    print("Took %g seconds to get image metadata" % (time.time() - ts))
 
     if not isinstance(data, tuple):
       data = (data,)
     data = list(data)
 
+    print(data[23].as_numpy_array().shape)
+    panel23 = data[23].as_numpy_array().flatten()
+    max = np.amax(panel23)
+    max_index = np.argmax(panel23)
+    print("len(panel23) = %d, divide by 256 = %d" % (len(panel23),len(panel23)/256))
+    print("max = %g, index = %d" % (max, max_index))
+    print("slow = %d, fast = %d" % (max_index/254,max_index % 254))
+    print("panel23(slow,fast) = %g" % (panel23[254*(np.int(max_index/254))+(max_index%254)]))
+
     A = LunusDIFFIMAGE(len(data))
 
     print("Set up images")
     sys.stdout.flush()
+
 
     for pidx in range(len(data)):
       A.set_image(pidx,data[pidx])
@@ -136,6 +143,8 @@ modeim_kernel_width=15
 #dxtbx.format.FormatCBFMini.FormatCBFMini.as_file(detector,beam,gonio,scan,data,path,header_convention="GENERIC_MINI",det_type="GENERIC")
     for pidx in range(len(data)):
       data[pidx] = A.get_image_double(pidx)
+    panel23 = data[23].as_numpy_array().flatten()
+    print("panel23(slow,fast) = %g" % (panel23[254*(np.int(max_index/254))+(max_index%254)]))
     writer.add_data_to_cbf(cbf, data=tuple(data))
     writer.write_cbf(args.outfile, cbf=cbf)
 #FormatCBFMini.as_file(detector,beam,gonio,scan,data2,args.outfile)
