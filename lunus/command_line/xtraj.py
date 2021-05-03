@@ -267,7 +267,7 @@ if __name__=="__main__":
   xrs.set_occupancies(1.0)
   xrs_sel = xrs.select(selection)
   fcalc = xrs_sel.structure_factors(d_min=d_min).f_calc()
-  f_000 = mmtbx.utils.f_000(xray_structure=xrs_sel)
+  f_000 = mmtbx.utils.f_000(xray_structure=xrs_sel,mean_solvent_density=0.0)
   volume = xrs_sel.unit_cell().volume()
   print("f_000 = %g, volume = %g" % (f_000.f_000,volume))
   if (mpi_rank == 0):
