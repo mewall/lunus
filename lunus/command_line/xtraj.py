@@ -11,6 +11,7 @@
 #
 # This script depends on CCTBX. Launch using mpirun for parallel execution.
 
+from __future__ import print_function
 from iotbx.pdb import hierarchy
 from cctbx.array_family import flex
 import mmtbx.utils
@@ -24,7 +25,6 @@ import os
 from libtbx.utils import Keep
 from cctbx import crystal
 import cctbx.sgtbx
-import future
 
 def mpi_enabled():
   return 'OMPI_COMM_WORLD_SIZE' in os.environ.keys()
