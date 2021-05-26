@@ -10,7 +10,6 @@
 #include<complex.h>
 #ifdef USE_FFTW
 #include<fftw3.h>
-#endif
 int lllmnlt(LAT3D *lat)
 {
   size_t
@@ -145,6 +144,7 @@ int lllmnlt(LAT3D *lat)
  CloseShop:
   return(return_value);
 }
+#endif
 
 int lllmlt(LAT3D *lat)
 {
