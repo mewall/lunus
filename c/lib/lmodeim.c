@@ -27,6 +27,20 @@
 #pragma omp declare target
 #endif
 
+double log_local(double x) {
+  int n,N=10,onefac=1;
+  double y,xfac,f = 0.0;
+
+  xfac = y = x-1.;
+
+  for (n=1;n<=10;n++) {
+    f += (double)onefac*xfac/(double)n;
+    onefac *= -1;
+    xfac *= y;
+  }
+  return(f);
+}
+
 void swap(size_t *a, size_t *b) 
 { 
   size_t t = *a; 
@@ -179,8 +193,8 @@ int lmodeim(DIFFIMAGE *imdiff_in)
     hpixels = 0,
     vpixels = 0;
 
-  size_t num_teams = 32;
-  size_t num_threads = 1;
+  size_t num_teams = LUNUS_TEAMS;
+  size_t num_threads = LUNUS_THREADS;
 
   //  printf("omp_get_num_teams() = %d, omp_get_num_threads() = %d\n",omp_get_num_teams(), omp_get_num_threads());
 
@@ -381,7 +395,7 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 		  this_count++;
 		} else {
 		  double p = (double)this_count/(double)l;
-		  entropy -=  p * log(p);
+		  entropy -=  p * log_local(p);
 		  last_value = this_window[k];
 		  this_count = 1;
 		}
@@ -392,7 +406,7 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 	      }
 	      mode_value = (size_t)(((float)mode_value/(float)mode_ct) + .5);
 	      double p = (double)this_count/(double)l;
-	      entropy -=  p * log(p);
+	      entropy -=  p * log_local(p);
 	      //	  image_mode[index_mode] = (size_t)(((float)mode_value/(float)mode_ct) + .5);
 #ifdef DEBUG
 	      if (j == 2200 && i == 1800) {

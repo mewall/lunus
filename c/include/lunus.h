@@ -304,6 +304,13 @@
 #endif
 #endif
 
+#ifndef LUNUS_TEAMS
+#define LUNUS_TEAMS 1
+#endif
+#ifndef LUNUS_THREADS
+#define LUNUS_THREADS 32
+#endif
+
 /*
  * Structures and typedefs:
  */
