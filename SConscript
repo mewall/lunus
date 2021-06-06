@@ -29,10 +29,16 @@ CPPP = os.path.join(env_etc.lunus_include,"c","include")
 env_lunus = env_base.Clone(SHLINKFLAGS=env_etc.shlinkflags)
 
 replacement_ccflags = []
-for f in env_lunus["SHCCFLAGS"]:
+for f in env_lunus["CCFLAGS"]:
  if (f not in ["-ffast-math"]):
    replacement_ccflags.append(f)
-env_lunus.Replace(SHCCFLAGS = replacement_ccflags)
+env_lunus.Replace(CCFLAGS = replacement_ccflags)
+
+#replacement_ccflags = []
+#for f in env_lunus["SHCCFLAGS"]:
+# if (f not in ["-ffast-math"]):
+#   replacement_ccflags.append(f)
+#env_lunus.Replace(SHCCFLAGS = replacement_ccflags)
 
 #replacement_cflags = []
 #for f in env_lunus["SHCFLAGS"]:
