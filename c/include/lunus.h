@@ -305,10 +305,10 @@
 #endif
 
 #ifndef LUNUS_TEAMS
-#define LUNUS_TEAMS 1
+#define LUNUS_TEAMS 32
 #endif
 #ifndef LUNUS_THREADS
-#define LUNUS_THREADS 32
+#define LUNUS_THREADS 1
 #endif
 
 /*
