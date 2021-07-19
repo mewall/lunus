@@ -310,7 +310,8 @@ int lmodeim(DIFFIMAGE *imdiff_in)
 #pragma omp distribute parallel for collapse(2) schedule(static,1)
 #else
     //#pragma omp distribute parallel for collapse(2)
-#pragma omp parallel for shared(stack,window,image,image_mode) private(i,j,th)
+#pragma omp parallel for shared(stack,window,image,image_mode) \
+  private(i,j,th) reduction(+:num_mode_values,num_median_values,num_this_values,num_med90_values)
 #endif
 #endif
     for (tm = 0; tm < num_teams; tm++) {
