@@ -7,7 +7,7 @@
 
 
 import libtbx.load_env
-import os
+import os, sys
 from libtbx.env_config import get_boost_library_with_python_version
 op = os.path
 Import("env_base", "env_etc")
@@ -125,4 +125,6 @@ if (not env_etc.no_boost_python):
 
   env_etc.enable_more_warnings(env=env_lunus)
   env_lunus.SConscript("lunus/SConscript",exports={ 'env' : env_lunus })
+  if sys.platform.startswith('linux') and env_etc.enable_cuda:
+    env_lunus.SConscript("lunus/cuda/SConscript",exports={ 'env' : env_lunus })
 
