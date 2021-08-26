@@ -8,6 +8,7 @@
 
 import libtbx.load_env
 import os
+from libtbx.env_config import get_boost_library_with_python_version
 op = os.path
 Import("env_base", "env_etc")
 
@@ -112,8 +113,14 @@ if (not env_etc.no_boost_python):
     env=env_lunus,
     paths=env_etc.lunus_common_includes + [env_etc.python_include])
 
+  if libtbx.env.build_options.use_conda:
+    boost_python = get_boost_library_with_python_version(
+        "boost_python", env_etc.conda_libpath
+    )
+  else:
+    boost_python = "boost_python"
 
-  env_lunus.Append(LIBS=env_etc.libm+["scitbx_boost_python","boost_python","cctbx"])
+  env_lunus.Append(LIBS=env_etc.libm+["scitbx_boost_python",boost_python,"cctbx"])
 
   env_etc.enable_more_warnings(env=env_lunus)
   env_lunus.SConscript("lunus/SConscript",exports={ 'env' : env_lunus })
