@@ -117,8 +117,6 @@ if (not env_etc.no_boost_python):
     boost_python = get_boost_library_with_python_version(
         "boost_python", env_etc.conda_libpath
     )
-    env_lunus.Append(LIBPATH=env_etc.conda_libpath)
-    env_etc.lunus_common_includes.extend(env_etc.conda_cpppath)
   else:
     boost_python = "boost_python"
 
