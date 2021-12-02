@@ -212,6 +212,19 @@ if __name__=="__main__":
   else:
     space_group_str = args.pop(idx).split("=")[1]
 
+# Apply B factor in structure calculations, then reverse after calc
+
+  try:
+    idx = [a.find("apply_bfac")==0 for a in args].index(True)
+  except ValueError:
+    apply_bfac = False
+  else:
+    apply_bfac_str = args.pop(idx).split("=")[1]
+    if apply_bfac_str == "True":
+      apply_bfac = True
+    else:
+      apply_bfac = False
+
 # Set nsteps if needed
   
   if (nsteps == 0):
@@ -263,7 +276,10 @@ if __name__=="__main__":
   selection_cache = pdb_in.hierarchy.atom_selection_cache()
   selection = selection_cache.selection(selection_text)
   xrs.convert_to_isotropic()
-  xrs.set_b_iso(0.0)
+  if apply_bfac:
+    xrs.set_b_iso(15.0)
+  else:
+    xrs.set_b_iso(0.0)
   xrs.set_occupancies(1.0)
   xrs_sel = xrs.select(selection)
   fcalc = xrs_sel.structure_factors(d_min=d_min).f_calc()
@@ -483,6 +499,10 @@ if __name__=="__main__":
     avg_fcalc = sig_fcalc / float(ct)
     sq_avg_fcalc = abs(avg_fcalc).set_observation_type_xray_amplitude().f_as_f_sq()
     avg_icalc = sig_icalc / float(ct)
+    if apply_bfac:
+      avg_fcalc.apply_debye_waller_factors(b_iso=-15.0)
+      sq_avg_fcalc.apply_debye_waller_factors(b_iso=-15.0)
+      avg_icalc.apply_debye_waller_factors(b_iso=-15.0)
     diffuse_array=avg_icalc*1.0
     sq_avg_fcalc_data = sq_avg_fcalc.data()
     diffuse_data = diffuse_array.data()
