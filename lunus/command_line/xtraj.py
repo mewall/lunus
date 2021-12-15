@@ -194,7 +194,16 @@ if __name__=="__main__":
     else:
       translational_fit = False
 
-# Unit cell, replaces the one in the top file
+# Scattering table
+
+  try:
+    idx = [a.find("scattering_table")==0 for a in args].index(True)
+  except ValueError:
+    scattering_table = 'n_gaussian'
+  else:
+    scattering_table = args.pop(idx).split("=")[1]
+
+    # Unit cell, replaces the one in the top file
 
   try:
     idx = [a.find("unit_cell")==0 for a in args].index(True)
@@ -282,6 +291,7 @@ if __name__=="__main__":
     xrs.set_b_iso(0.0)
   xrs.set_occupancies(1.0)
   xrs_sel = xrs.select(selection)
+  xrs_sel.scattering_type_registry(table=scattering_table)
   fcalc = xrs_sel.structure_factors(d_min=d_min).f_calc()
   f_000 = mmtbx.utils.f_000(xray_structure=xrs_sel,mean_solvent_density=0.0)
   volume = xrs_sel.unit_cell().volume()
@@ -421,6 +431,8 @@ if __name__=="__main__":
 
         xrs_sel = xrs.select(selection)
 
+        xrs_sel.scattering_type_registry(table=scattering_table)
+        
         fcalc = xrs_sel.structure_factors(d_min=d_min).f_calc()
 
     # Commented out some density trajectory code
