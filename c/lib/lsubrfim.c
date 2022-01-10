@@ -8,7 +8,7 @@
 
 #include<mwmask.h>
 
-int lsubrfim(DIFFIMAGE *imdiff)
+int lsubrfim(DIFFIMAGE *imdiff_in)
 {
 	size_t
 		r,
@@ -20,11 +20,25 @@ int lsubrfim(DIFFIMAGE *imdiff)
 
 	struct xycoords rvec;
 
+	int pidx;
+
+	DIFFIMAGE *imdiff;
+
 	int
 		return_value;
+	
+	XYZCOORDS_DATA
+	  ssq,
+	  rr,
+	  cos_two_theta;
+	
+  if (imdiff_in->slist == NULL) lslistim(imdiff_in);
 
+	
   // First, compute the spline from the rfile
 
+  imdiff = imdiff_in;
+  
   float *tau, *cv;
   int n,ibcbeg,ibcend;
   int l,jd,kk;
@@ -51,22 +65,35 @@ int lsubrfim(DIFFIMAGE *imdiff)
 
   lspline(tau,cv,&n,&ibcbeg,&ibcend);
 
-  float radiusf;
+  // Subtract the rfile from each image panel
+  
+  for (pidx = 0; pidx < imdiff_in->num_panels; pidx++) {
 
-	for(r = 0; r < imdiff->vpixels; r++) {
-	  rvec.y = r*imdiff->pixel_size_mm - imdiff->beam_mm.y;
-	  for(c = 0; c < imdiff->hpixels; c++) {
-	      rvec.x = c*imdiff->pixel_size_mm - imdiff->beam_mm.x;
-	      //	      radius = (size_t)(sqrtf(rvec.x*rvec.x + rvec.y*rvec.y)/imdiff->pixel_size_mm+.5);
-	      radiusf = (sqrtf(rvec.x*rvec.x + rvec.y*rvec.y)/imdiff->pixel_size_mm);
-	      radius = (size_t)radiusf;
-	      l = (int)radius + 1;
+    imdiff = &imdiff_in[pidx];
+    index = 0;
+    
+    struct xyzcoords s;
 
-	      index = r*imdiff->hpixels+c;
+    float radiusf;
+    
+    for(r = 0; r < imdiff->vpixels; r++) {
+      for(c = 0; c < imdiff->hpixels; c++) {
+	s = imdiff->slist[index];
+	ssq = ldotvec(s,s);
+	cos_two_theta = 1. - ssq * imdiff->wavelength * imdiff->wavelength / 2.;
+	rr = imdiff->distance_mm / cos_two_theta; 
+	rvec.x = imdiff->wavelength * s.x * rr;
+	rvec.y = imdiff->wavelength * s.y * rr;
+	radiusf = sqrtf(rvec.x*rvec.x + rvec.y*rvec.y)/imdiff->pixel_size_mm;
+	radius = (size_t)(radiusf);
 
-	      if ((imdiff->image[index] != imdiff->overload_tag) &&
-		  (imdiff->image[index] != imdiff->ignore_tag) &&
-		    (imdiff->image[index] != imdiff->mask_tag)) {
+	l = (int)radius + 1;
+
+	index = r*imdiff->hpixels+c;
+
+	if ((imdiff->image[index] != imdiff->overload_tag) &&
+	    (imdiff->image[index] != imdiff->ignore_tag) &&
+	    (imdiff->image[index] != imdiff->mask_tag)) {
 	  if (radiusf>= tau[0] && radiusf <= tau[n-2]) {
 	    imdiff->image[index] -= (IMAGE_DATA_TYPE)lspleval(tau,cv,&l,&kk,&radiusf,&jd);
 	  } else {
@@ -91,7 +118,8 @@ int lsubrfim(DIFFIMAGE *imdiff)
 	    index++;
 	  }
 	}
-	return(return_value);
+  }
+  return(return_value);
 }
 
 

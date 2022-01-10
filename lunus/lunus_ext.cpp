@@ -636,6 +636,11 @@ namespace lunus {
       lpolarim(imdiff);
     }
 
+    inline void LunusPolarim() {
+      printf("LunusPolarim\n");
+      lpolarim(imdiff);
+    }
+
     inline void LunusNormim(float bx, float by, float dist, float cx, float cy, float px) {
       printf("LunusNormim\n");
       imdiff->beam_mm.x = bx;
@@ -883,6 +888,25 @@ namespace lunus {
       return data;
     }
 
+    inline scitbx::af::flex_double LunusRadialAvgim() {
+      lavgrim(imdiff);
+      std::size_t rs = imdiff->rfile_length;
+      scitbx::af::flex_double data(rs);
+      double* begin=data.begin();
+      std::size_t ct=0;
+      imdiff->rfile = (RFILE_DATA_TYPE *)realloc(imdiff->rfile,imdiff->rfile_length*sizeof(RFILE_DATA_TYPE));
+      for (int i = 0;i<imdiff->rfile_length;i++) {
+	if (imdiff->rfile[i] == imdiff->ignore_tag) {
+	  begin[i] = -1;
+	  ct++;
+	} else {
+	  begin[i] = imdiff->rfile[i];
+	}
+      }
+      printf("Calculated radial average for %ld bins, with %ld empty bins.\n",rs,ct);
+      return data;
+    }
+    
     inline scitbx::af::flex_int get_image() {
       std::size_t fast = imdiff->hpixels;
       std::size_t slow = imdiff->vpixels;
@@ -1156,6 +1180,12 @@ namespace boost_python { namespace {
     void (lunus::LunusDIFFIMAGE::*LunusModeim1)() = &lunus::LunusDIFFIMAGE::LunusModeim;
     void (lunus::LunusDIFFIMAGE::*LunusModeim2)(size_t) = &lunus::LunusDIFFIMAGE::LunusModeim;
 
+    void (lunus::LunusDIFFIMAGE::*LunusPolarim1)() = &lunus::LunusDIFFIMAGE::LunusPolarim;
+    void (lunus::LunusDIFFIMAGE::*LunusPolarim2)(float,float,float,float,float,float) = &lunus::LunusDIFFIMAGE::LunusPolarim;
+
+    scitbx::af::flex_double (lunus::LunusDIFFIMAGE::*LunusRadialAvgim1)() = &lunus::LunusDIFFIMAGE::LunusRadialAvgim;
+    scitbx::af::flex_double (lunus::LunusDIFFIMAGE::*LunusRadialAvgim2)(float,float,float) = &lunus::LunusDIFFIMAGE::LunusRadialAvgim;
+
     class_<lunus::LunusDIFFIMAGE>("LunusDIFFIMAGE",init<>())
       .def(init<std::size_t>())
       .def("LunusSetparamsim",LunusSetparamsim_b1)
@@ -1174,11 +1204,13 @@ namespace boost_python { namespace {
       .def("LunusWindim",LunusWindim2)
       .def("LunusThrshim",LunusThrshim1)
       .def("LunusThrshim",LunusThrshim2)
-      .def("LunusPolarim",&lunus::LunusDIFFIMAGE::LunusPolarim)
+      .def("LunusPolarim",LunusPolarim1)
+      .def("LunusPolarim",LunusPolarim2)
+      .def("LunusRadialAvgim",LunusRadialAvgim1)
+      .def("LunusRadialAvgim",LunusRadialAvgim2)
       .def("LunusNormim",&lunus::LunusDIFFIMAGE::LunusNormim)
       .def("LunusModeim",LunusModeim1)
       .def("LunusModeim",LunusModeim2)
-      .def("LunusRadialAvgim",&lunus::LunusDIFFIMAGE::LunusRadialAvgim)
       .def("LunusScaleim",&lunus::LunusDIFFIMAGE::LunusScaleim)
     ;
 
