@@ -90,6 +90,67 @@ def get_experiment_xvectors(experiments):
 
   return(x)
 
+def get_image_params(img):
+
+  from scitbx.matrix import col
+
+  beam = img.get_beam()
+  detector = img.get_detector()
+
+  beam_direction = col(beam.get_sample_to_source_direction())
+  wavelength = beam.get_wavelength()
+
+  beam_params = "\nbeam_vec={0},{1},{2}\nwavelength={3}".format(-beam_direction[0],-beam_direction[1],-beam_direction[2],wavelength)
+
+  experiment_params = []
+
+  panel_ct = 0
+
+  for panel in detector: 
+    pixel_size_mm = panel.get_pixel_size()[0]
+    beam_mm_x = panel.get_beam_centre(beam.get_s0())[0]
+    beam_mm_y = panel.get_beam_centre(beam.get_s0())[1]
+    distance_mm = panel.get_distance()
+    fast_vec = col(panel.get_fast_axis())
+    slow_vec = col(panel.get_slow_axis())
+    origin_vec = col(panel.get_origin())
+    normal_vec = col(panel.get_normal())
+    
+    fast_vec_params = "\nfast_vec={0},{1},{2}".format(fast_vec[0],fast_vec[1],fast_vec[2])
+    slow_vec_params = "\nslow_vec={0},{1},{2}".format(slow_vec[0],slow_vec[1],slow_vec[2])
+    origin_vec_params = "\norigin_vec={0},{1},{2}".format(origin_vec[0],origin_vec[1],origin_vec[2])
+    normal_vec_params = "\nnormal_vec={0},{1},{2}".format(normal_vec[0],normal_vec[1],normal_vec[2])
+
+    more_params = "\npixel_size_mm={0}\nbeam_mm_x={1}\nbeam_mm_y={2}\ndistance_mm={3}".format(pixel_size_mm,beam_mm_x,beam_mm_y,distance_mm)
+
+    experiment_params.append(beam_params+fast_vec_params+slow_vec_params+origin_vec_params+normal_vec_params+more_params)
+
+#    print "panel_ct = ",panel_ct,origin_vec_params
+
+    panel_ct += 1
+
+  return(experiment_params)
+
+def get_image_xvectors(img):
+
+  beam = img.get_beam()
+  detector = img.get_detector()
+
+  x = []
+
+  for panel in detector: 
+    lab_coordinates = flex.vec3_double()
+    pixels = flex.vec2_double(panel.get_image_size())
+    mms = panel.pixel_to_millimeter(pixels)
+    lab_coordinates.extend(panel.get_lab_coord(mms))
+
+    # generate s1 vectors
+    s1 = lab_coordinates.each_normalize() * (1/beam.get_wavelength())
+    # Generate x vectors
+    x.append((s1 - beam.get_s0()).as_double())
+
+  return(x)
+
 def mpi_bcast(d):
   if mpi_enabled():
     db = mpi_comm.bcast(d,root=0)

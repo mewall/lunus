@@ -31,7 +31,9 @@ int lsubrfim(DIFFIMAGE *imdiff_in)
 	  ssq,
 	  rr,
 	  cos_two_theta;
-	
+
+	IMAGE_DATA_TYPE minval = 0;
+
   if (imdiff_in->slist == NULL) lslistim(imdiff_in);
 
 	
@@ -96,11 +98,15 @@ int lsubrfim(DIFFIMAGE *imdiff_in)
 	    (imdiff->image[index] != imdiff->mask_tag)) {
 	  if (radiusf>= tau[0] && radiusf <= tau[n-2]) {
 	    imdiff->image[index] -= (IMAGE_DATA_TYPE)lspleval(tau,cv,&l,&kk,&radiusf,&jd);
+	    if (imdiff->image[index] < minval) {
+	      minval = imdiff->image[index];
+	    }
+
 	  } else {
 	    imdiff->image[index] = imdiff->ignore_tag;
 	  }} else {
 	    imdiff->image[index] = imdiff->ignore_tag;
-		}		  
+	}		  
 
 	      /*	      if (radius < imdiff->rfile_length) {
 		index = r*imdiff->hpixels+c;
@@ -119,6 +125,23 @@ int lsubrfim(DIFFIMAGE *imdiff_in)
 	  }
 	}
   }
+  /*
+  for (pidx = 0; pidx < imdiff_in->num_panels; pidx++) {
+
+    imdiff = &imdiff_in[pidx];
+    index = 0;
+
+    if (minval < 0) {
+      for (i = 0;i<imdiff->image_length;i++) {	    
+	if ((imdiff->image[i] != imdiff->overload_tag) &&
+	    (imdiff->image[i] != imdiff->ignore_tag)) {
+	  imdiff->image[i] -= minval;
+	}
+      }
+      imdiff->value_offset = -minval;
+    } else imdiff->value_offset = 0;
+  }
+  */
   return(return_value);
 }
 

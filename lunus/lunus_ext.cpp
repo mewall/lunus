@@ -641,6 +641,11 @@ namespace lunus {
       lpolarim(imdiff);
     }
 
+    inline void LunusSubrfim() {
+      printf("LunusSubrfim\n");
+      lsubrfim(imdiff);
+    }
+
     inline void LunusNormim(float bx, float by, float dist, float cx, float cy, float px) {
       printf("LunusNormim\n");
       imdiff->beam_mm.x = bx;
@@ -866,7 +871,7 @@ namespace lunus {
     }
 
 
-    inline scitbx::af::flex_double LunusRadialAvgim(float bx, float by, float px) {
+    inline scitbx::af::flex_double LunusAvgrim(float bx, float by, float px) {
       imdiff->beam_mm.x = bx;
       imdiff->beam_mm.y = by;
       imdiff->pixel_size_mm = px;
@@ -888,7 +893,7 @@ namespace lunus {
       return data;
     }
 
-    inline scitbx::af::flex_double LunusRadialAvgim() {
+    inline scitbx::af::flex_double LunusAvgrim() {
       lavgrim(imdiff);
       std::size_t rs = imdiff->rfile_length;
       scitbx::af::flex_double data(rs);
@@ -964,6 +969,71 @@ namespace lunus {
       return sizeof(IMAGE_DATA_TYPE);
     }
 
+    inline void set_xvectors(scitbx::af::flex_double xvectors_in) {
+      double* begin=xvectors_in.begin();
+      std::size_t size=xvectors_in.size();
+
+      struct xyzcoords *xvectors_cctbx = (struct xyzcoords *)malloc(size*sizeof(struct xyzcoords));
+
+      if (imdiff->slist != NULL) free(imdiff->slist);
+      imdiff->slist = (struct xyzcoords *)malloc(size*sizeof(float));
+
+      if (imdiff->image_length != size/3) {
+	perror("set_xvectors: image length differs from size of xvectors. aborting.\n");
+	exit(1);
+      }
+
+
+      float *xvectors_cctbx_float = (float *)xvectors_cctbx;
+
+      for (std::size_t i = 0; i < size; i++) {
+	xvectors_cctbx_float[i] = (float)begin[i];
+      }
+
+      // The xvectors for lunus should be transposed with respect to those coming from cctbx
+
+      size_t index = 0;
+      for (std::size_t j = 0; j < imdiff->vpixels; j++) {
+	for (std::size_t i = 0; i < imdiff->hpixels; i++) {
+	  imdiff->slist[index] = xvectors_cctbx[i*imdiff->vpixels + j];
+	  index++;
+	}
+      }
+    }
+
+    inline void set_xvectors(std::size_t n,scitbx::af::flex_double xvectors_in) {
+      double* begin=xvectors_in.begin();
+      std::size_t size=xvectors_in.size();
+
+      struct xyzcoords *xvectors_cctbx = (struct xyzcoords *)malloc(size*sizeof(struct xyzcoords));
+
+      DIFFIMAGE *im = &imdiff[n];
+
+      if (im->slist == NULL) free(im->slist);
+      im->slist = (struct xyzcoords *)malloc(size*sizeof(float));
+
+      if (im->image_length != size/3) {
+	perror("set_xvectors: image length differs from size of xvectors. aborting.\n");
+	exit(1);
+      }
+
+
+      float *xvectors_cctbx_float = (float *)xvectors_cctbx;
+
+      for (std::size_t i = 0; i < size; i++) {
+	xvectors_cctbx_float[i] = (float)begin[i];
+      }
+
+      // The xvectors for lunus should be transposed with respect to those coming from cctbx
+
+      size_t index = 0;
+      for (std::size_t j = 0; j < im->vpixels; j++) {
+	for (std::size_t i = 0; i < im->hpixels; i++) {
+	  im->slist[index] = xvectors_cctbx[i*im->vpixels + j];
+	  index++;
+	}
+      }
+    }
   };
 
   class LunusLAT3D {
@@ -1183,8 +1253,11 @@ namespace boost_python { namespace {
     void (lunus::LunusDIFFIMAGE::*LunusPolarim1)() = &lunus::LunusDIFFIMAGE::LunusPolarim;
     void (lunus::LunusDIFFIMAGE::*LunusPolarim2)(float,float,float,float,float,float) = &lunus::LunusDIFFIMAGE::LunusPolarim;
 
-    scitbx::af::flex_double (lunus::LunusDIFFIMAGE::*LunusRadialAvgim1)() = &lunus::LunusDIFFIMAGE::LunusRadialAvgim;
-    scitbx::af::flex_double (lunus::LunusDIFFIMAGE::*LunusRadialAvgim2)(float,float,float) = &lunus::LunusDIFFIMAGE::LunusRadialAvgim;
+    scitbx::af::flex_double (lunus::LunusDIFFIMAGE::*LunusAvgrim1)() = &lunus::LunusDIFFIMAGE::LunusAvgrim;
+    scitbx::af::flex_double (lunus::LunusDIFFIMAGE::*LunusAvgrim2)(float,float,float) = &lunus::LunusDIFFIMAGE::LunusAvgrim;
+
+    void (lunus::LunusDIFFIMAGE::*set_xvectors_b1)(scitbx::af::flex_double xvectors_in) = &lunus::LunusDIFFIMAGE::set_xvectors;
+    void (lunus::LunusDIFFIMAGE::*set_xvectors_b2)(std::size_t n,scitbx::af::flex_double xvectors_in) = &lunus::LunusDIFFIMAGE::set_xvectors;
 
     class_<lunus::LunusDIFFIMAGE>("LunusDIFFIMAGE",init<>())
       .def(init<std::size_t>())
@@ -1206,12 +1279,15 @@ namespace boost_python { namespace {
       .def("LunusThrshim",LunusThrshim2)
       .def("LunusPolarim",LunusPolarim1)
       .def("LunusPolarim",LunusPolarim2)
-      .def("LunusRadialAvgim",LunusRadialAvgim1)
-      .def("LunusRadialAvgim",LunusRadialAvgim2)
+      .def("LunusAvgrim",LunusAvgrim1)
+      .def("LunusAvgrim",LunusAvgrim2)
       .def("LunusNormim",&lunus::LunusDIFFIMAGE::LunusNormim)
+      .def("LunusSubrfim",&lunus::LunusDIFFIMAGE::LunusSubrfim)
       .def("LunusModeim",LunusModeim1)
       .def("LunusModeim",LunusModeim2)
       .def("LunusScaleim",&lunus::LunusDIFFIMAGE::LunusScaleim)
+      .def("set_xvectors",set_xvectors_b1)
+      .def("set_xvectors",set_xvectors_b2)
     ;
 
     class_<lunus::LunusLAT3D>("LunusLAT3D",init<>())
