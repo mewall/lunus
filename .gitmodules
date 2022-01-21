@@ -1,3 +1,6 @@
 [submodule "lunus/cuda/cub"]
 	path = lunus/cuda/cub
 	url = https://github.com/NVIDIA/cub.git
+[submodule "kokkos-kernels"]
+	path = lunus/kokkos-kernels
+	url = https://github.com/kokkos/kokkos-kernels.git
