@@ -1,8 +1,12 @@
+import sys
 Import("env","env_etc")
 env = env.Clone()
 env.Prepend(LIBS=["lunus"])
-if (env_etc.enable_cuda):
-  env.Prepend(LIBS=["lunus_cuda"])
+if sys.platform.startswith('linux') and env_etc.enable_kokkos:
+  env.Prepend(LIBS=["lunus_kokkos"])
+else:
+  if (env_etc.enable_cuda):
+    env.Prepend(LIBS=["lunus_cuda"])
 
 #env.Prepend(LIBPATH=["/opt/local/lib/libomp","/opt/cudatoolkit/10.0/lib64"])
 

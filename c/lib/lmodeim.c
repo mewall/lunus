@@ -261,6 +261,12 @@ int lmodeim(DIFFIMAGE *imdiff_in)
   imdiff = &imdiff_in[0];
   num_panels = imdiff->num_panels;
 
+#ifdef USE_KOKKOS
+  printf("Starting kokkos...\n");
+  kokkos_start();
+  printf("...done\n");
+#endif
+  
   if (reentry == 2 || reentry == 3) {
     if (hpixels != imdiff->hpixels || vpixels != imdiff->vpixels) {
       perror("LMODEIM: Image panel size changed on reentry. Aborting\n");
@@ -446,7 +452,9 @@ int lmodeim(DIFFIMAGE *imdiff_in)
       tic = ltime();
 #ifdef USE_CUDA
       quickSortListCUB(window_all,stack_all,num_per_iblock*num_per_jblock*num_panels,wlen);
-#else
+#elif USE_KOKKOS
+      quickSortListKokkos(window_all,stack_all,num_per_iblock*num_per_jblock*num_panels,wlen);
+#else      
       quickSortList(window_all,stack_all,num_per_iblock*num_per_jblock*num_panels,wlen);
 #endif
       toc = ltime();
@@ -713,6 +721,11 @@ int lmodeim(DIFFIMAGE *imdiff_in)
       free(nvals_all);
       free(stack_all);
     }
+
+#ifdef USE_KOKKOS
+  kokkos_stop();
+#endif
+
  CloseShop:
   return(return_value);
 }

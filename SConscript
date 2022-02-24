@@ -56,8 +56,12 @@ env_lunus.Prepend(CCFLAGS=["-Xpreprocessor"])
 if (env_etc.have_openmp):
   env_lunus.Prepend(CCFLAGS=["-DUSE_OPENMP"])
   env_lunus.Prepend(LIBS=["gomp"])
-if (env_etc.enable_cuda):
-  env_lunus.Prepend(CCFLAGS=["-DUSE_CUDA","-DLUNUS_NUM_JBLOCKS=16","-DLUNUS_NUM_IBLOCKS=8"])
+if sys.platform.startswith('linux') and env_etc.enable_kokkos:
+  env_lunus.Prepend(CCFLAGS=["-DUSE_KOKKOS","-DLUNUS_NUM_JBLOCKS=16","-DLUNUS_NUM_IBLOCKS=8"])
+#  env_lunus.Prepend(CCFLAGS=["-DUSE_KOKKOS","-DLUNUS_NUM_JBLOCKS=8","-DLUNUS_NUM_IBLOCKS=1"])
+else:
+  if (env_etc.enable_cuda):
+    env_lunus.Prepend(CCFLAGS=["-DUSE_CUDA","-DLUNUS_NUM_JBLOCKS=16","-DLUNUS_NUM_IBLOCKS=8"])
 #env_lunus.Prepend(CCFLAGS=["-g","-O2","-fopenmp","-DUSE_OPENMP","-Xpreprocessor"])
 #env_lunus.Prepend(CCFLAGS=["-g","-O3","-fopenmp","-DUSE_OPENMP","-DUSE_OFFLOAD","-foffload=nvptx-none","-foffload=-lm","-foffload=-fPIC","-Xpreprocessor"])
 #env_lunus.Prepend(LIBS=["gomp"])
@@ -131,6 +135,9 @@ if (not env_etc.no_boost_python):
 
   env_etc.enable_more_warnings(env=env_lunus)
   env_lunus.SConscript("lunus/SConscript",exports={ 'env' : env_lunus })
-  if sys.platform.startswith('linux') and env_etc.enable_cuda:
-    env_lunus.SConscript("lunus/cuda/SConscript",exports={ 'env' : env_lunus })
+  if sys.platform.startswith('linux') and env_etc.enable_kokkos:
+    env_lunus.SConscript("lunus/kokkos/SConscript",exports={ 'env' : env_lunus })
+  else:
+    if sys.platform.startswith('linux') and env_etc.enable_cuda:
+      env_lunus.SConscript("lunus/cuda/SConscript",exports={ 'env' : env_lunus })
 

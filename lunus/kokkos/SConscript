@@ -1,0 +1,103 @@
+import os
+import subprocess
+import libtbx.load_env
+
+Import("env", "env_etc")
+
+def detect_architecture(verbose=True):
+  if verbose:
+    print('Looking for GPUs ...')
+  available_gpu = subprocess.check_output(['nvidia-smi', '--query-gpu=name', '--format=csv,noheader'])
+  available_gpu = available_gpu.split(b'\n')
+  first_entry = available_gpu[0].decode('utf8')
+  if len(first_entry)>0:
+    if verbose:
+      print( ' Found ', first_entry)
+    if 'A100' in first_entry:
+      architecture = "Ampere80"
+    elif 'V100' in first_entry:
+      architecture = "Volta70"
+    else:
+      if verbose:
+        print(' GPU name not recognized. Reverting to CPU HSW architecture. ')
+      architecture = "HSW"
+  else:
+    architecture = "HSW"
+  return architecture
+
+#print("LUNUS: Imported kokkos_env KOKKOS_PATH = {0}\n".format(kokkos_env['KOKKOS_PATH']))
+
+if os.getenv('LUNUS_KOKKOS_ARCH') is None:
+  os.environ['LUNUS_KOKKOS_ARCH'] = detect_architecture()
+if os.getenv('LUNUS_KOKKOS_DEVICES') is None:
+  if (os.environ['LUNUS_KOKKOS_ARCH'] == 'Volta70') or (os.environ['LUNUS_KOKKOS_ARCH'] == 'Ampere80'):
+    os.environ['LUNUS_KOKKOS_DEVICES'] = 'Cuda'
+  else:
+    os.environ['LUNUS_KOKKOS_DEVICES'] = 'OpenMP'
+if os.getenv('LUNUS_KOKKOS_PATH') is None:
+  os.environ['LUNUS_KOKKOS_PATH'] = libtbx.env.under_dist('simtbx', '../../kokkos')
+
+if os.environ['LUNUS_KOKKOS_ARCH'] == 'Volta70':
+  kokkos_cxxflags = ['-arch=sm_70','-std=c++14']	
+elif os.environ['LUNUS_KOKKOS_ARCH'] == 'Ampere80':
+  kokkos_cxxflags = ['-arch=sm_80','-std=c++14']
+else:
+  kokkos_cxxflags = ['-std=c++14']
+
+Import("env_boost_python_ext")
+lunus_kokkos_env = env_boost_python_ext.Clone()
+
+print("LUNUS Kokkos configuration: LUNUS_KOKKOS_PATH = {0}\nLUNUS_KOKKOS_DEVICES = {1}\nLUNUS_KOKKOS_ARCH = {2}\n".format(os.environ['LUNUS_KOKKOS_PATH'],os.environ['LUNUS_KOKKOS_DEVICES'],os.environ['LUNUS_KOKKOS_ARCH']))
+
+if os.getenv('LUNUS_KOKKOS_DEVICES') == 'Cuda':
+  lunus_kokkos_env.Replace(CXX=os.path.join(os.environ['LUNUS_KOKKOS_PATH'], 'bin', 'nvcc_wrapper'))
+lunus_kokkos_env.Replace(SHCXX=lunus_kokkos_env['CXX'])
+lunus_kokkos_env.Prepend(CXXFLAGS=['-DCUDAREAL=double'] + kokkos_cxxflags)
+lunus_kokkos_env.Prepend(CPPFLAGS=['-DCUDAREAL=double'] + kokkos_cxxflags)
+lunus_kokkos_env.Prepend(CPPPATH=[os.environ['LUNUS_KOKKOS_PATH']])
+
+print("LUNUS Kokkos configuration: CXX = {0}\nSHCXX = {1}\nCXXFLAGS = {2}\nCPPFLAGS = {3}\nCPPPATH = {4}\n".format(lunus_kokkos_env['CXX'],lunus_kokkos_env['SHCXX'],lunus_kokkos_env['CXXFLAGS'],lunus_kokkos_env['CPPFLAGS'],lunus_kokkos_env['CPPPATH']))
+
+default_libs = [
+  "scitbx_boost_python",
+  env_etc.boost_python_lib,
+  "cctbx",
+  "kokkoskernels",
+  "kokkoscontainers",
+  "kokkoscore"
+]
+
+env_etc.include_registry.append(
+    env=lunus_kokkos_env,
+    paths=env_etc.lunus_common_includes + [env_etc.python_include])
+
+# remove -ffast-math compile option
+ccflags = lunus_kokkos_env['SHCCFLAGS']
+o = '-ffast-math'
+if o in ccflags:
+  ccflags.remove(o)
+lunus_kokkos_env.Replace(SHCCFLAGS=ccflags)
+
+if 'Cuda' in os.getenv('LUNUS_KOKKOS_DEVICES'):
+  lunus_kokkos_env.Append(LIBPATH=[os.path.join(os.environ['CUDA_HOME'], 'lib64')])
+  lunus_kokkos_env.Append(LIBPATH=[os.path.join(os.environ['CUDA_HOME'], 'compat')])
+  lunus_kokkos_env.Append(LIBS=env_etc.libm + default_libs + ["dl","cudart"])
+elif 'HIP' in os.getenv('LUNUS_KOKKOS_DEVICES'):
+  lunus_kokkos_env.Append(LIBPATH=[os.path.join(os.environ['ROCM_PATH'], 'lib')])
+  lunus_kokkos_env.Append(LIBS=env_etc.libm + default_libs + ["amdhip64", "hsa-runtime64"])
+else:
+  lunus_kokkos_env.Append(LIBS=env_etc.libm + default_libs)
+
+if (env_etc.enable_kokkos):
+  kokkos_src = []
+  kokkos_src.append("lsort_kokkos.cpp")
+
+  lunus_kokkos_env.Prepend(CPPPATH=[env_etc.boost_adaptbx_include,
+    env_etc.boost_include])
+
+  kokkos_lib = lunus_kokkos_env.SharedLibrary(
+    target = "#lib/liblunus_kokkos",
+    source = kokkos_src)
+
+  env.Prepend(LIBS=["liblunus_kokkos"])
+
