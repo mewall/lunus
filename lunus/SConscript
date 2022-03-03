@@ -4,6 +4,7 @@ env = env.Clone()
 env.Prepend(LIBS=["lunus"])
 if sys.platform.startswith('linux') and env_etc.enable_kokkos:
   env.Prepend(LIBS=["lunus_kokkos"])
+  env.Prepend(SHCXXFLAGS=["-DUSE_KOKKOS"])
 else:
   if (env_etc.enable_cuda):
     env.Prepend(LIBS=["lunus_cuda"])
