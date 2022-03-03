@@ -224,9 +224,9 @@ int lmodeim_kokkos(DIFFIMAGE *imdiff_in)
 
   size_t wlen = (imdiff_in->mode_height+2)*(imdiff_in->mode_width+2);
     
-  int 
-    num_panels,
-    pidx;
+  size_t num_panels;
+
+  int  pidx;
 
   double tic, toc, tmkarr, tsort, tmkimg;
 
@@ -377,7 +377,8 @@ int lmodeim_kokkos(DIFFIMAGE *imdiff_in)
     typedef Kokkos::View<size_t *> OrdView;
     typedef Kokkos::View<size_t *> ValView;
     typedef Kokkos::View<IMAGE_DATA_TYPE *> ImgView;
-    typedef Kokkos::View<size_t *> ParamView;
+    typedef Kokkos::View<IMAGE_DATA_TYPE *> ImgTParamView;
+    typedef Kokkos::View<size_t *> SizeTParamView;
   
     OrdView d_offsets("d_offsets",num_arrays);
   
@@ -395,8 +396,10 @@ int lmodeim_kokkos(DIFFIMAGE *imdiff_in)
     Kokkos::View<size_t*, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged> > h_image_mode_all(image_mode_all,num_panels*image_length);
 
     size_t num_params = 100;
-    ParamView d_params("d_params",num_params); 
-    Kokkos::View<size_t *>::HostMirror h_params = Kokkos::create_mirror_view(d_params);
+    SizeTParamView d_sizet_params("d_sizet_params",num_params); 
+    Kokkos::View<size_t *>::HostMirror h_sizet_params = Kokkos::create_mirror_view(d_sizet_params);
+    ImgTParamView d_imgt_params("d_imgt_params",num_params); 
+    Kokkos::View<IMAGE_DATA_TYPE *>::HostMirror h_imgt_params = Kokkos::create_mirror_view(d_imgt_params);
   
     Kokkos::deep_copy(d_image_all,h_image_all);
     Kokkos::deep_copy(d_image_mode_all,h_image_mode_all);
@@ -416,36 +419,62 @@ int lmodeim_kokkos(DIFFIMAGE *imdiff_in)
 	size_t ihi = hpixels - half_width;     
 
 	// Define params array
-	h_params[0] = minval;
-	h_params[1] = binsize;
-	h_params[2] = wlen;
-	h_params[3] = num_jblocks;
-	h_params[4] = num_iblocks;
-	h_params[5] = num_per_jblock;
-	h_params[6] = num_per_iblock;
-	h_params[7] = jlo;
-	h_params[8] = jhi;
-	h_params[9] = ilo;
-	h_params[10]= ihi;
+	h_imgt_params[0] = minval;
+	h_imgt_params[1] = binsize;
+	h_imgt_params[2] = overload_tag;
+	h_imgt_params[3] = ignore_tag;
+	h_sizet_params[0] = wlen;
+	h_sizet_params[1] = num_jblocks;
+	h_sizet_params[2] = num_iblocks;
+	h_sizet_params[3] = num_per_jblock;
+	h_sizet_params[4] = num_per_iblock;
+	h_sizet_params[5] = jlo;
+	h_sizet_params[6] = jhi;
+	h_sizet_params[7] = ilo;
+	h_sizet_params[8] = ihi;
+	h_sizet_params[9] = num_panels;
+	h_sizet_params[10] = image_length;
+	h_sizet_params[11] = hpixels;
   
-	Kokkos::deep_copy(d_params,h_params);
+	Kokkos::deep_copy(d_imgt_params,h_imgt_params);
+	Kokkos::deep_copy(d_sizet_params,h_sizet_params);
+	typedef Kokkos::TeamPolicy<>               team_policy;
+	typedef typename team_policy::member_type  team_member;
+	Kokkos::parallel_for(Kokkos::TeamPolicy<>(num_per_jblock, Kokkos::AUTO()),KOKKOS_LAMBDA(const team_member& thread) {
 
-	for (pidx = 0; pidx < num_panels; pidx++) {
+	    
+	    IMAGE_DATA_TYPE  minval = d_imgt_params[0];
+	    IMAGE_DATA_TYPE binsize = d_imgt_params[1];
+	    IMAGE_DATA_TYPE overload_tag = d_imgt_params[2];
+	    IMAGE_DATA_TYPE ignore_tag = d_imgt_params[3];
+	    size_t wlen = d_sizet_params[0];
+	    size_t num_jblocks = d_sizet_params[1];
+	    size_t num_iblocks = d_sizet_params[2];
+	    size_t num_per_jblock = d_sizet_params[3];
+	    size_t num_per_iblock = d_sizet_params[4];
+	    size_t jlo = d_sizet_params[5];
+	    size_t jhi = d_sizet_params[6];
+	    size_t ilo = d_sizet_params[7];
+	    size_t ihi = d_sizet_params[8];
+	    size_t num_panels = d_sizet_params[9];
+	    size_t image_length = d_sizet_params[10];
+	    size_t hpixels = d_sizet_params[11];
+	    
+	for (int pidx = 0; pidx < num_panels; pidx++) {
 	  size_t this_image_idx = pidx*image_length;
 	  size_t first_window_idx = pidx*wlen*num_per_jblock*num_per_iblock;
 	  size_t first_nval_idx = pidx*num_per_jblock*num_per_iblock;
 
-#ifdef USE_OPENMP
-#pragma omp parallel for default(shared) private(i,j)
-#endif
-	  for (j = jlo; j < jhi; j=j+num_jblocks) {
-	    for (i = ilo; i < ihi; i=i+num_iblocks) {
+	  int j = jlo + thread.league_rank()*num_jblocks;
+	  //	  for (j = jlo; j < jhi; j=j+num_jblocks) {
+	  if (j < jhi) {
+	    for (int i = ilo; i < ihi; i=i+num_iblocks) {
 	      size_t block_idx = (((j-jlo)/num_jblocks)*num_per_iblock+(i-ilo)/num_iblocks);
 	      size_t window_idx = first_window_idx + block_idx * wlen;
 	      size_t nval_idx = first_nval_idx + block_idx;
 	      size_t k;
 	      for (k = 0; k < wlen; k++) {
-		window_all[window_idx + k] = ULONG_MAX;
+		d_window_all(window_idx + k) = ULONG_MAX;
 	      }
 	      size_t l = 0;
 	      size_t wind = window_idx;
@@ -457,22 +486,23 @@ int lmodeim_kokkos(DIFFIMAGE *imdiff_in)
 	      for (r = rlo; r <= rhi; r++) {
 		for (c = clo; c <= chi; c++) {
 		  size_t index = this_image_idx + r*hpixels + c;
-		  if ((image_all[index] != overload_tag) &&
-		      (image_all[index] != ignore_tag) &&
-		      (image_all[index] < MAX_IMAGE_DATA_VALUE)) {
-		    window_all[wind] = (image_all[index]-minval)/binsize + 1;
+		  if ((d_image_all(index) != overload_tag) &&
+		      (d_image_all(index) != ignore_tag) &&
+		      (d_image_all(index) < MAX_IMAGE_DATA_VALUE)) {
+		    d_window_all(wind) = (d_image_all(index)-minval)/binsize + 1;
 		    l++;
 		  }
 		  else {
-		    window_all[wind] = ULONG_MAX;
+		    d_window_all(wind) = ULONG_MAX;
 		  }
 		  wind++;
 		}
 	      }
-	      nvals_all[nval_idx] = l;
+	      d_nvals_all(nval_idx) = l;
 	    }
 	  }
 	}
+	  });
 	toc = ltime();
 	tmkarr = toc - tic;
 

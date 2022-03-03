@@ -53,7 +53,7 @@ if os.getenv('LUNUS_KOKKOS_DEVICES') == 'Cuda':
   lunus_kokkos_env.Replace(CXX=os.path.join(os.environ['LUNUS_KOKKOS_PATH'], 'bin', 'nvcc_wrapper'))
 lunus_kokkos_env.Replace(SHCXX=lunus_kokkos_env['CXX'])
 lunus_kokkos_env.Prepend(CXXFLAGS=['-DCUDAREAL=double'] + kokkos_cxxflags)
-lunus_kokkos_env.Prepend(CPPFLAGS=['-DCUDAREAL=double'] + kokkos_cxxflags)
+lunus_kokkos_env.Prepend(CPPFLAGS=['-DCUDAREAL=double','--expt-extended-lambda'] + kokkos_cxxflags)
 lunus_kokkos_env.Prepend(CPPPATH=[os.environ['LUNUS_KOKKOS_PATH']])
 
 print("LUNUS Kokkos configuration: CXX = {0}\nSHCXX = {1}\nCXXFLAGS = {2}\nCPPFLAGS = {3}\nCPPPATH = {4}\n".format(lunus_kokkos_env['CXX'],lunus_kokkos_env['SHCXX'],lunus_kokkos_env['CXXFLAGS'],lunus_kokkos_env['CPPFLAGS'],lunus_kokkos_env['CPPPATH']))
