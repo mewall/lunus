@@ -489,11 +489,6 @@ int lmodeim_kokkos(DIFFIMAGE *imdiff_in)
 	  size_t this_image_idx = pidx*image_length;
 	  size_t first_window_idx = pidx*wlen*num_per_jblock*num_per_iblock;
 	  size_t first_nval_idx = pidx*num_per_jblock*num_per_iblock;
-	  image = &image_all[this_image_idx];
-	  image_mode = &image_mode_all[this_image_idx];
-	  window = &window_all[first_window_idx];
-	  stack = &stack_all[first_window_idx];
-	  nvals = &nvals_all[first_nval_idx];
 
 #ifdef USE_OPENMP
 #pragma omp parallel for default(shared)				\
@@ -509,12 +504,9 @@ int lmodeim_kokkos(DIFFIMAGE *imdiff_in)
 	      size_t block_idx = (((j-jlo)/num_jblocks)*num_per_iblock+(i-ilo)/num_iblocks);
 	      size_t window_idx = first_window_idx + block_idx * wlen;
 	      size_t nval_idx = first_nval_idx + block_idx;
-	      size_t *this_window = &window[window_idx];
-	      size_t *this_stack = &stack[window_idx];
-	      size_t *this_nval = &nvals[nval_idx];
-	      size_t l = *this_nval;
-	      if (l == 0 || image[index_mode] == ignore_tag || image[index_mode] == overload_tag || image[index_mode] >= MAX_IMAGE_DATA_VALUE) {
-		image_mode[index_mode] = 0;
+	      size_t l = nvals_all[nval_idx];
+	      if (l == 0 || image_all[index_mode] == ignore_tag || image_all[index_mode] == overload_tag || image_all[index_mode] >= MAX_IMAGE_DATA_VALUE) {
+		image_mode_all[index_mode] = 0;
 		num_ignored_values++;
 	      }
 	      else {
@@ -525,40 +517,42 @@ int lmodeim_kokkos(DIFFIMAGE *imdiff_in)
 		// Get the median
 		int kmed = l/2;
 		int k90 = l*9/10;
-		size_t min_value = this_window[0];
-		size_t max_value = this_window[l-1];
+		size_t min_value = window_all[window_idx];
+		size_t max_value = window_all[window_idx + l-1];
 		size_t range_value = max_value - min_value;
-		size_t median_value = this_window[kmed];
-		size_t med90_value = this_window[k90];
+		size_t median_value = window_all[window_idx + kmed];
+		size_t med90_value = window_all[window_idx + k90];
 
 		// Get the mode
 		size_t this_count = 1;
-		size_t last_value = this_window[0];
+		size_t last_value = window_all[window_idx];
 		max_count = 1;
 		size_t k;
 		for (k = 1; k < l; k++) {
-		  if (this_window[k] == last_value) {
+		  size_t this_window_value = window_all[window_idx + k];
+		  if (this_window_value == last_value) {
 		    this_count++;
 		  } else {
-		    last_value = this_window[k];
+		    last_value = this_window_value;
 		    this_count = 1;
 		  }
 		  if (this_count > max_count) max_count = this_count;
 		}
 		this_count = 1;
-		last_value = this_window[0];
+		last_value = window_all[window_idx];
 		double p, entropy = 0.0;
 		for (k = 1; k < l; k++) {
-		  if (this_window[k] == last_value) {
+		  size_t this_window_value = window_all[window_idx + k];
+		  if (this_window_value == last_value) {
 		    this_count++;
 		  } else {
 		    p = (double)this_count/(double)l;
 		    entropy -=  p * log_local(p);
-		    last_value = this_window[k];
+		    last_value = this_window_value;
 		    this_count = 1;
 		  }
 		  if (this_count == max_count) {
-		    mode_value += this_window[k];
+		    mode_value += this_window_value;
 		    mode_ct++;
 		  }
 		}
@@ -573,14 +567,14 @@ int lmodeim_kokkos(DIFFIMAGE *imdiff_in)
 #endif 
 		// Depending on the distribution, use alternative values other than the mode
 		if (range_value <= 2) {
-		  image_mode[index_mode]  = this_value;
+		  image_mode_all[index_mode]  = this_value;
 		  num_this_values++;
 		} else {
 		  if (this_value <= med90_value) {
-		    image_mode[index_mode] = this_value;
+		    image_mode_all[index_mode] = this_value;
 		    num_this_values++;
 		  } else {
-		    image_mode[index_mode] = this_window[(size_t)(((double)k90*(double)rand_local())/(double)ULONG_MAX)];
+		    image_mode_all[index_mode] = window_all[window_idx + (size_t)(((double)k90*(double)rand_local())/(double)ULONG_MAX)];
 		    num_med90_values++;
 		    //	      printf("%d %ld %ld\n",kmed,mode_value,median_value);
 		    //	      mode_value = median_value;
@@ -640,12 +634,9 @@ int lmodeim_kokkos(DIFFIMAGE *imdiff_in)
 
     for (pidx = 0; pidx < num_panels; pidx++) {
 
-      imdiff = &imdiff_in[pidx];
-      image = &image_all[pidx*image_length];
-      image_mode = &image_mode_all[pidx*image_length];
-      window = &window_all[pidx*wlen*num_per_jblock*num_per_iblock];
-      stack = &stack_all[pidx*wlen*num_per_jblock*num_per_iblock];
-      nvals = &nvals_all[pidx*num_per_jblock*num_per_iblock];
+      size_t this_image_idx = pidx*image_length;
+      size_t first_window_idx = pidx*wlen*num_per_jblock*num_per_iblock;
+      size_t first_nval_idx = pidx*num_per_jblock*num_per_iblock;
     
 #ifdef USE_OPENMP
 #pragma omp distribute
@@ -654,19 +645,19 @@ int lmodeim_kokkos(DIFFIMAGE *imdiff_in)
       for (j = 0; j < vpixels; j++) {
 	if (j < half_height || j > (vpixels-half_height)) {
 	  for (i = 0; i < hpixels; i++) {
-	    size_t this_index = j * hpixels + i;
-	    image[this_index] = ignore_tag;
+	    size_t this_index = this_image_idx + j * hpixels + i;
+	    image_all[this_index] = ignore_tag;
 	  } 
 	} else {
 
 	  for (i = 0; i < half_width; i++) {
-	    size_t this_index = j * hpixels + i;
-	    image[this_index] = ignore_tag;
+	    size_t this_index = this_image_idx + j * hpixels + i;
+	    image_all[this_index] = ignore_tag;
 	  }
 	
 	  for (i = hpixels - half_width; i < hpixels; i++) {
-	    size_t this_index = j * hpixels + i;
-	    image[this_index] = ignore_tag;
+	    size_t this_index = this_image_idx + j * hpixels + i;
+	    image_all[this_index] = ignore_tag;
 	  }
 
 #ifdef USE_OPENMP
@@ -674,11 +665,11 @@ int lmodeim_kokkos(DIFFIMAGE *imdiff_in)
 #endif
 
 	  for (i = half_width; i < hpixels - half_width; i++) {
-	    size_t this_index = j * hpixels + i;
-	    if (image_mode[this_index] != 0) {
-	      image[this_index] = (image_mode[this_index]-1)*binsize + minval;
+	    size_t this_index = this_image_idx + j * hpixels + i;
+	    if (image_mode_all[this_index] != 0) {
+	      image_all[this_index] = (image_mode_all[this_index]-1)*binsize + minval;
 	    } else {
-	      image[this_index] = ignore_tag;
+	      image_all[this_index] = ignore_tag;
 	    }
 	  }
 	}
