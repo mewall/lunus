@@ -27,9 +27,83 @@ extern "C" {
 #endif
 #include<time.h>
 
-void quickSortListKokkos(size_t arr[], size_t stack[], size_t num_arrays, size_t array_size);
 void kokkos_start();  
 void kokkos_stop();
+}
+
+template<typename ValView, typename OrdView>
+struct TestTeamBitonicFunctor
+{
+  typedef typename ValView::value_type Value;
+
+  TestTeamBitonicFunctor(ValView& values_, OrdView& counts_, OrdView& offsets_)
+    : values(values_), counts(counts_), offsets(offsets_)
+  {}
+
+  template<typename TeamMem>
+  KOKKOS_INLINE_FUNCTION void operator()(const TeamMem t) const
+  {
+    int i = t.league_rank();
+    KokkosKernels::TeamBitonicSort<int, Value, TeamMem>(values.data() + offsets(i), counts(i), t);
+  }
+
+  ValView values;
+  OrdView counts;
+  OrdView offsets;
+};
+
+
+template<typename ValView>
+void quickSortListKokkosDeviceArrays(ValView& d_values, size_t num_arrays, size_t array_size)
+{
+  size_t i, j;
+
+  size_t num_values = num_arrays * array_size;
+
+  typedef Kokkos::View<size_t *> OrdView;
+
+#ifdef DEBUG
+  printf("quickSortListKokkosDeviceArrays: Creating views\n");
+#endif
+  OrdView d_offsets("d_offsets",num_arrays);
+  Kokkos::View<size_t *>::HostMirror h_offsets = Kokkos::create_mirror_view(d_offsets);
+  OrdView d_counts("d_counts",num_arrays);
+  Kokkos::View<size_t *>::HostMirror h_counts = Kokkos::create_mirror_view(d_counts);
+
+#ifdef DEBUG
+  printf("quickSortListKokkosDeviceArrays: Done creating views\n");
+#endif
+
+#ifdef DEBUG
+  printf("quickSortListKokkosDeviceArrays: Initializing offset and counts arrays on host\n");
+#endif
+
+  for (i=0; i<num_arrays;i++) {
+    h_offsets[i] = (int)(i*array_size);
+    h_counts[i] = array_size;
+  }
+#ifdef DEBUG
+  printf("quickSortListKokkosDeviceArrays: Initializing data array on host\n");
+#endif
+
+#ifdef DEBUG
+  printf("quickSortListKokkosDeviceArrays: Copying arrays to device\n");
+#endif
+
+  Kokkos::deep_copy(d_offsets,h_offsets);
+  Kokkos::deep_copy(d_counts,h_counts);
+
+#ifdef DEBUG
+  printf("quickSortListKokkosDeviceArrays: Performing sort\n");
+#endif
+
+  Kokkos::parallel_for(Kokkos::TeamPolicy<>(num_arrays, Kokkos::AUTO()),
+      TestTeamBitonicFunctor<ValView, OrdView>(d_values, d_counts, d_offsets));
+  Kokkos::fence();
+
+#ifdef DEBUG
+  printf("quickSortList: num_arrays, array_size = %ld, %ld\n",num_arrays,array_size);
+#endif
 }
 
 static size_t x=123456789, y=362436069, z=521288629;
@@ -508,7 +582,7 @@ int lmodeim_kokkos(DIFFIMAGE *imdiff_in)
 
 	tic = ltime();
 
-	quickSortListKokkos(window_all,stack_all,num_per_iblock*num_per_jblock*num_panels,wlen);
+	quickSortListKokkosDeviceArrays<ValView>(d_window_all,num_per_iblock*num_per_jblock*num_panels,wlen);
 
 	toc = ltime();
 	tsort = toc - tic;
