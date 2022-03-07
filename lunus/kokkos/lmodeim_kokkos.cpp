@@ -106,11 +106,11 @@ void quickSortListKokkosDeviceArrays(ValView& d_values, size_t num_arrays, size_
 #endif
 }
 
-static size_t x=123456789, y=362436069, z=521288629;
 
 // Code taken from xorshf96()
 
-size_t rand_local(void) {          //period 2^96-1
+KOKKOS_INLINE_FUNCTION size_t rand_local(void) {          //period 2^96-1
+static size_t x=123456789, y=362436069, z=521288629;
 size_t t;
     x ^= x << 16;
     x ^= x >> 5;
@@ -124,7 +124,7 @@ size_t t;
   return z;
 }
 
-double log_local(double x) {
+KOKKOS_INLINE_FUNCTION double log_local(double x) {
   int n,N=10,onefac=1;
   double y,xfac,f = 0.0;
 
@@ -534,49 +534,50 @@ int lmodeim_kokkos(DIFFIMAGE *imdiff_in)
 	    size_t image_length = d_sizet_params[10];
 	    size_t hpixels = d_sizet_params[11];
 	    
-	for (int pidx = 0; pidx < num_panels; pidx++) {
-	  size_t this_image_idx = pidx*image_length;
-	  size_t first_window_idx = pidx*wlen*num_per_jblock*num_per_iblock;
-	  size_t first_nval_idx = pidx*num_per_jblock*num_per_iblock;
+	    for (int pidx = 0; pidx < num_panels; pidx++) {
+	      size_t this_image_idx = pidx*image_length;
+	      size_t first_window_idx = pidx*wlen*num_per_jblock*num_per_iblock;
+	      size_t first_nval_idx = pidx*num_per_jblock*num_per_iblock;
 
-	  int j = jlo + thread.league_rank()*num_jblocks;
-	  //	  for (j = jlo; j < jhi; j=j+num_jblocks) {
-	  if (j < jhi) {
-	    for (int i = ilo; i < ihi; i=i+num_iblocks) {
-	      size_t block_idx = (((j-jlo)/num_jblocks)*num_per_iblock+(i-ilo)/num_iblocks);
-	      size_t window_idx = first_window_idx + block_idx * wlen;
-	      size_t nval_idx = first_nval_idx + block_idx;
-	      size_t k;
-	      for (k = 0; k < wlen; k++) {
-		d_window_all(window_idx + k) = ULONG_MAX;
-	      }
-	      size_t l = 0;
-	      size_t wind = window_idx;
-	      RCCOORDS_DATA r, c, rlo, rhi, clo, chi;
-	      rlo = j - half_height;
-	      rhi = (j + half_height);
-	      clo = i - half_width;
-	      chi = (i + half_width);
-	      for (r = rlo; r <= rhi; r++) {
-		for (c = clo; c <= chi; c++) {
-		  size_t index = this_image_idx + r*hpixels + c;
-		  if ((d_image_all(index) != overload_tag) &&
-		      (d_image_all(index) != ignore_tag) &&
-		      (d_image_all(index) < MAX_IMAGE_DATA_VALUE)) {
-		    d_window_all(wind) = (d_image_all(index)-minval)/binsize + 1;
-		    l++;
+	      int j = jlo + thread.league_rank()*num_jblocks;
+	      //	  for (j = jlo; j < jhi; j=j+num_jblocks) {
+	      if (j < jhi) {
+		for (int i = ilo; i < ihi; i=i+num_iblocks) {
+		  size_t block_idx = (((j-jlo)/num_jblocks)*num_per_iblock+(i-ilo)/num_iblocks);
+		  size_t window_idx = first_window_idx + block_idx * wlen;
+		  size_t nval_idx = first_nval_idx + block_idx;
+		  size_t k;
+		  for (k = 0; k < wlen; k++) {
+		    d_window_all(window_idx + k) = ULONG_MAX;
 		  }
-		  else {
-		    d_window_all(wind) = ULONG_MAX;
+		  size_t l = 0;
+		  size_t wind = window_idx;
+		  RCCOORDS_DATA r, c, rlo, rhi, clo, chi;
+		  rlo = j - half_height;
+		  rhi = (j + half_height);
+		  clo = i - half_width;
+		  chi = (i + half_width);
+		  for (r = rlo; r <= rhi; r++) {
+		    for (c = clo; c <= chi; c++) {
+		      size_t index = this_image_idx + r*hpixels + c;
+		      if ((d_image_all(index) != overload_tag) &&
+			  (d_image_all(index) != ignore_tag) &&
+			  (d_image_all(index) < MAX_IMAGE_DATA_VALUE)) {
+			d_window_all(wind) = (d_image_all(index)-minval)/binsize + 1;
+			l++;
+		      }
+		      else {
+			d_window_all(wind) = ULONG_MAX;
+		      }
+		      wind++;
+		    }
 		  }
-		  wind++;
+		  d_nvals_all(nval_idx) = l;
 		}
 	      }
-	      d_nvals_all(nval_idx) = l;
 	    }
-	  }
-	}
-	  });
+	  }); // Kokkos::parallel_for()
+	
 	toc = ltime();
 	tmkarr = toc - tic;
 
@@ -588,132 +589,108 @@ int lmodeim_kokkos(DIFFIMAGE *imdiff_in)
 	tsort = toc - tic;
 
 	tic = ltime();
-	for (pidx = 0; pidx < num_panels; pidx++) {
+	Kokkos::parallel_for(Kokkos::TeamPolicy<>(num_per_jblock, Kokkos::AUTO()),KOKKOS_LAMBDA(const team_member& thread) {
 
-	  size_t this_image_idx = pidx*image_length;
-	  size_t first_window_idx = pidx*wlen*num_per_jblock*num_per_iblock;
-	  size_t first_nval_idx = pidx*num_per_jblock*num_per_iblock;
+	    IMAGE_DATA_TYPE  minval = d_imgt_params[0];
+	    IMAGE_DATA_TYPE binsize = d_imgt_params[1];
+	    IMAGE_DATA_TYPE overload_tag = d_imgt_params[2];
+	    IMAGE_DATA_TYPE ignore_tag = d_imgt_params[3];
+	    size_t wlen = d_sizet_params[0];
+	    size_t num_jblocks = d_sizet_params[1];
+	    size_t num_iblocks = d_sizet_params[2];
+	    size_t num_per_jblock = d_sizet_params[3];
+	    size_t num_per_iblock = d_sizet_params[4];
+	    size_t jlo = d_sizet_params[5];
+	    size_t jhi = d_sizet_params[6];
+	    size_t ilo = d_sizet_params[7];
+	    size_t ihi = d_sizet_params[8];
+	    size_t num_panels = d_sizet_params[9];
+	    size_t image_length = d_sizet_params[10];
+	    size_t hpixels = d_sizet_params[11];
 
-#ifdef USE_OPENMP
-#pragma omp parallel for default(shared)				\
-  private(i,j)								\
-  reduction(+:num_mode_values, num_median_values, num_med90_values, num_this_values,num_ignored_values)
-#endif
-	  for (j = jlo; j < jhi; j=j+num_jblocks) {
-	    for (i = ilo; i < ihi; i=i+num_iblocks) {
-	      int mode_ct = 0;
-	      size_t mode_value=0, max_count=0;
-	      size_t index_mode = this_image_idx + j*hpixels + i;
-	      size_t this_value = (image_all[index_mode]-minval)/binsize + 1;
-	      size_t block_idx = (((j-jlo)/num_jblocks)*num_per_iblock+(i-ilo)/num_iblocks);
-	      size_t window_idx = first_window_idx + block_idx * wlen;
-	      size_t nval_idx = first_nval_idx + block_idx;
-	      size_t l = nvals_all[nval_idx];
-	      if (l == 0 || image_all[index_mode] == ignore_tag || image_all[index_mode] == overload_tag || image_all[index_mode] >= MAX_IMAGE_DATA_VALUE) {
-		image_mode_all[index_mode] = 0;
-		num_ignored_values++;
-	      }
-	      else {
-		//          printf("Starting quicksort for i=%d,j=%ld\n",i,index_mode/hpixels);
-		//	  insertion_sort(this_window,0,l-1);
-		//	  quicksort(this_window,0,l-1);
-		//          printf("Done with quicksort for i=%d,j=%ld\n",i,index_mode/hpixels);
-		// Get the median
-		int kmed = l/2;
-		int k90 = l*9/10;
-		size_t min_value = window_all[window_idx];
-		size_t max_value = window_all[window_idx + l-1];
-		size_t range_value = max_value - min_value;
-		size_t median_value = window_all[window_idx + kmed];
-		size_t med90_value = window_all[window_idx + k90];
+	    for (int pidx = 0; pidx < num_panels; pidx++) {
 
-		// Get the mode
-		size_t this_count = 1;
-		size_t last_value = window_all[window_idx];
-		max_count = 1;
-		size_t k;
-		for (k = 1; k < l; k++) {
-		  size_t this_window_value = window_all[window_idx + k];
-		  if (this_window_value == last_value) {
-		    this_count++;
+	      size_t this_image_idx = pidx*image_length;
+	      size_t first_window_idx = pidx*wlen*num_per_jblock*num_per_iblock;
+	      size_t first_nval_idx = pidx*num_per_jblock*num_per_iblock;
+
+	      int j = jlo + thread.league_rank()*num_jblocks;
+	  //	  for (j = jlo; j < jhi; j=j+num_jblocks) {
+	      if (j < jhi) {
+		for (int i = ilo; i < ihi; i=i+num_iblocks) {
+		  int mode_ct = 0;
+		  size_t mode_value=0, max_count=0;
+		  size_t index_mode = this_image_idx + j*hpixels + i;
+		  size_t this_value = (d_image_all(index_mode)-minval)/binsize + 1;
+		  size_t block_idx = (((j-jlo)/num_jblocks)*num_per_iblock+(i-ilo)/num_iblocks);
+		  size_t window_idx = first_window_idx + block_idx * wlen;
+		  size_t nval_idx = first_nval_idx + block_idx;
+		  size_t l = d_nvals_all(nval_idx);
+		  if (l == 0 || d_image_all(index_mode) == ignore_tag || d_image_all(index_mode) == overload_tag || d_image_all(index_mode) >= MAX_IMAGE_DATA_VALUE) {
+		    d_image_mode_all(index_mode) = 0;
 		  } else {
-		    last_value = this_window_value;
+		    int kmed = l/2;
+		    int k90 = l*9/10;
+		    size_t min_value = d_window_all(window_idx);
+		    size_t max_value = d_window_all(window_idx + l-1);
+		    size_t range_value = max_value - min_value;
+		    size_t median_value = d_window_all(window_idx + kmed);
+		    size_t med90_value = d_window_all(window_idx + k90);
+		    
+		    size_t this_count = 1;
+		    size_t last_value = d_window_all(window_idx);
+		    max_count = 1;
+		    size_t k;
+		    for (k = 1; k < l; k++) {
+		      size_t this_window_value = d_window_all(window_idx + k);
+		      if (this_window_value == last_value) {
+			this_count++;
+		      } else {
+			last_value = this_window_value;
+			this_count = 1;
+		      }
+		      if (this_count > max_count) max_count = this_count;
+		    }
 		    this_count = 1;
-		  }
-		  if (this_count > max_count) max_count = this_count;
-		}
-		this_count = 1;
-		last_value = window_all[window_idx];
-		double p, entropy = 0.0;
-		for (k = 1; k < l; k++) {
-		  size_t this_window_value = window_all[window_idx + k];
-		  if (this_window_value == last_value) {
-		    this_count++;
-		  } else {
+		    last_value = d_window_all(window_idx);
+		    double p, entropy = 0.0;
+		    for (k = 1; k < l; k++) {
+		      size_t this_window_value = d_window_all(window_idx + k);
+		      if (this_window_value == last_value) {
+			this_count++;
+		      } else {
+			p = (double)this_count/(double)l;
+			entropy -=  p * log_local(p);
+			last_value = this_window_value;
+			this_count = 1;
+		      }
+		      if (this_count == max_count) {
+			mode_value += this_window_value;
+			mode_ct++;
+		      }
+		    }
+		    mode_value = (size_t)(((float)mode_value/(float)mode_ct) + .5);
 		    p = (double)this_count/(double)l;
 		    entropy -=  p * log_local(p);
-		    last_value = this_window_value;
-		    this_count = 1;
-		  }
-		  if (this_count == max_count) {
-		    mode_value += this_window_value;
-		    mode_ct++;
-		  }
-		}
-		mode_value = (size_t)(((float)mode_value/(float)mode_ct) + .5);
-		p = (double)this_count/(double)l;
-		entropy -=  p * log_local(p);
-		//	  image_mode[index_mode] = (size_t)(((float)mode_value/(float)mode_ct) + .5);
 #ifdef DEBUG
-		if (j == 600 && i == 600) {
-		  printf("LMODEIM: entropy = %g, mode_ct = %d, mode_value = %ld, median_value = %ld, range_value = %ld, this_value = %ld, med90_value = %ld, kmed = %d, k90 = %d\n",entropy,mode_ct,mode_value,median_value,range_value,this_value,med90_value,kmed,k90);
-		} 
+		    if (j == 600 && i == 600) {
+		      printf("LMODEIM: entropy = %g, mode_ct = %d, mode_value = %ld, median_value = %ld, range_value = %ld, this_value = %ld, med90_value = %ld, kmed = %d, k90 = %d\n",entropy,mode_ct,mode_value,median_value,range_value,this_value,med90_value,kmed,k90);
+		    } 
 #endif 
-		// Depending on the distribution, use alternative values other than the mode
-		if (range_value <= 2) {
-		  image_mode_all[index_mode]  = this_value;
-		  num_this_values++;
-		} else {
-		  if (this_value <= med90_value) {
-		    image_mode_all[index_mode] = this_value;
-		    num_this_values++;
-		  } else {
-		    image_mode_all[index_mode] = window_all[window_idx + (size_t)(((double)k90*(double)rand_local())/(double)ULONG_MAX)];
-		    num_med90_values++;
-		    //	      printf("%d %ld %ld\n",kmed,mode_value,median_value);
-		    //	      mode_value = median_value;
+		    if (range_value <= 2) {
+		      d_image_mode_all(index_mode)  = this_value;
+		    } else {
+		      if (this_value <= med90_value) {
+			d_image_mode_all(index_mode) = this_value;
+		      } else {
+			d_image_mode_all(index_mode) = d_window_all(window_idx + (size_t)(((double)k90*(double)rand_local())/(double)ULONG_MAX));
+		      }
+		    }
 		  }
 		}
-		/*	      if (entropy > log(10.)) {
-			      if (mode_ct == 1) {
-			      image_mode[index_mode] = median_value;
-			      num_median_values++;
-			      } else {
-			      image_mode[index_mode] = mode_value;
-			      num_mode_values++;
-			      }
-			      } else {
-			      if (range_value <= 2) {
-			      image_mode[index_mode]  = this_value;
-			      num_this_values++;
-			      } else {
-			      if (this_value <= med90_value) {
-			      image_mode[index_mode] = this_value;
-			      num_this_values++;
-			      } else {
-			      image_mode[index_mode] = this_window[(size_t)(((double)k90*(double)rand())/(double)RAND_MAX)];
-			      num_med90_values++;
-			      //	      printf("%d %ld %ld\n",kmed,mode_value,median_value);
-			      //	      mode_value = median_value;
-			      }
-			      }
-			      }
-		*/
 	      }
-	      //        printf("Stop tm = %ld,th = %ld,i = %d,j = %d\n",tm,th,i,j);
 	    }
-	  }
-	}
+	  }); // Kokkos::parallel_for()
       
 	toc = ltime();
 	tmkimg = toc - tic;
@@ -723,9 +700,10 @@ int lmodeim_kokkos(DIFFIMAGE *imdiff_in)
 
       }
     }
-
     // Now image_mode holds the mode filtered values
     // Convert these values to pixel values and store them in the input image
+
+    Kokkos::deep_copy(h_image_mode_all,d_image_mode_all);
 
     double stop = ltime();
 
