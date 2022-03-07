@@ -542,38 +542,48 @@ int lmodeim_kokkos(DIFFIMAGE *imdiff_in)
 	      int j = jlo + thread.league_rank()*num_jblocks;
 	      //	  for (j = jlo; j < jhi; j=j+num_jblocks) {
 	      if (j < jhi) {
-		for (int i = ilo; i < ihi; i=i+num_iblocks) {
-		  size_t block_idx = (((j-jlo)/num_jblocks)*num_per_iblock+(i-ilo)/num_iblocks);
-		  size_t window_idx = first_window_idx + block_idx * wlen;
-		  size_t nval_idx = first_nval_idx + block_idx;
-		  size_t k;
-		  for (k = 0; k < wlen; k++) {
-		    d_window_all(window_idx + k) = ULONG_MAX;
-		  }
-		  size_t l = 0;
-		  size_t wind = window_idx;
-		  RCCOORDS_DATA r, c, rlo, rhi, clo, chi;
-		  rlo = j - half_height;
-		  rhi = (j + half_height);
-		  clo = i - half_width;
-		  chi = (i + half_width);
-		  for (r = rlo; r <= rhi; r++) {
-		    for (c = clo; c <= chi; c++) {
-		      size_t index = this_image_idx + r*hpixels + c;
-		      if ((d_image_all(index) != overload_tag) &&
-			  (d_image_all(index) != ignore_tag) &&
-			  (d_image_all(index) < MAX_IMAGE_DATA_VALUE)) {
-			d_window_all(wind) = (d_image_all(index)-minval)/binsize + 1;
-			l++;
-		      }
-		      else {
-			d_window_all(wind) = ULONG_MAX;
-		      }
-		      wind++;
+		Kokkos::parallel_for(Kokkos::ThreadVectorRange(thread, num_per_iblock), [&](int ii) {
+		  int i = ilo + ii*num_iblocks;
+		  if (i < ihi) {
+		    //		for (int i = ilo; i < ihi; i=i+num_iblocks) {
+		    size_t block_idx = (((j-jlo)/num_jblocks)*num_per_iblock+(i-ilo)/num_iblocks);
+		    size_t window_idx = first_window_idx + block_idx * wlen;
+		    size_t nval_idx = first_nval_idx + block_idx;
+		    size_t k;
+		    for (k = 0; k < wlen; k++) {
+		      d_window_all(window_idx + k) = ULONG_MAX;
 		    }
+		    size_t l = 0;
+		    //		    size_t wind = window_idx;
+		    RCCOORDS_DATA rlo = j - half_height;
+		    RCCOORDS_DATA rhi = (j + half_height);
+		    RCCOORDS_DATA clo = i - half_width;
+		    RCCOORDS_DATA chi = (i + half_width);
+		    RCCOORDS_DATA nr = 2*half_height + 1;
+		    RCCOORDS_DATA nc = 2*half_width + 1;
+		    for (size_t ri = 0; ri < nr; ri++) {
+		      for (size_t ci = 0; ci < nc; ci++) {
+			RCCOORDS_DATA r = j - half_height + ri;
+			RCCOORDS_DATA c = i - half_width + ci;
+			//		    for (r = rlo; r <= rhi; r++) {
+			//		      for (c = clo; c <= chi; c++) {
+			size_t index = this_image_idx + r*hpixels + c;
+			size_t wind = window_idx + ri*nc + ci;
+			if ((d_image_all(index) != overload_tag) &&
+			    (d_image_all(index) != ignore_tag) &&
+			    (d_image_all(index) < MAX_IMAGE_DATA_VALUE)) {
+			  d_window_all(wind) = (d_image_all(index)-minval)/binsize + 1;
+			  l++;
+			}
+			else {
+			  d_window_all(wind) = ULONG_MAX;
+			}
+			//			wind++;
+		      }
+		    }
+		    d_nvals_all(nval_idx) = l;
 		  }
-		  d_nvals_all(nval_idx) = l;
-		}
+		}); // Kokkos::parallel_for()
 	      }
 	    }
 	  }); // Kokkos::parallel_for()
