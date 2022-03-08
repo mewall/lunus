@@ -176,6 +176,7 @@ void quickSortIterative(size_t arr[], size_t stack[], int l, int h)
     h = stack[top--]; 
     l = stack[top--]; 
   
+
     // Set pivot element at its correct position 
     // in sorted array 
     int p;
