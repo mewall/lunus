@@ -542,7 +542,7 @@ int lmodeim_kokkos(DIFFIMAGE *imdiff_in)
 	      int j = jlo + thread.league_rank()*num_jblocks;
 	      //	  for (j = jlo; j < jhi; j=j+num_jblocks) {
 	      if (j < jhi) {
-		Kokkos::parallel_for(Kokkos::ThreadVectorRange(thread, num_per_iblock), [&](int ii) {
+		Kokkos::parallel_for(Kokkos::TeamThreadRange(thread, num_per_iblock), [&](int ii) {
 		  int i = ilo + ii*num_iblocks;
 		  if (i < ihi) {
 		    //		for (int i = ilo; i < ihi; i=i+num_iblocks) {
@@ -627,7 +627,10 @@ int lmodeim_kokkos(DIFFIMAGE *imdiff_in)
 	      int j = jlo + thread.league_rank()*num_jblocks;
 	  //	  for (j = jlo; j < jhi; j=j+num_jblocks) {
 	      if (j < jhi) {
-		for (int i = ilo; i < ihi; i=i+num_iblocks) {
+		Kokkos::parallel_for(Kokkos::TeamThreadRange(thread, num_per_iblock), [&](int ii) {
+		  int i = ilo + ii*num_iblocks;
+		  if (i < ihi) {
+		    //		for (int i = ilo; i < ihi; i=i+num_iblocks) {
 		  int mode_ct = 0;
 		  size_t mode_value=0, max_count=0;
 		  size_t index_mode = this_image_idx + j*hpixels + i;
@@ -697,7 +700,8 @@ int lmodeim_kokkos(DIFFIMAGE *imdiff_in)
 		      }
 		    }
 		  }
-		}
+		  }
+										      });
 	      }
 	    }
 	  }); // Kokkos::parallel_for()
