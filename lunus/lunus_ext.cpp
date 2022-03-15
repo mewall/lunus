@@ -11,6 +11,8 @@
 
 extern "C" {
 #include <c/include/mwmask.h>
+  void kokkos_start();
+  void kokkos_stop();
 }
 
 #include <string>
@@ -19,6 +21,8 @@ extern "C" {
 #include <fstream>
 #include <iostream>
 #include <exception>
+
+int lmodeim_kokkos(DIFFIMAGE *imdiff_in);
 
 namespace lunus {
   void foo2(){
@@ -665,7 +669,12 @@ namespace lunus {
     inline void LunusModeim() {
       if (imdiff->reentry == 1) imdiff->reentry = 2;
       if (imdiff->reentry == 0) imdiff->reentry = 1;
+#ifdef USE_KOKKOS
+      printf("LUNUS_EXT: Using lmodeim_kokkos()\n");
+      lmodeim_kokkos(imdiff);
+#else
       lmodeim(imdiff);
+#endif
     }
 
     inline scitbx::af::flex_double LunusScaleim(float bx, float by, float px, int inner_radius, int outer_radius) {

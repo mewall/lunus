@@ -35,39 +35,25 @@ for f in env_lunus["CCFLAGS"]:
    replacement_ccflags.append(f)
 env_lunus.Replace(CCFLAGS = replacement_ccflags)
 
-#replacement_ccflags = []
-#for f in env_lunus["SHCCFLAGS"]:
-# if (f not in ["-ffast-math"]):
-#   replacement_ccflags.append(f)
-#env_lunus.Replace(SHCCFLAGS = replacement_ccflags)
+replacement_shcxxflags = []
+for f in env_lunus["SHCXXFLAGS"]:
+ if (f not in ["-ffast-math"]):
+   replacement_shcxxflags.append(f)
+env_lunus.Replace(SHCXXFLAGS = replacement_shcxxflags)
 
-#replacement_cflags = []
-#for f in env_lunus["SHCFLAGS"]:
-# if (f not in ["-ffast-math"]):
-#   replacement_cflags.append(f)
-#env_lunus.Replace(CFLAGS = replacement_cflags)
-
-#for f in ["-g","-DUSE_OPENMP","-I/opt/local/include/libomp","-Xpreprocessor"#,"-fopenmp"]:
-#  replacement_ccflags.append(f)
-
-#env_lunus.Prepend(CCFLAGS=["-g","-DUSE_OPENMP","-I/opt/local/include/libomp","-Xpreprocessor","-fopenmp"])
-#env_lunus.Prepend(SHCCFLAGS=["-g","-O2","-fopenmp","-DUSE_OPENMP","-Xpreprocessor"])
 env_lunus.Prepend(CCFLAGS=["-Xpreprocessor"])
+
 if (env_etc.have_openmp):
   env_lunus.Prepend(CCFLAGS=["-DUSE_OPENMP"])
+  env_lunus.Prepend(SHCXXFLAGS=["-DUSE_OPENMP"])
   env_lunus.Prepend(LIBS=["gomp"])
 if sys.platform.startswith('linux') and env_etc.enable_kokkos:
-  env_lunus.Prepend(CCFLAGS=["-DUSE_KOKKOS","-DLUNUS_NUM_JBLOCKS=16","-DLUNUS_NUM_IBLOCKS=8"])
-#  env_lunus.Prepend(CCFLAGS=["-DUSE_KOKKOS","-DLUNUS_NUM_JBLOCKS=8","-DLUNUS_NUM_IBLOCKS=1"])
+  kokkos_flags = ["-DUSE_KOKKOS","-DLUNUS_NUM_JBLOCKS=16","-DLUNUS_NUM_IBLOCKS=8"]
+  env_lunus.Prepend(CCFLAGS=kokkos_flags)
+  env_lunus.Prepend(SHCXXFLAGS=kokkos_flags)
 else:
   if (env_etc.enable_cuda):
     env_lunus.Prepend(CCFLAGS=["-DUSE_CUDA","-DLUNUS_NUM_JBLOCKS=16","-DLUNUS_NUM_IBLOCKS=8"])
-#env_lunus.Prepend(CCFLAGS=["-g","-O2","-fopenmp","-DUSE_OPENMP","-Xpreprocessor"])
-#env_lunus.Prepend(CCFLAGS=["-g","-O3","-fopenmp","-DUSE_OPENMP","-DUSE_OFFLOAD","-foffload=nvptx-none","-foffload=-lm","-foffload=-fPIC","-Xpreprocessor"])
-#env_lunus.Prepend(LIBS=["gomp"])
-#env_lunus.Prepend(LIBS=["gomp","cudart"])
-#env_lunus.Prepend(LIBPATH=["/opt/local/lib/libomp","/opt/cudatoolkit/10.0/lib64"])
-#env_lunus.Prepend(LIBPATH=["/opt/cudatoolkit/10.0/lib64"])
 
 correct_prefix = "#"+os.path.basename(env_etc.lunus_dist)
 

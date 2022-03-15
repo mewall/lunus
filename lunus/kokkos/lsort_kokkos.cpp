@@ -9,9 +9,9 @@
 //#include <Kokkos_Complex.hpp>
 #include <cstdlib>
 
-extern "C" void kokkos_start (int narg, char *args[])
+extern "C" void kokkos_start ()
 {
-  Kokkos::initialize(narg,args);
+  Kokkos::initialize();
 }
 
 extern "C" void kokkos_stop() {
@@ -92,6 +92,7 @@ extern "C" void quickSortListKokkos(size_t arr[], size_t stack[], size_t num_arr
 
   Kokkos::parallel_for(Kokkos::TeamPolicy<>(num_arrays, Kokkos::AUTO()),
       TestTeamBitonicFunctor<ValView, OrdView>(d_values, d_counts, d_offsets));
+  Kokkos::fence();
   Kokkos::deep_copy(h_values, d_values);
 
   // for (i=0; i<num_values;i++) {

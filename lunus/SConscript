@@ -8,7 +8,8 @@ else:
   if (env_etc.enable_cuda):
     env.Prepend(LIBS=["lunus_cuda"])
 
-#env.Prepend(LIBPATH=["/opt/local/lib/libomp","/opt/cudatoolkit/10.0/lib64"])
+if sys.platform.startswith('linux') and env_etc.enable_kokkos:
+  env.Prepend(SHCXXFLAGS=["-DUSE_KOKKOS"])
 
 env.SharedLibrary(
   target="#lib/lunus_ext",
