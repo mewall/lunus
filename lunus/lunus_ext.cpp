@@ -11,8 +11,10 @@
 
 extern "C" {
 #include <c/include/mwmask.h>
+#ifdef USE_KOKKOS
   void kokkos_start();
   void kokkos_stop();
+#endif
 }
 
 #include <string>
@@ -22,11 +24,31 @@ extern "C" {
 #include <iostream>
 #include <exception>
 
+#ifdef USE_KOKKOS
 int lmodeim_kokkos(DIFFIMAGE *imdiff_in);
+#endif
 
 namespace lunus {
   void foo2(){
     std::cout<<"HELLO foo2"<<std::endl;
+  }
+
+  void KokkosStart() {
+#ifdef USE_KOKKOS
+    kokkos_start();
+    std::cout<<"lunus.KokkosStart: Starting Kokkos"<<std::endl;
+#else
+    std::cout<<"lunus.KokkosStart: Not a Kokkos build, skipping start"<<std::endl;
+#endif
+  }
+
+  void KokkosStop() {
+#ifdef USE_KOKKOS
+    kokkos_stop();
+    std::cout<<"lunus.KokkosStop: Stopping Kokkos"<<std::endl;
+#else
+    std::cout<<"lunus.KokkosStop: Not a Kokkos build, skipping stop"<<std::endl;
+#endif
   }
 
   class Process {
@@ -1314,6 +1336,8 @@ namespace boost_python { namespace {
     ;
 
     def("foo2",&lunus::foo2);
+    def("kokkos_start",&lunus::KokkosStart);
+    def("kokkos_stop",&lunus::KokkosStop);
   }
 
 }

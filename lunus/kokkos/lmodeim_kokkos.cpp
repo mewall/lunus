@@ -338,17 +338,6 @@ int lmodeim_kokkos(DIFFIMAGE *imdiff_in)
   printf("LMODEIM_KOKKOS: num_iblocks, num_jblocks = %ld, %ld\n");
 #endif
   
-
-#ifdef USE_KOKKOS
-#ifdef DEBUG
-  //  printf("LMODEIM_KOKKOS: Starting kokkos...\n");
-#endif
-  kokkos_start();
-#ifdef DEBUG
-  //  printf("LMODEIM_KOKKOS: ...done\n");
-#endif
-#endif
-  
   if (reentry == 2 || reentry == 3) {
     if (hpixels != imdiff->hpixels || vpixels != imdiff->vpixels) {
       perror("LMODEIM_KOKKOS: Image panel size changed on reentry. Aborting\n");
@@ -791,10 +780,6 @@ int lmodeim_kokkos(DIFFIMAGE *imdiff_in)
     free(nvals_all);
     free(stack_all);
   }
-
-#ifdef USE_KOKKOS
-  kokkos_stop();
-#endif
 
  CloseShop:
   return(return_value);

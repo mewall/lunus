@@ -5,8 +5,10 @@ import dxtbx
 from dxtbx.format.FormatCBFMini import FormatCBFMini
 from dials.array_family import flex
 from lunus import LunusDIFFIMAGE
+from lunus import kokkos_start, kokkos_stop
 import os
 import numpy as np
+import time
 
 import sys
 
@@ -35,6 +37,8 @@ except ValueError:
 else:
     ref_name = args.pop(idx).split("=")[1]
 
+kokkos_start()
+    
 img = dxtbx.load(inp_name)
 
 detector = img.get_detector()
@@ -69,9 +73,16 @@ A.LunusSetparamsim(deck)
 A.LunusPunchim()
 A.LunusWindim()
 A.LunusThrshim()
+tic = time.time()
 A.LunusModeim()
-print("Mode filter finished.")
+toc = time.time()
+print("Mode filter took {0} seconds.".format(toc-tic))
+tic = time.time()
+A.LunusModeim()
+toc = time.time()
+print("Mode filter took {0} seconds.".format(toc-tic))
 data2 = A.get_image();
+kokkos_stop()
 if not ref_name is None:
     ref = dxtbx.load(ref_name)
     ref_data_np = ref.get_raw_data().as_numpy_array().flatten()
