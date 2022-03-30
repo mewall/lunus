@@ -27,8 +27,15 @@ extern "C" {
 #endif
 #include<time.h>
 
-void kokkos_start();  
-void kokkos_stop();
+void kokkos_start ()
+{
+  Kokkos::initialize();
+}
+
+void kokkos_stop() {
+  Kokkos::finalize();
+}
+
 }
 
 template<typename ValView, typename OrdView>

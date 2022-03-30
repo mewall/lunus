@@ -90,7 +90,6 @@ else:
 
 if (env_etc.enable_kokkos):
   kokkos_src = []
-  kokkos_src.append("lsort_kokkos.cpp")
   kokkos_src.append("lmodeim_kokkos.cpp")
 
   lunus_kokkos_env.Prepend(CPPPATH=[env_etc.boost_adaptbx_include,
