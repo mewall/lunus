@@ -1,11 +1,8 @@
 from __future__ import print_function
 import future,six
-import lunus
 import dxtbx
 from dxtbx.format.FormatCBFMini import FormatCBFMini
 from dials.array_family import flex
-from lunus import LunusDIFFIMAGE
-from lunus import kokkos_start, kokkos_stop
 from simtbx.kokkos import gpu_instance
 import os
 import numpy as np
@@ -47,14 +44,18 @@ beam = img.get_beam()
 gonio = img.get_goniometer()
 scan = img.get_scan()
 
-A = LunusDIFFIMAGE()
-data = img.get_raw_data()
-data_np = data.as_numpy_array()
-hist=np.histogram(data,range=(0,50),bins=50,density=False)
-print(hist[0:50])
-print(data[0])
-A.set_image(data)
-deck = '''
+for i in [0]:
+    from lunus import LunusDIFFIMAGE
+    from lunus import kokkos_start, kokkos_stop
+
+    A = LunusDIFFIMAGE()
+    data = img.get_raw_data()
+    data_np = data.as_numpy_array()
+    hist=np.histogram(data,range=(0,50),bins=50,density=False)
+    print(hist[0:50])
+    print(data[0])
+    A.set_image(data)
+    deck = '''
 #lunus input deck
 punchim_xmin=1203
 punchim_ymin=1250
@@ -70,30 +71,29 @@ modeim_bin_size=1
 modeim_kernel_width=20
 
 '''
-A.LunusSetparamsim(deck)
-A.LunusPunchim()
-A.LunusWindim()
-A.LunusThrshim()
-tic = time.time()
-A.LunusModeim()
-toc = time.time()
-print("Mode filter took {0} seconds.".format(toc-tic))
-tic = time.time()
-A.LunusModeim()
-toc = time.time()
-print("Mode filter took {0} seconds.".format(toc-tic))
-data2 = A.get_image();
+    A.LunusSetparamsim(deck)
+    A.LunusPunchim()
+    A.LunusWindim()
+    A.LunusThrshim()
+    tic = time.time()
+    A.LunusModeim()
+    toc = time.time()
+    print("Mode filter took {0} seconds.".format(toc-tic))
+    tic = time.time()
+    A.LunusModeim()
+    toc = time.time()
+    print("Mode filter took {0} seconds.".format(toc-tic))
+    data2 = A.get_image();
 
-if not ref_name is None:
-    ref = dxtbx.load(ref_name)
-    ref_data_np = ref.get_raw_data().as_numpy_array().flatten()
-    data2_np = data2.as_numpy_array().flatten()
+    if not ref_name is None:
+        ref = dxtbx.load(ref_name)
+        ref_data_np = ref.get_raw_data().as_numpy_array().flatten()
+        data2_np = data2.as_numpy_array().flatten()
 #    data2_np_rand = np.random.random_sample((len(data2_np),))
-    cc = np.corrcoef(ref_data_np,data2_np)[0,1]
+        cc = np.corrcoef(ref_data_np,data2_np)[0,1]
 #dxtbx.format.FormatCBFMini.FormatCBFMini.as_file(detector,beam,gonio,scan,data,path,header_convention="GENERIC_MINI",det_type="GENERIC")
-FormatCBFMini.as_file(detector,beam,gonio,scan,data2,out_name)
+        FormatCBFMini.as_file(detector,beam,gonio,scan,data2,out_name)
 
-del kokkos_run
 
 if np.abs(cc - 1.0) < 0.00001:
     sys.exit(0)
