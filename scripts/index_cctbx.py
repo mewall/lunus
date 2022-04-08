@@ -84,7 +84,7 @@ if __name__=="__main__":
     from dxtbx.datablock import DataBlockFactory
     from dials.array_family import flex
     from dials.algorithms.indexing.indexer import indexer_base
-    from dials.util.options import OptionParser
+    from dials.util.options import ArgumentParser
   else:	
     import imp
     dxtbx = imp.load_module("dxtbx",None,os.path.join(pymodpath,"/cctbx_project/dxtbx"),('','',5))
@@ -94,7 +94,7 @@ if __name__=="__main__":
     flex = imp.load_module("dials.array_family.flex",None,os.path.join(pymodpath+"/cctbx_project/dials/array_family"),('','',5))
     indexer_base = imp.load_module("dials.algorithms.indexing.indexer",None,os.path.join(pymodpath
 +"/cctbx_project/dials/algorithms/indexing/indexer"),('','',5))
-    OptionParser = imp.load_module("dials.util.options.OptionParser",None,os.path.join(pymodpath+"/cctbx_project/dials/util/options"),('','',5))
+    ArgumentParser = imp.load_module("dials.util.options.ArgumentParser",None,os.path.join(pymodpath+"/cctbx_project/dials/util/options"),('','',5))
 
   # new dials
 #  from iotbx.phil import parse
@@ -123,8 +123,8 @@ if __name__=="__main__":
       .type = space_group
   '''
   phil_scope = parse(phil_scope_str.format(target_cell,target_sg), process_includes=True)
-#  from dials.util.options import OptionParser
-  parser = OptionParser(phil=phil_scope)
+#  from dials.util.options import ArgumentParser
+  parser = ArgumentParser(phil=phil_scope)
   params, options = parser.parse_args(args=[], show_diff_phil=True)
   
   params.refinement.parameterisation.scan_varying = False
