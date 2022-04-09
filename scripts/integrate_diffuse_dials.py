@@ -319,8 +319,8 @@ if __name__=="__main__":
       .type = space_group
   '''
   phil_scope = parse(phil_scope_str.format(target_cell,target_sg), process_includes=True)
-  from dials.util.options import OptionParser
-  parser = OptionParser(phil=phil_scope)
+  from dials.util.options import ArgumentParser
+  parser = ArgumentParser(phil=phil_scope)
   params, options = parser.parse_args(args=[], show_diff_phil=True)
   params.refinement.parameterisation.scan_varying = False
   params.indexing.method='real_space_grid_search'
