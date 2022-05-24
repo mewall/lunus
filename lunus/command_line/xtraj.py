@@ -306,9 +306,9 @@ if __name__=="__main__":
     chunksize = int(nsteps/nchunks)
   else:
     nchunks = int(nsteps/chunksize)
-  chunklist = np.zeros((mpi_size), dtype=np.int)
-  nchunklist = np.zeros((mpi_size),dtype=np.int)
-  skiplist = np.zeros((mpi_size), dtype=np.int)
+  chunklist = np.zeros((mpi_size), dtype=int)
+  nchunklist = np.zeros((mpi_size),dtype=int)
+  skiplist = np.zeros((mpi_size), dtype=int)
   nchunksize = nchunks/mpi_size
   leftover = nchunks % mpi_size
   for i in range(mpi_size):
