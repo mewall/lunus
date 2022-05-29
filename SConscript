@@ -56,71 +56,17 @@ else:
 
 correct_prefix = "#"+os.path.basename(env_etc.lunus_dist)
 
+import glob
+glob_str = os.path.join(env_etc.lunus_dist,"c","lib","*.c")
+srcfile_list = glob.glob(glob_str)
 env_lunus.StaticLibrary(target='#lib/lunus',
-  source = [os.path.join(correct_prefix,"c","lib",srcfile) for srcfile in [
-  "linitim.c",
-  "lcalcsim.c",
-  "lfreeim.c",
-  "lmodeim.c",
-  "lofstim.c",
-  "lpunchim.c",
-  "lnormim.c",
-  "lpolarim.c",
-  "lscaleim.c",
-  "lavgrcf.c",
-  "lavgrim.c",
-  "lwindim.c",
-  "lthrshim.c",
-  "linitlt.c",
-  "lfreelt.c",
-  "lreadlt.c",
-  "lreadvtk.c",
-  "lgettag.c",
-  "lparsecelllt.c",
-  "lmattools.c",
-  "lwritevtk.c",
-  "lwritehkl.c",
-  "lwritelt.c",
-  "lsetmetim.c",
-  "lsymlt.c",
-  "lsymlib.c",
-  "lanisolt.c",
-  "lsvtools.c",
-  "lspline.c",
-  "lsetparamsim.c",
-  "lsetparamslt.c",
-  "lsubrfim.c",
-  "ltime.c",
-  "lprocimlt.c",
-  "lcloneim.c",
-  "lcfim.c",
-  "lwritecube.c",
-  "lbkgsubim.c",
-  "lslistim.c",
-  "lccrlt.c",
-  "lcorrlt.c",
-  "linitmap.c",
-  "lwritemap.c",
-  "lreadcube.c",
-  "lreadhkl.c",
-  "lscalelt.c",
-  "lmulsclt.c",
-  "lmulcfim.c"]],
-  CPPPATH=[CPPP] )
+  source = [os.path.join(correct_prefix,"c","lib",os.path.basename(srcfile)) for srcfile in srcfile_list],CPPPATH=[CPPP] )
 
-for f in [os.path.join(correct_prefix,"c","src",srcfile) for srcfile in [
-    "anisolt.c",
-    "corrlt.c",
-    "ccrlt.c",
-    "symlt.c",
-    "hkl2lat.c",
-    "makelt.c",
-    "scalelt.c",
-    "mulsclt.c",
-    "cube2map.c",
-    "vtk2cube.c",
-    "lat2vtk.c"]]:
-    env_lunus.Program('#bin/{}'.format(os.path.basename(f).split('.')[0]),f,LIBS=['lunus','m'],CPPPATH=[CPPP])
+glob_str = os.path.join(env_etc.lunus_dist,"c","src","*.c")
+srcfile_list = glob.glob(glob_str)
+
+for f in [os.path.join(correct_prefix,"c","src",os.path.basename(srcfile)) for srcfile in srcfile_list]:
+    env_lunus.Program('#bin/{}'.format("lunus."+os.path.basename(f).split('.')[0]),f,LIBS=['lunus','m'],CPPPATH=[CPPP])
 
 if (not env_etc.no_boost_python):
 
