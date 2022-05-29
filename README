@@ -1,1 +1,31 @@
-00README
+LUNUS version 0.2a
+Los Alamos National Laboratory C21101
+
+LUNUS software for analyzing diffuse scattering data is distributed
+under the following BSD license:
+
+Copyright (c) 1993-1997, Michael E. Wall
+Copyright (c) 2007-2015, Los Alamos National Security, LLC
+Copyright © 2022. Triad National Security, LLC. All rights reserved.
+
+This program was produced under U.S. Government contract 89233218CNA000001 
+for Los Alamos National Laboratory (LANL), which is operated by Triad National 
+Security, LLC for the U.S.  Department of Energy/National Nuclear Security 
+Administration. All rights in the program are reserved by Triad National 
+Security, LLC, and the U.S. Department of Energy/National Nuclear
+Security Administration. The Government is granted for itself and others 
+acting on its behalf a nonexclusive, paid-up, irrevocable worldwide license 
+in this material to reproduce, prepare derivative works, distribute copies 
+to the public, perform publicly and display publicly, and to permit
+others to do so.
+
+All rights reserved.
+
+LUNUS software for diffuse scattering from protein crystals
+
+analysis/ - scripts for data analysis
+c/ - source and binaries for diffuse scattering routines
+docs/ - documentation for diffuse scattering analysis
+generation/ - map generation files
+visualization/ - map visualization files
+xplor/ - simulation files
