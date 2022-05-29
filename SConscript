@@ -29,24 +29,23 @@ CPPP = os.path.join(env_etc.lunus_include,"c","include")
 
 env_lunus = env_base.Clone(SHLINKFLAGS=env_etc.shlinkflags)
 
-replacement_ccflags = []
-for f in env_lunus["CCFLAGS"]:
- if (f not in ["-ffast-math"]):
-   replacement_ccflags.append(f)
-env_lunus.Replace(CCFLAGS = replacement_ccflags)
+if "-ffast-math" in env_lunus["CCFLAGS"]:
+  replacement_ccflags = []
+  for f in env_lunus["CCFLAGS"]:
+    if (f not in ["-ffast-math"]):
+      replacement_ccflags.append(f)
+  env_lunus.Replace(CCFLAGS = replacement_ccflags)
 
-replacement_shcxxflags = []
-for f in env_lunus["SHCXXFLAGS"]:
- if (f not in ["-ffast-math"]):
-   replacement_shcxxflags.append(f)
-env_lunus.Replace(SHCXXFLAGS = replacement_shcxxflags)
-
-env_lunus.Prepend(CCFLAGS=["-Xpreprocessor"])
+if "-ffast-math" in env_lunus["CCFLAGS"]:
+  replacement_shcxxflags = []
+  for f in env_lunus["SHCXXFLAGS"]:
+    if (f not in ["-ffast-math"]):
+      replacement_shcxxflags.append(f)
+  env_lunus.Replace(SHCXXFLAGS = replacement_shcxxflags)
 
 if (env_etc.have_openmp):
   env_lunus.Prepend(CCFLAGS=["-DUSE_OPENMP"])
   env_lunus.Prepend(SHCXXFLAGS=["-DUSE_OPENMP"])
-  env_lunus.Prepend(LIBS=["gomp"])
 if sys.platform.startswith('linux') and env_etc.enable_kokkos:
   kokkos_flags = ["-DUSE_KOKKOS","-DLUNUS_NUM_JBLOCKS=16","-DLUNUS_NUM_IBLOCKS=8"]
   env_lunus.Prepend(CCFLAGS=kokkos_flags)
@@ -98,8 +97,30 @@ env_lunus.StaticLibrary(target='#lib/lunus',
   "lwritecube.c",
   "lbkgsubim.c",
   "lslistim.c",
+  "lccrlt.c",
+  "lcorrlt.c",
+  "linitmap.c",
+  "lwritemap.c",
+  "lreadcube.c",
+  "lreadhkl.c",
+  "lscalelt.c",
+  "lmulsclt.c",
   "lmulcfim.c"]],
   CPPPATH=[CPPP] )
+
+for f in [os.path.join(correct_prefix,"c","src",srcfile) for srcfile in [
+    "anisolt.c",
+    "corrlt.c",
+    "ccrlt.c",
+    "symlt.c",
+    "hkl2lat.c",
+    "makelt.c",
+    "scalelt.c",
+    "mulsclt.c",
+    "cube2map.c",
+    "vtk2cube.c",
+    "lat2vtk.c"]]:
+    env_lunus.Program('#bin/{}'.format(os.path.basename(f).split('.')[0]),f,LIBS=['lunus','m'],CPPPATH=[CPPP])
 
 if (not env_etc.no_boost_python):
 

@@ -7,22 +7,25 @@ Import("env", "env_etc")
 def detect_architecture(verbose=True):
   if verbose:
     print('Looking for GPUs ...')
-  available_gpu = subprocess.check_output(['nvidia-smi', '--query-gpu=name', '--format=csv,noheader'])
-  available_gpu = available_gpu.split(b'\n')
-  first_entry = available_gpu[0].decode('utf8')
-  if len(first_entry)>0:
-    if verbose:
-      print( ' Found ', first_entry)
-    if 'A100' in first_entry:
-      architecture = "Ampere80"
-    elif 'V100' in first_entry:
-      architecture = "Volta70"
-    else:
+  try:
+    available_gpu = subprocess.check_output(['nvidia-smi', '--query-gpu=name', '--format=csv,noheader'])
+    available_gpu = available_gpu.split(b'\n')
+    first_entry = available_gpu[0].decode('utf8')
+    if len(first_entry)>0:
       if verbose:
-        print(' GPU name not recognized. Reverting to CPU HSW architecture. ')
+        print( ' Found ', first_entry)
+      if 'A100' in first_entry:
+        architecture = "Ampere80"
+      elif 'V100' in first_entry:
+        architecture = "Volta70"
+      else:
+        if verbose:
+          print(' GPU name not recognized. Reverting to CPU HSW architecture. ')
+        architecture = "HSW"
+    else:
       architecture = "HSW"
-  else:
-    architecture = "HSW"
+  except:
+    architecture = "HSW" 
   return architecture
 
 #print("LUNUS: Imported kokkos_env KOKKOS_PATH = {0}\n".format(kokkos_env['KOKKOS_PATH']))
