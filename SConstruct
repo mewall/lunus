@@ -48,7 +48,7 @@ import glob
 glob_str = os.path.join("c","lib","*.c")
 srcfile_list = glob.glob(glob_str)
 print(srcfile_list)
-env.StaticLibrary(target='c/lib/lunus', source = [srcfile for srcfile in srcfile_list],CPPPATH=[CPPP,'c/lib'] )
+env.StaticLibrary(target='c/lib/lunus', source = [srcfile for srcfile in srcfile_list],CPPPATH=[CPPP] )
 
 if sys.platform.startswith('linux') and env.enable_kokkos:
   env.SConscript("lunus/kokkos/SConscript",exports={ 'env' : env_lunus })
@@ -63,6 +63,6 @@ else:
 glob_str = os.path.join("c","src","*.c")
 srcfile_list = glob.glob(glob_str)
 for f in [srcfile for srcfile in srcfile_list]:
-    env.Program('c/bin/{}'.format("lunus."+os.path.basename(f).split('.')[0]),f,LIBS=lunus_program_libs,CPPPATH=[CPPP,'c/lib'],LIBPATH='c/lib')
+    env.Program('c/bin/{}'.format("lunus."+os.path.basename(f).split('.')[0]),f,LIBS=lunus_program_libs,CPPPATH=[CPPP],LIBPATH='c/lib')
 
 
