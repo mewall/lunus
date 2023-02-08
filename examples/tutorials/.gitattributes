@@ -1,0 +1,16 @@
+crystalline_MD_analysis_diffuse/data/full_sys_first_1ns_50_frames_fit.xtc filter=lfs diff=lfs merge=lfs -text
+crystalline_MD_analysis_diffuse/data/full_sys_start.pdb filter=lfs diff=lfs merge=lfs -text
+crystalline_MD_analysis_bragg/data/supercell_sample_frame.pdb filter=lfs diff=lfs merge=lfs -text
+crystalline_MD_prep/images/unit_cell_angles.png filter=lfs diff=lfs merge=lfs -text
+crystalline_MD_analysis_diffuse/data/amber_average_sc_c_alpha_distances_pbc.npy filter=lfs diff=lfs merge=lfs -text
+crystalline_MD_analysis_diffuse/data/amber_tot_var_mat.npy filter=lfs diff=lfs merge=lfs -text
+crystalline_MD_analysis_bragg/data/fcalc_wat.mtz filter=lfs diff=lfs merge=lfs -text
+crystalline_MD_analysis_bragg/data/unrestrained_single_structure_protein_first_waters_refine_2.pdb filter=lfs diff=lfs merge=lfs -text
+crystalline_MD_analysis_diffuse/data/4wor_complete.pdb filter=lfs diff=lfs merge=lfs -text
+crystalline_MD_analysis_bragg/data/fcalc_full.mtz filter=lfs diff=lfs merge=lfs -text
+crystalline_MD_analysis_bragg/data/fcalc_prot.mtz filter=lfs diff=lfs merge=lfs -text
+crystalline_MD_analysis_bragg/images/coot_ensemble.png filter=lfs diff=lfs merge=lfs -text
+crystalline_MD_analysis_bragg/images/ensemble.gif filter=lfs diff=lfs merge=lfs -text
+crystalline_MD_analysis_bragg/images/supercell.png filter=lfs diff=lfs merge=lfs -text
+crystalline_MD_analysis_bragg/images/water_comparison.png filter=lfs diff=lfs merge=lfs -text
+crystalline_MD_analysis_bragg/images/coot_comparison_exp_MD_restrained_and_unrestrained.png filter=lfs diff=lfs merge=lfs -text
