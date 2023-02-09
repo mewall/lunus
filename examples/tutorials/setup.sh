@@ -12,7 +12,7 @@
 #   - To install CCP4 + coot -> https://www.ccp4.ac.uk/download
 #   - To install phenix -> https://phenix-online.org/download
 #
-# Set the environment variables below (PHENIX_PATH, CCP4_PATH and CONDA_PATH) to the absolute paths 
+# Set the environment variables below (LUNUS_PATH, PHENIX_PATH, CCP4_PATH and CONDA_PATH) to the absolute paths 
 # of the respective directories.
 # 
 # The lines highlighted below should be placed in your ~/.bash_profile, ~/.bashrc or ~/.zshrc file,
@@ -22,6 +22,7 @@
 # open a new one for the changes to take effect.
 # 
 # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+export LUNUS_PATH=${LUNUS_PATH:=/path/to/lunus} # <--- Replace with path to lunus directory cloned from github
 export PHENIX_PATH=${PHENIX_PATH:=/path/to/phenix} # <--- Replace with path to phenix install directory
 export CCP4_PATH=${CCP4_PATH:=/path/to/ccp4} # <--- Replace with path to ccp4 install directory
 source ${PHENIX_PATH}/phenix_env.sh

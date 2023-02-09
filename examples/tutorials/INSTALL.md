@@ -83,7 +83,9 @@ from the directory where the notebook lives, and double click on the notebook to
     - The `phenix` link above will take you to a page where you can request a password to download the installer -- `phenix` is free for academic users -- and with the provided username and password, you will be able to download an installer. 
 
 
-Make sure to record what directory you installed `CCP4` and `phenix` into, then set the following environment variables in your `~/.bashrc`, `~/.bash_profile`, `~/.zshrc`, file or the equivalent for your system/shell:
+Make sure to record what directory you installed `CCP4` and `phenix` into, and the directory where lunus was cloned from github, then set the following environment variables in your `~/.bashrc`, `~/.bash_profile`, `~/.zshrc`, file or the equivalent for your system/shell:
+
+```export LUNUS_PATH="/path/to/your/lunus/directory/"```
 
 ```export PHENIX_PATH="/path/to/your/phenix/directory/"```
 
