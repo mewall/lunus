@@ -62,6 +62,12 @@ _Below, any command with a `$` symbol in front of it means that that command sho
 ```$ jupyter-nbextension install nglview --py --sys-prefix```
 ```$ jupyter-nbextension enable nglview --py --sys-prefix```
 
+- Tell jupyter to trust the notebooks before opening them:
+
+```$ jupyter trust crystalline_MD_prep/Preparation_of_MD_Simulations_of_Protein_Crystals.ipynb```
+```$ jupyter trust crystalline_MD_analysis_bragg/Crystalline_MD_Analysis_Bragg.ipynb```
+```$ jupyter trust crystalline_MD_analysis_diffuse/Crystalline_MD_Analysis_Diffuse.ipynb``` 
+
 - To open the notebooks:
 
 ```$ jupyter notebook [name of the notebook file].ipynb```

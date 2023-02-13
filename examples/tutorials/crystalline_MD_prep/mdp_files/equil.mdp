@@ -2,13 +2,13 @@ title                   = OPLS Lysozyme NVT equilibration
 define                  = -DPOSRES  ; position restrain the protein
 ; Run parameters
 integrator              = md        ; leap-frog integrator
-nsteps                  = 500     ; 2 * 500 = 1 ps
+nsteps                  = 1000      ; 1000 * 2 fs = 2 ps
 dt                      = 0.002     ; 2 fs
 ; Output control
-nstxout                 = 5       ; save coordinates every 1.0 ps
-nstvout                 = 5       ; save velocities every 1.0 ps
-nstenergy               = 5       ; save energies every 1.0 ps
-nstlog                  = 5       ; update log file every 1.0 ps
+nstxout                 = 5         ; save coordinates every 1.0 ps
+nstvout                 = 5         ; save velocities every 1.0 ps
+nstenergy               = 5         ; save energies every 1.0 ps
+nstlog                  = 5         ; update log file every 1.0 ps
 ; Bond parameters
 continuation            = no        ; first dynamics run
 constraint_algorithm    = lincs     ; holonomic constraints 
