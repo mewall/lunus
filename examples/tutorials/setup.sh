@@ -47,8 +47,8 @@ jupyter-nbextension install nglview --py --sys-prefix
 jupyter-nbextension enable nglview --py --sys-prefix
 # tell jupyter to trust the notebooks
 jupyter trust crystalline_MD_prep/Preparation_of_MD_Simulations_of_Protein_Crystals.ipynb
-jupyter trust crystalline_MD_analysis_bragg/Crystalline_MD_Analysis_Bragg.ipynb
-jupyter trust crystalline_MD_analysis_diffuse/Crystalline_MD_Analysis_Diffuse.ipynb
+jupyter trust crystalline_MD_analysis_bragg/Analysis_of_MD_Simulations_of_Protein_Crystals_Bragg.ipynb
+jupyter trust crystalline_MD_analysis_diffuse/Analysis_of_MD_Simulations_of_Protein_Crystals_Diffuse.ipynb
 
 # install lunus with scons (not a problem if lunus is already installed)
 cd ../../
