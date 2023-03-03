@@ -4,7 +4,10 @@
 # removes all the files created in the running of the notebook
 # for a fresh start
 
-rm -r equil_2*
+rm supercell_2.top
+rm -r equilibration_3/ 
+rm -r minimization_3/
+rm equil_2*
 rm -r equilibration_2/
 rm mdout.mdp
 rm -r minimization_2/
@@ -17,7 +20,7 @@ rm ions.tpr
 rm supercell_solvated.gro
 rm supercell_no_chains_renumbered.pdb
 rm supercell.pdb
-rm \#supercell.top.*
+rm \#supercell*
 rm \#step*
 rm step*
 rm asymmetric_unit.pdb
