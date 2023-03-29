@@ -20,6 +20,7 @@ rm ions.tpr
 rm supercell_solvated.gro
 rm supercell_no_chains_renumbered.pdb
 rm supercell.pdb
+rm supercell_corrected_box.gro
 rm \#supercell*
 rm \#step*
 rm step*
