@@ -25,7 +25,11 @@
 
 _Below, any command with a `$` symbol in front of it means that that command should be run from the terminal/command line. Otherwise, the commands should be placed in your `~/.zshrc`, `~/.bash_profile`, `~/.bashrc` or similar, or placed in a script to be sourced before running the notebooks (e.g. `source set_env.sh`)._
 
-**After installing `conda/miniconda`, `XQuartz`, `CCP4`, `coot`, and `phenix`, all of the following can be accomplished by editing and running the script `setup.py` in this directory (e.g. `$ bash setup.py`). However, for explanations of all the commands, or to run the installations line-by-line/instruction-by-instruction from the terminal yourself (e.g. if you encounter problems with the install) follow the instructions below.**
+**After installing `conda/miniconda`, `XQuartz`, `CCP4`, `coot`, and `phenix`, all of the following can be accomplished by editing and running the script `setup.py` in this directory (e.g. `$ bash setup.sh`). However, for explanations of all the commands, or to run the installations line-by-line/instruction-by-instruction from the terminal yourself (e.g. if you encounter problems with the install) follow the instructions below.**
+
+**Once the environment variables have been set, and `$ bash setup.sh` has been run, conda and lunus should be installed. One can check this by running `conda env list` and checking to see that `crystalMD` is one of the available environemnts, and running `$ echo $PATH` and making sure the path to `/lunus/c/bin/` is among the directories on path.**
+
+**Then, to use the notebooks, activate the conda environment with `$ conda activate crystalMD` and run `$ source setup.sh`, and you should be good to go.
 
 **Note:** We assume a bash-compatible shell for all of the following setup commands and the running of the notebooks themselves. These instructions will have to be altered to be compatible with other shells.
 
