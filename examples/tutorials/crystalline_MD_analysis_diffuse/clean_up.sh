@@ -6,6 +6,7 @@
 
 rm AMBER_full_supercell_covar_vs_dist_FULL_DATA_xf.dat
 rm supercell_cell.txt
+rm reference.mtz
 rm diffuse_supercell_prot.hkl
 rm icalc_supercell_prot.mtz
 rm fcalc_supercell_prot.mtz
@@ -27,5 +28,4 @@ rm anisotropic_component_correlation_coefficient.txt
 rm anisotropic_correlation_in_bins.dat
 rm anisotropic_correlation_in_bins.rf
 rm full_map_correlation_coefficient.txt
-rm unit_cell.txt
 rm diffuse_supercell*
