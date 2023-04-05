@@ -13,3 +13,5 @@ rm single_structure_protein_first_waters_refine_*
 rm single_structure_protein_first_refinement_against_exp_*
 rm ensemble.pdb
 rm ensemble_cleaned.pdb
+rm *_PKA_sample.*
+rm reference.mtz
