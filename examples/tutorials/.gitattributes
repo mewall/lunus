@@ -16,3 +16,5 @@ crystalline_MD_analysis_bragg/images/water_comparison.png filter=lfs diff=lfs me
 crystalline_MD_analysis_bragg/images/coot_comparison_exp_MD_restrained_and_unrestrained.png filter=lfs diff=lfs merge=lfs -text
 crystalline_MD_analysis_diffuse/data/experimental_data.lat filter=lfs diff=lfs merge=lfs -text
 crystalline_MD_analysis_diffuse/data/simulated_data.lat filter=lfs diff=lfs merge=lfs -text
+crystalline_MD_analysis_bragg/data/PKA_crystal_structure_supercell.pdb filter=lfs diff=lfs merge=lfs -text
+crystalline_MD_analysis_bragg/data/PKA_sample_trajectory.xtc filter=lfs diff=lfs merge=lfs -text
