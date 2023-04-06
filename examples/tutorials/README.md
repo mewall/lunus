@@ -5,13 +5,13 @@ This directory contains tutorials for the preparation and analysis of MD simulat
 Each directory contains a Jupyter notebook, which is a combination of exposition and code blocks which can be run in line. The directories also contain their own sub-directories containing the files necessary to run the contents of the code blocks in the notebooks. 
 
 - `crystalline_MD_prep/`
-    - `Preparation_of_MD_Analysis_of_Protein_Crystals.ipynb`: Jupyter notebook walking through the preparation, parametrization, minimization, and equlibration of MD simulation of protein crystals.
+    - `MDPreparation.ipynb`: Jupyter notebook walking through the preparation, parametrization, minimization, and equlibration of MD simulation of protein crystals.
 
 - `crystalline_MD_analysis_bragg/`
-    - `Analysis_of_MD_Simulations_of_Protein_Crystals_Bragg.ipynb`: Jupyter notebook walking through the calculation Bragg data from an MD simulation trajectory of a protein crystal, refinement of a protein structure against MD-calculated Bragg data, analysis of B-factors from refinement and simulation, and reverse-propagation of frame of the simulation to produce an ensemble structural model.
+    - `MDAnalysisBragg.ipynb`: Jupyter notebook walking through the calculation Bragg data from an MD simulation trajectory of a protein crystal, refinement of a protein structure against MD-calculated Bragg data, analysis of B-factors from refinement and simulation, and reverse-propagation of frame of the simulation to produce an ensemble structural model.
 
 - `crystalline_MD_analysis_diffuse/`
-    - `Analysis_of_MD_Simulations_of_Protein_Crystals_Diffuse.ipynb`: Jupyter notebook walking through teh calculation of diffuse scattering data from an MD simulationtrajectory of protein crystal, calculation of the isotropic scattering (total and by component), and analysis of the covariance of atom pairs from the MD simulation to study models of diffuse scattering.
+    - `MDAnalysisDiffuse.ipynb`: Jupyter notebook walking through teh calculation of diffuse scattering data from an MD simulationtrajectory of protein crystal, calculation of the isotropic scattering (total and by component), and analysis of the covariance of atom pairs from the MD simulation to study models of diffuse scattering.
 
 - `erice-2022`
     - Directory containing a version of the MD prep notebook presented in the Workshop on MD simulations of protein crystals from the 2022 Course on Diffuse Scattering at the Erice International School or Crystallography.
