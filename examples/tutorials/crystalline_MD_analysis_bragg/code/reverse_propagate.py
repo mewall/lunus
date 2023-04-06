@@ -1,14 +1,13 @@
-import iotbx.pdb
-import cctbx
+import numpy as np
 import scitbx.matrix
 import itertools
 import string
-import numpy as np
+import iotbx.pdb
 import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-xrs", "--input_xrs", help="xray structure pdb file")
-parser.add_argument("-s",   "--input_sc",  help="supercell pdb file")
+parser.add_argument("-sc",   "--input_sc",  help="supercell pdb file")
 parser.add_argument("-o",   "--output",    help="output pdb file")
 args = parser.parse_args()
 
@@ -159,7 +158,7 @@ def reverse_propagate_supercell(supercell_pdb_filename, xrs_pdb_filename):
     # until you reach the end of each protein
     for sc_chain in SC.chains():
         for res in sc_chain.residue_groups():
-            res_atoms = [a for a in res.atoms()] 
+            res_atoms = [a for a in res.atoms()]
             atom_count += len(res_atoms)
             # keep appending residues if we haven't reached the end of the chain
             if (atom_count-1) // atoms_per_copy == c:
@@ -192,8 +191,7 @@ def reverse_propagate_supercell(supercell_pdb_filename, xrs_pdb_filename):
     
     return ens
 
-# get the ensemble and write it out
-ensemble = reverse_propagate_supercell(sc_pdb, xrs_pdb)
 xtal_symmetry = iotbx.pdb.input(file_name=xrs_pdb).xray_structure_simple()
-ensemble.write_pdb_file(outpdb, crystal_symmetry=xtal_symmetry)
 
+starting_structure_ensemble = reverse_propagate_supercell(sc_pdb, xrs_pdb)
+starting_structure_ensemble.write_pdb_file(out_pdb, crystal_symmetry=xtal_symmetry)
