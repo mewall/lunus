@@ -7,7 +7,6 @@
 rm supercell_2.top
 rm -r equilibration_3/ 
 rm -r minimization_3/
-rm equil_2*
 rm -r equilibration_2/
 rm mdout.mdp
 rm -r minimization_2/

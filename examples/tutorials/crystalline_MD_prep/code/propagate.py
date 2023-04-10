@@ -1,6 +1,8 @@
 import iotbx.pdb
 import cctbx
 import numpy as np
+import argparse
+import itertools
 
 def construct_supercell(UC, xrs, n_cells):
     '''Constructs a supercell from a unit cell given a number of cells in each dimension
@@ -74,11 +76,8 @@ def construct_supercell(UC, xrs, n_cells):
 
 
 if __name__ == "__main__":
-    import argparse
-   
     parser = argparse.ArgumentParser()
     parser.add_argument("-au",  "--asymmetric_unit_pdb", help="name of asymmetric unit pdb file")
-    parser.add_argument("-xrs", "--xray_structure_pdb",  help="name of xray structure pdb file")
     parser.add_argument("-o",   "--output_pdb",          help="name of output supercell pdb file")
     parser.add_argument("-x", type=int, help="number of unit cells along the x-axis")
     parser.add_argument("-y", type=int, help="number of unit cells along the y-axis")
@@ -86,7 +85,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     au_pdb = args.asymmetric_unit_pdb
-    xrs_pdb = args.xray_structure_pdb
     out_pdb = args.output_pdb
     Nx = args.x
     Ny = args.y
@@ -94,7 +92,7 @@ if __name__ == "__main__":
     
     input_pdb = iotbx.pdb.input(file_name=au_pdb)
     input_hierarchy = input_pdb.construct_hierarchy(sort_atoms=False)
-    xray_structure = iotbx.pdb.input(file_name=xrs_pdb).xray_structure_simple()
+    xray_structure = iotbx.pdb.input(file_name=au_pdb).xray_structure_simple()
     unit_cell = input_hierarchy.expand_to_p1(xray_structure.crystal_symmetry())
     
     A, B, C, alpha, gamma, beta = xray_structure.crystal_symmetry().unit_cell().parameters()
