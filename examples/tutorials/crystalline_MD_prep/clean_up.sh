@@ -34,6 +34,7 @@ rm -r pdb4amber_files/
 rm protein_calcium_amber.pdb
 rm protein_calcium.pdb
 rm pdTp.pdb
+rm posre_Protein_weaker.itp
 
 # remove any additional gromacs
 # saved files
