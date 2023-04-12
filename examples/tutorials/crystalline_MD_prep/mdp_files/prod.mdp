@@ -1,5 +1,5 @@
 title                   = Production 
-define                  = -DPOSRES              ; position restrain the protein
+define                  = -DPOSRES_WEAKER       ; position restrain the protein
 
 ; Run parameters
 integrator              = md                    ; leap-frog integrator
