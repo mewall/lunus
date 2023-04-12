@@ -4,6 +4,3 @@
 [submodule "kokkos-kernels"]
 	path = lunus/kokkos/kokkos-kernels
 	url = https://github.com/kokkos/kokkos-kernels.git
-[submodule "lunus-data"]
-	path = lunus-data
-	url = https://github.com/lanl/lunus-data

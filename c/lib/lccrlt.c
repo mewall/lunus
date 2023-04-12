@@ -84,6 +84,8 @@ int lccrlt(LAT3D *lat1, LAT3D *lat2)
     }
   }
 
+  
+
   for (i=0;i<=lat1->rfile_length;i++) {
     if (ct[i]>0) {
       avg1[i] /= (float)ct[i];
@@ -127,14 +129,18 @@ int lccrlt(LAT3D *lat1, LAT3D *lat2)
   float cumulative_corr=0.0f;
   size_t cumulative_ct=0;
 
-  for (i=1;i<=lat1->rfile_length;i++) {
+  size_t last_nonzero_index;
+
+  for (i=0;i<=lat1->rfile_length;i++) {
     if (ct[i]>0) {
+      last_nonzero_index = i;
       cumulative_corr += ((float)ct[i])*lat1->rfile[i];
       cumulative_ct += ct[i];
       printf("cumulative_ct=%d,ct[%d]=%d, corr=%f\n",cumulative_ct,i,ct[i],lat1->rfile[i]);
     }
   }
 
+  lat1->rfile_length = last_nonzero_index+1;
 
   cumulative_corr /= (float)cumulative_ct;
 
