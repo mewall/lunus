@@ -329,8 +329,9 @@ int main(int argc, char *argv[])
   // Broadcast file lists and A matrices from rank 0 to other MPI ranks
 
   lbcastBufMPI((void *)&num_images,sizeof(size_t),0,mpiv);
-  int il_sz[num_images];
-  int bl_sz[num_images];
+  int *il_sz, *bl_sz;
+  il_sz = (int *)malloc(num_images*sizeof(int));
+  bl_sz = (int *)malloc(num_images*sizeof(int));
   if (mpiv->my_id == 0) {
     for (i=0;i<num_images;i++) {
       il_sz[i] = strlen(imagelist[i])+1;
@@ -726,6 +727,8 @@ int main(int argc, char *argv[])
 
   lfinalMPI(mpiv);
   free(mpiv);
+  free(il_sz);
+  free(bl_sz);
   lfreeim(imdiff);
   lfreeim(imdiff_ref);
   lfreeim(imdiff_corrected);
