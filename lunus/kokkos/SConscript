@@ -47,8 +47,8 @@ elif os.environ['LUNUS_KOKKOS_ARCH'] == 'Ampere80':
 else:
   kokkos_cxxflags = ['-std=c++14']
 
-Import("env_boost_python_ext")
-lunus_kokkos_env = env_boost_python_ext.Clone()
+#Import("env_boost_python_ext")
+lunus_kokkos_env = env.Clone()
 
 print("LUNUS Kokkos configuration: LUNUS_KOKKOS_PATH = {0}\nLUNUS_KOKKOS_DEVICES = {1}\nLUNUS_KOKKOS_ARCH = {2}\n".format(os.environ['LUNUS_KOKKOS_PATH'],os.environ['LUNUS_KOKKOS_DEVICES'],os.environ['LUNUS_KOKKOS_ARCH']))
 
@@ -63,10 +63,10 @@ lunus_kokkos_env.Prepend(CPPPATH=[os.environ['LUNUS_KOKKOS_PATH']])
 
 print("LUNUS Kokkos configuration: CXX = {0}\nSHCXX = {1}\nCXXFLAGS = {2}\nCPPFLAGS = {3}\nCPPPATH = {4}\n".format(lunus_kokkos_env['CXX'],lunus_kokkos_env['SHCXX'],lunus_kokkos_env['CXXFLAGS'],lunus_kokkos_env['CPPFLAGS'],lunus_kokkos_env['CPPPATH']))
 
+#  "scitbx_boost_python",
+#  env_etc.boost_python_lib,
+#  "cctbx",
 default_libs = [
-  "scitbx_boost_python",
-  env_etc.boost_python_lib,
-  "cctbx",
   "kokkoskernels",
   "kokkoscontainers",
   "kokkoscore"
