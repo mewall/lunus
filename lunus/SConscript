@@ -2,15 +2,14 @@ import sys
 Import("env","env_etc")
 env = env.Clone()
 env.Prepend(LIBS=["lunus"])
-#if sys.platform.startswith('linux') and env_etc.enable_kokkos:
-#  env.Prepend(LIBS=["lunus_kokkos"])
-#else:
-if 1==1:
+if sys.platform.startswith('linux') and env_etc.enable_kokkos:
+  env.Prepend(LIBS=["lunus_kokkos"])
+else:
   if (env_etc.enable_cuda):
     env.Prepend(LIBS=["lunus_cuda"])
 
-#if sys.platform.startswith('linux') and env_etc.enable_kokkos:
-#  env.Prepend(SHCXXFLAGS=["-DUSE_KOKKOS"])
+if sys.platform.startswith('linux') and env_etc.enable_kokkos:
+  env.Prepend(SHCXXFLAGS=["-DUSE_KOKKOS"])
 
 env.SharedLibrary(
   target="#lib/lunus_ext",

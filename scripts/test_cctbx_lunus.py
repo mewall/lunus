@@ -89,6 +89,8 @@ if not ref_name is None:
     data2_np = data2.as_numpy_array().flatten()
 #    data2_np_rand = np.random.random_sample((len(data2_np),))
     cc = np.corrcoef(ref_data_np,data2_np)[0,1]
+else:
+    cc = 1.
 #dxtbx.format.FormatCBFMini.FormatCBFMini.as_file(detector,beam,gonio,scan,data,path,header_convention="GENERIC_MINI",det_type="GENERIC")
 FormatCBFMini.as_file(detector,beam,gonio,scan,data2,out_name)
 if np.abs(cc - 1.0) < 0.00001:

@@ -1,4 +1,4 @@
-   # Authors: Mike Wall & Nick Sauter
+  # Authors: Mike Wall & Nick Sauter
    # Date: 6/15/2017
    # Lattice methods wrapped by Alex Wolff (9/22/2017).
 
@@ -46,11 +46,11 @@ if "-ffast-math" in env_lunus["CCFLAGS"]:
 if (env_etc.have_openmp):
   env_lunus.Prepend(CCFLAGS=["-DUSE_OPENMP"])
   env_lunus.Prepend(SHCXXFLAGS=["-DUSE_OPENMP"])
-#if sys.platform.startswith('linux') and env_etc.enable_kokkos:
-#  kokkos_flags = ["-DUSE_KOKKOS","-DLUNUS_NUM_JBLOCKS=16","-DLUNUS_NUM_IBLOCKS=8"]
-#  env_lunus.Prepend(CCFLAGS=kokkos_flags)
-#  env_lunus.Prepend(SHCXXFLAGS=kokkos_flags)
-#else:
+if sys.platform.startswith('linux') and env_etc.enable_kokkos:
+  kokkos_flags = ["-DUSE_KOKKOS","-DLUNUS_NUM_JBLOCKS=16","-DLUNUS_NUM_IBLOCKS=8"]
+  env_lunus.Prepend(CCFLAGS=kokkos_flags)
+  env_lunus.Prepend(SHCXXFLAGS=kokkos_flags)
+else:
   if (env_etc.enable_cuda):
     env_lunus.Prepend(CCFLAGS=["-DUSE_CUDA","-DLUNUS_NUM_JBLOCKS=16","-DLUNUS_NUM_IBLOCKS=8"])
 
@@ -63,21 +63,16 @@ env_lunus.StaticLibrary(target='#lib/lunus',
   source = [os.path.join(correct_prefix,"c","lib",os.path.basename(srcfile)) for srcfile in srcfile_list],CPPPATH=[CPPP] )
 
 
-#if sys.platform.startswith('linux') and env_etc.enable_kokkos:
-#  env_lunus.SConscript("lunus/kokkos/SConscript",exports={ 'env' : env_lunus })
-#  lunus_program_libs = ['lunus','lunus_kokkos','m']
-#else:
-if 1==1:
+if sys.platform.startswith('linux') and env_etc.enable_kokkos:
+  env_lunus.SConscript("lunus/kokkos/SConscript",exports={ 'env' : env_lunus })
+  lunus_program_libs = ['lunus_kokkos','lunus','m']
+else:
   if sys.platform.startswith('linux') and env_etc.enable_cuda:
     env_lunus.SConscript("lunus/cuda/SConscript",exports={ 'env' : env_lunus })
-    lunus_program_libs = ['lunus','lunus_cuda','m']
+    lunus_program_libs = ['lunus_cuda','lunus','m']
   else:
     lunus_program_libs = ['lunus','m']
 
-glob_str = os.path.join(env_etc.lunus_dist,"c","src","*.c")
-srcfile_list = glob.glob(glob_str)
-for f in [os.path.join(correct_prefix,"c","src",os.path.basename(srcfile)) for srcfile in srcfile_list]:
-    env_lunus.Program('#bin/{}'.format("lunus."+os.path.basename(f).split('.')[0]),f,LIBS=lunus_program_libs,CPPPATH=[CPPP])
 
 if (not env_etc.no_boost_python):
 
@@ -99,4 +94,12 @@ if (not env_etc.no_boost_python):
 
   env_etc.enable_more_warnings(env=env_lunus)
   env_lunus.SConscript("lunus/SConscript",exports={ 'env' : env_lunus })
+
+#  lunus_program_libs += env_lunus['LIBS']
+  
+glob_str = os.path.join(env_etc.lunus_dist,"c","src","*.c")
+srcfile_list = glob.glob(glob_str)
+env_lunus.Append(CFLAGS=["-std=c99"])
+for f in [os.path.join(correct_prefix,"c","src",os.path.basename(srcfile)) for srcfile in srcfile_list]:
+    env_lunus.Program('#bin/{}'.format("lunus."+os.path.basename(f).split('.')[0]),f,LIBS=lunus_program_libs,CPPPATH=[CPPP])
 
