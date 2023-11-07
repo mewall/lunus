@@ -41,11 +41,11 @@ if os.getenv('LUNUS_KOKKOS_PATH') is None:
   os.environ['LUNUS_KOKKOS_PATH'] = libtbx.env.under_dist('simtbx', '../../kokkos')
 
 if os.environ['LUNUS_KOKKOS_ARCH'] == 'Volta70':
-  kokkos_cxxflags = ['-arch=sm_70','-std=c++14']	
+  kokkos_cxxflags = ['-arch=sm_70','-std=c++17']	
 elif os.environ['LUNUS_KOKKOS_ARCH'] == 'Ampere80':
-  kokkos_cxxflags = ['-arch=sm_80','-std=c++14']
+  kokkos_cxxflags = ['-arch=sm_80','-std=c++17']
 else:
-  kokkos_cxxflags = ['-std=c++14']
+  kokkos_cxxflags = ['-std=c++17']
 
 #Import("env_boost_python_ext")
 lunus_kokkos_env = env.Clone()
