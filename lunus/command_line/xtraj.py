@@ -15,6 +15,7 @@ from __future__ import print_function
 from iotbx.pdb import hierarchy
 from cctbx.array_family import flex
 import mmtbx.utils
+import mmtbx.model
 from cctbx import maptbx
 import copy
 import mdtraj as md
@@ -25,6 +26,7 @@ import os
 from libtbx.utils import Keep
 from cctbx import crystal
 import cctbx.sgtbx
+import subprocess
 
 def mpi_enabled():
   return 'OMPI_COMM_WORLD_SIZE' in os.environ.keys()
@@ -56,7 +58,7 @@ if __name__=="__main__":
   try:
     idx = [a.find("d_min")==0 for a in args].index(True)
   except ValueError:
-    d_min = 1.6
+    d_min = 0.9
   else:
     d_min = float(args.pop(idx).split("=")[1])
 
@@ -226,13 +228,14 @@ if __name__=="__main__":
   try:
     idx = [a.find("apply_bfac")==0 for a in args].index(True)
   except ValueError:
-    apply_bfac = False
+    apply_bfac = True
   else:
     apply_bfac_str = args.pop(idx).split("=")[1]
-    if apply_bfac_str == "True":
-      apply_bfac = True
-    else:
+    if apply_bfac_str == "False":
       apply_bfac = False
+      print("Setting apply_bfac = True")
+    else:
+      apply_bfac = True
 
 # Set nsteps if needed
   
@@ -244,6 +247,14 @@ if __name__=="__main__":
 
   last = first + nsteps - 1
 
+# Unit cell, replaces the one in the top file
+
+  try:
+    idx = [a.find("engine")==0 for a in args].index(True)
+  except ValueError:
+    engine = "cctbx"
+  else:
+    engine = args.pop(idx).split("=")[1]
 
 # Initialize MPI
 
@@ -292,12 +303,30 @@ if __name__=="__main__":
   xrs.set_occupancies(1.0)
   xrs_sel = xrs.select(selection)
   xrs_sel.scattering_type_registry(table=scattering_table)
-  fcalc = xrs_sel.structure_factors(d_min=d_min).f_calc()
-  f_000 = mmtbx.utils.f_000(xray_structure=xrs_sel,mean_solvent_density=0.0)
-  volume = xrs_sel.unit_cell().volume()
-  print("f_000 = %g, volume = %g" % (f_000.f_000,volume))
   if (mpi_rank == 0):
-    fcalc.as_mtz_dataset('FWT').mtz_object().write(file_name="reference.mtz")
+    pdbtmp = xrs_sel.as_pdb_file()
+    with open("reference.pdb","w") as fo:
+      fo.write(pdbtmp)
+    if engine == "sfall":
+      sfall_script = \
+"""
+sfall xyzin $1 hklout $2 <<EOF
+mode sfcalc xyzin
+symm P1
+RESOLUTION {d_min}
+NOSCALE
+VDWR 3.0
+end
+EOF
+"""
+      print("Writing the following as run_sfall.sh:")
+      print(sfall_script.format(d_min=d_min))
+      with open("run_sfall.sh","w") as fo:
+        fo.write(sfall_script.format(d_min=d_min))
+    f_000 = mmtbx.utils.f_000(xray_structure=xrs_sel,mean_solvent_density=0.0)
+    volume = xrs_sel.unit_cell().volume()
+    print("f_000 = %g, volume = %g" % (f_000.f_000,volume))
+    fcalc = xrs_sel.structure_factors(d_min=d_min).f_calc()
 
 # read the MD trajectory and extract coordinates
 
@@ -430,10 +459,22 @@ if __name__=="__main__":
     # select the atoms for the structure factor calculation
 
         xrs_sel = xrs.select(selection)
-
-        xrs_sel.scattering_type_registry(table=scattering_table)
-        
-        fcalc = xrs_sel.structure_factors(d_min=d_min).f_calc()
+        if engine == "sfall":
+          pdbtmp = xrs_sel.as_pdb_file()
+          pdbnam_tmp = "tmp_{rank:03d}.pdb".format(rank=mpi_rank)
+          fcalcnam_tmp = "tmp_{rank:03d}.mtz".format(rank=mpi_rank)
+          lognam = "sfall_{rank:03d}.log".format(rank=mpi_rank)
+          with open(pdbnam_tmp,"w") as fo:
+            fo.write(pdbtmp)
+          with open(lognam,"w") as fo:
+            subprocess.run(["bash","run_sfall.sh",pdbnam_tmp,fcalcnam_tmp],stdout=fo)
+          from iotbx.reflection_file_reader import any_reflection_file
+          hkl_in = any_reflection_file(file_name=fcalcnam_tmp)
+          miller_arrays = hkl_in.as_miller_arrays()
+          fcalc = miller_arrays[0]
+        else:
+          xrs_sel.scattering_type_registry(table=scattering_table)
+          fcalc = xrs_sel.structure_factors(d_min=d_min).f_calc()
 
     # Commented out some density trajectory code
     #    if not (dens_file is None):
@@ -512,13 +553,19 @@ if __name__=="__main__":
     sq_avg_fcalc = abs(avg_fcalc).set_observation_type_xray_amplitude().f_as_f_sq()
     avg_icalc = sig_icalc / float(ct)
     if apply_bfac:
-      avg_fcalc.apply_debye_waller_factors(b_iso=-15.0)
-      sq_avg_fcalc.apply_debye_waller_factors(b_iso=-15.0)
-      avg_icalc.apply_debye_waller_factors(b_iso=-15.0)
+      miller_set = avg_fcalc.set()
+      dwf_array = miller_set.debye_waller_factors(b_iso=15.0)
+      dwf_data = dwf_array.data()
+      avg_fcalc_data = avg_fcalc.data()
+      sq_avg_fcalc_data = sq_avg_fcalc.data()
+      avg_icalc_data = avg_icalc.data()
+      for x in range(0,avg_fcalc_data.size()):
+        avg_fcalc_data[x] /= dwf_data[x]
+        sq_avg_fcalc_data[x] /= dwf_data[x] * dwf_data[x]
+        avg_icalc_data[x] /= dwf_data[x] * dwf_data[x]
     diffuse_array=avg_icalc*1.0
     sq_avg_fcalc_data = sq_avg_fcalc.data()
     diffuse_data = diffuse_array.data()
-#    print ("diffuse_data[0] = ",diffuse_data[0])
     for x in range(0,diffuse_data.size()):
       diffuse_data[x]=diffuse_data[x]-sq_avg_fcalc_data[x]
     etime = time.time()
