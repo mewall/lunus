@@ -288,11 +288,14 @@ if __name__=="__main__":
   else:
     pdb_in = None
     xrs = None
+    space_group_info = None
     
   if mpi_enabled():
     pdb_in = mpi_comm.bcast(pdb_in,root=0)
     xrs = mpi_comm.bcast(xrs,root=0)
-    
+    space_group_info = mpi_comm.bcast(space_group_info,root=0)
+
+  space_group_str = str(space_group_info).replace(" ","")
   selection_cache = pdb_in.hierarchy.atom_selection_cache()
   selection = selection_cache.selection(selection_text)
   xrs.convert_to_isotropic()
@@ -310,9 +313,10 @@ if __name__=="__main__":
     if engine == "sfall":
       sfall_script = \
 """
-sfall xyzin $1 hklout $2 <<EOF
-mode sfcalc xyzin
-symm P1
+sfall xyzin $1 hklin $2 hklout $3 <<EOF
+mode sfcalc xyzin hklin
+symm {space_group}
+labin FP=F SIGFP=SIGF
 RESOLUTION {d_min}
 NOSCALE
 VDWR 3.0
@@ -320,13 +324,21 @@ end
 EOF
 """
       print("Writing the following as run_sfall.sh:")
-      print(sfall_script.format(d_min=d_min))
+      print(sfall_script.format(d_min=d_min,space_group=space_group_str))
       with open("run_sfall.sh","w") as fo:
-        fo.write(sfall_script.format(d_min=d_min))
+        fo.write(sfall_script.format(d_min=d_min,space_group=space_group_str))
     f_000 = mmtbx.utils.f_000(xray_structure=xrs_sel,mean_solvent_density=0.0)
     volume = xrs_sel.unit_cell().volume()
     print("f_000 = %g, volume = %g" % (f_000.f_000,volume))
-    fcalc = xrs_sel.structure_factors(d_min=d_min).f_calc()
+
+  fcalc = xrs_sel.structure_factors(d_min=d_min).f_calc()
+  mtz_dataset = fcalc.as_mtz_dataset('FWT')
+  famp = abs(fcalc)
+  famp.set_observation_type_xray_amplitude()
+  famp.set_sigmas(sigmas=flex.double(fcalc.data().size(),1))
+  #famp_with_sigmas = miller_set.array(data=famp.data(),sigmas=sigmas)
+  mtz_dataset.add_miller_array(famp,'F')
+  mtz_dataset.mtz_object().write(file_name="reference_{rank:03d}.mtz".format(rank=mpi_rank))
 
 # read the MD trajectory and extract coordinates
 
@@ -467,11 +479,11 @@ EOF
           with open(pdbnam_tmp,"w") as fo:
             fo.write(pdbtmp)
           with open(lognam,"w") as fo:
-            subprocess.run(["bash","run_sfall.sh",pdbnam_tmp,fcalcnam_tmp],stdout=fo)
+            subprocess.run(["bash","run_sfall.sh",pdbnam_tmp,"reference_{rank:03d}.mtz".format(rank=mpi_rank),fcalcnam_tmp],stdout=fo)
           from iotbx.reflection_file_reader import any_reflection_file
           hkl_in = any_reflection_file(file_name=fcalcnam_tmp)
           miller_arrays = hkl_in.as_miller_arrays()
-          fcalc = miller_arrays[0]
+          fcalc = miller_arrays[1]
         else:
           xrs_sel.scattering_type_registry(table=scattering_table)
           fcalc = xrs_sel.structure_factors(d_min=d_min).f_calc()

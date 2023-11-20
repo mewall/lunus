@@ -31,7 +31,7 @@ if __name__=="__main__":
 
 # Parse command line arguments
 
-    parser = argparse.ArgumentParser(description='Test MD with charge equilibration for free')
+    parser = argparse.ArgumentParser(description='Prototype MD code')
 
     parser.add_argument("--topin",help="Input topology file (.pdb with coords)",required=True)
 
