@@ -4,13 +4,16 @@
 import os, sys
 op = os.path
 
-env = Environment()
+if 'CC' in os.environ.keys():
+  compiler_string = os.environ['CC']
+else:
+  compiler_string = 'gcc'
 
-compiler_string = env['CC']
+env = Environment(CC = compiler_string)
 
-if compiler_string[:3] == 'gcc':
+if 'gcc' in compiler_string:
   env.compiler = 'gnu'
-elif compiler_string[:5] == 'clang':
+elif 'clang' in compiler_string:
   env.compiler = 'clang'
 
 env.enable_openmp = False
@@ -33,6 +36,7 @@ env.lunus_include = Dir(os.path.join("c","include"))
 CPPP = env.lunus_include
 
 if (env.enable_openmp):
+  env.Prepend(LINKFLAGS=["-fopenmp"])
   env.Prepend(CCFLAGS=["-fopenmp", "-DUSE_OPENMP"])
   env.Prepend(SHCXXFLAGS=["-fopenmp", "-DUSE_OPENMP"])
 
