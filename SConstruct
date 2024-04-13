@@ -58,7 +58,7 @@ if sys.platform.startswith('linux') and env.enable_kokkos:
   env.SConscript("lunus/kokkos/SConscript",exports={ 'env' : env_lunus })
   lunus_program_libs = ['lunus','lunus_kokkos','m']
 else:
-  if sys.platform.startswith('linux') and env_etc.enable_cuda:
+  if sys.platform.startswith('linux') and env.enable_cuda:
     env.SConscript("lunus/cuda/SConscript",exports={ 'env' : env_lunus })
     lunus_program_libs = ['lunus','lunus_cuda','m']
   else:
