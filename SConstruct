@@ -14,7 +14,7 @@ if 'AR' in os.environ.keys():
 else:
   archiver_string = 'ar'
 
-env = Environment(CC = compiler_string, AR = archiver_string)
+env = Environment(CC = compiler_string, ARCOM = archiver_string)
 
 if 'gcc' in compiler_string:
   env.compiler = 'gnu'
