@@ -59,7 +59,7 @@ int lreadhkl(LAT3D *lat,LAT3D *tmpl)
   int i,j,k;
   float I,sigI;
 
-  printf("%d %d %d %ld\n",lat->xvoxels,lat->yvoxels,lat->zvoxels,lat->xvoxels*lat->yvoxels*lat->zvoxels);
+  printf("%d %d %d %zu\n",lat->xvoxels,lat->yvoxels,lat->zvoxels,lat->lattice_length);
 
   printf("Initializing the hkl file data...\n");
 
