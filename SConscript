@@ -107,5 +107,5 @@ glob_str = os.path.join(env_etc.lunus_dist,"c","src","*.c")
 srcfile_list = glob.glob(glob_str)
 env_lunus.Append(CFLAGS=["-std=c99"])
 for f in [os.path.join(correct_prefix,"c","src",os.path.basename(srcfile)) for srcfile in srcfile_list]:
-    env_lunus.Program('#bin/{}'.format("lunus."+os.path.basename(f).split('.')[0]),f,LIBS=lunus_program_libs,CPPPATH=[CPPP])
+    env_lunus.Program('#bin/{}'.format("lunus."+os.path.basename(f).split('.')[0]),f,LIBS=lunus_program_libs,RPATH=env_lunus['LIBPATH'],CPPPATH=[CPPP])
 
