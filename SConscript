@@ -65,7 +65,9 @@ env_lunus.StaticLibrary(target='#lib/lunus',
 
 if sys.platform.startswith('linux') and env_etc.enable_kokkos:
   env_lunus.SConscript("lunus/kokkos/SConscript",exports={ 'env' : env_lunus })
-  lunus_program_libs = ['lunus_kokkos','lunus','m']
+  lunus_program_libs = ['lunus_kokkos','lunus','m',"kokkoskernels",
+  "kokkoscontainers",
+  "kokkoscore"]
 else:
   if sys.platform.startswith('linux') and env_etc.enable_cuda:
     env_lunus.SConscript("lunus/cuda/SConscript",exports={ 'env' : env_lunus })
@@ -73,6 +75,10 @@ else:
   else:
     lunus_program_libs = ['lunus','m']
 
+if 'Cuda' in os.getenv('LUNUS_KOKKOS_DEVICES'):
+  lunus_program_libs.extend(["dl","cudart"])
+  env_lunus.Append(LIBPATH=[os.path.join(os.environ['CUDA_HOME'], 'lib64')])
+  env_lunus.Append(LIBPATH=[os.path.join(os.environ['CUDA_HOME'], 'compat')])
 
 if (not env_etc.no_boost_python):
 
@@ -101,5 +107,5 @@ glob_str = os.path.join(env_etc.lunus_dist,"c","src","*.c")
 srcfile_list = glob.glob(glob_str)
 env_lunus.Append(CFLAGS=["-std=c99"])
 for f in [os.path.join(correct_prefix,"c","src",os.path.basename(srcfile)) for srcfile in srcfile_list]:
-    env_lunus.Program('#bin/{}'.format("lunus."+os.path.basename(f).split('.')[0]),f,LIBS=lunus_program_libs,CPPPATH=[CPPP])
+    env_lunus.Program('#bin/{}'.format("lunus."+os.path.basename(f).split('.')[0]),f,LIBS=lunus_program_libs,RPATH=env_lunus['LIBPATH'],CPPPATH=[CPPP])
 
