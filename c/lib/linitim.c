@@ -127,6 +127,8 @@ DIFFIMAGE *linitim(size_t n)
   
     imdiff->rfile = (RFILE_DATA_TYPE *)calloc(MAX_RFILE_LENGTH,
 					      sizeof(RFILE_DATA_TYPE));
+    imdiff->rfile_s = (float *)calloc(MAX_RFILE_LENGTH,
+					      sizeof(float));
     imdiff->imscaler = (RFILE_DATA_TYPE *)calloc(MAX_RFILE_LENGTH,
 						 sizeof(RFILE_DATA_TYPE));
     imdiff->imoffsetr = (RFILE_DATA_TYPE *)calloc(MAX_RFILE_LENGTH,

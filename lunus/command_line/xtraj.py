@@ -376,22 +376,25 @@ EOF
 
   ti = md.iterload(traj_file,chunk=chunklist[mpi_rank],top=top_file,skip=skiplist[mpi_rank])
 
+  if (mpi_rank == 0): 
+    mtime = time.time()                                                        
+    print("TIMING: md.iterload = ",mtime-stime)
+
 # Each MPI rank works with its own trajectory chunk t
 
   chunk_ct = 0
 
   itime = time.time()
   
-  for tt in ti:         
+  for tt in ti:
+    
+    mtime = time.time()
+      
     t = tt
 #    print "rank =",mpi_rank," skip = ",skiplist[mpi_rank]," chunk = ",chunklist[mpi_rank]," start time = ",t.time[0]," coords of first atom = ",t.xyz[0][0]
 
 #    if mpi_enabled():
 #      mpi_comm.Barrier()                                                                          
-    if (mpi_rank == 0): 
-      mtime = time.time()                                                        
-      print("TIMING: md.iterload = ",mtime-stime)
-
     na = len(t.xyz[0])
 
   # np.around() is needed here to avoid small changes in the coordinates
@@ -504,7 +507,7 @@ EOF
 
     chunk_ct = chunk_ct + 1
 
-    print("Rank ",mpi_rank," processed chunk ",chunk_ct," of ",nchunklist[mpi_rank])
+    print("Rank ",mpi_rank," processed chunk ",chunk_ct," of ",nchunklist[mpi_rank]," in ",time.time()-mtime," seconds")
 
     if (chunk_ct >= nchunklist[mpi_rank]):
       break

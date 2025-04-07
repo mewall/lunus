@@ -518,6 +518,7 @@ typedef struct
   RFILE_DATA_TYPE *imscaler;    /* Scale as fn of radius */
   RFILE_DATA_TYPE *imoffsetr;   /* Offset as fn of radius */
   RFILE_DATA_TYPE *rfile;	/* Pointer to rfile */
+  float *rfile_s;               /* Scattering vectors for each rfile value */
   size_t rfile_length;	        /* Length of rfile */
   RFILE_DATA_TYPE rfile_mask_tag;/* Tag for masked rfile value */
   RFILE_DATA_TYPE avg_pixel_value;/* Single average value */

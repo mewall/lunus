@@ -31,6 +31,10 @@ int lclearim(DIFFIMAGE *imdiff_in)
 	free(imdiff->rfile);
 	imdiff->rfile = NULL;
       }
+      if (imdiff->rfile_s != NULL) { 
+	free(imdiff->rfile_s);
+	imdiff->rfile_s = NULL;
+      }
       if (imdiff->image != NULL) {
 	free(imdiff->image);
 	imdiff->image = NULL;

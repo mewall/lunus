@@ -68,6 +68,7 @@ int lavgrim(DIFFIMAGE *imdiff_in)
 	    imdiff_in->rfile_length = radius+1;
 	  rf[radius] += (RFILE_DATA_TYPE)(float)(imdiff->image[index]-imdiff->value_offset);
 	  n[radius]++;
+	  imdiff_in->rfile_s[radius] = (float)sqrtf(ssq);
 	}
 	index++;
       }
