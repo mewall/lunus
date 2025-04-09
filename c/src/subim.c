@@ -4,7 +4,7 @@
    Date: 4/18/94
    Version: 1.
    
-   "subim <input image 1> <x origin 1> <y origin 1> <input image 2> <x origin 2> <y origin 2> <output image>" 
+   "subim <input image 1> <input image 2> <output image> <x origin 1> <y origin 1> <x origin 2> <y origin 2>" 
 
    Input two diffraction images in TIFF TV6 format.  Output is the second 
    subtracted from the first, taking origin translation into account.
@@ -51,37 +51,37 @@ int main(int argc, char *argv[])
  */
 	switch(argc) {
 		case 8:
-			if (strcmp(argv[7], "-") == 0) {
+			origin2.r = (RCCOORDS_DATA)atoi(argv[7]);
+			got_r2 = 1;
+		case 7:
+			origin2.c = (RCCOORDS_DATA)atoi(argv[6]);
+			got_c2 = 1;
+		case 6:
+			origin1.r = (RCCOORDS_DATA)atoi(argv[5]);
+			if (got_r2 == 0) origin2.r = origin1.r;
+		case 5:
+			origin1.c = (RCCOORDS_DATA)atoi(argv[4]);
+			if (got_c2 == 0) origin2.c = origin1.c;
+		case 4:
+			if (strcmp(argv[3], "-") == 0) {
 				imageout = stdout;
 			}
 			else {
-			 if ( (imageout = fopen(argv[7],"wb")) == NULL ) {
-				printf("Can't open %s.",argv[7]);
+			 if ( (imageout = fopen(argv[3],"wb")) == NULL ) {
+				printf("Can't open %s.",argv[3]);
 				exit(0);
 			 }
 			}
-		case 7:
-			origin2.r = (RCCOORDS_DATA)atoi(argv[6]);
-			got_r2 = 1;
-		case 6:
-			origin2.c = (RCCOORDS_DATA)atoi(argv[5]);
-			got_c2 = 1;
-		case 5:
-			if (strcmp(argv[4], "-") == 0) {
+		case 3:
+			if (strcmp(argv[2], "-") == 0) {
 				imagein2 = stdin;
 			}
 			else {
-			 if ( (imagein2 = fopen(argv[4],"rb")) == NULL ) {
-				printf("Can't open %s.",argv[4]);
+			 if ( (imagein2 = fopen(argv[2],"rb")) == NULL ) {
+				printf("Can't open %s.",argv[2]);
 				exit(0);
 			 }
 			}
-		case 4:
-			origin1.r = (RCCOORDS_DATA)atoi(argv[3]);
-			if (got_r2 == 0) origin2.r = origin1.r;
-		case 3:
-			origin1.c = (RCCOORDS_DATA)atoi(argv[2]);
-			if (got_c2 == 0) origin2.c = origin1.c;
 		case 2:
 			if (strcmp(argv[1], "-") == 0) {
 				imagein1 = stdin;
@@ -95,9 +95,11 @@ int main(int argc, char *argv[])
 			break;
 		default:
 			printf("\n Usage: subim <input image 1> "
-				"<x origin 1> <y origin 1> <input image 2> "
+			        "<input image 2> "
+			        "<output image> "
+				"<x origin 1> <y origin 1>  "
 				"<x origin 2> <y origin 2> "
-				"<output image>\n\n");
+				"\n\n");
 			exit(0);
 	}
 /*
