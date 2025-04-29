@@ -58,11 +58,13 @@ LAT3D *linitlt(void)
 
   lat->rfile = (RFILE_DATA_TYPE *)calloc(MAX_RFILE_LENGTH, 
 					sizeof(RFILE_DATA_TYPE));
+  lat->rfile_svecs = (RFILE_DATA_TYPE *)calloc(MAX_RFILE_LENGTH, 
+					sizeof(RFILE_DATA_TYPE));
   lat->lattice = (LATTICE_DATA_TYPE *)calloc(lat->lattice_length,
 					     sizeof(LATTICE_DATA_TYPE)); 
   lat->shim = (SHIM_DATA_TYPE *)calloc(lat->shim_length,
 				       sizeof(SHIM_DATA_TYPE));
-  if (!lat->lattice || !lat->rfile || !lat->shim) {
+  if (!lat->lattice || !lat->rfile || !lat->rfile_svecs || !lat->shim) {
     printf("\nLINITLT:  Unable to allocate all memory.\n");
     lat = NULL;
     goto CloseShop;

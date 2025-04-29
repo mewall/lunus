@@ -731,6 +731,7 @@ typedef struct {
   struct ijkcoords index;       /* Currently selected voxel position index */
   struct xyzcoords sv;          /* Currently selected scattering vector */
   RFILE_DATA_TYPE *rfile;       /* Radial distribution function */
+  RFILE_DATA_TYPE *rfile_svecs; /* Scattering vector lengths for rfile */
   size_t rfile_length;	        /* Number of rfile values */
   struct xyzcoords minrange;    /* Minimum valid distances to Bragg */
 				/* peak */
@@ -954,6 +955,7 @@ void lsubminlt(LAT3D *lat);
 int lsubrf(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lsubrfim(DIFFIMAGE *imdiff);
 int lsubrflt(LAT3D *lat);
+int lsubrfsvlt(LAT3D *lat);
 int lsumscim(DIFFIMAGE *imdiff);
 int lsumim(DIFFIMAGE *imdiff1, DIFFIMAGE *imdiff2);
 int lsumlt(LAT3D *lat1, LAT3D *lat2);

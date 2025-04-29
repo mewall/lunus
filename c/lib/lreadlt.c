@@ -92,7 +92,7 @@ int lreadlt(LAT3D *lat)
   }
 		   */
   if (num_read != lat->lattice_length) {
-    printf("/nCouldn't read all of the lattice from input file.\n\n");
+    printf("\nCouldn't read all of the lattice from input file.\n\n");
     return_value = 2;
     goto CloseShop;
   }
