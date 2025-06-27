@@ -732,6 +732,7 @@ typedef struct {
   struct xyzcoords sv;          /* Currently selected scattering vector */
   RFILE_DATA_TYPE *rfile;       /* Radial distribution function */
   RFILE_DATA_TYPE *rfile_svecs; /* Scattering vector lengths for rfile */
+  RFILE_DATA_TYPE rfile_scale;  /* Scale factor for rfile */
   size_t rfile_length;	        /* Number of rfile values */
   struct xyzcoords minrange;    /* Minimum valid distances to Bragg */
 				/* peak */

@@ -6,7 +6,7 @@
    Version: 1.
    
    Usage:
-   		"subrflt <input rfile> <input svec rfile> <input lattice> <output lattice>"
+   		"subrflt <input rfile> <input svec rfile> <input lattice> <output lattice> <rfile factor>"
 
 		Input is a radial intensity distribution, a list of
 		corresponding scattering vector lengths, and an input 
@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
   LAT3D 
 	*lat;
 
-  RFILE_DATA_TYPE *rfile;
+  RFILE_DATA_TYPE *rfile, f;
 
 /*
  * Set input line defaults:
@@ -46,13 +46,16 @@ int main(int argc, char *argv[])
 	latticein = stdin;
 	latticeout = stdout;
 	strcpy(cell_str,"None");
-
+	f = 1.;
+	
 /*
  * Read information from input line:
  */
 	switch(argc) {
+	case 7:
+	  strcpy(cell_str,argv[6]);
 	case 6:
-	  strcpy(cell_str,argv[5]);
+	  f = atof(argv[5]);
 	case 5:
 	  if (strcmp(argv[4],"-") == 0) {
 	    latticeout = stdout;
@@ -127,6 +130,10 @@ int main(int argc, char *argv[])
 			   svfile)) == 1) {
     i++;
   }
+  for(i=0;i<lat->rfile_length;i++){
+    lat->rfile[i] *= f;
+  }
+  
   //  if (i != lat->rfile_length) {
   //    perror("Size of svec file differs from size of rfile\n\n");
   //    exit(0);
