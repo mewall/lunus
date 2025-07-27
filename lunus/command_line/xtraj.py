@@ -247,7 +247,7 @@ if __name__=="__main__":
 
   last = first + nsteps - 1
 
-# Unit cell, replaces the one in the top file
+# Method (engine) for calculating structure factors
 
   try:
     idx = [a.find("engine")==0 for a in args].index(True)
@@ -256,6 +256,46 @@ if __name__=="__main__":
   else:
     engine = args.pop(idx).split("=")[1]
 
+# Calculate difference with respect to reference (for optimization)
+
+  try:
+    idx = [a.find("diff_mode")==0 for a in args].index(True)
+  except ValueError:
+    diff_mode = False
+  else:
+    diff_str = args.pop(idx).split("=")[1]
+    if diff_str == "True":
+      diff_mode = True
+    else:
+      diff_mode = False
+      
+# Reference fcalc for diff mode
+
+  try:
+    idx = [a.find("fcalc_ref")==0 for a in args].index(True)
+  except ValueError:
+    fcalc_ref_file = "fcalc_ref.mtz"
+  else:
+    fcalc_ref_file = args.pop(idx).split("=")[1]
+    
+# Reference icalc for diff mode
+
+  try:
+    idx = [a.find("icalc_ref")==0 for a in args].index(True)
+  except ValueError:
+    icalc_ref_file = "icalc_ref.mtz"
+  else:
+    icalc_ref_file = args.pop(idx).split("=")[1]
+
+# Number of frames in reference
+
+  try:
+    idx = [a.find("nref")==0 for a in args].index(True)
+  except ValueError:
+    nsteps_ref = 1
+  else:
+    nsteps_ref = int(args.pop(idx).split("=")[1])
+    
 # Initialize MPI
 
   if mpi_enabled():
@@ -267,6 +307,18 @@ if __name__=="__main__":
     mpi_comm = None
     mpi_rank = 0
     mpi_size = 1
+
+# If in diff_mode, read the reference .mtz files
+
+  if diff_mode:
+    if mpi_rank == 0:      
+      from iotbx.reflection_file_reader import any_reflection_file
+      hkl_in = any_reflection_file(file_name=fcalc_ref_file)
+      miller_arrays = hkl_in.as_miller_arrays()
+      avg_fcalc_ref = miller_arrays[0]
+      hkl_in = any_reflection_file(file_name=icalc_ref_file)
+      miller_arrays = hkl_in.as_miller_arrays()
+      avg_icalc_ref = miller_arrays[0]
 
 # read .pdb file. It's used as a template, so don't sort it.
 
@@ -336,7 +388,6 @@ EOF
   famp = abs(fcalc)
   famp.set_observation_type_xray_amplitude()
   famp.set_sigmas(sigmas=flex.double(fcalc.data().size(),1))
-  #famp_with_sigmas = miller_set.array(data=famp.data(),sigmas=sigmas)
   mtz_dataset.add_miller_array(famp,'F')
   mtz_dataset.mtz_object().write(file_name="reference_{rank:03d}.mtz".format(rank=mpi_rank))
 
@@ -565,21 +616,26 @@ EOF
       sig_fcalc_data[x] = tot_sig_fcalc_np[x]
       sig_icalc_data[x] = tot_sig_icalc_np[x]
     avg_fcalc = sig_fcalc / float(ct)
-    sq_avg_fcalc = abs(avg_fcalc).set_observation_type_xray_amplitude().f_as_f_sq()
     avg_icalc = sig_icalc / float(ct)
     if apply_bfac:
       miller_set = avg_fcalc.set()
       dwf_array = miller_set.debye_waller_factors(b_iso=15.0)
       dwf_data = dwf_array.data()
       avg_fcalc_data = avg_fcalc.data()
-      sq_avg_fcalc_data = sq_avg_fcalc.data()
       avg_icalc_data = avg_icalc.data()
       for x in range(0,avg_fcalc_data.size()):
         avg_fcalc_data[x] /= dwf_data[x]
-        sq_avg_fcalc_data[x] /= dwf_data[x] * dwf_data[x]
         avg_icalc_data[x] /= dwf_data[x] * dwf_data[x]
-    diffuse_array=avg_icalc*1.0
+    # Calculate difference if requested
+    if diff_mode:
+      avg_fcalc_ref_data = avg_fcalc_ref.data()
+      avg_icalc_ref_data = avg_icalc_ref.data()
+      for x in range(0,avg_fcalc_data.size()):
+        avg_fcalc_data[x] = (avg_fcalc_ref_data[x] * float(nsteps_ref) - avg_fcalc_data[x] * float(ct)) / float(nsteps_ref - ct)
+        avg_icalc_data[x] = (avg_icalc_ref_data[x] * float(nsteps_ref) - avg_icalc_data[x] * float(ct)) / float(nsteps_ref - ct)
+    sq_avg_fcalc = abs(avg_fcalc).set_observation_type_xray_amplitude().f_as_f_sq()
     sq_avg_fcalc_data = sq_avg_fcalc.data()
+    diffuse_array=avg_icalc*1.0
     diffuse_data = diffuse_array.data()
     for x in range(0,diffuse_data.size()):
       diffuse_data[x]=diffuse_data[x]-sq_avg_fcalc_data[x]
@@ -587,6 +643,8 @@ EOF
     print("TIMING: Reduction = ",etime-mtime)
     print("TIMING: Total diffuse calculation = ",etime-stime)
 
+
+    
 # write fcalc
 
     if not partial_sum_mode:
