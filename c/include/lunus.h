@@ -8,6 +8,11 @@
 			65535
 */
 
+/*
+ * Ensure that getline is declared when including stdio.h
+ */
+#define _POSIX_C_SOURCE 200809L
+
 #ifndef __MWMASK_H
 
 #define __MWMASK_H
