@@ -233,9 +233,21 @@ if __name__=="__main__":
     apply_bfac_str = args.pop(idx).split("=")[1]
     if apply_bfac_str == "False":
       apply_bfac = False
-      print("Setting apply_bfac = True")
     else:
       apply_bfac = True
+
+# Use topology file B factoris in structure calculations
+
+  try:
+    idx = [a.find("use_top_bfacs")==0 for a in args].index(True)
+  except ValueError:
+    use_top_bfacs = False
+  else:
+    use_top_bfacs_str = args.pop(idx).split("=")[1]
+    if use_top_bfacs_str == "True":
+      use_top_bfacs =True 
+    else:
+      use_top_bfacs = False
 
 # Set nsteps if needed
   
@@ -302,7 +314,8 @@ if __name__=="__main__":
   if apply_bfac:
     xrs.set_b_iso(15.0)
   else:
-    xrs.set_b_iso(0.0)
+    if not use_top_bfacs:
+      xrs.set_b_iso(0.0)
   xrs.set_occupancies(1.0)
   xrs_sel = xrs.select(selection)
   xrs_sel.scattering_type_registry(table=scattering_table)
@@ -331,14 +344,15 @@ EOF
     volume = xrs_sel.unit_cell().volume()
     print("f_000 = %g, volume = %g" % (f_000.f_000,volume))
 
-  fcalc = xrs_sel.structure_factors(d_min=d_min).f_calc()
-  mtz_dataset = fcalc.as_mtz_dataset('FWT')
-  famp = abs(fcalc)
-  famp.set_observation_type_xray_amplitude()
-  famp.set_sigmas(sigmas=flex.double(fcalc.data().size(),1))
-  #famp_with_sigmas = miller_set.array(data=famp.data(),sigmas=sigmas)
-  mtz_dataset.add_miller_array(famp,'F')
-  mtz_dataset.mtz_object().write(file_name="reference_{rank:03d}.mtz".format(rank=mpi_rank))
+  if engine == "sfall":
+    fcalc = xrs_sel.structure_factors(d_min=d_min).f_calc()
+    mtz_dataset = fcalc.as_mtz_dataset('FWT')
+    famp = abs(fcalc)
+    famp.set_observation_type_xray_amplitude()
+    famp.set_sigmas(sigmas=flex.double(fcalc.data().size(),1))
+    #famp_with_sigmas = miller_set.array(data=famp.data(),sigmas=sigmas)
+    mtz_dataset.add_miller_array(famp,'F')
+    mtz_dataset.mtz_object().write(file_name="reference_{rank:03d}.mtz".format(rank=mpi_rank))
 
 # read the MD trajectory and extract coordinates
 
