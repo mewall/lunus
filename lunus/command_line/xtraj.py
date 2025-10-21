@@ -697,7 +697,13 @@ EOF
       print("%4d %4d %4d   %10.2f" %(hkl+tuple((intensity,))))
       count+=1
       if count>10: break
-    f=open(diffuse_file,'w')
-    for hkl,intensity in diffuse_array:
-      print("%4d %4d %4d   %10.2f" %(hkl+tuple((intensity,))),file=f)
-    f.close()
+    if(diffuse_file.endswith(".mtz")):
+      if not partial_sum_mode:
+        diffuse_array.as_mtz_dataset('ID').mtz_object().write(file_name=diffuse_file)
+      else:
+        diffuse_array.as_mtz_dataset('IDpart').mtz_object().write(file_name=diffuse_file)
+    else:
+      f=open(diffuse_file,'w')
+      for hkl,intensity in diffuse_array:
+        print("%4d %4d %4d   %10.2f" %(hkl+tuple((intensity,))),file=f)
+      f.close()
