@@ -161,6 +161,15 @@ if __name__=="__main__":
   else:
     icalc_file = args.pop(idx).split("=")[1]
 
+# Diffuse data file
+
+  try:
+    idx = [a.find("ID_file")==0 for a in args].index(True)
+  except ValueError:
+    diffuse_data_file = None
+  else:
+    diffuse_data_file = args.pop(idx).split("=")[1]
+
 # density map
 
 #  try:
@@ -236,6 +245,19 @@ if __name__=="__main__":
     else:
       apply_bfac = True
 
+# Calculate f_000 and print it
+
+  try:
+    idx = [a.find("calc_f000")==0 for a in args].index(True)
+  except ValueError:
+    calc_f000 = False
+  else:
+    calc_f000_str = args.pop(idx).split("=")[1]
+    if calc_f000_str == "False":
+      calc_f000 = False
+    else:
+      calc_f000 = True
+      
 # Use topology file B factoris in structure calculations
 
   try:
@@ -332,6 +354,15 @@ if __name__=="__main__":
       miller_arrays = hkl_in.as_miller_arrays()
       avg_icalc_ref = miller_arrays[0]
 
+# If there's a diffuse data file, read it
+
+  if diffuse_data_file is not None:
+    if mpi_rank == 0:      
+      from iotbx.reflection_file_reader import any_reflection_file
+      hkl_in = any_reflection_file(file_name=diffuse_data_file)
+      miller_arrays = hkl_in.as_miller_arrays()
+      diffuse_expt = miller_arrays[0].as_non_anomalous_array()
+
 # read .pdb file. It's used as a template, so don't sort it.
 
   if mpi_rank == 0:
@@ -372,9 +403,9 @@ if __name__=="__main__":
   xrs_sel = xrs.select(selection)
   xrs_sel.scattering_type_registry(table=scattering_table)
   if (mpi_rank == 0):
-    pdbtmp = xrs_sel.as_pdb_file()
-    with open("reference.pdb","w") as fo:
-      fo.write(pdbtmp)
+#    pdbtmp = xrs_sel.as_pdb_file()
+#    with open("reference.pdb","w") as fo:
+#      fo.write(pdbtmp)
     if engine == "sfall":
       sfall_script = \
 """
@@ -392,9 +423,10 @@ EOF
       print(sfall_script.format(d_min=d_min,space_group=space_group_str))
       with open("run_sfall.sh","w") as fo:
         fo.write(sfall_script.format(d_min=d_min,space_group=space_group_str))
-    f_000 = mmtbx.utils.f_000(xray_structure=xrs_sel,mean_solvent_density=0.0)
-    volume = xrs_sel.unit_cell().volume()
-    print("f_000 = %g, volume = %g" % (f_000.f_000,volume))
+    if calc_f000:
+      f_000 = mmtbx.utils.f_000(xray_structure=xrs_sel,mean_solvent_density=0.0)
+      volume = xrs_sel.unit_cell().volume()
+      print("f_000 = %g, volume = %g" % (f_000.f_000,volume))
 
   if engine == "sfall":
     fcalc = xrs_sel.structure_factors(d_min=d_min).f_calc()
@@ -441,10 +473,6 @@ EOF
     skip_calc = True
 
   ti = md.iterload(traj_file,chunk=chunklist[mpi_rank],top=top_file,skip=skiplist[mpi_rank])
-
-  if (mpi_rank == 0): 
-    mtime = time.time()                                                        
-    print("TIMING: md.iterload = ",mtime-stime)
 
 # Each MPI rank works with its own trajectory chunk t
 
@@ -658,7 +686,13 @@ EOF
     print("TIMING: Reduction = ",etime-mtime)
     print("TIMING: Total diffuse calculation = ",etime-stime)
 
-
+# Compute the correlation with the data, if available
+    if diffuse_data_file is not None:
+      print("Calculating Correlation")
+      diffuse_expt_common, diffuse_array_common = diffuse_expt.common_sets(diffuse_array.as_non_anomalous_array())
+      X = np.array([np.array(diffuse_expt_common.data()),np.array(diffuse_array_common.data())])
+      C = np.corrcoef(X)
+      print("Correlation between diffuse simulation and data = ",C[0,1])
     
 # write fcalc
 
