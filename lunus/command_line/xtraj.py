@@ -466,7 +466,6 @@ EOF
   skiplist = np.zeros((mpi_size), dtype=int)
   nchunksize = nchunks/mpi_size
   leftover = nsteps % mpi_size
-  print("leftover = ",leftover)
   ct = 0
   for i in range(mpi_size):
     chunklist[i] = chunksize
