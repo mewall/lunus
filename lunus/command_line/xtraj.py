@@ -258,6 +258,19 @@ if __name__=="__main__":
     else:
       calc_f000 = True
       
+# Do optimization with respect to data
+
+  try:
+    idx = [a.find("do_opt")==0 for a in args].index(True)
+  except ValueError:
+    do_opt = False
+  else:
+    do_opt_str = args.pop(idx).split("=")[1]
+    if do_opt_str == "False":
+      do_opt = False
+    else:
+      do_opt = True
+      
 # Use topology file B factoris in structure calculations
 
   try:
@@ -362,6 +375,9 @@ if __name__=="__main__":
       hkl_in = any_reflection_file(file_name=diffuse_data_file)
       miller_arrays = hkl_in.as_miller_arrays()
       diffuse_expt = miller_arrays[0].as_non_anomalous_array()
+    else:
+      diffuse_expt = None
+    diffuse_expt = mpi_comm.bcast(diffuse_expt,root=0)
 
 # read .pdb file. It's used as a template, so don't sort it.
 
@@ -449,19 +465,23 @@ EOF
   nchunklist = np.zeros((mpi_size),dtype=int)
   skiplist = np.zeros((mpi_size), dtype=int)
   nchunksize = nchunks/mpi_size
-  leftover = nchunks % mpi_size
+  leftover = nsteps % mpi_size
+  print("leftover = ",leftover)
+  ct = 0
   for i in range(mpi_size):
     chunklist[i] = chunksize
     nchunklist[i] = nchunksize
     if (i < leftover):
-      nchunklist[i] += 1
+      chunklist[i] += 1
     if (i == 0):
       skiplist[i] = first
     else:
       skiplist[i] = skiplist[i-1] + chunklist[i-1] * nchunklist[i-1]
+    ct = ct + chunklist[i]*nchunklist[i]
 
   if (mpi_rank == 0):               
     stime = time.time()
+    print("Will use ",ct," frames distributed over ",mpi_size," ranks")
 
   ct = 0
   sig_fcalc = None
@@ -477,7 +497,8 @@ EOF
 # Each MPI rank works with its own trajectory chunk t
 
   chunk_ct = 0
-
+  fcalc_list = None
+  
   itime = time.time()
   
   for tt in ti:
@@ -585,23 +606,35 @@ EOF
           xrs_sel.scattering_type_registry(table=scattering_table)
           fcalc = xrs_sel.structure_factors(d_min=d_min).f_calc()
 
+        if do_opt:
+          diffuse_expt_common,fcalc_common = diffuse_expt.common_sets(fcalc.as_non_anomalous_array())
+          icalc_common = abs(fcalc_common).set_observation_type_xray_amplitude().f_as_f_sq()
+          fcalc_common_data = np.array(fcalc_common.data())
+          icalc_common_data = np.array(icalc_common.data())
+          if fcalc_list is None:
+            fcalc_list = np.empty((chunklist[mpi_rank]*nchunklist[mpi_rank],fcalc_common_data.size),dtype=fcalc_common_data.dtype)
+            icalc_list = np.empty((chunklist[mpi_rank]*nchunklist[mpi_rank],icalc_common_data.size),dtype=icalc_common_data.dtype)
+            sig_fcalc = fcalc_common
+            sig_icalc = icalc_common
+          fcalc_list[ct] = fcalc_common_data
+          icalc_list[ct] = icalc_common_data
     # Commented out some density trajectory code
     #    if not (dens_file is None):
     #      this_map = fcalc.fft_map(d_min=d_min, resolution_factor = 0.5)
     #      real_map_np = this_map.real_map_unpadded().as_numpy_array()
     #      map_data.append(real_map_np)
-
-        if sig_fcalc is None:
-          sig_fcalc = fcalc
-          sig_icalc = abs(fcalc).set_observation_type_xray_amplitude().f_as_f_sq()
         else:
-          sig_fcalc = sig_fcalc + fcalc
-          sig_icalc = sig_icalc + abs(fcalc).set_observation_type_xray_amplitude().f_as_f_sq()
+          if sig_fcalc is None:
+            sig_fcalc = fcalc
+            sig_icalc = abs(fcalc).set_observation_type_xray_amplitude().f_as_f_sq()
+          else:
+            sig_fcalc = sig_fcalc + fcalc
+            sig_icalc = sig_icalc + abs(fcalc).set_observation_type_xray_amplitude().f_as_f_sq()
         ct = ct + 1
 
     chunk_ct = chunk_ct + 1
 
-    print("Rank ",mpi_rank," processed chunk ",chunk_ct," of ",nchunklist[mpi_rank]," in ",time.time()-mtime," seconds")
+    print("Rank ",mpi_rank," processed chunk ",chunk_ct," of ",nchunklist[mpi_rank]," with ",ct," frames in ",time.time()-mtime," seconds")
 
     if (chunk_ct >= nchunklist[mpi_rank]):
       break
@@ -627,25 +660,43 @@ EOF
     mtime = time.time()
     print("TIMING: Calculate individual statistics = ",mtime-itime)
 
+# If optimization is on, calculate sig_fcalc and sig_icalc
+  if do_opt:
+    if apply_bfac:
+      miller_set = sig_fcalc.set()
+      dwf_array = miller_set.debye_waller_factors(b_iso=15.0)
+      dwf_data_np = np.array(dwf_array.data())
+      # fcalc_list /= dwf_data_np[np.newaxis,:]
+      # icalc_list /= dwf_data_np[np.newaxis,:]
+      for x in range(len(fcalc_list)):
+        fcalc_list[x] /= dwf_data_np
+        icalc_list[x] /= dwf_data_np * dwf_data_np
+    #At this point fcalc_list and icalc_list can be used for optimization
+    #Still need to calculate the sums across all MPI ranks, however.
+    sig_fcalc_np = np.sum(fcalc_list,axis=0)
+    sig_icalc_np = np.sum(icalc_list,axis=0)
+  else:
+    sig_fcalc_np = sig_fcalc.data().as_numpy_array()
+    sig_icalc_np = sig_icalc.data().as_numpy_array()
+    
 # perform reduction of sig_fcalc, sig_icalc, and ct
 
-  sig_fcalc_np = sig_fcalc.data().as_numpy_array()
-  sig_icalc_np = sig_icalc.data().as_numpy_array()
-
-  if mpi_rank == 0:
-    tot_sig_fcalc_np = np.zeros_like(sig_fcalc_np)
-    tot_sig_icalc_np = np.zeros_like(sig_icalc_np)
-  else:
-    tot_sig_fcalc_np = None
-    tot_sig_icalc_np = None
+  # if mpi_rank == 0:
+  #   tot_sig_fcalc_np = np.zeros_like(sig_fcalc_np)
+  #   tot_sig_icalc_np = np.zeros_like(sig_icalc_np)
+  # else:
+  #   tot_sig_fcalc_np = None
+  #   tot_sig_icalc_np = None
+  tot_sig_fcalc_np = np.zeros_like(sig_fcalc_np)
+  tot_sig_icalc_np = np.zeros_like(sig_icalc_np)
 
   if mpi_enabled():
     mpi_comm.Barrier()                                                        
 
   if mpi_enabled():
-    mpi_comm.Reduce(sig_fcalc_np,tot_sig_fcalc_np,op=MPI.SUM,root=0)
-    mpi_comm.Reduce(sig_icalc_np,tot_sig_icalc_np,op=MPI.SUM,root=0)
-    ct = mpi_comm.reduce(ct,op=MPI.SUM,root=0)
+    mpi_comm.Allreduce(sig_fcalc_np,tot_sig_fcalc_np,op=MPI.SUM)
+    mpi_comm.Allreduce(sig_icalc_np,tot_sig_icalc_np,op=MPI.SUM)
+    ct = mpi_comm.allreduce(ct,op=MPI.SUM)
   else:
     tot_sig_fcalc_np = sig_fcalc_np
     tot_sig_icalc_np = sig_icalc_np
@@ -660,7 +711,7 @@ EOF
       sig_icalc_data[x] = tot_sig_icalc_np[x]
     avg_fcalc = sig_fcalc / float(ct)
     avg_icalc = sig_icalc / float(ct)
-    if apply_bfac:
+    if apply_bfac and not do_opt:
       miller_set = avg_fcalc.set()
       dwf_array = miller_set.debye_waller_factors(b_iso=15.0)
       dwf_data = dwf_array.data()
@@ -689,10 +740,14 @@ EOF
 # Compute the correlation with the data, if available
     if diffuse_data_file is not None:
       print("Calculating Correlation")
-      diffuse_expt_common, diffuse_array_common = diffuse_expt.common_sets(diffuse_array.as_non_anomalous_array())
-      X = np.array([np.array(diffuse_expt_common.data()),np.array(diffuse_array_common.data())])
-      C = np.corrcoef(X)
-      print("Correlation between diffuse simulation and data = ",C[0,1])
+      if do_opt:
+        #Common sets already have been extracted in this case
+        diffuse_array_common = diffuse_array
+      else:
+        diffuse_expt_common, diffuse_array_common = diffuse_expt.common_sets(diffuse_array.as_non_anomalous_array())
+      C = np.corrcoef(np.array([diffuse_expt_common.data(),diffuse_array_common.data()]))
+      print("Pearson correlation between diffuse simulation and data = ",C[0,1])
+
     
 # write fcalc
 
@@ -741,3 +796,76 @@ EOF
       for hkl,intensity in diffuse_array:
         print("%4d %4d %4d   %10.2f" %(hkl+tuple((intensity,))),file=f)
       f.close()
+
+#Perform optimization      
+  if do_opt:
+    if mpi_rank == 0:
+      print("Doing optimization using ",ct," initial frames")
+    diffuse_expt_np = np.array(diffuse_expt_common.data())
+    C_ref = np.corrcoef(diffuse_expt_np,ct*tot_sig_icalc_np - (tot_sig_fcalc_np * tot_sig_fcalc_np.conjugate()).real)[0,1]
+    #Initialize correlations array
+    w = np.ones(ct)
+    ct_nonzero = ct
+    first_this = (skiplist[mpi_rank]-first)
+    last_this = first_this + chunklist[mpi_rank]*nchunklist[mpi_rank]-1
+    #Get the slice for the section handled by this rank
+    C_all_this = np.zeros(ct)
+    C_this = C_all_this[first_this:last_this+1]
+    w_this = w[first_this:last_this+1]
+    keep_optimizing = True
+    while keep_optimizing:
+      C_this[:] = 0
+    #print("Rank = ",mpi_rank,"ct = ",ct,"len(C_this) = ",len(C_this),skiplist[mpi_rank]-first,chunklist[mpi_rank]*nchunklist[mpi_rank])
+    #Calculation the correlations leaving out each frame
+      ct_nonzero = ct_nonzero - 1
+      for x in range(len(C_this)):
+        if w_this[x] != 0:
+          sig_fcalc_this = tot_sig_fcalc_np - fcalc_list[x]
+          sig_icalc_this = tot_sig_icalc_np - icalc_list[x]
+          diffuse_this = (ct_nonzero*sig_icalc_this - sig_fcalc_this * sig_fcalc_this.conjugate()).real
+          C_this[x] = np.corrcoef(np.array([diffuse_expt_np,diffuse_this]))[0,1]
+      C_all = np.zeros(ct)
+      mpi_comm.Allreduce(C_all_this,C_all,op=MPI.SUM)
+      if np.max(C_all) > C_ref:
+        C_ref = np.max(C_all)
+        maxind = np.argmax(C_all)
+#        print("DEBUG: ",mpi_rank,maxind,first_this,last_this)
+        if maxind >= first_this and maxind <= last_this:
+          which_rank = mpi_rank
+        else:
+          which_rank = 0
+        which_rank = mpi_comm.allreduce(which_rank,MPI.SUM)
+#        print("which_rank = ",which_rank)
+        if which_rank == mpi_rank:          
+          tot_sig_fcalc_np = tot_sig_fcalc_np - fcalc_list[maxind - first_this]
+          tot_sig_icalc_np = tot_sig_icalc_np - icalc_list[maxind - first_this]
+        else:
+          tot_sig_fcalc_np = None
+          tot_sig_icalc_np = None
+        tot_sig_fcalc_np = mpi_comm.bcast(tot_sig_fcalc_np,root=which_rank)
+        tot_sig_icalc_np = mpi_comm.bcast(tot_sig_icalc_np,root=which_rank)
+        w[maxind] = 0
+        if mpi_rank == 0:
+          print("Max correlation, index = ",C_ref,maxind)
+      else:
+        keep_optimizing = False
+    if (mpi_rank == 0):
+      print("Total ",ct_nonzero+1," frames remaining (see selected_frames.ndx)")
+      keep_idx = np.where(w!=0)
+      print(keep_idx[0])
+      with open("selected_frames.ndx","w") as f:
+        f.write("[ selected frames ]\n")
+        for x in range(len(keep_idx[0])):
+          f.write("{0}\n".format(keep_idx[0][x]+1))
+      # print("Diffuse Expt:")
+      # count=0
+      # for hkl,intensity in diffuse_expt_common:
+      #   print("%4d %4d %4d   %10.2f" %(hkl+tuple((intensity,))))
+      #   count+=1
+      #   if count>10: break
+      # print("Diffuse Array:")
+      # count=0
+      # for hkl,intensity in diffuse_array_common:
+      #   print("%4d %4d %4d   %10.2f" %(hkl+tuple((intensity,))))
+      #   count+=1
+      #   if count>10: break
