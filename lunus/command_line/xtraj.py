@@ -411,7 +411,7 @@ if __name__=="__main__":
   selection = selection_cache.selection(selection_text)
   xrs.convert_to_isotropic()
   if apply_bfac:
-    xrs.set_b_iso(15.0)
+    xrs.set_b_iso(20.0*d_min*d_min)
   else:
     if not use_top_bfacs:
       xrs.set_b_iso(0.0)
@@ -456,26 +456,51 @@ EOF
 
 # read the MD trajectory and extract coordinates
 
+  assert nsteps >= mpi_size, "nsteps < mpi_size"
+
   if (chunksize is None):
     nchunks = mpi_size
     chunksize = int(nsteps/nchunks)
   else:
     nchunks = int(nsteps/chunksize)
-  chunklist = np.zeros((mpi_size), dtype=int)
-  nchunklist = np.zeros((mpi_size),dtype=int)
+    if nchunks < mpi_size:
+      nchunks = mpi_size
+      chunksize = int(nsteps/nchunks)
+  
   skiplist = np.zeros((mpi_size), dtype=int)
-  nchunksize = nchunks/mpi_size
-  leftover = nsteps % mpi_size
+  chunklist = np.zeros((mpi_size), dtype=int)
+  nchunklist = np.zeros((mpi_size), dtype=int)
+  chunks_per_rank = int(nchunks/mpi_size)
+  extra_chunks = nchunks % mpi_size
+  extra_frames = nsteps - chunksize*nchunks
+    
+  print("first: nchunks, chunks_per_rank, extra_chunks, extra_frames, chunksize = ",nchunks, chunks_per_rank, extra_chunks, extra_frames, chunksize)
+  extra_chunks = extra_chunks + chunks_per_rank-1
+  if extra_chunks >= mpi_size - 1:
+    chunks_per_rank = chunks_per_rank + 1
+    extra_chunks = extra_chunks - mpi_size + 1
   ct = 0
+  print("second: nchunks, chunks_per_rank, extra_chunks, extra_frames, chunksize = ",nchunks, chunks_per_rank, extra_chunks, extra_frames, chunksize)
   for i in range(mpi_size):
-    chunklist[i] = chunksize
-    nchunklist[i] = nchunksize
-    if (i < leftover):
-      chunklist[i] += 1
     if (i == 0):
       skiplist[i] = first
     else:
-      skiplist[i] = skiplist[i-1] + chunklist[i-1] * nchunklist[i-1]
+      skiplist[i] = skiplist[i-1] + chunklist[i-1]*nchunklist[i-1]
+    if nchunks == mpi_size:
+        chunklist[i] = chunksize
+        if i < extra_frames:
+          chunklist[i] = chunklist[i] + 1
+        nchunklist[i] = 1
+    else:
+        if i == mpi_size-1:
+          chunklist[i] = nsteps-ct
+          nchunklist[i] = 1
+          print("Last rank will handle ",nsteps-ct," frames")
+        else:
+          chunklist[i] = chunksize
+          nchunklist[i] = chunks_per_rank
+        if (i < extra_chunks):
+          nchunklist[i] = nchunklist[i] + 1
     ct = ct + chunklist[i]*nchunklist[i]
 
   if (mpi_rank == 0):               
@@ -633,7 +658,7 @@ EOF
 
     chunk_ct = chunk_ct + 1
 
-    print("Rank ",mpi_rank," processed chunk ",chunk_ct," of ",nchunklist[mpi_rank]," with ",ct," frames in ",time.time()-mtime," seconds")
+    print("Rank ",mpi_rank," processed chunk ",chunk_ct," of ",nchunklist[mpi_rank]," increasing to ",ct," frames in ",time.time()-mtime," seconds")
 
     if (chunk_ct >= nchunklist[mpi_rank]):
       break
@@ -663,7 +688,7 @@ EOF
   if do_opt:
     if apply_bfac:
       miller_set = sig_fcalc.set()
-      dwf_array = miller_set.debye_waller_factors(b_iso=15.0)
+      dwf_array = miller_set.debye_waller_factors(b_iso=20.0*d_min*d_min)
       dwf_data_np = np.array(dwf_array.data())
       # fcalc_list /= dwf_data_np[np.newaxis,:]
       # icalc_list /= dwf_data_np[np.newaxis,:]
@@ -712,7 +737,7 @@ EOF
     avg_icalc = sig_icalc / float(ct)
     if apply_bfac and not do_opt:
       miller_set = avg_fcalc.set()
-      dwf_array = miller_set.debye_waller_factors(b_iso=15.0)
+      dwf_array = miller_set.debye_waller_factors(b_iso=20.0*d_min*d_min)
       dwf_data = dwf_array.data()
       avg_fcalc_data = avg_fcalc.data()
       avg_icalc_data = avg_icalc.data()
@@ -747,7 +772,6 @@ EOF
       C = np.corrcoef(np.array([diffuse_expt_common.data(),diffuse_array_common.data()]))
       print("Pearson correlation between diffuse simulation and data = ",C[0,1])
 
-    
 # write fcalc
 
     if not partial_sum_mode:
