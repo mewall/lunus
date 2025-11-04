@@ -472,15 +472,12 @@ EOF
   nchunklist = np.zeros((mpi_size), dtype=int)
   chunks_per_rank = int(nchunks/mpi_size)
   extra_chunks = nchunks % mpi_size
-  extra_frames = nsteps - chunksize*nchunks
-    
-  print("first: nchunks, chunks_per_rank, extra_chunks, extra_frames, chunksize = ",nchunks, chunks_per_rank, extra_chunks, extra_frames, chunksize)
-  extra_chunks = extra_chunks + chunks_per_rank-1
+  extra_frames = nsteps - chunksize*nchunks    
+  extra_chunks = extra_chunks + chunks_per_rank
   if extra_chunks >= mpi_size - 1:
     chunks_per_rank = chunks_per_rank + 1
     extra_chunks = extra_chunks - mpi_size + 1
   ct = 0
-  print("second: nchunks, chunks_per_rank, extra_chunks, extra_frames, chunksize = ",nchunks, chunks_per_rank, extra_chunks, extra_frames, chunksize)
   for i in range(mpi_size):
     if (i == 0):
       skiplist[i] = first
@@ -495,7 +492,6 @@ EOF
         if i == mpi_size-1:
           chunklist[i] = nsteps-ct
           nchunklist[i] = 1
-          print("Last rank will handle ",nsteps-ct," frames")
         else:
           chunklist[i] = chunksize
           nchunklist[i] = chunks_per_rank
@@ -506,6 +502,11 @@ EOF
   if (mpi_rank == 0):               
     stime = time.time()
     print("Will use ",ct," frames distributed over ",mpi_size," ranks")
+    if (mpi_rank == nchunks):
+      print("Each rank will handle ",chunksize," frames with one extra in the first ",extra_frames," ranks")
+    else:
+      print("Each rank but the last will handle ",chunks_per_rank," chunks with one extra in the first ",extra_chunks," ranks.")
+      print("The last rank will handle ",nchunklist[mpi_size-1]," chunks with ",chunklist[mpi_size-1]," frames")
 
   ct = 0
   sig_fcalc = None
@@ -658,7 +659,7 @@ EOF
 
     chunk_ct = chunk_ct + 1
 
-    print("Rank ",mpi_rank," processed chunk ",chunk_ct," of ",nchunklist[mpi_rank]," increasing to ",ct," frames in ",time.time()-mtime," seconds")
+    print("Rank ",mpi_rank," processed chunk ",chunk_ct," of ",nchunklist[mpi_rank]," with ",chunklist[mpi_rank]," frames in ",time.time()-mtime," seconds")
 
     if (chunk_ct >= nchunklist[mpi_rank]):
       break
@@ -823,6 +824,7 @@ EOF
 #Perform optimization      
   if do_opt:
     if mpi_rank == 0:
+      stime = time.time()
       print("Doing optimization using ",ct," initial frames")
     diffuse_expt_np = np.array(diffuse_expt_common.data())
     C_ref = np.corrcoef(diffuse_expt_np,ct*tot_sig_icalc_np - (tot_sig_fcalc_np * tot_sig_fcalc_np.conjugate()).real)[0,1]
@@ -873,6 +875,8 @@ EOF
       else:
         keep_optimizing = False
     if (mpi_rank == 0):
+      etime = time.time()
+      print("TIMING: Optimization took ",etime-stime," secs")
       print("Total ",ct_nonzero+1," frames remaining (see selected_frames.ndx)")
       keep_idx = np.where(w!=0)
       print(keep_idx[0])
