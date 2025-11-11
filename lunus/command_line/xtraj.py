@@ -342,7 +342,12 @@ if __name__=="__main__":
     nsteps_ref = 1
   else:
     nsteps_ref = int(args.pop(idx).split("=")[1])
-    
+
+  if use_top_bfacs:
+    if apply_bfac:
+      print("Setting apply_bfac = False as use_top_bfacs = True")
+      apply_bfac = False
+      
 # Initialize MPI
 
   if mpi_enabled():
@@ -472,41 +477,49 @@ EOF
   nchunklist = np.zeros((mpi_size), dtype=int)
   chunks_per_rank = int(nchunks/mpi_size)
   extra_chunks = nchunks % mpi_size
-  extra_frames = nsteps - chunksize*nchunks    
-  extra_chunks = extra_chunks + chunks_per_rank
-  if extra_chunks >= mpi_size - 1:
-    chunks_per_rank = chunks_per_rank + 1
-    extra_chunks = extra_chunks - mpi_size + 1
+  extra_frames = nsteps - chunksize*nchunks
+  if nchunks != mpi_size and extra_frames != 0:
+    extra_chunks = extra_chunks + chunks_per_rank
+    if extra_chunks >= mpi_size - 1:
+      chunks_per_rank = chunks_per_rank + 1
+      extra_chunks = extra_chunks - mpi_size + 1
   ct = 0
   for i in range(mpi_size):
     if (i == 0):
       skiplist[i] = first
     else:
       skiplist[i] = skiplist[i-1] + chunklist[i-1]*nchunklist[i-1]
-    if nchunks == mpi_size:
+    if extra_frames == 0:
+      chunklist[i] = chunksize
+      nchunklist[i] = chunks_per_rank
+      if i < extra_chunks:
+        nchunklist[i] = nchunklist[i] + 1
+    else:
+      if nchunks == mpi_size:
         chunklist[i] = chunksize
         if i < extra_frames:
           chunklist[i] = chunklist[i] + 1
         nchunklist[i] = 1
-    else:
+      else:
         if i == mpi_size-1:
           chunklist[i] = nsteps-ct
           nchunklist[i] = 1
         else:
           chunklist[i] = chunksize
           nchunklist[i] = chunks_per_rank
-        if (i < extra_chunks):
+        if i < extra_chunks:
           nchunklist[i] = nchunklist[i] + 1
     ct = ct + chunklist[i]*nchunklist[i]
 
   if (mpi_rank == 0):               
     stime = time.time()
-    print("Will use ",ct," frames distributed over ",mpi_size," ranks")
-    if (mpi_rank == nchunks):
-      print("Each rank will handle ",chunksize," frames with one extra in the first ",extra_frames," ranks")
+    print("Will use ",ct," frames distributed over ",mpi_size," workers")
+    if (mpi_size == nchunks):
+      print("Each worker will handle ",chunks_per_rank," chunks of ",chunksize," frames with one extra frame in the first ",extra_frames," workers")
     else:
-      print("Each rank but the last will handle ",chunks_per_rank," chunks with one extra in the first ",extra_chunks," ranks.")
-      print("The last rank will handle ",nchunklist[mpi_size-1]," chunks with ",chunklist[mpi_size-1]," frames")
+      print("Each worker will handle ",chunks_per_rank," chunks of ",chunksize," frames with one extra chunk in the first ",extra_chunks," workers.")
+      if extra_frames != 0:
+        print("As an exception the last worker will handle ",nchunklist[mpi_size-1]," chunks with ",chunklist[mpi_size-1]," frames")
 
   ct = 0
   sig_fcalc = None
@@ -517,10 +530,15 @@ EOF
   else:
     skip_calc = True
 
-  ti = md.iterload(traj_file,chunk=chunklist[mpi_rank],top=top_file,skip=skiplist[mpi_rank])
+  if mpi_rank == 0:
+    work_rank = mpi_size - 1
+  else:
+    work_rank = mpi_rank - 1
+    
+  ti = md.iterload(traj_file,chunk=chunklist[work_rank],top=top_file,skip=skiplist[work_rank])
 
 # Each MPI rank works with its own trajectory chunk t
-
+  
   chunk_ct = 0
   fcalc_list = None
   
@@ -586,7 +604,7 @@ EOF
         sig_fcalc = xrs_sel.structure_factors(d_min=d_min).f_calc() * 0.0
       if sig_icalc is None:
         sig_icalc = abs(sig_fcalc).set_observation_type_xray_amplitude().f_as_f_sq()
-      print("WARNING: Rank ",mpi_rank," is idle")
+      print("WARNING: Worker ",work_rank," is idle")
 
     else:
 
@@ -637,8 +655,8 @@ EOF
           fcalc_common_data = np.array(fcalc_common.data())
           icalc_common_data = np.array(icalc_common.data())
           if fcalc_list is None:
-            fcalc_list = np.empty((chunklist[mpi_rank]*nchunklist[mpi_rank],fcalc_common_data.size),dtype=fcalc_common_data.dtype)
-            icalc_list = np.empty((chunklist[mpi_rank]*nchunklist[mpi_rank],icalc_common_data.size),dtype=icalc_common_data.dtype)
+            fcalc_list = np.empty((chunklist[work_rank]*nchunklist[work_rank],fcalc_common_data.size),dtype=fcalc_common_data.dtype)
+            icalc_list = np.empty((chunklist[work_rank]*nchunklist[work_rank],icalc_common_data.size),dtype=icalc_common_data.dtype)
             sig_fcalc = fcalc_common
             sig_icalc = icalc_common
           fcalc_list[ct] = fcalc_common_data
@@ -659,9 +677,9 @@ EOF
 
     chunk_ct = chunk_ct + 1
 
-    print("Rank ",mpi_rank," processed chunk ",chunk_ct," of ",nchunklist[mpi_rank]," with ",chunklist[mpi_rank]," frames in ",time.time()-mtime," seconds")
+    print("Worker ",work_rank," processed chunk ",chunk_ct," of ",nchunklist[work_rank]," with ",chunklist[work_rank]," frames in ",time.time()-mtime," seconds")
 
-    if (chunk_ct >= nchunklist[mpi_rank]):
+    if (chunk_ct >= nchunklist[work_rank]):
       break
 
 
@@ -675,7 +693,7 @@ EOF
 #    map_grid_3D = np.reshape(map_grid,(len(tsites),Ni,Nj,Nk))
 #    np.save(dens_file,map_grid_3D)                           
 
-  print("Rank ",mpi_rank," is done with individual calculations")
+  print("Worker ",work_rank," is done with individual calculations")
   sys.stdout.flush()
 
   if mpi_enabled():
@@ -772,6 +790,8 @@ EOF
         diffuse_expt_common, diffuse_array_common = diffuse_expt.common_sets(diffuse_array.as_non_anomalous_array())
       C = np.corrcoef(np.array([diffuse_expt_common.data(),diffuse_array_common.data()]))
       print("Pearson correlation between diffuse simulation and data = ",C[0,1])
+      Camp = np.corrcoef(np.sqrt(np.abs(np.array([diffuse_expt_common.data(),diffuse_array_common.data()]))))
+      print("   Correlation between amplitudes = ",Camp[0,1])
 
 # write fcalc
 
@@ -831,8 +851,8 @@ EOF
     #Initialize correlations array
     w = np.ones(ct)
     ct_nonzero = ct
-    first_this = (skiplist[mpi_rank]-first)
-    last_this = first_this + chunklist[mpi_rank]*nchunklist[mpi_rank]-1
+    first_this = (skiplist[work_rank]-first)
+    last_this = first_this + chunklist[work_rank]*nchunklist[work_rank]-1
     #Get the slice for the section handled by this rank
     C_all_this = np.zeros(ct)
     C_this = C_all_this[first_this:last_this+1]
@@ -840,13 +860,21 @@ EOF
     keep_optimizing = True
     while keep_optimizing:
       C_this[:] = 0
-    #print("Rank = ",mpi_rank,"ct = ",ct,"len(C_this) = ",len(C_this),skiplist[mpi_rank]-first,chunklist[mpi_rank]*nchunklist[mpi_rank])
+#      print("Worker = ",work_rank,"ct = ",ct,"len(C_this) = ",len(C_this),first_this,last_this)
     #Calculation the correlations leaving out each frame
       ct_nonzero = ct_nonzero - 1
       for x in range(len(C_this)):
         if w_this[x] != 0:
-          sig_fcalc_this = tot_sig_fcalc_np - fcalc_list[x]
-          sig_icalc_this = tot_sig_icalc_np - icalc_list[x]
+          try:
+            sig_fcalc_this = tot_sig_fcalc_np - fcalc_list[x]
+          except TypeError:
+            print("Couldn't calculate fcalc difference on worker ",work_rank," with len(C_this), ct_nonzero, x = ",len(C_this),ct_nonzero,x)
+            print("Types of tot_sig_fcalc_np, fcalc_list[x] = ",type(tot_sig_fcalc_np),type(fcalc_list[x]))
+          try:            
+            sig_icalc_this = tot_sig_icalc_np - icalc_list[x]
+          except:
+            print("Couldn't calculate icalc difference on worker ",work_rank," with len(C_this), ct_nonzero, x = ",len(C_this),ct_nonzero,x)
+            print("Types of tot_sig_icalc_np, icalc_list[x] = ",type(tot_sig_icalc_np),type(icalc_list[x]))
           diffuse_this = (ct_nonzero*sig_icalc_this - sig_fcalc_this * sig_fcalc_this.conjugate()).real
           C_this[x] = np.corrcoef(np.array([diffuse_expt_np,diffuse_this]))[0,1]
       C_all = np.zeros(ct)
@@ -854,7 +882,7 @@ EOF
       if np.max(C_all) > C_ref:
         C_ref = np.max(C_all)
         maxind = np.argmax(C_all)
-#        print("DEBUG: ",mpi_rank,maxind,first_this,last_this)
+#        print("DEBUG: ",work_rank,maxind,first_this,last_this)
         if maxind >= first_this and maxind <= last_this:
           which_rank = mpi_rank
         else:
