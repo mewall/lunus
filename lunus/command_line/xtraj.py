@@ -27,6 +27,7 @@ from libtbx.utils import Keep
 from cctbx import crystal
 import cctbx.sgtbx
 import subprocess
+import pickle
 
 def mpi_enabled():
   return 'OMPI_COMM_WORLD_SIZE' in os.environ.keys()
@@ -351,7 +352,9 @@ if __name__=="__main__":
 # Initialize MPI
 
   if mpi_enabled():
+    import mpi4py
     from mpi4py import MPI
+
     mpi_comm = MPI.COMM_WORLD
     mpi_rank = mpi_comm.Get_rank()
     mpi_size = mpi_comm.Get_size()
@@ -389,27 +392,27 @@ if __name__=="__main__":
   if mpi_rank == 0:
     pdb_in = hierarchy.input(file_name=top_file,sort_atoms=False)
 
-# MEW use cctbx.xray.structure.customized_copy() here to change the unit cell and space group as needed
-    symm = pdb_in.input.crystal_symmetry()
-    if unit_cell_str is None:
-      unit_cell = symm.unit_cell()
-    else:
-      unit_cell = unit_cell_str
-    if space_group_str is None:
-      space_group_info = symm.space_group_info()
-    else:
-      space_group_info = cctbx.sgtbx.space_group_info(symbol=space_group_str)
-
-    xrs = pdb_in.input.xray_structure_simple(crystal_symmetry=crystal.symmetry(unit_cell=unit_cell,space_group_info=space_group_info))
-  else:
-    pdb_in = None
-    xrs = None
-    space_group_info = None
-    
   if mpi_enabled():
-    pdb_in = mpi_comm.bcast(pdb_in,root=0)
-    xrs = mpi_comm.bcast(xrs,root=0)
-    space_group_info = mpi_comm.bcast(space_group_info,root=0)
+    if mpi_rank == 0:
+      pdb_bytes = pickle.dumps(pdb_in, protocol=4)
+    else:
+      pdb_bytes = None
+    pdb_bytes = mpi_comm.bcast(pdb_bytes,root=0)
+    if mpi_rank != 0:
+      pdb_in = pickle.loads(pdb_bytes)
+
+# MEW use cctbx.xray.structure.customized_copy() here to change the unit cell and space group as needed
+  symm = pdb_in.input.crystal_symmetry()
+  if unit_cell_str is None:
+    unit_cell = symm.unit_cell()
+  else:
+    unit_cell = unit_cell_str
+  if space_group_str is None:
+    space_group_info = symm.space_group_info()
+  else:
+    space_group_info = cctbx.sgtbx.space_group_info(symbol=space_group_str)
+
+  xrs = pdb_in.input.xray_structure_simple(crystal_symmetry=crystal.symmetry(unit_cell=unit_cell,space_group_info=space_group_info))
 
   space_group_str = str(space_group_info).replace(" ","")
   selection_cache = pdb_in.hierarchy.atom_selection_cache()
