@@ -28,6 +28,7 @@ from cctbx import crystal
 import cctbx.sgtbx
 import subprocess
 import pickle
+import h5py
 
 def mpi_enabled():
   return 'OMPI_COMM_WORLD_SIZE' in os.environ.keys()
@@ -40,6 +41,38 @@ def calc_msd(x):
     msd += np.sum(d[:,k] * d[:,k])
     return msd
 
+def write_nexus_metadata(h5_file, fcalc_array, icalc_array):
+  """Helper to map cctbx symmetry to NeXus groups."""
+  # 1. Create Entry
+  entry = h5_file.require_group("entry")
+  entry.attrs["NX_class"] = "NXentry"
+
+  # 2. Create Sample/Crystal Group
+  sample = entry.require_group("sample")
+  sample.attrs["NX_class"] = "NXsample"
+
+  # Extract unit cell and space group
+  uc = fcalc_array.crystal_symmetry().unit_cell().parameters()
+  sg = str(fcalc_array.crystal_symmetry().space_group_info())
+
+  # Write attributes
+  dset_uc = sample.create_dataset("unit_cell", data=uc)
+  dset_uc.attrs["units"] = "angstrom"
+  dset_sg = sample.create_dataset("unit_cell_group", data=sg)
+  # 3. Write Reflection Data
+  refl = entry.require_group("reflections")
+  refl.attrs["NX_class"] = "NXdata"
+  
+  # Convert flex.miller_index to numpy (N, 3)
+  indices = fcalc_array.indices().as_vec3_double().as_double().as_numpy_array().reshape(-1, 3)
+  refl.create_dataset("hkl", data=indices)
+  
+  # Convert data (Structure Factors / Intensities)
+  # If complex (Fcalc/Fobs), h5py requires a compound type or two datasets
+  refl.create_dataset("fcalc_real", data=np.real(fcalc_array.data().as_numpy_array()))
+  refl.create_dataset("fcalc_imag", data=np.imag(fcalc_array.data().as_numpy_array()))
+  refl.create_dataset("icalc", data=icalc_array.data().as_numpy_array())
+                        
 if __name__=="__main__":
   import sys
 
@@ -271,7 +304,18 @@ if __name__=="__main__":
       do_opt = False
     else:
       do_opt = True
-      
+
+  try:
+    idx = [a.find("checkpoint")==0 for a in args].index(True)
+  except ValueError:
+    checkpoint_opt = False
+  else:
+    checkpoint_opt_str = args.pop(idx).split("=")[1]
+    if checkpoint_opt_str == "False":
+      checkpoint_opt = False
+    else:
+      checkpoint_opt = True
+
 # Use topology file B factoris in structure calculations
 
   try:
@@ -849,6 +893,7 @@ EOF
     if mpi_rank == 0:
       stime = time.time()
       print("Doing optimization using ",ct," initial frames")
+
     diffuse_expt_np = np.array(diffuse_expt_common.data())
     C_ref = np.corrcoef(diffuse_expt_np,ct*tot_sig_icalc_np - (tot_sig_fcalc_np * tot_sig_fcalc_np.conjugate()).real)[0,1]
     #Initialize correlations array
@@ -861,6 +906,36 @@ EOF
     C_this = C_all_this[first_this:last_this+1]
     w_this = w[first_this:last_this+1]
     keep_optimizing = True
+    if checkpoint_opt:
+      if mpi_rank == 0:
+        print("Writing checkpoint file on rank 0")
+        with h5py.File("checkpoint.nxs", "w") as f:
+          f.attrs["NX_class"] = "NXroot"
+          
+          # Only Rank 0 writes the miller_array content
+          # But because creating groups is a 'metadata' operation,
+          # all ranks should technically be outside the 'if rank == 0' for the create_group calls
+          # or ensure they wait at a barrier.
+          write_nexus_metadata(f, avg_fcalc, avg_icalc)
+            
+      # Wait for Rank 0 to finish metadata definitions
+      mpi_comm.Barrier()
+      
+      # --- Parallel Numpy Writing (All Ranks) ---
+      with h5py.File("checkpoint.nxs", "a", driver="mpio", comm=mpi_comm) as f:
+        data_shape = (last-first+1,fcalc_list.shape[1],2)
+        dset = f.create_dataset("entry/data/fcalc_list", data_shape, dtype=np.float32)
+                  
+        with dset.collective:
+          dset[first_this:last_this+1, :, :] = np.stack((np.real(fcalc_list),np.imag(fcalc_list)),axis=-1).astype(np.float32)
+
+        data_shape = (last-first+1)
+        dset = f.create_dataset("entry/data/weights",data_shape,dtype=np.float32)
+        with dset.collective:
+          dset[first_this:last_this+1] = w_this.astype(np.float32)
+          
+        if mpi_rank == 0:
+          print("Nexus file successfully written with cctbx metadata and parallel arrays.")
     while keep_optimizing:
       C_this[:] = 0
 #      print("Worker = ",work_rank,"ct = ",ct,"len(C_this) = ",len(C_this),first_this,last_this)
